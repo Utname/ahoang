@@ -6,9 +6,14 @@
 # behind a reverse proxy (Railway or similar).
 FROM php:8.2-apache
 
-# System packages needed to build the PHP extensions below (removed again
-# after docker-php-ext-install, layered inside the same RUN so they don't
-# bloat the final image).
+# The libFoo-dev packages below are only needed to build the PHP extensions
+# further down and are purged again afterward so they don't bloat the final
+# image. `curl` (the CLI tool, unrelated to the `curl` PHP extension built
+# below from libcurl4-openssl-dev) and `default-mysql-client` (the `mysql`
+# CLI) are kept as runtime tools: curl so a Railway Cron service can hit
+# /cron/default on a schedule, mysql so app/database/*.sql can be applied by
+# shelling into the running container instead of installing a client
+# separately.
 RUN apt-get update && apt-get install -y --no-install-recommends \
 		libicu-dev \
 		libzip-dev \
@@ -19,6 +24,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 		libcurl4-openssl-dev \
 		unzip \
 		git \
+		curl \
+		default-mysql-client \
 	&& docker-php-ext-configure gd --with-freetype --with-jpeg \
 	&& docker-php-ext-install -j"$(nproc)" \
 		gd \
