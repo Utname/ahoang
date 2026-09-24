@@ -1,0 +1,51 @@
+{var $allowedActionsprepared = $control->getAllowedActionsPrepared()}
+
+<div n:if="!empty($allowedActionsprepared)" class="clearfix m-b-sm b bulk-events-container">
+	<div class="row">
+		{form bulkActionsForm}
+			<div class="col-sm-6 col-md-3 col-lg-2">
+				<div class="form-group">
+					{label apply_to/}
+					{input apply_to}
+				</div>
+			</div>
+			<div class="col-sm-6 col-md-3 col-lg-2">
+				<div class="form-group">
+					{label action/}
+					{input action class => "toggle-trigger", data-target => ".bulk-event"}
+				</div>
+			</div>
+
+			<div n:foreach="\App\AdminModule\Presenters\BulkActionsControl::ACTIONS as $actionId => $actionName" n:if="$control->getBulkActionData($actionId)" class="col-sm-6 col-md-3 col-lg-2 bulk-event" data-show-on="{$actionId}">
+				<div class="form-group">
+					{label 'action_value__'.$actionId /}
+					{input 'action_value__'.$actionId}
+				</div>
+			</div>
+
+
+			<div class="col-sm-6 col-md-4 col-lg-6" style="padding-top: 23px;">
+				{var $name = 'submit_'.\App\AdminModule\Presenters\BulkActionsControl::SUBMIT_STATE_SAVE}
+				<button n:name="$name" class="btn btn-success btn-addon bulk-event" data-show-on="{$control->getSubmitStateShowOn(\App\AdminModule\Presenters\BulkActionsControl::SUBMIT_STATE_SAVE)}">
+					<i class="far fa-check"></i> {_admin.bulkActions.form.buttons.save}
+				</button>
+
+				{var $name = 'submit_'.\App\AdminModule\Presenters\BulkActionsControl::SUBMIT_STATE_SET}
+				<button n:name="$name" class="btn btn-success btn-addon bulk-event" data-show-on="{$control->getSubmitStateShowOn(\App\AdminModule\Presenters\BulkActionsControl::SUBMIT_STATE_SET)}">
+					<i class="far fa-check"></i> {_admin.bulkActions.form.buttons.set}
+				</button>
+
+				{var $name = 'submit_'.\App\AdminModule\Presenters\BulkActionsControl::SUBMIT_STATE_REMOVE}
+				<button n:name="$name" class="btn btn-danger btn-addon bulk-event with-confirm" data-show-on="{$control->getSubmitStateShowOn(\App\AdminModule\Presenters\BulkActionsControl::SUBMIT_STATE_REMOVE)}" data-message="{_admin.bulkActions.form.removeConfirm}">
+					<i class="far fa-times"></i> {_admin.bulkActions.form.buttons.remove}
+				</button>
+
+				{var $name = 'submit_'.\App\AdminModule\Presenters\BulkActionsControl::SUBMIT_STATE_DELETE}
+				<button n:name="$name" class="btn btn-danger btn-addon bulk-event with-confirm" data-show-on="{$control->getSubmitStateShowOn(\App\AdminModule\Presenters\BulkActionsControl::SUBMIT_STATE_DELETE)}" data-message="{_admin.bulkActions.form.deleteConfirm}">
+					<i class="far fa-trash"></i> {_admin.bulkActions.form.buttons.delete}
+				</button>
+
+			</div>
+		{/form}
+	</div>
+</div>

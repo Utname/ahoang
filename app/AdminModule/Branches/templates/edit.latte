@@ -1,0 +1,194 @@
+{block content}
+
+<div class="col-md-12">
+	<div class="panel panel-white">
+		{form editForm}
+			<div class="panel-body">
+
+				<div role="tabpanel">
+					<ul class="nav nav-tabs" role="tablist">
+						<li role="presentation" class="active">
+							<a href="#section-01" role="tab" data-toggle="tab">{_admin.tabs.basicInfo}</a>
+						</li>
+						<li role="presentation">
+							<a href="#section-02" role="tab" data-toggle="tab">{_admin.tabs.sale}</a>
+						</li>
+					</ul>
+
+					<div class="tab-content">
+						<div role="tabpanel" class="tab-pane active clearfix" id="section-01">
+							<div class="col-lg-4">
+								<div class="clearfix">
+									<h4>{_admin.terms.mainInfo}</h4>
+									<div n:ifset="$form['name']" class="form-group">
+										{label name /}
+										{input name class => 'form-control form-control-bigger url-source', data-target => '.webalize'}
+									</div>
+
+									<div n:ifset="$form['slug']" class="form-group">
+										{label slug /}
+										{input slug class => 'form-control form-control-bigger webalize'}
+									</div>
+
+									<div n:ifset="$form['chain_store']" class="form-group">
+										{label chain_store /}
+									{input chain_store class => 'form-control'}
+									</div>
+
+									<div n:ifset="$form['partner']" class="form-group">
+										{label partner /}
+										{input partner class => 'form-control'}
+									</div>
+
+									{include APP_DIR.'/AdminModule/__inc/formImage.latte' field => 'image'}
+									{include APP_DIR.'/AdminModule/__inc/formImage.latte' field => 'image_detail'}
+
+									<div n:ifset="$form['google_profile_url']" class="form-group">
+										{label google_profile_url /}
+										{input google_profile_url class => 'form-control'}
+									</div>
+
+									<div n:ifset="$form['fb_url']" class="form-group">
+										{label fb_url /}
+										{input fb_url class => 'form-control'}
+									</div>
+
+									<div class="row">
+										<div n:ifset="$form['phone']" class="col-lg-6">
+											<div class="form-group">
+												{label phone /}
+											{input phone class => 'form-control'}
+											</div>
+										</div>
+										<div n:ifset="$form['email']" class="col-lg-6">
+											<div class="form-group">
+												{label email /}
+											{input email class => 'form-control'}
+											</div>
+										</div>
+									</div>
+									<div class="row">
+										<div n:ifset="$form['reg_number']" class="col-lg-6">
+											<div class="form-group">
+												{label reg_number /}
+												{input reg_number class => 'form-control'}
+											</div>
+										</div>
+
+										<div n:ifset="$form['vat_number']" class="col-lg-6">
+											<div class="form-group">
+												{label vat_number /}
+												{input vat_number class => 'form-control'}
+											</div>
+										</div>
+									</div>
+
+									<div class="row">
+										<div n:ifset="$form['street']" class="col-lg-5">
+											<div class="form-group">
+												{label street /}
+												{input street class => 'form-control'}
+											</div>
+										</div>
+										<div n:ifset="$form['city']" class="col-lg-5">
+											<div class="form-group">
+												{label city /}
+												{input city class => 'form-control'}
+											</div>
+										</div>
+										<div n:ifset="$form['zip']" class="col-lg-2">
+											<div class="form-group">
+												{label zip /}
+												{input zip class => 'form-control'}
+											</div>
+										</div>
+									</div>
+
+									<div class="row">
+										<div n:ifset="$form['lat']" class="col-lg-6">
+											<div class="form-group">
+												{label lat /}
+												{input lat class => 'form-control'}
+											</div>
+										</div>
+										<div n:ifset="$form['lng']" class="col-lg-6">
+											<div class="form-group">
+												{label lng /}
+												{input lng class => 'form-control'}
+											</div>
+										</div>
+									</div>
+
+									<div class="row">
+										<div n:ifset="$form['lat']" class="col-lg-12">
+											<div class="form-group">
+												{label google_maps_link /}
+												{input google_maps_link class => 'form-control h-100'}
+											</div>
+										</div>
+									</div>
+
+								</div>
+
+								<div class="clearfix">
+									<h4>{_admin.terms.details}</h4>
+
+									<div class="row">
+										<div class="col-sm-6">
+											<div class="form-group">
+												{label is_active /}
+											{input is_active class => 'form-control'}
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div class="col-lg-7 col-lg-offset-1">
+
+								{if isset($form['text'])}
+									<h4>{_admin.terms.content}</h4>
+
+									<div class="row">
+										<div n:ifset="$form['title']" class="col-sm-10">
+											<div class="form-group">
+												{label title /}
+												{input title class => 'form-control'}
+											</div>
+										</div>
+
+										<div n:ifset="$form['text']" class="col-sm-12">
+											<div class="form-group">
+												{label text /}
+												{input text class => 'form-control wsw h-300'}
+											</div>
+										</div>
+										<div n:ifset="$form['detail_text']" class="col-sm-12">
+											<div class="form-group">
+												{label detail_text /}
+												{input detail_text class => 'form-control wsw h-150'}
+											</div>
+										</div>
+										<div class="col-sm-12">
+											<h4>{_admin.terms.images}</h4>
+											{control images}
+										</div>
+									</div>
+								{/if}
+							</div>
+						</div>
+						<div role="tabpanel" class="tab-pane clearfix" id="section-02">
+							<div class="col-lg-8">
+								{label sale_text /}
+								{input sale_text class => 'form-control wsw wp-100 h-300'}
+							</div>
+						</div>
+					</div>
+
+					{include APP_DIR.'/AdminModule/__inc/formButtons.latte'}
+				</div>
+
+			</div>
+		{/form}
+	</div>
+</div>

@@ -1,0 +1,167 @@
+.check-styled{
+    color: #333;
+    display: block;
+}
+
+.check-styled label {
+    padding-left: 35px;
+}
+
+.check-styled label:before {
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 0px;
+    border: 1px solid #F4F4F4;
+    background-color: transparent;
+    content: "";
+    position: absolute;
+    left: 0px;
+    top: 0;
+    transition: all 0.3s;
+    display: block;
+}
+
+.check-styled label:after {
+    display: flex;
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 0px;
+    content: "";
+    position: absolute;
+    left: 0px;
+    top: 0;
+    transition: all 0.3s;
+    opacity: 0;
+    background: url(../images/check.svg) no-repeat center;
+}
+
+.check-styled label {
+    display: flex;
+    width: 100%;
+    margin: 0;
+    min-height: 2.4rem;
+    margin: 0;
+    vertical-align: middle;
+    padding-left: 3.2rem;
+    cursor: pointer;
+    padding-top: 0.4rem;
+    line-height: 1.2;
+    position: relative;
+    transition: all 0.3s;
+    color: #333;
+    font-size: 1.4rem;
+    font-weight: 300;
+}
+
+.check-styled label:hover:before{
+    border-color: #F47721;
+}
+
+.check-styled input + a{
+    margin-left: 5px;
+}
+
+.check-styled.is-checked label:before{
+    background: #F47721;
+}
+
+.check-styled.is-checked label:after{
+    opacity: 1;
+}
+
+.ol-styled{
+    padding-inline-start: 25px!important;
+}
+
+.error-page a{
+    color: #ffffff;
+    background-color: #F47721;
+    border-color: #F47721;
+
+    display: inline-block;
+    font-weight: 500;
+    color: #ffffff;
+    text-align: center;
+    vertical-align: middle;
+    user-select: none;
+    padding: 1.9rem 3.9rem;
+    font-size: 1.6rem;
+    line-height: 1;
+    border-radius: 0;
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.error-page a:hover{
+    color: #ffffff;
+    background-color: #e3630b;
+    border-color: #d75e0b;
+}
+
+
+.product-list-section .left-menu-box li.active a{
+    color: #F47721;
+}
+
+.product-detail-price .price-value small{
+    font-size: 60%;
+}
+
+.product-detail-price .price-value .is-action small{
+    text-decoration: line-through;
+}
+
+/*--
+    Scroll Up
+-----------------------------------------*/
+#scrollUp {
+    width: 40px;
+    height: 40px;
+    background-color: transparent;
+    color: #F47721;
+    right: 70px;
+    bottom: 120px;
+    text-align: center;
+    overflow: hidden;
+    border: 1px solid #F47721;
+    z-index: 999 !important;
+}
+#scrollUp:hover {
+    color: #ffffff;
+    border: 1px solid #F47721;
+    background-color: #F47721;
+}
+@media only screen and (max-width: 767px) {
+    #scrollUp {
+        width: 40px;
+        height: 40px;
+        right: 15px;
+    }
+}
+#scrollUp i {
+    display: block;
+    line-height: 38px;
+    font-size: 18px;
+}
+@media only screen and (max-width: 767px) {
+    #scrollUp i {
+        line-height: 40px;
+        font-size: 16px;
+    }
+}
+
+.lang-flags button { color: #fff; }
+.lang-flags button:hover { color: #fff; }
+.lang-flags img { width: 20px; margin-right: 5px; }
+.lang-flags .dropdown-menu { position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(-50%, 58px, 0px) !important; margin-left: 50%;}
+
+@media only screen and (max-width: 991px) {
+    .lang-flags { margin-top: 2rem }
+}
+
+.contact-text-item {
+    min-width: 25% !important;
+}
+
+.contact-form {
+    max-width: 100% !important;
+}

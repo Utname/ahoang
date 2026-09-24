@@ -1,0 +1,88 @@
+<div class="clearfix">
+        <h4>{_admin.terms.prices}</h4>
+
+        <div class="clearfix">
+            <table class="table table-striped table-hover table-compact">
+                <thead>
+                <tr>
+                    <th>
+                        <div class="w-150">{_admin.terms.branches}</div>
+                    </th>
+                    <th class="w-100 text-center">
+                        {_admin.terms.price}
+                    </th>
+                    <th class="w-100 text-center">
+                        {_admin.terms.actionPrice}
+                    </th>
+                    <th class="w-100 text-center">
+                        {_admin.terms.actionFrom}
+                    </th>
+                    <th class="w-100 text-center">
+                        {_admin.terms.actionTo}
+                    </th>
+                    <th class="w-50 text-center">
+                        {_admin.terms.action}
+                    </th>
+                    <th class="w-150">
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                {foreach $branches as $branches}
+                    <tr n:foreach="$currencies as $currency">
+                        {*{var $isAutoRecount = $currency->isAutoRecount($branches)}*}
+                        {var $inputTitle = ''}
+
+                        <td>
+                            {$branches->name}<br />
+                        </td>
+                        <td class="text-right">
+                            <div class="input-group pull-left">
+                                <div data-toggle="tooltip" title="{$inputTitle}">
+                                    {input 'branch_prices_'.$branches->id.'_'.$currency->id.'_price' class => 'form-control text-right'}
+                                </div>
+                                <span n:if="!empty($item)" class="input-group-btn">
+                                    <a n:href="showPricesLog! $item->id, $branches->id" class="btn btn-default ajax-modal" data-target="#modal-pricesLog" title="Historie cen">
+                                        <i class="far fa-clock"></i>
+                                    </a>
+                                </span>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <div data-toggle="tooltip" title="{$inputTitle}">
+                                {input 'branch_prices_'.$branches->id.'_'.$currency->id.'_price_action' class => 'form-control text-right'}
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <div data-toggle="tooltip" title="{$inputTitle}">
+                                {input 'branch_prices_'.$branches->id.'_'.$currency->id.'_action_from' class => 'form-control date-picker text-center'}
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <div data-toggle="tooltip" title="{$inputTitle}">
+                                {input 'branch_prices_'.$branches->id.'_'.$currency->id.'_action_to' class => 'form-control date-picker text-center'}
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <div data-toggle="tooltip" title="{$inputTitle}">
+                                {var $name = 'branch_prices_'.$branches->id.'_'.$currency->id.'_is_action'}
+                                <input n:name="$name" disabled="disabled">
+                            </div>
+                        </td>
+                        <td>
+                            {if !empty($item)}
+                                {var $refPrice = $item->getRefPrice($branches->id)}
+                                {if $refPrice}
+                                    <span class="label label-warning" style="font-weight: normal; font-size: 11px;" data-toggle="tooltip" title="Na webu se jako přeškrtnutá cena zobrazí {$refPrice|price} (nejnižší cena za posledních 30 dní), nikoliv základní cena.">
+                                        <i class="fas fa-triangle-exclamation"></i> Přeškrtnutá cena: {$refPrice|price}
+                                    </span>
+                                {/if}
+                            {/if}
+                        </td>
+                    </tr>
+                {/foreach}
+                </tbody>
+            </table>
+        </div>
+</div>
+

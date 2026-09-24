@@ -1,0 +1,7 @@
+<div class="form-group">
+	<h4 n:if="$label">{$label}</h4>
+	<p n:if="$helpBlockText" class="help-block">{$helpBlockText}</p>
+	<div class="{$customClass}">
+		{$control->getImagesControl($block, $parameterKey)->render()}
+	</div>
+</div>

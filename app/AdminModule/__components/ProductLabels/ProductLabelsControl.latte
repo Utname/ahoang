@@ -1,0 +1,53 @@
+{snippet list}
+    {var $item = $control->getItem()}
+    {var $price = $item->getPrice($control->getBranchesId())}
+    {var $labels = $item->getProductLabels($control->getBranchesId())}
+
+    <span n:if="!$price" class="text-danger">{_admin.terms.noBasicPrice}</span>
+    {if $price}
+        <a href="{plink multiLabel! $item->id}" class="btn btn-default ajax-modal" data-target="#modal-multiLabelsForm">
+            <i class="fa fa-copy"></i>
+        </a>
+        <div n:foreach="$GLOBALS['global']['productLabelTypes'] as $labelTypeId => $term" class="d-inline-block">
+            {* Clicking the chip activates the label directly (count=1, using
+               the same product-derived defaults as the count input below —
+               handleSaveLabelCount()) instead of requiring the modal + Save
+               step first. "Biên tập" in the dropdown below still opens the
+               modal for anyone who wants to customize the label afterward. *}
+            <a n:if="!isset($labels[$labelTypeId]) || !$labels[$labelTypeId]->isToPrint()" href="{link saveLabelCount! $labelTypeId, isset($labels[$labelTypeId]) ? $labels[$labelTypeId]->id : NULL}&productLabels-{$item->id}-count=1" class="btn btn-default ajax w-50">
+                {$term}
+            </a>
+            <div n:if="isset($labels[$labelTypeId]) && $labels[$labelTypeId]->isToPrint()" class="dropdown pull-left">
+                <a class="dropdown-toggle btn btn-success w-50-important" data-toggle="dropdown" href="#" style="width: auto;">
+                    {$term}
+                </a>
+                <ul class="dropdown-menu dropdown-menu-right dropdown-list">
+                    <li>
+                        <a href="{plink label! $item->id, $labelTypeId}" class="ajax-modal" data-target="#modal-labelsForm">
+                            <i class="fas fa-pencil"></i> {_admin.actions.edit}
+                        </a>
+                    </li>
+                    <li>
+                        {* class + data-products-id let a click handler in custom.js read the
+                           row's own (possibly unsaved) price/date inputs and append them as
+                           override query params before navigating — see handleDownloadPdf(). *}
+                        <a href="{plink downloadPdf! $labels[$labelTypeId]->id, FALSE}" target="_blank" class="print-with-live-price" data-products-id="{$item->id}">
+                            <i class="fas fa-file-pdf"></i> {_admin.actions.preview}
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{plink downloadPdf! $labels[$labelTypeId]->id, TRUE}" target="_blank" class="print-with-live-price" data-products-id="{$item->id}">
+                            <i class="fas fa-file-download"></i> {_admin.actions.download}
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{plink deleteLabel! $labels[$labelTypeId]->id}" class="ajax">
+                            <i class="fas fa-trash"></i> {_admin.actions.delete}
+                        </a>
+                    </li>
+                </ul>
+            </div><br>
+            <input type="number" value="{isset($labels[$labelTypeId]) ? $labels[$labelTypeId]->count : 0}" min="1" step="1" class="form-control w-50 without-arrows text-center change-handler" data-handler="{link saveLabelCount! $labelTypeId, isset($labels[$labelTypeId]) ? $labels[$labelTypeId]->id : NULL}&productLabels-{$item->id}-count=">
+        </div>
+    {/if}
+{/snippet}

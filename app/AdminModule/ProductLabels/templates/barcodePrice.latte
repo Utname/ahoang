@@ -1,0 +1,46 @@
+<html>
+    <head>
+        <script n:if="!empty($windowClose)">
+	        window.close();
+        </script>
+        <style>
+            body { margin: 0; }
+            .overlay { width: 198px; font-family: "Times New Roman", serif; font-weight: 600; text-align: center; height: 133px; }
+            .overlay .headline { font-size: 16px; padding-bottom: 5px; border-bottom: 1px solid #000; text-align: center; margin-bottom: 7px; width: 100%; }
+            .overlay .product-name { font-size: 12px; text-align: center; height: 28px; overflow: hidden; width: 100%; }
+            .overlay .base-info { margin-bottom: 6px; display: inline-block; width: 100%; }
+            .overlay .base-info > div { text-align: center; font-size: 16px; font-weight: 600; float: left; }
+            .overlay .base-info > div.base-info-left { width: 40%; }
+            .overlay .base-info > div.base-info-right { width: 60%; }
+            .overlay .base-info span { font-size: 12px }
+            .overlay .price { padding: 0 2px; margin: 0 auto; background-color: #000; color: #fff; display: inline-block; font-size: 22px; font-weight: 700; }
+        </style>
+    </head>
+    <body>
+        <div n:foreach="$presenter->getBarcodePricesList(TRUE) as $item" class="overlay">
+            {var $itemData = $item->getData()}
+            <div class="headline">
+                FIKKO market
+            </div>
+            <div class="product-name">
+                {$itemData->productName ?? ''}
+            </div>
+            <div class="base-info">
+                <div class="base-info-left">
+                    {(($itemData->weight ?? 0) / 1000)|number,3,'.',''} <span>Kg</span>
+                </div>
+                <div class="base-info-right">
+                    {($itemData->unitPrice ?? 0)|number,2,',',''} <span>Kč/Kg</span>
+                </div>
+            </div>
+            <div class="price">
+                {round($itemData->totalPrice ?? 0, 2)|number,2,',',''} Kč
+            </div>
+        </div>
+
+        <script type="text/javascript">
+	        window.print();
+	        window.onfocus=function(){ window.close();}
+        </script>
+    </body>
+</html>

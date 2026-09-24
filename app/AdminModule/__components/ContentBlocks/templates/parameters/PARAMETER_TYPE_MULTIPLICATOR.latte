@@ -1,0 +1,68 @@
+<div class="form-group">
+	<h4 n:if="$label">{$label}</h4>
+	<p n:if="$helpBlockText" class="help-block">{$helpBlockText}</p>
+	{if isset($parameter[\ContentBlocksDefinition::INPUTS]) && is_array($parameter[\ContentBlocksDefinition::INPUTS]) && !empty($parameter[\ContentBlocksDefinition::INPUTS])}
+		<div class="multiplicator sortable" data-multiplicator-init-count="1">
+
+			<div class="multiplicator-pattern sortable-item m-b-sm">
+				<a class="move-handler text-gray" data-toggle="tooltip" title="{_admin.actions.move}"><i class="far fa-bars"></i></a>
+				<a class="multiplicator-remove text-gray" href="#" data-toggle="tooltip" title="{_admin.actions.delete}"><i class="far fa-trash"></i></a>
+				<div class="input-set clearfix">
+					{foreach $parameter[\ContentBlocksDefinition::INPUTS] as $inputParameterKey => $inputParameter}
+						<div class="col-sm-{if isset($inputParameter[\ContentBlocksDefinition::COLS]) && $inputParameter[\ContentBlocksDefinition::COLS]}{$inputParameter[\ContentBlocksDefinition::COLS]}{else}12{/if}">
+
+							{var $includeName = $control->getParameterLatteIncludeName($inputParameter[\ContentBlocksDefinition::TYPE])}
+							{if $includeName}
+								{var $customClass = isset($inputParameter[\ContentBlocksDefinition::CUSTOM_CLASS]) && $inputParameter[\ContentBlocksDefinition::CUSTOM_CLASS] ? $parameter[\ContentBlocksDefinition::CUSTOM_CLASS] : ''}
+								{if $inputParameter['type'] == \ContentBlocksDefinition::PARAMETER_TYPE_WSW}
+									{var $customClass = $customClass.' wsw-after-multiply'}
+								{/if}
+								{include $includeName.'.latte',
+									'sectionTypeKey' => $sectionTypeKey,
+									'parameterKey' => $parameterKey.'__'.$inputParameterKey.'[]',
+									'parameter' => $inputParameter,
+									'block' => $selectedBlock,
+									'value' => '',
+									'label' => isset($inputParameter[\ContentBlocksDefinition::NAME]) ? $control->getTranslator()->translate($inputParameter[\ContentBlocksDefinition::NAME]) : '',
+									'helpBlockText' => isset($inputParameter[\ContentBlocksDefinition::HELP_TEXT]) ? $control->getTranslator()->translate($inputParameter[\ContentBlocksDefinition::HELP_TEXT]) : NULL,
+									'customClass' => $customClass
+								}
+							{/if}
+						</div>
+					{/foreach}
+				</div>
+			</div>
+
+			<div class="multiplicator-items">
+				{if is_array($value)}
+					<div n:foreach="$value as $values" class="multiplicator-item sortable-item m-b-sm">
+						<a class="move-handler text-gray" data-toggle="tooltip" title="{_admin.actions.move}"><i class="far fa-bars"></i></a>
+						<a class="multiplicator-remove text-gray" href="#" data-toggle="tooltip" title="{_admin.actions.delete}"><i class="far fa-trash"></i></a>
+						<div class="input-set clearfix">
+							{foreach $parameter[\ContentBlocksDefinition::INPUTS] as $inputParameterKey => $inputParameter}
+								<div class="col-sm-{if isset($inputParameter[\ContentBlocksDefinition::COLS]) && $inputParameter[\ContentBlocksDefinition::COLS]}{$inputParameter[\ContentBlocksDefinition::COLS]}{else}12{/if}">
+									{var $includeName = $control->getParameterLatteIncludeName($inputParameter[\ContentBlocksDefinition::TYPE])}
+									{if $includeName}
+										{include $includeName.'.latte',
+										'sectionTypeKey' => $sectionTypeKey,
+										'parameterKey' => $parameterKey.'__'.$inputParameterKey.'[]',
+										'parameter' => $inputParameter,
+										'block' => $selectedBlock,
+										'value' => isset($values[$inputParameterKey]) ? $values[$inputParameterKey] : '',
+										'label' => isset($inputParameter[\ContentBlocksDefinition::NAME]) ? $control->getTranslator()->translate($inputParameter[\ContentBlocksDefinition::NAME]) : '',
+										'helpBlockText' => isset($inputParameter[\ContentBlocksDefinition::HELP_TEXT]) ? $control->getTranslator()->translate($inputParameter[\ContentBlocksDefinition::HELP_TEXT]) : NULL,
+										'customClass' => isset($inputParameter[\ContentBlocksDefinition::CUSTOM_CLASS]) && $inputParameter[\ContentBlocksDefinition::CUSTOM_CLASS] ? $parameter[\ContentBlocksDefinition::CUSTOM_CLASS] : '',
+										'customIdAddon' => $iterator->parent->counter
+										}
+									{/if}
+
+								</div>
+							{/foreach}
+						</div>
+					</div>
+				{/if}
+			</div>
+			<a class="multiplicator-add text-gray" href="#"><i class="far fa-plus-circle"></i> {_admin.terms.add}</a>
+		</div>
+	{/if}
+</div>

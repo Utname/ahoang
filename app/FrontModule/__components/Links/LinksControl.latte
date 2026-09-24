@@ -1,0 +1,31 @@
+{if count($control->getLinks())}
+
+  {if $type == 'unset'}
+    <ul>
+      <li n:foreach="$control->getLinks() as $item">
+        <a href="{$item->link}" title="{$item->name}">
+          <i class="{$item->icon|faIcon:'fab'}">
+          </i>
+        </a>
+      </li>
+    </ul>
+  {elseif $type == 'footer'}
+    <a n:foreach="$control->getLinks() as $item" href="{$item->link}" title="{$item->name}" class="{$control->getClassName($item->name)}">
+      <i class="{$item->icon|faIcon:'fab'}">
+      </i>
+    </a>
+
+  {elseif $type == 'header'}
+    <a n:foreach="$control->getLinks() as $item" href="{$item->link}" title="{$item->name}" class="{$control->getClassName($item->name)}">
+      <i class="{$item->icon|faIcon:'fab'}">
+      </i>
+    </a>
+
+  {elseif $type == 'header-mobile'}
+    <a n:foreach="$control->getLinks() as $item" href="{$item->link}" title="{$item->name}" class="{$control->getClassName($item->name)}">
+      <i class="{$item->icon|faIcon:'fab'}">
+      </i>
+    </a>
+  {/if}
+
+{/if}

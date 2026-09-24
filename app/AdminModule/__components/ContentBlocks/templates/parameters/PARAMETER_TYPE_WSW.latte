@@ -1,0 +1,5 @@
+<div class="form-group">
+	<label n:if="$label">{$label}</label>
+	<p n:if="$helpBlockText" class="help-block">{$helpBlockText}</p>
+	<textarea name="types_id-{$sectionTypeKey}-{$parameterKey}" id="types_id-{$sectionTypeKey}-{$parameterKey}{isset($customIdAddon) ? ('-'.$customIdAddon) : ''}" class="{if !\Nette\Utils\Strings::contains($customClass, 'wsw-after-multiply')}wsw{/if} wp-100 h-200 {$customClass}">{$value}</textarea>
+</div>

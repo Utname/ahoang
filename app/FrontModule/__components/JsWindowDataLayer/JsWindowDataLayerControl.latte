@@ -1,0 +1,12 @@
+{snippet pushes}
+
+	{var $jsWindowDataLayerPushes = $control->getJsWindowDataLayerPushes()}
+
+	<script n:if="!empty($jsWindowDataLayerPushes)">
+		window.dataLayer = window.dataLayer || [];
+		{foreach $jsWindowDataLayerPushes as $push}
+			dataLayer.push({json_encode($push, JSON_UNESCAPED_UNICODE)|noescape});
+		{/foreach}
+	</script>
+
+{/snippet}

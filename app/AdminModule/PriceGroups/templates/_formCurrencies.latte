@@ -1,0 +1,55 @@
+<div n:if="count($currencies) > 1" class="clearfix">
+    <h4>{_admin.terms.currenciesClassification}</h4>
+
+    <div class="clearfix">
+        <table class="table table-striped table-hover table-compact">
+            <thead>
+            <tr>
+                <th>
+                    {_admin.terms.name}
+                </th>
+                <th class="w-150 text-center">
+                    {_admin.terms.exchangeRate}
+                </th>
+                <th class="w-50 text-center">
+                    <i class="far fa-repeat" data-toggle="tooltip" data-html="true" title="{_admin.terms.autoRecountByDefaultCurrency|brakes|noescape}"></i>
+                </th>
+                <th class="w-140 text-center">
+                    <span data-toggle="tooltip" title="{_admin.terms.exchangeRateCorrectionTip} {\CurrenciesService::formatPrice(1, $defaultCurrency)}">{_admin.terms.exchangeRateCorrection} ({$defaultCurrency->symbol})</span>
+                </th>
+                <th class="w-50 text-center">
+                    <i class="far fa-star" data-toggle="tooltip" title="{_admin.terms.isDefault}"></i>
+                </th>
+                <th class="w-50 text-center">
+                    <i class="far fa-eye" data-toggle="tooltip" title="{_admin.terms.isActive}"></i>
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr n:foreach="$currencies as $i">
+                <td>
+                   {$i->iso_code_3} / {$i->name}
+                </td>
+                <td class="text-center">
+                    {if $defaultCurrency}
+                        {\CurrenciesService::formatPrice(1, $i)} = {\CurrenciesService::formatPrice($i->exchange_rate, NULL, 2)}
+                    {/if}
+                </td>
+                <td class="text-center">
+                    <input n:if="!$i->is_default" {if isset($item) && $i->isAutoRecount($item)}checked="checked"{/if} type="checkbox" class="m-r-no toggle-trigger" data-target =".correction-{$i->id}" name="auto_recount_by_default_currency__{$i->id}">
+                </td>
+                <td>
+                    <input n:if="!$i->is_default" {if isset($item) && $exchangeRateCorrection = $i->getAutoRecountExchangeRateCorrection($item)}value="{$exchangeRateCorrection}"{/if} type="number" step="0.01" placeholder="{_admin.terms.exchangeRateCorrectionTip}  {\CurrenciesService::formatPrice(1, $defaultCurrency)}" name="auto_recount_exchange_rate_correction__{$i->id}" class="form-control text-right correction-{$i->id}" data-show-on="1">
+                </td>
+                <td class="text-center">
+                    {include APP_DIR.'/AdminModule/__inc/boolSwitch.latte', 'item' => $i, 'param' => 'is_default', 'disabled' => TRUE}
+                </td>
+                <td class="text-center">
+                    {include APP_DIR.'/AdminModule/__inc/boolSwitch.latte', 'item' => $i, 'param' => 'is_active', 'disabled' => TRUE}
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+    </div>
+</div>

@@ -1,0 +1,34 @@
+{block content}
+
+<div class="col-md-12">
+	<div class="panel panel-white">
+		<div class="panel-body">
+
+			<div role="tabpanel">
+				<ul class="nav nav-tabs" role="tablist">
+					{var $isFirst = TRUE}
+					{foreach $presenter->getModuleActions() as $action}
+						{continueIf $action == 'list'}
+						<li role="presentation" n:class="$isFirst ? 'active' : ''">
+							<a href="#section-{$action}" role="tab" data-toggle="tab">{_'admin.permissions.'.$action}</a>
+						</li>
+						{var $isFirst = FALSE}
+					{/foreach}
+				</ul>
+
+				<div class="tab-content">
+
+					{var $isFirst = TRUE}
+					{foreach $presenter->getModuleActions() as $action}
+						{continueIf $action == 'list'}
+						<div role="tabpanel" n:class="$isFirst ? 'active' : '', 'tab-pane clearfix'" id="section-{$action}">
+							{control settings $action}
+						</div>
+						{var $isFirst = FALSE}
+					{/foreach}
+				</div>
+			</div>
+
+		</div>
+	</div>
+</div>

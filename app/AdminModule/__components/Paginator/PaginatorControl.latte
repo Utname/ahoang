@@ -1,0 +1,27 @@
+<div class="dataTables_paginate paging_simple_numbers pull-left">
+	<div n:if="$control->getPaginator()->getItemCount() > $control->getDefaultItemsPerPage()" class="wp-100 pull-left m-b-sm p-h-xxs">
+		<label>{_admin.paginator.onPage}</label>
+		<div class="w-70">
+			<select n:class="$control->isAllowedAjax() ? 'change-to-ajax' : 'change-to-call'" data-url="{link changeItemsPerPage! -1}">
+				{for $i = $control->getDefaultItemsPerPage();$i <= $control->getDefaultItemsPerPage() * 5;$i += $control->getDefaultItemsPerPage()}
+					<option value="{$i}" {if $control->getPaginator()->getItemsPerPage() == $i}selected{/if}>
+						{$i}
+					</option>
+					{breakIf $i > $control->getPaginator()->getItemCount()}
+				{/for}
+			</select>
+		</div>
+	</div>
+	<div class="wp-100 pull-left m-b-sm p-h-xxs">
+		{_admin.paginator.totalItems}:
+		<strong>{$control->getPaginator()->getItemCount()|float:0}</strong>
+	</div>
+	<div class="wp-100 pull-left m-b-sm">
+		{var $spread = $control->getPageSpread()}
+		<a n:if="$control->getPaginator()->page > $spread" n:class="'paginate_button', $control->isAllowedAjax() ? 'ajax'" n:href="changePage! 1">1</a>
+		<span n:if="$control->getPaginator()->page > $spread" n:class="'paginate_button'">...</span>
+		<a n:foreach="$control->getPages() as $i" n:class="'paginate_button', $i === $control->getPaginator()->page ? 'current', $control->isAllowedAjax() ? 'ajax'" n:href="changePage! $i">{$i}</a>
+		<span n:if="$control->getPaginator()->page < $control->getPaginator()->getPageCount() - $spread" n:class="'paginate_button'">...</span>
+		<a n:if="$control->getPaginator()->page < $control->getPaginator()->getPageCount() - $spread" n:class="'paginate_button', $control->isAllowedAjax() ? 'ajax'" n:href="changePage! $control->getPaginator()->getPageCount()">{$control->getPaginator()->getPageCount()}</a>
+	</div>
+</div>

@@ -1,0 +1,6 @@
+<div class="form-group">
+	<label n:if="$label">{$label}</label>
+	<input type="file" name="types_id-{$sectionTypeKey}-{$parameterKey}" class="form-control {$customClass}" />
+	{control attachment:file, $block, $parameterKey}
+	<p n:if="$helpBlockText" class="help-block">{$helpBlockText}</p>
+</div>

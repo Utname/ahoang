@@ -1,0 +1,68 @@
+{block content}
+
+<div class="col-md-12">
+	<div class="panel panel-white">
+		{form editForm}
+			<div class="panel-body">
+
+				<div role="tabpanel">
+					<ul class="nav nav-tabs" role="tablist">
+						<li role="presentation" class="active">
+							<a href="#section-01" role="tab" data-toggle="tab">{_admin.tabs.basicInfo}</a>
+						</li>
+					</ul>
+
+					<div class="tab-content">
+						<div role="tabpanel" class="tab-pane active clearfix" id="section-01">
+							<div class="col-lg-4">
+								<div class="form-group">
+									{label name /}
+									{input name class => 'form-control form-control-bigger'}
+								</div>
+								<div class="form-group">
+									{label email /}
+									{input email class => 'form-control'}
+								</div>
+								<div class="form-group">
+									{label admin_roles_id /}
+									{input admin_roles_id class => 'form-control'}
+								</div>
+								<div class="form-group">
+									{label new_password /}
+									{input new_password class => 'form-control'}
+								</div>
+							</div>
+							<div class="col-lg-7 col-md-offset-1">
+								<div class="row">
+									<div class="col-md-3">
+										<div class="form-group">
+											{label is_all_branches_permission /}
+											{input is_all_branches_permission class => 'form-control toggle-trigger', 'data-target' => '.branches-permissions'}
+										</div>
+									</div>
+									<div class="col-md-6">
+										<div class="form-group">
+											{label default_branches_id /}
+											{input default_branches_id class => 'form-control'}
+										</div>
+									</div>
+								</div>
+								<div class="row branches-permissions" data-show-on="0">
+									<div n:foreach="$branchesPairs as $relKey => $relVal" class="col-sm-3">
+										<div class="form-group">
+											{input 'rel_values__admin_users_branches_rel__'.$relKey class => 'form-control'}
+											{label 'rel_values__admin_users_branches_rel__'.$relKey /}
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					{include APP_DIR.'/AdminModule/__inc/formButtons.latte'}
+				</div>
+
+			</div>
+		{/form}
+	</div>
+</div>

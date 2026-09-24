@@ -1,0 +1,57 @@
+<div id="modal-{$control->getName()}-editBlockForm" class="modal fade">
+	<div class="modal-dialog modal-lg-2">
+		<div class="modal-content" n:snippet="editBlockForm" style="background-color: #fafafa;">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" title="{_admin.buttons.close}">
+					<span aria-hidden="true">×</span>
+				</button>
+				<h4 n:if="isset($blockType) && $blockType">{_$blockType['name']}</h4>
+			</div>
+			{form editBlockForm class => 'ajax ajax-modal-close'}
+				<div n:if="isset($blockType) && $blockType" class="modal-body clearfix">
+					<div class="tabs-left row" role="tabpanel">
+						<ul class="nav nav-tabs col-sm-3" role="tablist" style="margin-right: 0; padding-right: 0; border-right: none; z-index: 1;">
+							<li n:foreach="$blockType['tabs'] as $tabKey => $tab" role="presentation" n:class="$iterator->first ? 'active'">
+								<a href="#tab-{$tabKey}" role="tab" data-toggle="tab" style="margin-bottom: 0;">{_$tab['name']}</a>
+							</li>
+						</ul>
+
+						<div class="tab-content col-sm-9" style="padding: 20px; border: 1px solid #dddddd;">
+							{var $allParameters = $blockType['parameters']}
+							<div n:foreach="$blockType['tabs'] as $tabKey => $tab" role="tabpanel" n:class="'tab-pane', $iterator->first ? 'active in'" id="tab-{$tabKey}">
+								<div n:foreach="$tab['parameters'] as $parameterKey" n:if="isset($allParameters[$parameterKey])">
+									{var $parameter = $allParameters[$parameterKey]}
+									<div class="col-sm-{if isset($parameter[\ContentBlocksDefinition::COLS]) && $parameter[\ContentBlocksDefinition::COLS]}{$parameter[\ContentBlocksDefinition::COLS]}{else}12{/if}">
+
+									{var $includeName = $control->getParameterLatteIncludeName($parameter[\ContentBlocksDefinition::TYPE])}
+
+									{if $includeName}
+										{include 'parameters/'.$includeName.'.latte',
+											'sectionTypeKey' => 0,
+											'parameterKey' => $parameterKey,
+											'parameter' => $parameter,
+											'block' => $selectedBlock,
+											'value' => $selectedBlock ? $selectedBlock->getValue($parameterKey) : NULL,
+											'label' => isset($parameter[\ContentBlocksDefinition::NAME]) ? $control->getTranslator()->translate($parameter[\ContentBlocksDefinition::NAME]) : '',
+											'customClass' => $parameter[\ContentBlocksDefinition::CUSTOM_CLASS] ?? '',
+											'helpBlockText' => isset($parameter[\ContentBlocksDefinition::HELP_TEXT]) ? $control->getTranslator()->translate($parameter[\ContentBlocksDefinition::HELP_TEXT]) : '',
+										}
+									{/if}
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer" style="padding: 0 15px 15px 15px;">
+					<button n:name="submit" class="btn btn-success btn-addon">
+						<i class="far fa-check"></i> {_admin.buttons.save}
+					</button>
+					<button type="button" class="btn btn-default btn-addon" data-dismiss="modal">
+						<i class="far fa-times"></i> {_admin.buttons.close}
+					</button>
+				</div>
+			{/form}
+		</div>
+	</div>
+</div>

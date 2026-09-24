@@ -1,0 +1,49 @@
+{block content}
+
+{control breadcrumbs}
+
+<div class="blog-area pt-120">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-9 col-md-12 ml-auto mr-auto">
+                <div class="blog-details-wrapper">
+                    <div class="blog-details-top">
+                        <div n:if="$item->image" class="blog-details-img">
+                            <img alt="{$item->image|imageTitle}" src="{$item->image|image:blogDetail}">
+                        </div>
+                        <div class="blog-details-content">
+                            <div class="blog-meta-2">
+                                <ul>
+                                    <li n:foreach="$item->getCategories() as $itemCategory">
+                                        <a href="{$page->full_url}/{$itemCategory->getUrl()}">{$itemCategory->name}</a>
+                                    </li>
+                                    <li>
+                                        {$item->date|datetime:FALSE}
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{control contentBlocks}
+
+<div class="blog-area pb-120">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-9 col-md-12 ml-auto mr-auto">
+                <div class="blog-details-wrapper">
+                    <div class="next-previous-post">
+                        <a href="{$page->full_url}">
+                            <i class="fa fa-angle-left"></i> {content('blog', 'btn_back')}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

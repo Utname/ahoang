@@ -1,0 +1,150 @@
+$primary: #F47721;
+$secondary: #fd7e14;
+$success: #28a745;
+$info: #17a2b8;
+$warning: #ffc107;
+$danger: #dc3545;
+$light: #f8f9fa;
+$white: #ffffff;
+$dark: #333;
+
+$body-bg: $white;
+$body-color: $dark;
+
+/* space */
+$spacer: 1.6rem;
+
+$spacers: ();
+$spacers: map-merge(
+  (
+    0: 0,
+    1: (
+      2.4rem
+    ),
+    2: (
+      4.8rem
+    ),
+    3: 8rem,
+    4: (
+      12rem
+    )
+  ),
+  $spacers
+);
+
+/* fonts */
+$font-family-sans-serif: 'Poppins', sans-serif;
+$headings-font-family: null;
+$font-size-base: 1.6rem;
+$line-height-lg: 1.5;
+$line-height-sm: 1.2;
+$small-font-size: 80%;
+
+$font-weight-lighter: lighter;
+$font-weight-light: 300;
+$font-weight-normal: 400;
+$font-weight-bold: 700;
+$font-weight-bolder: bolder;
+$font-weight-base: $font-weight-normal;
+$line-height-base: 1.6;
+
+$h1-font-size: 6.4rem;
+$h2-font-size: 4.8rem;
+$h3-font-size: 4rem;
+$h4-font-size: 2.4rem;
+$h5-font-size: 2.1rem;
+$h6-font-size: 1.6rem;
+
+$headings-margin-bottom: 4rem;
+$headings-font-weight: 700;
+$headings-line-height: 1.125;
+$headings-color: $dark;
+
+$paragraph-margin-bottom: 4rem;
+
+/* Links */
+$link-color: $primary;
+$link-decoration: none;
+$link-hover-color: $primary;
+$link-hover-decoration: underline;
+
+/* Grid */
+$grid-breakpoints: (
+  xs: 0,
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1200px,
+  xxl: 1300px,
+);
+
+/* Container */
+$container-max-widths: (
+  sm: 540px,
+  md: 720px,
+  lg: 960px,
+  xl: 1140px,
+  xxl: 1296px,
+);
+
+/* Buttons */
+$input-btn-padding-y: 1.9rem;
+$input-btn-padding-x: 3.9rem;
+$input-btn-font-family: null;
+$input-btn-font-size: 1.6rem;
+$input-btn-line-height: 1;
+
+$input-btn-border-width: 0;
+$btn-font-weight: 500;
+
+/* grid */
+$grid-columns: 12;
+$grid-gutter-width: 16px;
+
+/* Btn disable box shadows */
+$btn-box-shadow: none;
+$btn-focus-box-shadow: none;
+$btn-active-box-shadow: none;
+
+/* border radius*/
+$border-radius: 0;
+$border-radius-lg: 0;
+$border-radius-sm: 0;
+
+@import "../bootstrap/scss/functions";
+@import "../bootstrap/scss/variables";
+@import "../bootstrap/scss/mixins";
+@import "../bootstrap/scss/root";
+@import "../bootstrap/scss/reboot";
+@import "../bootstrap/scss/type";
+@import "../bootstrap/scss/images";
+@import "../bootstrap/scss/code";
+@import "../bootstrap/scss/grid";
+@import "../bootstrap/scss/tables";
+@import "../bootstrap/scss/forms";
+@import "../bootstrap/scss/buttons";
+@import "../bootstrap/scss/transitions";
+@import "../bootstrap/scss/dropdown";
+@import "../bootstrap/scss/button-group";
+@import "../bootstrap/scss/input-group";
+@import "../bootstrap/scss/custom-forms";
+@import "../bootstrap/scss/nav";
+@import "../bootstrap/scss/navbar";
+@import "../bootstrap/scss/card";
+@import "../bootstrap/scss/breadcrumb";
+@import "../bootstrap/scss/pagination";
+@import "../bootstrap/scss/badge";
+@import "../bootstrap/scss/jumbotron";
+@import "../bootstrap/scss/alert";
+@import "../bootstrap/scss/progress";
+@import "../bootstrap/scss/media";
+@import "../bootstrap/scss/list-group";
+@import "../bootstrap/scss/close";
+@import "../bootstrap/scss/toasts";
+@import "../bootstrap/scss/modal";
+@import "../bootstrap/scss/tooltip";
+@import "../bootstrap/scss/popover";
+@import "../bootstrap/scss/carousel";
+@import "../bootstrap/scss/spinners";
+@import "../bootstrap/scss/utilities";
+@import "../bootstrap/scss/print";

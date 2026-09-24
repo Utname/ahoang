@@ -1,0 +1,235 @@
+{* Computed before <style> so both can be interpolated straight into the
+   .ribbon-mini-badge{} rule below, as ONE stylesheet rule with the main block
+   (see vel3.latte for why: two separate <style> blocks touching the same
+   selector, or splitting a dynamic property into an inline style, silently
+   drop properties in Dompdf).
+   .ribbon-mini-badge had a FIXED width (31.02mm) sized only for the short
+   sample value "10 Kč" used when the design was approved — real data routinely
+   produces longer values ("45,00 Kč", "125,50 Kč"), which overflowed both
+   sides of the badge's solid black background with no padding at all (that
+   background never grew with the text). Width is now derived from the actual
+   value string length: 0.53 + 4.1475mm per character, calibrated by rendering
+   "5 Kč" through "998,99 Kč" and pixel-measuring the true glyph width for each
+   at this exact font/size (not guessed), plus 9.75mm total side padding —
+   the same padding the original 31.02mm box gave "10 Kč" (21.27mm of that was
+   text), so short values render pixel-identical to the originally approved
+   design and only longer ones grow. Left is recomputed so the box keeps the
+   same center point (87.48mm = 71.97 + 31.02/2) the design centers .ribbon-note1
+   over, regardless of width. *}
+{var $ribbonMiniValueText = $savingText . ' ' . $currencySymbol}
+{var $ribbonMiniBadgeWidthMm = max(31.02, 0.53 + 4.1475 * mb_strlen($ribbonMiniValueText) + 9.75)}
+{var $ribbonMiniBadgeLeftMm = 87.48 - $ribbonMiniBadgeWidthMm / 2}
+<style>
+    @page { margin: 0; }
+    html, body { margin: 0; padding: 0; background: #fff; color: #111; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
+    .fikko-a5 { box-sizing: border-box; position: relative; width: 200mm; height: 138.5mm; margin: 5mm; overflow: hidden; }
+    .fikko-a5 .heading { position: absolute; top: 0; left: 0; width: 200mm; height: 19mm; background: #111; color: #fff; }
+    .fikko-a5 .heading-text { position: absolute; top: 0; left: 22mm; width: 178mm; height: 19mm; display: table; text-align: center; }
+    .fikko-a5 .heading-text span { display: table-cell; vertical-align: middle; font-family: Nunito, sans-serif; font-size: 12mm; font-weight: 900; font-style: italic; line-height: 1; letter-spacing: .02em; }
+    .fikko-a5 .logo-box { position: absolute; top: -.3mm; left: -.3mm; width: 22.3mm; height: 19.3mm; box-sizing: border-box; background: #fff; display: table; }
+    .fikko-a5 .logo-box .logo-cell { display: table-cell; text-align: center; vertical-align: middle; padding: 1mm; }
+    .fikko-a5 .logo { max-width: 100%; max-height: 17mm; filter: grayscale(1) contrast(1.15); }
+    .fikko-a5 .product-name { position: absolute; top: 22.5mm; left: 0; width: 200mm; text-align: center; font-size: 5.6mm; font-weight: 800; line-height: 1.15; }
+    .fikko-a5 .product-meta { position: absolute; top: 30.9mm; left: 0; width: 200mm; min-height: 6.6mm; border-bottom: .4mm solid #111; padding-bottom: 2mm; text-align: center; }
+    .fikko-a5 .more-species { font-family: Nunito, sans-serif; font-size: 6mm; font-weight: 900; font-style: italic; line-height: 1.1; }
+    .fikko-a5 .validity { position: absolute; right: 0; top: 1.5mm; font-size: 3.6mm; font-weight: 800; white-space: nowrap; }
+    .fikko-a5 .validity-label { margin-right: 2mm; color: #555; font-size: 2.6mm; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+    .fikko-a5 .origin { position: absolute; top: 70.5mm; left: 0; display: table; }
+    .fikko-a5 .origin-icon { display: table-cell; width: 11.2mm; vertical-align: middle; }
+    .fikko-a5 .origin-icon img { display: block; width: 11.2mm; height: auto; border: .1mm solid #ccc; }
+    .fikko-a5 .origin-text { display: table-cell; padding-left: 2.5mm; vertical-align: middle; }
+    .fikko-a5 .origin-label { color: #555; font-size: 2.5mm; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    .fikko-a5 .origin-name { font-size: 3.8mm; font-weight: 800; line-height: 1.1; }
+    .fikko-a5 .note-1 { position: absolute; top: 87.7mm; left: 0; white-space: nowrap; font-family: Nunito, sans-serif; font-size: 6mm; font-weight: 900; font-style: italic; }
+    .fikko-a5 .price-block { position: absolute; top: 52mm; left: 82mm; }
+    .fikko-a5 .base-price { display: table; margin-left: 23.9mm; white-space: nowrap; }
+    .fikko-a5 .base-label { font-size: 2.8mm; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+    .fikko-a5 .base-value { margin-left: 2.5mm; font-family: Nunito, sans-serif; font-size: 8mm; font-weight: 900; font-style: italic; }
+    .fikko-a5 .our-price-label { margin-top: 2mm; margin-left: 30.7mm; font-size: 2.8mm; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+    /* Independent absolute positions, not display:table — same Dompdf table-cell
+       height-miscalculation issue fixed for the ribbon price block and for
+       Vel.1/Vel.3 applies here too. Positioned relative to .price-block (its
+       nearest positioned ancestor), not the label root, so the .long-name
+       downward shift of .price-block still carries these along with it. */
+    .fikko-a5 .price-major { position: absolute; top: 14.64mm; left: 0; font-family: Nunito, sans-serif; font-size: 40mm; font-weight: 900; font-style: italic; line-height: .82; letter-spacing: -.03em; white-space: nowrap; }
+    .fikko-a5 .price-minor { position: absolute; top: 19.5mm; left: 47.74mm; font-family: Nunito, sans-serif; font-weight: 900; font-style: italic; font-size: 16mm; line-height: .9; white-space: nowrap; }
+    .fikko-a5 .price-currency { position: absolute; top: 39mm; left: 47.74mm; font-family: Nunito, sans-serif; font-weight: 900; font-style: italic; font-size: 8mm; line-height: .9; white-space: nowrap; }
+    .fikko-a5 .save { position: absolute; top: 111mm; left: 86.1mm; width: 72.3mm; height: 11.9mm; color: #fff; white-space: nowrap; transform: rotate(-1.2deg); }
+    .fikko-a5 .save-brush { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .fikko-a5 .save-content { position: absolute; top: 2.2mm; left: 5mm; display: table; height: 5mm; }
+    .fikko-a5 .save-pig-cell { display: table-cell; width: 4.6mm; vertical-align: middle; }
+    .fikko-a5 .save-pig { display: block; width: 4.6mm; height: 4.6mm; }
+    .fikko-a5 .save-copy, .fikko-a5 .save-value, .fikko-a5 .save-suffix { display: table-cell; vertical-align: middle; }
+    .fikko-a5 .save-copy { padding-left: 2.5mm; font-size: 2.8mm; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+    .fikko-a5 .save-value { padding-left: 2mm; font-family: Nunito, sans-serif; font-size: 6mm; font-weight: 900; font-style: italic; line-height: 1; }
+    .fikko-a5 .save-suffix { padding-left: 2mm; font-size: 2.4mm; font-weight: 600; }
+    .fikko-a5 .ean { position: absolute; left: 0; bottom: 0; font-size: 2.9mm; font-weight: 600; line-height: 1; letter-spacing: .14em; white-space: nowrap; }
+    .fikko-a5 .notes-bottom { position: absolute; left: 75.7mm; top: 128.2mm; width: 90mm; text-align: center; white-space: nowrap; font-family: Nunito, sans-serif; font-size: 6mm; font-weight: 900; font-style: italic; line-height: 1.1; }
+    .fikko-a5 .unit { position: absolute; right: 0; bottom: 0; white-space: nowrap; font-size: 3.4mm; font-weight: 700; }
+    .fikko-a5 .unit-value { margin-left: 2.5mm; font-family: Nunito, sans-serif; font-size: 4.2mm; font-weight: 900; font-style: italic; }
+    .fikko-a5.long-name .product-meta { top: 37.3mm; }
+    .fikko-a5.long-name .origin { top: 76.9mm; }
+    .fikko-a5.long-name .note-1 { top: 94.1mm; }
+    .fikko-a5.long-name .price-block { top: 58.6mm; }
+    .fikko-a5.price-digits-3 .our-price-label { margin-left: 20mm; }
+    .fikko-a5.price-digits-3 .price-major { left: -7.4mm; font-size: 31mm; }
+    .fikko-a5.price-digits-3 .price-minor { font-size: 12.5mm; }
+    .fikko-a5.price-digits-3 .price-currency { top: 34mm; font-size: 6.5mm; }
+
+    /* brush-20.png (the hand-painted brush stroke) renders at roughly half
+       its declared height in Dompdf at this box size — isolated to Dompdf's
+       handling of large near-black/near-gray PNGs (a clearly hued recolor of
+       the exact same file renders at the correct height; CSS filter cannot
+       fix this after the fact, since Dompdf does not apply filter at all —
+       confirmed via the logo's own filter:grayscale(1), which is likewise
+       silently ignored). ribbonBadgeBrushDataUri is the same artwork with a
+       faint navy retint (barely perceptible at print size) that avoids the
+       bug while keeping the authentic hand-painted edge, instead of a
+       synthetic CSS shape. */
+    .fikko-a5 .ribbon-badge { position: absolute; top: 51.4mm; left: 0; width: 58.5mm; height: 24.2mm; }
+    .fikko-a5 .ribbon-badge img { position: absolute; top: 0; left: 0; width: 58.5mm; height: 24.2mm; }
+    /* display:table (with either width:100% or an explicit mm width) does not
+       reliably center vertically in Dompdf via table-cell vertical-align —
+       the box ends up short/top-heavy and the text sits low. Plain absolute
+       block + text-align:center (the pattern used everywhere else in this
+       template) is reliable; only horizontal centering is needed here since
+       vertical position is simply a tuned top offset. */
+    /* left is nudged a few mm negative (not 0): the brush artwork's jagged
+       fringe eats further into the visible ink on the right edge than the
+       left, so mathematically-centered text looks off-center against the
+       visible (asymmetric) ink shape. Tuned against real renders.
+       top is a large negative offset for a different reason: at font-size:
+       18mm/line-height:1, the "-X %" glyphs' actual cap-height renders at
+       only ~13.2mm in Dompdf (measured on real PDF output, not the ~18mm a
+       line-height:1 box implies), and the glyph sits low within that box —
+       so a naive top offset left ~4.4mm clear at the top of the black box
+       but only ~0.2mm at the bottom (text nearly touching the edge). Verified
+       by pixel-measuring the true glyph top/bottom against the box's own
+       top/bottom on a real render: this value gives ~5.4mm top / 5.6mm
+       bottom (balanced), independent of the percent value's digit count —
+       confirmed stable for -5%, -20%, -56%, -99%. */
+    .fikko-a5 .ribbon-badge-text { position: absolute; top: -3.2mm; left: -4.3mm; width: 58.5mm; text-align: center; color: #fff; font-family: Nunito, sans-serif; font-size: 18mm; font-weight: 900; font-style: italic; line-height: 1; }
+    /* Centered over .ribbon-mini-badge below it (same left/width, so both
+       share a center line), not left-anchored — Poznámka 1's length varies
+       per label, so a fixed nowrap left position drifted off-center. */
+    .fikko-a5 .ribbon-note1 { position: absolute; top: 43.3mm; left: 69.99mm; width: 34.99mm; text-align: center; font-family: Nunito, sans-serif; font-size: 6mm; font-weight: 900; font-style: italic; }
+    /* Solid black box (not the brush-textured strip used by the no-discount
+       badge) holding two centered rows: icon+"Ušetříte" on top, value below —
+       exact box from the approved "usetrite" design. Height is explicit
+       rather than auto from padding + table-cell content: auto-height
+       rendered ~4mm taller than the design in Dompdf (same class of
+       table/row height overestimation seen elsewhere this project for large
+       italic Nunito text), which is exactly why this box looked closer to
+       the same height as the "-X %" ribbon instead of visibly smaller — the
+       two are meant to share a common vertical center, not a common height.
+       The value line is independently positioned at its own measured top
+       instead of flowing after the icon row, for the same reliability
+       reason. Originally 17.49mm tall — pixel-measured on a real render and
+       confirmed the value line's glyphs (e.g. "45,00", "10") touched the
+       very bottom edge with 0mm of padding below them (2.6mm above the icon
+       row, 0mm below the value row — visibly lopsided, not a rendering
+       artifact). +2.5mm height gives the value line real bottom padding.
+       The extra height is added purely at the bottom (top stays at its
+       original 52.88mm) rather than split top/bottom around a fixed center:
+       pulling the top edge up, even by ~1mm, ran the box into "Poznámka 1"
+       above it — confirmed on a real render, not assumed. There's enough
+       clearance below (.ribbon-origin starts at 78mm/84.4mm, well past this
+       box's new bottom edge) that growing downward only doesn't need any
+       other position on the label to move. */
+    .fikko-a5 .ribbon-mini-badge { position: absolute; top: 52.88mm; left: {$ribbonMiniBadgeLeftMm|noescape}mm; width: {$ribbonMiniBadgeWidthMm|noescape}mm; height: 19.99mm; box-sizing: border-box; background: #111; color: #fff; }
+    .fikko-a5 .ribbon-mini-row { position: absolute; top: 1.99mm; left: 0; right: 0; display: table; margin: 0 auto; }
+    .fikko-a5 .ribbon-mini-icon { display: table-cell; width: 5mm; vertical-align: middle; }
+    .fikko-a5 .ribbon-mini-icon-img { display: block; width: 5mm; height: 5mm; }
+    .fikko-a5 .ribbon-mini-copy { display: table-cell; padding-left: 1.5mm; vertical-align: middle; font-size: 2.8mm; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
+    .fikko-a5 .ribbon-mini-value { position: absolute; top: 7.49mm; left: 0; width: 100%; text-align: center; font-family: Nunito, sans-serif; font-size: 8mm; font-weight: 900; font-style: italic; line-height: 1; white-space: nowrap; }
+    .fikko-a5 .ribbon-origin { position: absolute; top: 78mm; left: 0; display: table; }
+    .fikko-a5 .ribbon-ingredients-label { position: absolute; top: 91.25mm; left: 0; color: #555; font-size: 2.5mm; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    .fikko-a5 .ribbon-ingredients { position: absolute; top: 95.16mm; left: 0; width: 66mm; height: 17.63mm; overflow: hidden; font-size: 3.53mm; line-height: 1.25; }
+    .fikko-a5 .ribbon-refprice { position: absolute; top: 59mm; left: 140mm; width: 22mm; color: #555; font-size: 2.7mm; font-weight: 700; line-height: 1.15; }
+    /* Fixed width (measured from the design, not auto-sized) so the strike
+       line below always spans the full number: an inline-block's auto width
+       for this large italic Nunito text renders narrower in Dompdf than the
+       actual glyphs, leaving the line short of the last digit. */
+    .fikko-a5 .ribbon-oldprice { position: absolute; top: 50mm; left: 164mm; width: 34.73mm; white-space: nowrap; font-family: Nunito, sans-serif; font-size: 13mm; font-weight: 900; font-style: italic; color: #555; }
+    .fikko-a5 .ribbon-oldprice-line { position: absolute; left: -1.5mm; right: -1.5mm; top: 12mm; height: .7mm; background: #555; transform: rotate(-8deg); }
+    /* display:table here (like the price blocks fixed elsewhere this session)
+       computed row height unreliably for these large italic Nunito digits,
+       making "Kč / 1 ks" render further down than the CSS implied and collide
+       with the unit-price line below it — each part now gets its own
+       independent absolute position, taken from the approved design. */
+    .fikko-a5 .ribbon-price-major { position: absolute; top: 67.14mm; left: 108.98mm; font-family: Nunito, sans-serif; font-size: 46mm; font-weight: 900; font-style: italic; line-height: .82; letter-spacing: -.03em; white-space: nowrap; }
+    .fikko-a5 .ribbon-price-minor { position: absolute; top: 71.75mm; left: 162.92mm; font-family: Nunito, sans-serif; font-weight: 900; font-style: italic; font-size: 21mm; line-height: .9; white-space: nowrap; }
+    .fikko-a5 .ribbon-price-currency { position: absolute; top: 98.5mm; left: 162.92mm; font-family: Nunito, sans-serif; font-weight: 900; font-style: italic; font-size: 9mm; line-height: .9; white-space: nowrap; }
+    .fikko-a5 .ribbon-unit { position: absolute; right: 0; top: 110mm; white-space: nowrap; font-size: 3.4mm; font-weight: 700; }
+    .fikko-a5 .ribbon-unit-value { margin-left: 2.5mm; font-family: Nunito, sans-serif; font-size: 4.2mm; font-weight: 900; font-style: italic; }
+    .fikko-a5.long-name .ribbon-note1 { top: 49.5mm; }
+    .fikko-a5.long-name .ribbon-mini-badge { top: 59.08mm; }
+    .fikko-a5.long-name .ribbon-badge { top: 57.6mm; }
+    .fikko-a5.long-name .ribbon-origin { top: 84.4mm; }
+    .fikko-a5.long-name .ribbon-ingredients-label { top: 97.65mm; }
+    .fikko-a5.long-name .ribbon-ingredients { top: 101.56mm; }
+    .fikko-a5.price-digits-3 .ribbon-price-major { left: 97mm; font-size: 32mm; }
+    .fikko-a5.price-digits-3 .ribbon-price-minor { top: 71.75mm; font-size: 15mm; }
+    .fikko-a5.price-digits-3 .ribbon-price-currency { top: 86.3mm; font-size: 7mm; }
+    .fikko-a5.price-digits-3 .ribbon-oldprice { width: 29mm; font-size: 9mm; }
+    .fikko-a5.price-digits-3 .ribbon-oldprice-line { top: 8.8mm; }
+</style>
+
+{var $a5Classes = 'fikko-a5' . ($priceDigits >= 3 ? ' price-digits-3' : '') . ($labelNameLength > 58 ? ' long-name' : '')}
+{var $logoMarkup = '<img class="logo" src="' . $logoDataUri . '" alt="Fikko market">'}
+{var $flagMarkup = $flagIconDataUri ? '<img src="' . $flagIconDataUri . '" alt="">' : ''}
+{var $brushMarkup = '<img class="save-brush" src="' . $brushDataUri . '" alt="">'}
+{var $ribbonBadgeBrushMarkup = '<img src="' . $ribbonBadgeBrushDataUri . '" alt="">'}
+{var $pigMarkup = '<img class="save-pig" src="' . $pigFaceIconDataUri . '" alt="">'}
+{var $pigMiniMarkup = '<img class="ribbon-mini-icon-img" src="' . $pigIconDataUri . '" alt="">'}
+<section class="{$a5Classes}">
+    <div class="heading"><div class="heading-text"><span>FIKKO CENA</span></div></div>
+    <div class="logo-box"><div class="logo-cell">{$logoMarkup|noescape}</div></div>
+
+    <div class="product-name">{$labelName}</div>
+    <div class="product-meta">
+        <div n:if="$label && $label->is_more_species" class="more-species">Více druhů</div>
+        <div n:if="$validityText" class="validity"><span class="validity-label">Platnost</span>{$validityText}</div>
+    </div>
+
+    {if $hasSaleRibbon}
+    <div>
+        <div class="ribbon-badge">{$ribbonBadgeBrushMarkup|noescape}<div class="ribbon-badge-text"><span>-{$salePercent|number:0} %</span></div></div>
+        <div n:if="$label && $label->note_1" class="ribbon-note1">{$label->note_1}</div>
+        <div n:if="$saving > 0" class="ribbon-mini-badge">
+            <div class="ribbon-mini-row"><span class="ribbon-mini-icon">{$pigMiniMarkup|noescape}</span><span class="ribbon-mini-copy">Ušetříte</span></div>
+            <div class="ribbon-mini-value">{$savingText} {$currencySymbol}</div>
+        </div>
+        <div n:if="$country" class="ribbon-origin">
+            <div class="origin-icon">{$flagMarkup|noescape}</div>
+            <div class="origin-text"><div class="origin-label">Země původu</div><div class="origin-name">{$country->name}</div></div>
+        </div>
+        <div n:if="$product->ingredients" class="ribbon-ingredients-label">Složení</div>
+        <div n:if="$product->ingredients" class="ribbon-ingredients">{$product->ingredients|truncate:220}</div>
+        <div class="ribbon-refprice">Nejnižší cena<br>za 30 dní</div>
+        <div class="ribbon-oldprice">{$basePriceText}<span class="ribbon-oldprice-line"></span></div>
+        <div class="ribbon-price"><div class="ribbon-price-major">{$finalPriceMajor}</div><div class="ribbon-price-side"><div class="ribbon-price-minor">{$finalPriceMinor}</div><div class="ribbon-price-currency">{$currencySymbol} / 1 ks</div></div></div>
+        <div n:if="$unit" class="ribbon-unit">Cena za {$unit->unitWeight} {$unit->unitShort}<span class="ribbon-unit-value">{$unit->price|number:2,',',''} {$currencySymbol}</span></div>
+    </div>
+    {else}
+    <div>
+        <div n:if="$country" class="origin">
+            <div class="origin-icon">{$flagMarkup|noescape}</div>
+            <div class="origin-text"><div class="origin-label">Země původu</div><div class="origin-name">{$country->name}</div></div>
+        </div>
+        <div n:if="$label && $label->note_1" class="note-1">{$label->note_1}</div>
+
+        <div class="price-block">
+            <div class="base-price"><span class="base-label">Běžná cena</span><span class="base-value">{$basePriceText} {$currencySymbol}</span></div>
+            <div class="our-price-label">Naše cena</div>
+            <div class="price"><div class="price-major">{$finalPriceMajor}</div><div class="price-side"><div class="price-minor">{$finalPriceMinor}</div><div class="price-currency">{$currencySymbol} / 1 ks</div></div></div>
+        </div>
+
+        <div n:if="$saving > 0" class="save">{$brushMarkup|noescape}<div class="save-content"><span class="save-pig-cell">{$pigMarkup|noescape}</span><span class="save-copy">Ušetříte</span><span class="save-value">{$savingText} {$currencySymbol}</span><span class="save-suffix">oproti běžné ceně</span></div></div>
+        <div n:if="$unit" class="unit">Cena za {$unit->unitWeight} {$unit->unitShort}<span class="unit-value">{$unit->price|number:2,',',''} {$currencySymbol}</span></div>
+    </div>
+    {/if}
+
+    <div class="ean">EAN {$eanText}</div>
+    <div class="notes-bottom"><div n:if="$label && $label->note_3">{$label->note_3}</div></div>
+</section>

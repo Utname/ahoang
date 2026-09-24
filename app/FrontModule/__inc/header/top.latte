@@ -1,0 +1,161 @@
+{if $page->system == 'home'}
+
+    <div class="header-wrapper">
+        <div class="container">
+            <div class="header-top">
+                <a n:if="$logo = settings('logo')" class="header-logo" href="{page('home')->full_url}">
+                    <img src="{$logo|image:logo}" alt="{$logo|imageTitle}" data-src="{$logo|image:logo}" data-ret="{$logo|image:logo}" />
+                </a>
+                <button class="header-menu-toggle" type="button">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <div class="header-menu">
+                    <ul>
+                        <li n:foreach="$presenter->getMenuBlocksItems() as  $item" n:if="isset($item['slug']) && isset($item['tag']) && isset($item['name'])">
+                            <a href="{isset($language) && !$language->is_default ? "/".$language->id}/{$item['slug']}" class="home-page link" target="_self" data-url="{isset($language) && !$language->is_default ? "/".$language->id."/".$item['tag']}">{$item['name']}</a>
+                        </li>
+
+                        <li n:foreach="$presenter->getMenuItems() as  $item">
+                            <a href="{$item->url}"{$item->blank ? ' target="_blank"'} n:class="$item->current ? 'active', $item->system == 'home' ? 'home-page', 'link'">{$item->name}</a>
+                        </li>
+                    </ul>
+                    {var $menuBtnText = content('header', 'menuBtnText')}
+                    {var $menuBtnLink = content('header', 'menuBtnLink')}
+                    <a n:if="$menuBtnText && $menuBtnLink" href="{$menuBtnLink}" target="_self" class="btn btn-primary scroll-item home-page link">{$menuBtnText}</a>
+                    <div n:if="count($presenter->getMenuLanguages()) > 1" class="lang-flags">
+                        <div class="dropdown">
+                            <button type="button" class="btn dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                <img src="/images/front/flags/{$language->id}.svg" alt="">
+                                {$language->id|upper}
+                            </button>
+                            <div class="dropdown-menu" x-placement="bottom-start">
+                                <a n:foreach="$presenter->getMenuLanguages() as $menuLanguage" n:if="$menuLanguage->id != $language->id" class="dropdown-item" href="{$menuLanguage->page->full_url}">
+                                    <img src="/images/front/flags/{$menuLanguage->id}.svg" alt="">
+                                    {$menuLanguage->id|upper}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="header-slider">
+        <!-- Slider main container -->
+        <div n:if="$sliders = sliders()" class="swiper" id="top-slider">
+            <!-- Additional required wrapper -->
+            <div class="swiper-wrapper">
+                <!-- Slides -->
+                <div n:foreach="$sliders as $slider" class="swiper-slide">
+                    <div n:if="$slider->image" class="swiper-slide-img">
+                        <img src="{$slider->image|image:slider}" alt="{$slider->image|imageTitle}">
+                    </div>
+                    <div class="swiper-slide-text">
+                        <div class="container">
+                            <div class="swiper-slide-text-inner">
+                                <h2 n:if="$slider->name" class="h1">{$slider->name}</h2>
+                                {($slider->text ?? noescape)|noescape}
+                                <div class="swiper-slide-text-btns">
+                                    <a n:if="$slider->button_text && $slider->button_link" href="{$slider->button_link}" class="btn btn-primary scroll-item">{$slider->button_text}</a>
+                                    <a n:if="$slider->button_text_2 && $slider->button_link_2" href="{$slider->button_link_2}" class="btn btn-transparent scroll-item">{$slider->button_text_2}</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="swiper-controls">
+                <div class="container">
+                    <div class="swiper-controls-inner">
+                        <!-- If we need navigation buttons -->
+                        <div class="swiper-button-prev">
+                            <svg width="18" height="16" viewBox="0 0 18 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <g id="Arrow-Right-Outlined">
+                                    <path id="Path"
+                                          d="M0.95002 7.47L7.95002 0.469996C8.14294 0.282431 8.42128 0.212038 8.68017 0.285332C8.93907 0.358627 9.1392 0.564474 9.20517 0.825333C9.27115 1.08619 9.19294 1.36243 9.00002 1.55L3.29002 7.25H16.52C16.9342 7.25 17.27 7.58578 17.27 8C17.27 8.41421 16.9342 8.75 16.52 8.75H3.30002L9.00002 14.45C9.14297 14.5893 9.22359 14.7804 9.22359 14.98C9.22359 15.1796 9.14297 15.3707 9.00002 15.51C8.86218 15.6546 8.66977 15.7345 8.47002 15.73C8.27095 15.7309 8.0799 15.6516 7.94002 15.51L0.94002 8.51C0.647566 8.21718 0.647566 7.74281 0.94002 7.45L0.95002 7.47Z"
+                                          fill="#fff" />
+                                </g>
+                            </svg>
+                        </div>
+                        <div class="swiper-button-next">
+                            <svg width="18" height="16" viewBox="0 0 18 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <g id="Arrow-Right-Outlined">
+                                    <path id="Path"
+                                          d="M17.05 7.47L10.05 0.469996C9.85706 0.282431 9.57872 0.212038 9.31983 0.285332C9.06093 0.358627 8.8608 0.564474 8.79483 0.825333C8.72885 1.08619 8.80706 1.36243 8.99998 1.55L14.71 7.25H1.47998C1.06577 7.25 0.72998 7.58578 0.72998 8C0.72998 8.41421 1.06577 8.75 1.47998 8.75H14.7L8.99998 14.45C8.85703 14.5893 8.77641 14.7804 8.77641 14.98C8.77641 15.1796 8.85703 15.3707 8.99998 15.51C9.13782 15.6546 9.33023 15.7345 9.52998 15.73C9.72905 15.7309 9.9201 15.6516 10.06 15.51L17.06 8.51C17.3524 8.21718 17.3524 7.74281 17.06 7.45L17.05 7.47Z"
+                                          fill="#fff" />
+                                </g>
+                            </svg>
+                        </div>
+                        <!-- If we need scrollbar -->
+                        <div class="swiper-scrollbar"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="header-top-claim">
+        <div class="header-top-claim-text">Ofikko nejlepší ceny</div>
+        <div class="header-top-claim-logo">
+            <a n:if="$logo = settings('logo')" class="" href="{page('home')->full_url}">
+                <img src="{$logo|image:logo}" alt="{$logo|imageTitle}" data-src="{$logo|image:logo}" data-ret="{$logo|image:logo}" />
+            </a>
+        </div>
+    </div>
+{else}
+<header>
+    <div class="header-wrapper header-subpage" {if $page->meta_image} style="background: URL({$page->meta_image|image:header}); background-size: cover; background-position: bottom center;)" {/if}>
+      <div class="container">
+        <div class="header-top">
+          <a n:if="$logo = settings('logo')" class="header-logo" href="{page('home')->full_url}">
+                              <img src="{$logo|image:logo}" alt="{$logo|imageTitle}" data-src="{$logo|image:logo}" data-ret="{$logo|image:logo}" />
+                          </a>
+          <button class="header-menu-toggle" type="button">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+          <div class="header-menu">
+              <ul>
+                <li n:foreach="$presenter->getMenuBlocksItems() as  $item" n:if="isset($item['slug']) && isset($item['tag']) && isset($item['name'])">
+                    <a href="{isset($language) && !$language->is_default ? "/".$language->id}/{$item['slug']}" class="home-page link" target="_self" data-url="{isset($language) && !$language->is_default ? "/".$language->id."/".$item['tag']}">{$item['name']}</a>
+                </li>
+
+                  <li n:foreach="$presenter->getMenuItems() as  $item">
+                      <a href="{$item->url}"{$item->blank ? ' target="_blank"'} n:class="$item->current ? 'active', $item->system == 'home' ? 'home-page', 'link'">{$item->name}</a>
+                  </li>
+              </ul>
+              {var $menuBtnText = content('header', 'menuBtnText')}
+              {var $menuBtnLink = content('header', 'menuBtnLink')}
+              <a n:if="$menuBtnText && $menuBtnLink" href="{$menuBtnLink}" target="_self" class="btn btn-primary scroll-item home-page link">{$menuBtnText}</a>
+              <div n:if="count($presenter->getMenuLanguages()) > 1" class="lang-flags">
+                  <div class="dropdown">
+                      <button type="button" class="btn dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                          <img src="/images/front/flags/{$language->id}.svg" alt="">
+                          {$language->id|upper}
+                      </button>
+                      <div class="dropdown-menu" x-placement="bottom-start">
+                          <a n:foreach="$presenter->getMenuLanguages() as $menuLanguage" n:if="$menuLanguage->id != $language->id" class="dropdown-item" href="{$menuLanguage->page->full_url}">
+                              <img src="/images/front/flags/{$menuLanguage->id}.svg" alt="">
+                              {$menuLanguage->id|upper}
+                          </a>
+                      </div>
+                  </div>
+              </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </header>
+    <div class="header-top-claim">
+        <div class="header-top-claim-text">Ofikko nejlepší ceny</div>
+        <div class="header-top-claim-logo">
+            <a n:if="$logo = settings('logo')" class="" href="{page('home')->full_url}">
+                <img src="{$logo|image:logo}" alt="{$logo|imageTitle}" data-src="{$logo|image:logo}" data-ret="{$logo|image:logo}" />
+            </a>
+        </div>
+    </div>
+{/if}

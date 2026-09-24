@@ -1,0 +1,5 @@
+<section n:if="$text = $block->getValue('text')" class="product-list-section mt-2 mt-md-3 mb-2 mb-md-3">
+    <div class="container">
+        {($text ?? '')|noescape}
+    </div>
+</section>

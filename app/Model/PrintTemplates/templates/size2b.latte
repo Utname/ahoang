@@ -1,0 +1,71 @@
+<style>
+    @page { margin: 0; }
+    * { box-sizing: border-box; }
+    .size2b-label-root { position: relative; width: 133mm; height: 52mm; overflow: hidden; border: .4mm dashed #111; background: #fff; color: #111; font-family: Helvetica, Arial, sans-serif; }
+    .size2b-logo-col { position: absolute; top: 0; left: 0; width: 24mm; height: 52mm; border-right: .4mm dashed #111; text-align: center; }
+    .size2b-logo { position: absolute; top: 1.5mm; left: 5mm; width: 14mm; height: 11mm; object-fit: contain; filter: grayscale(1) contrast(1.15); }
+    .size2b-logo-rule { position: absolute; top: 14mm; left: 1.5mm; width: 21mm; border-top: .3mm dashed #111; }
+    .size2b-brand { position: absolute; top: 23mm; left: 0; width: 24mm; font-family: Nunito, sans-serif; font-size: 6mm; font-weight: 900; font-style: italic; line-height: 1.05; }
+    .size2b-content { position: absolute; top: 0; left: 24mm; width: 109mm; height: 52mm; }
+    .size2b-name { position: absolute; top: 1.1mm; left: 2mm; width: 105mm; overflow: hidden; text-align: center; font-size: 3.2mm; line-height: 1.1; white-space: nowrap; }
+    .size2b-note1 { position: absolute; top: 5.2mm; left: 2mm; width: 105mm; overflow: hidden; text-align: center; font-family: Nunito, sans-serif; font-size: 2.6mm; font-weight: 900; font-style: italic; line-height: 1.1; white-space: nowrap; }
+    .size2b-more { position: absolute; top: 5.3mm; left: 2mm; font-family: Nunito, sans-serif; font-size: 2.6mm; font-weight: 900; font-style: italic; line-height: 1.1; white-space: nowrap; }
+    .size2b-country { position: absolute; top: 8.5mm; left: 2mm; height: 7.5mm; white-space: nowrap; font-family: Nunito, sans-serif; font-size: 2.2mm; font-weight: 900; font-style: italic; line-height: 7.5mm; }
+    .size2b-country img { width: 7.5mm; height: auto; margin: 0 1mm; vertical-align: middle; border: .1mm solid #ccc; }
+    .size2b-base { position: absolute; top: 21mm; left: 3mm; width: 43mm; text-align: center; white-space: nowrap; }
+    .size2b-base-label, .size2b-our-label { font-size: 2.2mm; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    .size2b-base-value { margin-top: 1mm; font-family: Nunito, sans-serif; font-size: 5.5mm; font-weight: 900; font-style: italic; line-height: 1; }
+    .size2b-save { position: absolute; top: 34.5mm; left: 1mm; width: 49mm; height: 7.5mm; padding: 1.1mm 2.5mm; color: #fff; white-space: nowrap; transform: rotate(-1.2deg); }
+    .size2b-save-brush { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
+    .size2b-save-copy { position: relative; z-index: 1; font-size: 2.4mm; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    .size2b-save-value { position: relative; z-index: 1; margin-left: 1mm; font-family: Nunito, sans-serif; font-size: 4.5mm; font-weight: 900; font-style: italic; line-height: 1; }
+    .size2b-our-label { position: absolute; top: 13.5mm; left: 64mm; }
+    .size2b-price { position: absolute; top: 11mm; left: 60mm; display: table; white-space: nowrap; }
+    .size2b-whole { display: table-cell; font-family: Nunito, sans-serif; font-size: 23mm; font-weight: 900; font-style: italic; line-height: .85; }
+    .size2b-decimal { display: table-cell; padding-left: 1.2mm; vertical-align: top; font-family: Nunito, sans-serif; font-size: 11mm; font-weight: 900; font-style: italic; line-height: .9; }
+    /* The unit price belongs below the decimal part, not below the large whole-price digits. */
+    .size2b-per-pc { position: absolute; top: 25.5mm; left: 88mm; font-family: Nunito, sans-serif; font-size: 3.8mm; font-weight: 900; font-style: italic; white-space: nowrap; }
+    .size2b-unit { position: absolute; right: 2mm; top: 38mm; font-family: Nunito, sans-serif; font-size: 2.2mm; font-weight: 900; font-style: italic; white-space: nowrap; }
+    .size2b-label-root.price-digits-3 .size2b-our-label { left: 52mm; }
+    .size2b-label-root.price-digits-3 .size2b-price { top: 12mm; left: 45mm; }
+    .size2b-label-root.price-digits-3 .size2b-whole { font-size: 20mm; }
+    .size2b-label-root.price-digits-3 .size2b-decimal { padding-left: .7mm; font-size: 9.5mm; }
+    .size2b-label-root.price-digits-3 .size2b-per-pc { top: 24mm; left: 84mm; font-size: 3.4mm; }
+    /* Velikost 2B follows the A4 rule: print the EAN value, never barcode bars. */
+    .size2b-ean { position: absolute; left: 2mm; bottom: 1.2mm; font-size: 2.2mm; font-weight: 600; line-height: 1; white-space: nowrap; }
+    .size2b-note3 { position: absolute; right: 38mm; bottom: 1.2mm; font-family: Nunito, sans-serif; font-size: 2.6mm; font-weight: 900; font-style: italic; white-space: nowrap; }
+</style>
+
+{var $logoMarkup = '<img class="size2b-logo" src="' . $logoDataUri . '" alt="Fikko market">'}
+{var $countryFlagMarkup = $flagIconDataUri ? '<img src="' . $flagIconDataUri . '" alt="">' : ''}
+{var $brushMarkup = '<img class="size2b-save-brush" src="' . $brushDataUri . '" alt="">'}
+
+<div class="size2b-label-root price-digits-{$priceDigits}">
+    <div class="size2b-logo-col">
+        {$logoMarkup|noescape}
+        <div class="size2b-logo-rule"></div>
+        <div class="size2b-brand">Fikko<br>Cena</div>
+    </div>
+    <div class="size2b-content">
+        <div class="size2b-name">{$labelName}</div>
+        <div n:if="$label && $label->note_1" class="size2b-note1">{$label->note_1}</div>
+        <div n:if="$label && $label->is_more_species" class="size2b-more">Více druhů</div>
+        <div class="size2b-country">Země původu:{$countryFlagMarkup|noescape}<span>{$country->name ?? '-'}</span></div>
+
+        <div class="size2b-base">
+            <div class="size2b-base-label">Běžná cena</div>
+            <div class="size2b-base-value">{$basePriceText} {$currencySymbol}</div>
+        </div>
+        <div n:if="$isDiscounted" class="size2b-save">
+            {$brushMarkup|noescape}
+            <span class="size2b-save-copy">Ušetříte</span><span class="size2b-save-value">{$savingText} {$currencySymbol}</span>
+        </div>
+        <div class="size2b-our-label">Naše cena</div>
+        <div class="size2b-price"><span class="size2b-whole">{$finalPriceMajor}</span><span class="size2b-decimal">{$finalPriceMinor}</span></div>
+        <div class="size2b-per-pc">{$currencySymbol} / 1 ks</div>
+        <div n:if="$unit" class="size2b-unit">cena za {$unit->unitWeight}{$unit->unitShort} = {$unit->price|number:2,',',''} {$currencySymbol}</div>
+
+        <div n:if="$eanText" class="size2b-ean">EAN: {$eanText}</div>
+        <div n:if="$label && $label->note_3" class="size2b-note3">{$label->note_3}</div>
+    </div>
+</div>

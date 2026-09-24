@@ -1,0 +1,129 @@
+{block content}
+
+<div class="col-md-12">
+    <div class="panel panel-white">
+        {form editForm}
+        <div class="panel-body">
+
+            <div role="tabpanel">
+                <ul class="nav nav-tabs" role="tablist">
+                    <li role="presentation" class="active">
+                        <a href="#section-01" role="tab" data-toggle="tab">{_admin.tabs.basicInfo}</a>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane active clearfix" id="section-01">
+                        <div class="col-lg-4">
+                            <div class="clearfix">
+                                <h4>{_admin.terms.mainInfo}</h4>
+                                <div class="form-group">
+                                    {label name /}
+                                    {input name class => 'form-control form-control-bigger'}
+                                </div>
+                                <div class="form-group">
+                                    {label product_label_type_id /}
+                                    {input product_label_type_id class => 'form-control'}
+                                </div>
+                                <div class="form-group">
+                                    {label width_mm /}
+                                    {input width_mm class => 'form-control'}
+                                </div>
+                                <div class="form-group">
+                                    {label height_mm /}
+                                    {input height_mm class => 'form-control'}
+                                </div>
+                                <div class="form-group">
+                                    {label variant /}
+                                    {input variant class => 'form-control'}
+                                </div>
+                                <div class="form-group">
+                                    {label is_active /}
+                                    {input is_active class => 'form-control'}
+                                </div>
+                                <div class="form-group">
+                                    {label is_default /}
+                                    {input is_default class => 'form-control'}
+                                </div>
+                                <div class="form-group" n:ifset="$form['import_html_file']">
+                                    {label import_html_file /}
+                                    {input import_html_file class => 'form-control'}
+                                    <div class="help-block">{_admin.terms.printTemplateImportFileHint}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-8">
+                            <div class="clearfix">
+                                <h4>{_admin.terms.printTemplateHtmlSource}</h4>
+                                <div class="form-group">
+                                    {input html_source class => 'form-control', rows => 22, style => 'font-family:monospace;font-size:12px'}
+                                </div>
+
+                                <div class="alert alert-info">
+                                    <strong>{_admin.terms.printTemplateTokensHint}</strong>
+                                    <ul class="m-b-no">
+                                        <li><code>{l}$product->name{r}</code> — {_admin.terms.printTemplateTokenName}</li>
+                                        <li><code>{l}$label->name{r}</code>, <code>{l}$label->note_1{r}</code> — {_admin.terms.printTemplateTokenLabel}</li>
+                                        <li><code>{l}$product->code_ean{r}</code> — EAN</li>
+                                        <li><code>{l}$country->name{r}</code> — {_admin.terms.printTemplateTokenCountry}</li>
+                                        <li><code>{l}$price->price{r}</code> — {_admin.terms.printTemplateTokenBasePrice}</li>
+                                        <li><code>{l}$price->price_action{r}</code> — {_admin.terms.printTemplateTokenActionPrice}</li>
+                                        <li><code>{l}$price->is_valid_action{r}</code> — {_admin.terms.printTemplateTokenIsAction}</li>
+                                        <li><code>{l}$price->action_from|date:'d. m.'{r}</code> / <code>{l}$price->action_to|date:'d. m.'{r}</code> — {_admin.terms.printTemplateTokenActionDates}</li>
+                                        <li><code>{l}$eanText{r}</code>, <code>{l}foreach $bars as $bar{r}...{l}/foreach{r}</code> (<code>$bar['color']</code>, <code>$bar['width']</code>) — {_admin.terms.printTemplateTokenBarcode}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12" n:ifset="$currentId">
+                            <div class="clearfix">
+                                <hr>
+                                <h4>{_admin.terms.printTemplatePreview}</h4>
+                                <div class="form-group-btns m-b-sm">
+                                    <div class="input-group pull-left w-200 m-r-xs">
+                                        <span class="input-group-addon">{_admin.terms.printTemplatePreviewProductId}</span>
+                                        <input type="number" id="preview-product-id" class="form-control">
+                                    </div>
+                                    <div class="input-group pull-left w-200 m-r-xs">
+                                        <span class="input-group-addon">{_admin.terms.branch}</span>
+                                        <select id="preview-branch-id" class="form-control">
+                                            <option n:foreach="$branchesPairs as $branchId => $branchName" value="{$branchId}">{$branchName}</option>
+                                        </select>
+                                    </div>
+                                    <button type="button" id="preview-reload" class="btn btn-default">
+                                        <i class="far fa-sync"></i> {_admin.actions.preview}
+                                    </button>
+                                </div>
+                                <iframe id="preview-frame" src="{plink previewHtml! $currentId}" style="width:100%;min-height:500px;border:1px solid #d9e0e8;background:#fff"></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {include APP_DIR.'/AdminModule/__inc/formButtons.latte'}
+            </div>
+
+        </div>
+        {/form}
+    </div>
+</div>
+
+<script n:syntax="off">
+    (function() {
+        var frame = document.getElementById('preview-frame');
+        var baseUrl = frame ? frame.getAttribute('src') : null;
+        var reloadBtn = document.getElementById('preview-reload');
+        if (reloadBtn) {
+            reloadBtn.addEventListener('click', function() {
+                var productId = document.getElementById('preview-product-id').value;
+                var branchId = document.getElementById('preview-branch-id').value;
+                var url = baseUrl;
+                if (productId) { url += '&productId=' + encodeURIComponent(productId); }
+                if (branchId) { url += '&branchId=' + encodeURIComponent(branchId); }
+                frame.src = url;
+            });
+        }
+    })();
+</script>

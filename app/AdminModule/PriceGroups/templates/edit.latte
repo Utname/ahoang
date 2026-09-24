@@ -1,0 +1,64 @@
+{block content}
+
+<div class="col-md-12">
+    <div class="panel panel-white">
+        {form editForm}
+        <div class="panel-body">
+
+            <div role="tabpanel">
+                <ul class="nav nav-tabs" role="tablist">
+                    <li role="presentation" class="active">
+                        <a href="#section-01" role="tab" data-toggle="tab">{_admin.tabs.basicInfo}</a>
+                    </li>
+                    <li n:if="Connectors\MoneyS4Connector::isConnectorEnabled()" role="presentation">
+                        <a href="#section-02" role="tab" data-toggle="tab">{_admin.tabs.moneyConnection}</a>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane active clearfix" id="section-01">
+                        <div class="col-lg-4">
+                            <div class="clearfix">
+                                <h4>{_admin.terms.mainInfo}</h4>
+                                <div class="form-group">
+                                    {label name /}
+								    {input name class => 'form-control form-control-bigger'}
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            {label default_price_types_id /}
+										    {input default_price_types_id class => 'form-control'}
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            {label display_types_id /}
+										    {input display_types_id class => 'form-control'}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-7 col-lg-offset-1">
+                            {include '_formCurrencies.latte'}
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane clearfix" id="section-02">
+                        <div class="col-lg-4">
+                            <h4 class="m-t-no">{_admin.terms.moneyS4}</h4>
+                            <div class="form-group">
+                                {label money_id /}
+                                {input money_id class => 'form-control'}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {include APP_DIR.'/AdminModule/__inc/formButtons.latte'}
+            </div>
+
+        </div>
+		{/form}
+    </div>
+</div>

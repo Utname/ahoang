@@ -1,0 +1,28 @@
+{if $repository->isMultilevel()}
+	<li n:if="$aps->has('create')">
+		<a href="{plink new $item->id}">
+			<i class="fas fa-plus"></i> {_admin.actions.createChild}
+		</a>
+	</li>
+	<li n:if="$aps->has('edit')">
+		<a href="{plink move $item->id}">
+			<i class="fas fa-arrows"></i> {_admin.actions.move}
+		</a>
+	</li>
+{/if}
+
+<li n:if="$aps->has('edit')">
+	<a href="{plink edit $item->id}" class="row-as-link-target">
+		<i class="fas fa-pencil"></i> {_admin.actions.edit}
+	</a>
+</li>
+<li n:if="$aps->has('create')">
+	<a href="{plink copy $item->id}" data-toggle="modal">
+		<i class="fa fa-copy"></i> {_admin.actions.copy}
+	</a>
+</li>
+<li n:if="$aps->has('delete') && $item->canBeDeleted()">
+	<a href="{plink delete! $item->id}" class="with-confirm" data-message="{_admin.dialogs.delete}">
+		<i class="fa fa-trash"></i> {_admin.actions.delete}
+	</a>
+</li>

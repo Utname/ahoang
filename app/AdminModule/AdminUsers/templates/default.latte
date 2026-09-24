@@ -1,0 +1,101 @@
+{block topButtons}
+
+    <a n:if="count($filters)" n:href="resetFilters!" class="btn btn-danger btn-addon">
+        <i class="far fa-times"></i> {_admin.filters.reset}
+    </a>
+    <a n:if="$aps->has('AdminRoles_list')" n:href="AdminRoles:" class="btn btn-primary btn-addon">
+        <i class="far fa-list"></i> {_admin.modules.adminRoles|menu}
+    </a>
+    <a n:if="$aps->has('create')" n:href="new" class="btn btn-success btn-addon">
+        <i class="far fa-plus"></i> {_admin.actions.new}
+    </a>
+
+{/block}
+
+
+{block content}
+
+    <div class="col-md-12">
+        <div class="panel panel-white">
+            <div class="panel-body">
+                {form filters-form}
+
+                    <div class="clearfix m-b-sm">
+                        <div class="pull-right">
+
+                        </div>
+                    </div>
+
+                    <div class="table-responsive dataTables_wrapper">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                            <tr>
+                                <th>
+                                    <div class="w-300">{_admin.terms.fullName} {control sorting 'name'}</div>
+                                </th>
+                                <th class="w-300">
+                                    <div class="w-300">{_admin.terms.email} {control sorting 'email'}</div>
+                                </th>
+                                <th class="w-200">
+                                    <div class="w-200">{_admin.terms.role}</div>
+                                </th>
+                                <th class="w-40">
+                                    <div class="w-30"></div>
+                                </th>
+                            </tr>
+                            <tr class="filters">
+                                <td>
+                                    {input name class => 'form-control w-300'}
+                                </td>
+                                <td>
+                                    {input email class => 'form-control'}
+                                </td>
+                                <td>
+                                    {input admin_roles_id class => 'form-control'}
+                                </td>
+                                <td>
+                                    <button type="submit" class="btn btn-default wp-100">
+                                        <i class="far fa-filter"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            </thead>
+                            <tbody n:snippet="list">
+                            <tr n:foreach="$items as $item" class="row-as-link" data-id="{$item->id}">
+                                <td>
+                                    <strong>{$item->name}</strong>
+                                </td>
+                                <td>
+                                    {$item->email}
+                                </td>
+                                <td>
+                                    {$item->getRole()?->name}
+                                </td>
+                                <td class="actions actions-small row-as-link-ignore">
+                                    <div class="dropdown pull-left">
+                                        <a class="dropdown-toggle btn btn-default" data-toggle="dropdown" href="#">
+                                            <i class="fa fa-bars"></i>
+                                        </a>
+                                        <ul class="dropdown-menu dropdown-menu-right dropdown-list">
+                                            <li n:if="$aps->has('edit')">
+                                                <a n:href="resetPassword! $item->id" class="with-confirm" data-message="{_admin.terms.confirmResetPassword}">
+                                                    <i class="fas fa-lock"></i> {_admin.terms.sendNewPassword}
+                                                </a>
+                                            </li>
+                                            {control baseActions $item, $iterator}
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+
+                        {control paginator}
+                    </div>
+
+                {/form}
+            </div>
+        </div>
+    </div>
+
+{/block}

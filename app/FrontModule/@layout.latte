@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="{$language->id}">
+
+{var $antiCache = date('YmdH').'-22'}
+
+<head>
+    {*META INFO*}
+    {control metaInfo}
+
+    {*FAVICON*}
+    {\SettingsEntity::getFaviconCode(settings('favicon'))|noescape}
+
+    {*TEMPLATE CSS*}
+    <!-- Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="/css/front/custom-bootstrap.css">
+    <link rel="stylesheet" href="/css/front/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="/plugins/fontawesome/css/all.min.css"/>
+    <link rel="stylesheet" type="text/css" href="/css/front/lightbox.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/front/style.css?_v={$antiCache}">
+
+    <link rel="stylesheet" href="/css/front/custom.css?_v={$antiCache}">
+
+
+    {*CORE CSS*}
+    <link rel="stylesheet" href="/css/front/core/alertify.core.css">
+    <link rel="stylesheet" href="/css/front/core/alertify.default.css">
+    <link rel="stylesheet" href="/css/front/core/custom.css?_v={$antiCache}">
+
+
+    {*SCRIPTS, CUSTOM CODES*}
+    {if $customCodeHeader = settings('custom_code_header')}
+        {$customCodeHeader|noescape}
+    {/if}
+</head>
+
+<body>
+
+{include '__inc/header/top.latte'}
+
+{include #content}
+
+{snippetArea footerWrapper}
+{include '__inc/footer/bottom.latte'}
+{/snippetArea}
+
+<div n:snippet="flashMessages" style="display: none;">
+    <div n:foreach="$flashes as $flash" n:class="flash-messages, $flash->type">{$flash->message}</div>
+</div>
+
+{*CORE JS*}
+<script src="/js/front/core/alertify.js" defer></script>
+<script src="/js/front/core/custom.js?_v={$antiCache}" defer></script>
+
+{*TEMPLATE JS*}
+<script src="/js/front/jquery-3.6.1.min.js" crossorigin="anonymous"></script>
+<script src="/js/front/popper.min.js" crossorigin="anonymous"></script>
+<script src="/js/front/bootstrap.min.js" crossorigin="anonymous"></script>
+<script src="/js/front/swiper-bundle.min.js"></script>
+
+<script src="/js/front/lightbox.min.js"></script>
+<script src="/js/front/scrollup.min.js"></script>
+<script src="/js/front/script.js"></script>
+<script src="/js/front/custom.js"></script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key={settings('google_maps_api_key')}&callback=initMap&libraries=places"></script>
+
+{*SCRIPTS, CUSTOM CODES*}
+{if $customCodeFooter = settings('custom_code_footer')}
+{$customCodeFooter|noescape}
+{/if}
+
+{if $GLOBALS['container']->isDevMode()}
+{* Auto-translate CZ -> VI on load, local dev only (config/02-local.neon: devMode) *}
+<div id="google_translate_element" style="display:none;"></div>
+<script n:syntax="off">
+    document.cookie = 'googtrans=/cs/vi; path=/';
+    document.cookie = 'googtrans=/cs/vi; path=/; domain=' + location.hostname;
+    function googleTranslateElementInit() {
+        new google.translate.TranslateElement({pageLanguage: 'cs', includedLanguages: 'vi', autoDisplay: false}, 'google_translate_element');
+    }
+</script>
+<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+{/if}
+
+</body>
+
+</html>

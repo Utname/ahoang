@@ -1,0 +1,28 @@
+<div class="clearfix m-b-sm b feeds-container">
+	<div class="row">
+		<div class="col-lg-6">
+			<table class="table table-striped">
+				<tr>
+					<td><b>{_admin.terms.heureka}</b></td>
+					<td class="w-150"><a n:href="generateHeurekaXmlFeed!" class="btn btn-primary btn-addon btn-sm w-100p"><i class="far fa-refresh"></i>{_admin.terms.generate}</a></td>
+					<td class="w-180"><a n:if="file_exists(\HeurekaFeedGenerator::FILE_PATH)" href="{strstr(\HeurekaFeedGenerator::FILE_PATH, '/xml')}" download="" class="btn btn-default btn-addon btn-sm w-100p"><i class="far fa-download"></i>{_admin.terms.download} XML</a></td>
+				</tr>
+				<tr>
+					<td><b>{_admin.terms.heureka} ({_admin.terms.availability|lower})</b></td>
+					<td class="w-150"><a n:href="generateHeurekaAvailabilityXmlFeed!" class="btn btn-primary btn-addon btn-sm w-100p"><i class="far fa-refresh"></i>{_admin.terms.generate}</a></td>
+					<td class="w-180"><a n:if="file_exists(\HeurekaFeedGenerator::AVAILABILITY_FILE_PATH)" href="{strstr(\HeurekaFeedGenerator::AVAILABILITY_FILE_PATH, '/xml')}" download="" class="btn btn-default btn-addon btn-sm w-100p"><i class="far fa-download"></i>{_admin.terms.download} XML</a></td>
+				</tr>
+				<tr>
+					<td><b>{_admin.terms.zbozi}</b></td>
+					<td class="w-150"><a n:href="generateZboziXmlFeed!" class="btn btn-primary btn-addon btn-sm w-100p"><i class="far fa-refresh"></i>{_admin.terms.generate}</a></td>
+					<td class="w-180"><a n:if="file_exists(\ZboziFeedGenerator::FILE_PATH)" href="{strstr(\ZboziFeedGenerator::FILE_PATH, '/xml')}" download="" class="btn btn-default btn-addon btn-sm w-100p"><i class="far fa-download"></i>{_admin.terms.download} XML</a></td>
+				</tr>
+				<tr>
+					<td><b>{_admin.terms.google}</b></td>
+					<td class="w-150"><a n:href="generateGoogleXmlFeed!" class="btn btn-primary btn-addon btn-sm w-100p"><i class="far fa-refresh"></i>{_admin.terms.generate}</a></td>
+					<td class="w-180"><a n:if="file_exists(\GoogleFeedGenerator::FILE_PATH)" href="{strstr(\GoogleFeedGenerator::FILE_PATH, '/xml')}" download="" class="btn btn-default btn-addon btn-sm w-100p"><i class="far fa-download"></i>{_admin.terms.download} XML</a></td>
+				</tr>
+			</table>
+		</div>
+	</div>
+</div>

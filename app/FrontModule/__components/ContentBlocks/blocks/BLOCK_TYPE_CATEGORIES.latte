@@ -1,0 +1,40 @@
+{var $title = $block->getValue('title')}
+
+{var $categoriesSlidersIds = $block->getValue('categoriesSlider')}
+{var $categoriesSlider = $categoriesSlidersIds ? getCategories($categoriesSlidersIds, false, false) : getCategories([], false, false)}
+
+{var $categoriesIds = $block->getValue('categories')}
+{var $categories = $categoriesIds ? getCategories($categoriesIds, false, false) : getCategories([], false, false)}
+
+<section n:if="$categoriesSlider || $categories" class="banner-section mt-1 mt-md-4 mb-1 mb-md-4" id="sortiment">
+    <div class="container">
+        <h2 class="h-line">{$title}</h2>
+        <div class="banner-list">
+            <div n:if="$categoriesSlider" class="banner-slide-col">
+                <!-- Slider main container -->
+                <div class="swiper" id="banner-swiper">
+                    <!-- Additional required wrapper -->
+                    <div class="swiper-wrapper">
+                        <!-- Slides -->
+                        <div n:foreach="$categoriesSlider as $categorySlider" class="swiper-slide">
+                            <div class="banner-item">
+                                <img n:if="$categorySlider->image" src="{$categorySlider->image|image:categorySlider}" alt="{$categorySlider->image|imageTitle}">
+                                <div n:if="$categorySlider->name" class="banner-item-text">{$categorySlider->name}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- If we need pagination -->
+                    <div class="swiper-pagination"></div>
+                </div>
+            </div>
+            <div n:if="$categories" class="banner-small-list">
+                <div n:foreach="$categories as $category" class="banner-item-col">
+                    <div class="banner-item">
+                        <img n:if="$category->image" src="{$category->image|image:categorySlider}" alt="{$category->image|imageTitle}">
+                        <div n:if="$category->name" class="banner-item-text">{$category->name}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

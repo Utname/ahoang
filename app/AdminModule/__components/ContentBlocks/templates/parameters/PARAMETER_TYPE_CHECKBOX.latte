@@ -1,0 +1,20 @@
+<div class="form-group">
+	{var $options = $control->getInputOptions($parameter)}
+
+	<h4 n:if="$label">{$label}</h4>
+	<p n:if="$helpBlockText" class="help-block">{$helpBlockText}</p>
+	<div class="{$customClass}">
+		<table class="table table-striped table-hover table-compact">
+			<tbody>
+			<tr n:foreach="$options as $id => $name">
+				<td class="text-center w-30">
+					<input class="mr-0" id="types_id-{$sectionTypeKey}-{$parameterKey}-{$id}" name="types_id-{$sectionTypeKey}-{$parameterKey}[{$id}]" type="checkbox"{if is_array($value) && in_array($id, $value)} checked="checked"{/if} />
+				</td>
+				<td>
+					<label for="types_id-{$sectionTypeKey}-{$parameterKey}-{$id}">{$name}</label>
+				</td>
+			</tr>
+			</tbody>
+		</table>
+	</div>
+</div>

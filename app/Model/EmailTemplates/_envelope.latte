@@ -1,0 +1,79 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html>
+
+<head>
+	<title></title>
+	<meta http-equiv="content-type" content="text/html; charset=utf8">
+	<meta name="author" content=" ">
+	<meta name="copyright" content=" ">
+
+	<style type="text/css">
+		a img { border: 0 none;}
+		body { background: #efefef;}
+		h1 { margin-bottom: 24px; margin-top: 0; font-size: 25px; color: #1c1c1c;}
+		h2 { margin-bottom: 24px; margin-top: 0; font-size: 16px; color: #1c1c1c;}
+		h3 { margin-bottom: 0; margin-top: 0; font-size: 14px; color: #1c1c1c;}
+		h4 { margin-bottom: 0; margin-top: 0; font-size: 14px; font-weight: normal; color: #1c1c1c;}
+		a { color: #1c1c1c; text-decoration: underline;}
+		a:hover { text-decoration: none !important;}
+		p { margin-bottom: 28px;line-height: 22px; font-size: 16px; }
+
+		.btn.btn-primary, .btn.btn-red{
+			background-color: {$colors['base-primary']|noescape}; color: #fff;
+		}
+		.btn{
+			display: inline-block;
+			font-size: 14px;
+			font-weight: 600;
+			padding: 18px 40px 17px;
+			letter-spacing: 0.3px;
+			line-height: 1;
+			border-radius: 0;
+			background-color: {$colors['base-dark']|noescape};
+			color: #fff;
+			text-align: center;
+			vertical-align: middle;
+			-webkit-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			user-select: none;
+			border: 1px solid transparent;
+			transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+			text-decoration: none;
+		}
+
+		.logo{
+			margin-top: 20px;
+			margin-left: auto;
+			margin-right: auto;
+			display: block;
+			text-align: center;
+		}
+
+		.logo img{
+			max-height: 80px;
+			height: 100%;
+			width: auto;
+		}
+	</style>
+</head>
+
+<body>
+
+<a n:if="isset($logo) && $logo" class="logo" href="{$hostUrl}" target="_blank"><img src="{$logo}"></a>
+
+<table style="margin-top: 30px; margin-bottom: 50px; font-family: Arial, sans-serif; font-size: 16px; color: {$colors['base-dark']|noescape};"
+		align="center" cellpadding="0" cellspacing="0" width="786">
+	<tbody>
+	<tr>
+		<td bgcolor="#ffffff" style="padding-left: 43px; padding-right: 43px; padding-top: 45px; padding-bottom: 45px; border: 2px solid {$colors['base-dark']|noescape};">
+			{$text|noescape}
+		</td>
+	</tr>
+	</tbody>
+</table>
+
+</body>
+
+</html>

@@ -1,0 +1,75 @@
+<div id="modal-periodPicker-{$control->getName()}" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-sm-2">
+        <div n:snippet="container" class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" title="{_admin.periodPicker.close}">
+                    <span aria-hidden="true">×</span>
+                </button>
+                <h4>{_admin.periodPicker.period}</h4>
+            </div>
+            {form form}
+                <div class="modal-body clearfix">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="tabs-left row" role="tabpanel">
+                                {var $allowedTypesPrepared = $control->getAllowedTypesPrepared()}
+
+                                {var $allowedTypes = $control->getAllowedTypes()}
+                                {var $selectedTypeId = $control->getType()}
+
+                                {if is_null($selectedTypeId) || !in_array($selectedTypeId, $allowedTypes)}
+                                    {var $selectedTypeId = reset($allowedTypes)}
+                                {/if}
+                                <ul class="nav nav-tabs col-sm-5" role="tablist" style="margin-right: 0; padding-right: 0; border-right: none; z-index: 1;">
+                                    <li n:foreach="$allowedTypesPrepared as $item" data-type="{$item->id}" role="presentation" n:class="$selectedTypeId == $item->id ? 'active', 'type-selector'">
+                                        <a href="#tab-{$item->id}" role="tab" data-toggle="tab" style="margin-bottom: 0;">{$item->name}</a>
+                                    </li>
+                                </ul>
+                                <div class="tab-content col-sm-7" style="padding: 20px; border: 1px solid #dddddd; height: 300px;">
+                                    <div n:foreach="$allowedTypesPrepared as $item" role="tabpanel" n:class="'tab-pane', $selectedTypeId == $item->id ? 'active in'" id="tab-{$item->id}">
+
+                                        <div class="row">
+                                            <div class="col-sm-12">
+                                                <div class="form-group">
+                                                    {var $inputName = 'input_1_'.$item->id}
+                                                    {label $inputName/}
+                                                    {input $inputName autocomplete => 'off', class => "form-control", class => in_array($item->id, [App\AdminModule\Presenters\PeriodPickerControl::TYPE_DATE, App\AdminModule\Presenters\PeriodPickerControl::TYPE_CUSTOM_PERIOD]) ? "form-control date-picker" }
+                                                </div>
+                                            </div>
+                                            <div n:if="in_array($item->id, [
+                                                App\AdminModule\Presenters\PeriodPickerControl::TYPE_HALFYEAR,
+                                                App\AdminModule\Presenters\PeriodPickerControl::TYPE_QUARTER,
+                                                App\AdminModule\Presenters\PeriodPickerControl::TYPE_MONTH,
+                                                App\AdminModule\Presenters\PeriodPickerControl::TYPE_WEEK,
+                                                App\AdminModule\Presenters\PeriodPickerControl::TYPE_CUSTOM_PERIOD
+                                            ])" class="col-sm-12">
+                                                <div class="form-group">
+                                                    {var $inputName = 'input_2_'.$item->id}
+                                                    {label $inputName/}
+                                                    {input $inputName autocomplete => 'off', class => "form-control", class => in_array($item->id, [App\AdminModule\Presenters\PeriodPickerControl::TYPE_DATE, App\AdminModule\Presenters\PeriodPickerControl::TYPE_CUSTOM_PERIOD]) ? "form-control date-picker"}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <script>
+                                $(document).on('click', '.type-selector', function(e){
+                                	$('input[name="selected_type"]').val($(this).data('type'));
+                                });
+                            </script>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="padding: 0 15px 15px 15px;">
+                    <button n:name="submit" class="btn btn-success btn-addon">
+                        <i class="far fa-check"></i> {_admin.periodPicker.filter}
+                    </button>
+                    <button type="button" class="btn btn-default btn-addon" data-dismiss="modal">
+                        <i class="far fa-times"></i> {_admin.periodPicker.close}
+                    </button>
+                </div>
+            {/form}
+        </div>
+    </div>
+</div>

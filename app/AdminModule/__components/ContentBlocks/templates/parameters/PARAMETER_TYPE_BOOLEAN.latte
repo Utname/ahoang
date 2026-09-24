@@ -1,0 +1,8 @@
+<div class="form-group">
+	<label n:if="$label">{$label}</label>
+	<select name="types_id-{$sectionTypeKey}-{$parameterKey}" class="{$customClass}">
+		<option value="1"{if $value == 1 || is_null($value)} selected="selected"{/if}>{_admin.globals.bool.true}</option>
+		<option value="0"{if !is_null($value) && $value == 0} selected="selected"{/if}>{_admin.globals.bool.false}</option>
+	</select>
+	<p n:if="$helpBlockText" class="help-block">{$helpBlockText}</p>
+</div>

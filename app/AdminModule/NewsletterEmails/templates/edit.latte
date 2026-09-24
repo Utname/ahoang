@@ -1,0 +1,46 @@
+{block content}
+
+<div class="col-md-12">
+	<div class="panel panel-white">
+		{form editForm}
+		<div class="panel-body">
+
+			<div role="tabpanel">
+				<ul class="nav nav-tabs" role="tablist">
+					<li role="presentation" class="active">
+						<a href="#section-01" role="tab" data-toggle="tab">{_admin.tabs.basicInfo}</a>
+					</li>
+				</ul>
+
+				{var $isInEcomail = isset($item) && $presenter->isEcomailSubscribed($item->email)}
+				<div class="tab-content">
+					<div role="tabpanel" class="tab-pane active clearfix" id="section-01">
+						<div class="col-lg-4">
+							<div class="form-group">
+								{label email /}
+								<div n:class="$isInEcomail ? 'input-group pull-left m-b-sm' : ''">
+									{input email class => 'form-control'}
+									<span n:if="$isInEcomail" class="input-group-btn" data-toggle="tooltip" title="{_admin.terms.ecomailSubscribed}">
+										<span class="btn btn-default"><img src="/images/admin/ecomail.png" class="h-15"></span>
+									</span>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-sm-6">
+									<div class="form-group">
+										{label lang_id /}
+										{input lang_id class => 'form-control'}
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				{include APP_DIR.'/AdminModule/__inc/formButtons.latte'}
+			</div>
+
+		</div>
+		{/form}
+	</div>
+</div>

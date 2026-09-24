@@ -1,0 +1,7 @@
+<div class="clearfix m-b-sm b import-export-container export-container">
+	<div class="row">
+		<div class="col-lg-12">
+			<a n:foreach="$pairs as $languageId => $name" n:href="export! $languageId" class="btn btn-primary btn-addon"><i class="fa fa-download"></i>{$name}</a>
+		</div>
+	</div>
+</div>

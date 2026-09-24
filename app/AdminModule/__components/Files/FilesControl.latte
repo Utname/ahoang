@@ -1,0 +1,45 @@
+<div class="dz-container dropzone-component">
+
+	<div n:if="$control->getAction() != 'copy'" class="row">
+		<div class="col-sm-12">
+			<div class="panel panel-white">
+				<div class="panel-body dropzone" id="dropzone_images-{$control->getName()}" data-directory="{$control->getTempDir()}">
+					<div class="fallback">
+						<input name="file" type="file" multiple/>
+					</div>
+
+					<div class="dz-message d-flex flex-column">
+						<p>{_admin.terms.fileUploadTitle}</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="gallery_images_box">
+		<div n:if="$control->getFiles()" class="list">
+			<div n:foreach="$control->getFiles() as $file" class="form-group clearfix sortable_box item-list" data-dropzone="{json_encode($file)}">
+				<div class="input-group">
+					<input {$control->getAction() == 'copy' ? 'disabled' : ''} data-href="{link setFileTitle! $file->file, 'replace_title'}" type="text" class="form-control file-title" value="{$file->file|fileTitle}" placeholder="{$file->file}">
+					<span n:if="$control->getAction() != 'copy'" class="input-group-btn">
+						<a href="{plink downloadFile! $file->file}" class="btn btn-default ico_download" data-toggle="tooltip" title="{_admin.actions.download}">
+							<i class="far fa-download"></i>
+						</a>
+					</span>
+					<span n:if="$control->getAction() != 'copy'" class="input-group-btn">
+						<a href="#" class="btn btn-default ico_move dropzone-component-move-button" data-toggle="tooltip" title="{_admin.actions.move}">
+							<i class="far fa-arrows"></i>
+						</a>
+					</span>
+					<span n:if="$control->getAction() != 'copy'" class="input-group-btn">
+						<a href="#" class="btn btn-default ico_del text-danger dropzone-component-remove-button" data-toggle="tooltip" title="{_admin.actions.delete}">
+							<i class="far fa-trash"></i>
+						</a>
+					</span>
+					<span class="input-group-addon"><i class="far fa-check"></i></span>
+				</div>
+			</div>
+		</div>
+	</div>
+	<textarea name="files" class="hidden dropzone-component-list">{implode('; ', $control->getJsonFiles())}</textarea>
+</div>

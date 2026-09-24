@@ -1,0 +1,47 @@
+<div id="modal-contentParametersForm" class="modal fade" tabindex="-1">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			{form contentParametersForm class => 'ajax ajax-modal-close'}
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" title="{_admin.buttons.close}">
+						<span aria-hidden="true">×</span>
+					</button>
+					<h4>{_admin.terms.parameters}</h4>
+				</div>
+
+				<div class="modal-body clearfix" n:snippet="contentParametersForm">
+					<div class="hidden">
+						{input id}
+					</div>
+					<div class="form-group">
+						{label name /}
+						{input name class => "form-control"}
+					</div>
+					<div class="form-group">
+						{label system /}
+						{input system class => "form-control"}
+					</div>
+					<div class="row">
+						<div class="col-sm-6">
+							<div class="form-group">
+								{label types_id /}
+								{input types_id class => "form-control"}
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="modal-footer">
+					<div class="btns">
+						<button n:name="submit" class="btn btn-success btn-addon">
+							<i class="far fa-check"></i> {_admin.buttons.save}
+						</button>
+						<button type="button" class="btn btn-default btn-addon" data-dismiss="modal">
+							<i class="far fa-times"></i> {_admin.buttons.close}
+						</button>
+					</div>
+				</div>
+			{/form}
+		</div>
+	</div>
+</div>

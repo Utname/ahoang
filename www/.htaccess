@@ -1,0 +1,61 @@
+# Apache configuration file (see https://httpd.apache.org/docs/current/mod/quickreference.html)
+Allow from all
+
+# disable directory listing
+<IfModule mod_autoindex.c>
+	#Options -Indexes
+</IfModule>
+
+# enable cool URL
+<IfModule mod_rewrite.c>
+	RewriteEngine On
+	# RewriteBase /
+    #RewriteCond %{HTTP_HOST} !^www\. [NC]
+    #RewriteRule ^(.*)$ https://www.%{HTTP_HOST}/$1 [R=301,L]
+
+    # all redirection HTTP -> HTTPS
+    RewriteCond %{HTTPS} off
+    RewriteCond %{HTTP_HOST} !local [NC]
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+	# prevents files starting with dot to be viewed by browser
+	RewriteRule /\.|^\.(?!well-known/) - [F]
+
+	# front controller
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteCond %{REQUEST_FILENAME} !-d
+	RewriteRule !\.(pdf|js|ico|css|rar|zip|tar\.gz|map)$ index.php [L]
+</IfModule>
+
+# enable gzip compression
+<IfModule mod_deflate.c>
+	<IfModule mod_filter.c>
+		AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css application/javascript application/json application/xml image/svg+xml
+	</IfModule>
+</IfModule>
+
+<IfModule mod_expires.c>
+   ExpiresActive on
+
+   ExpiresByType text/javascript A31536000
+   ExpiresByType application/javascript A31536000
+   ExpiresByType application/x-javascript A31536000
+
+   ExpiresByType text/css A31536000
+
+   ExpiresByType image/gif A31536000
+   ExpiresByType image/jpeg A31536000
+   ExpiresByType image/jpg A31536000
+   ExpiresByType image/p-jpeg A31536000
+   ExpiresByType image/png A31536000
+   ExpiresByType image/svg+xml A31536000
+   ExpiresByType image/svg A31536000
+
+   AddType image/webp .webp
+   ExpiresByType image/webp A31536000
+
+   ExpiresByType font/woff2 A31536000
+   ExpiresByType font/woff A31536000
+
+   ExpiresByType text/html A1
+</IfModule>

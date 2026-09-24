@@ -1,0 +1,89 @@
+#parameters:
+#string icon = 'fas fa-list'
+#array permissions = [] //default from name and ifset empty array, no permissions needed
+#array subItems = NULL
+
+parameters:
+	menuStructure: [
+
+		Pages: [
+			icon: 'fas fa-list'
+		]
+		Blog: [
+			icon: 'fas fa-text'
+		]
+		Branches: [
+			icon: 'fas fa-house'
+		]
+		Products: [
+			icon: 'fas fa-th'
+		]
+		ProductLabels: [
+			icon: 'fas fa-tag'
+		]
+		PrintTemplates: [
+			icon: 'fas fa-print'
+		]
+		Messages: [
+			icon: 'fas fa-message'
+		]
+		Content: [
+			icon: 'fas fa-folder'
+			subItems: [
+				Contents:
+				AboutUs:
+				Sliders:
+				InfoBoxes:
+				PromoBoxes:
+				Links:
+				Services:
+				Galleries:
+				Downloads:
+				Cta:
+				Team:
+				Partners:
+				Testimonials:
+				Reviews:
+				Faq:
+				IndexBanners:
+			]
+		]
+		Newsletter: [
+			icon: 'fas fa-envelope'
+			subItems: [
+				NewsletterEmails:
+			]
+		]
+		SettingsBase: [
+			icon: 'fas fa-cog'
+			subItems: [
+				SettingsParent: [
+					subItems: [
+						Settings:
+						Redirects:
+						Countries:
+						Languages:
+						Currencies:
+						PriceGroups:
+						ProductLabelHeaders:
+						ProductLabelActionTypes:
+						NutritionValues:
+					]
+				]
+				SettingsAdmin: [
+					subItems: [
+						AdminUsers:
+						AdminIpAddresses:
+						Crons:
+					]
+				]
+				SettingsMailing: [
+					subItems: [
+						EmailTemplates:
+						MailingQueue:
+						BlacklistEmails:
+					]
+				]
+			]
+		]
+	]

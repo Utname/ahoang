@@ -1,0 +1,14 @@
+<title n:snippet="metaTitle">{$control->getTitle()}</title>
+
+<meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="robots" content="{$control->getNoindex() ? 'noindex, follow' : 'index, follow'}" />
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="Pro-idea s.r.o. / www.pro-idea.cz" />
+<meta name="copyright" content="Copyright (c) {date('Y')} {$control->getWebsiteName()}" />
+<meta n:snippet="metaDescription" name="description" content="{$control->getDescription()|striptags,noescape}" />
+
+<meta property="og:type" content="website" />
+<meta property="og:title" content="{$control->getTitle()}" />
+<meta property="og:description" content="{$control->getDescription()|striptags,noescape}" />
+<meta n:if="$control->getImage()" property="og:image" content="{$GLOBALS['container']->getUrlScript()->getHostUrl().($control->getImage()|image:ogImage)}" />

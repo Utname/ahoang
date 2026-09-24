@@ -1,0 +1,30 @@
+<div class="row">
+	<div class="col-sm-12" n:snippet="contentBlocksSorting">
+		<div class="content-blocks-sections">
+			<div n:foreach="$control->getSections() as $section" n:if="$sectionDefinition = $control->getSectionDefinition($section)" class="b b-default p-v-sm p-h-sm m-b-sm content-blocks-section b-gray" data-id="{$section->id}" data-control-name="{$control->getName()}">
+				<div class="row m-b-sm">
+					<div class="col-sm-8 text-gray">
+						{if $section->name}
+							{$section->name}
+						{else}
+							{_admin.terms.contents_section}{* - {_$sectionDefinition[\ContentSectionsDefinition::NAME]} *}
+						{/if}
+					</div>
+				</div>
+				<div class="content-blocks-blocks-in-menu">
+					{foreach $control->getBlocks($section, "pos_order_in_menu") as $block}
+						{var $blockDefinition = $control->getBlockDefinition($block)}
+						<div n:if="$blockDefinition && $block->is_in_menu" class="alert b m-b-xxs content-blocks-block" data-id="{$block->id}" data-control-name="{$control->getName()}">
+							<div class="content-block-row-info">
+								<i n:if="$aps->has('edit') && !$isCopy" class="far fa-bars m-r-xs move-handler" data-toggle="tooltip" title="{_admin.terms.contents_move_block}"></i>
+								<div>
+									{$control->getFormattedBlockName($block, $iterator->counter, $blockDefinition)|noescape}
+								</div>
+							</div>
+						</div>
+					{/foreach}
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

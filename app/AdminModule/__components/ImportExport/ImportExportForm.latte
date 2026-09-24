@@ -1,0 +1,18 @@
+{form importForm}
+	<div class="clearfix m-b-sm b import-export-container">
+		<div class="row">
+			<div class="col-lg-12">
+				<div class="form-group">
+					{label file /}
+					{input file class => 'form-control w-400'}
+				</div>
+				<a n:href="exportToXls!" class="btn btn-primary btn-addon">
+					<i class="far fa-download"></i> {_admin.buttons.exportFiltered}
+				</a>
+				<button n:name="submit" class="btn btn-success btn-addon">
+					<i class="far fa-upload"></i> {_admin.buttons.import}
+				</button>
+			</div>
+		</div>
+	</div>
+{/form}

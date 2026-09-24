@@ -1,0 +1,169 @@
+{block content}
+
+<div class="col-md-12">
+    <div class="panel panel-white">
+        {form editForm}
+        <div class="panel-body">
+
+            <div role="tabpanel">
+                <ul class="nav nav-tabs" role="tablist">
+                    <li role="presentation" class="active">
+                        <a href="#section-01" role="tab" data-toggle="tab">{_admin.tabs.basicInfo}</a>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane active clearfix" id="section-01">
+                        <div class="clearfix">
+                            <div class="col-lg-4">
+                                <div class="clearfix">
+                                    <div class="form-group">
+                                        {label name /}
+                                        {input name class => 'form-control form-control-bigger'}
+                                    </div>
+                                    <div class="form-group">
+                                        {label system /}
+                                        {input system class => 'form-control'}
+                                    </div>
+                                </div>
+
+                                <div n:ifset="$item" class="clearfix" n:snippet="contentParametersList">
+                                    {var $parameters = $item->getParameters()}
+
+                                    <h4>{_admin.terms.parameters}</h4>
+
+                                    <div n:if="!count($parameters)" class="alert alert-info">
+                                        {_admin.warnings.noItem}
+                                    </div>
+
+                                    <table n:if="count($parameters)" class="table table-striped table-hover table-compact">
+                                        <thead>
+                                        <tr>
+                                            <th>
+                                                <div class="w-150">{_admin.terms.name}</div>
+                                            </th>
+                                            <th>
+                                                <div class="w-150">{_admin.terms.system}</div>
+                                            </th>
+                                            <th class="w-80">
+                                                <div class="w-80">{_admin.terms.type}</div>
+                                            </th>
+                                            <th class="w-40"></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody class="sortable">
+                                        <tr n:foreach="$parameters as $i" class="row-as-link" data-id="{$i->id}" data-custom-handle="ContentParameter">
+                                            <td>
+                                                <span class="far fa-bars m-r-xxs move-handler text-default" data-toggle="tooltip" title="{_admin.actions.move}"></span>
+                                                {$i->name}
+                                            </td>
+                                            <td>
+                                                {$i->system}
+                                            </td>
+                                            <td>
+                                                {isset($parameterTypesPairs[$i->types_id]) ? $parameterTypesPairs[$i->types_id] : ''}
+                                            </td>
+                                            <td class="actions actions-small row-as-link-ignore">
+                                                <div class="dropdown pull-left">
+                                                    <a class="dropdown-toggle btn btn-default" data-toggle="dropdown" href="#">
+                                                        <i class="fa fa-bars"></i>
+                                                    </a>
+                                                    <ul class="dropdown-menu dropdown-menu-right dropdown-list">
+                                                        <li>
+                                                            <a n:href="editContentParameter! $i->id" class="row-as-link-target ajax-modal" data-target="#modal-contentParametersForm">
+                                                                <i class="fas fa-pencil"></i> {_admin.actions.edit}
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a n:href="copyContentParameter! $i->id" class="ajax-modal" data-target="#modal-contentParametersForm">
+                                                                <i class="fa fa-copy"></i> {_admin.actions.copy}
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a n:href="deleteContentParameter! $i->id" class="with-confirm" data-message="{_admin.dialogs.delete}">
+                                                                <i class="fa fa-trash"></i> {_admin.actions.delete}
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+
+                                    <div class="row-links m-b-lg">
+                                        <a n:href="createContentParameter!" class="text-gray m-r-md ajax-modal" data-target="#modal-contentParametersForm">
+                                            <i class="far fa-plus-circle"></i> {_admin.actions.new}
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div n:ifset="$item" class="col-lg-7 col-md-offset-1" n:snippet="contentParametersValues">
+                                <div n:foreach="$item->getParameters() as $i" class="row">
+                                    <div n:if="$i->types_id == \ContentParametersEntity::TYPE_TEXT" class="col-sm-6">
+                                        <div class="form-group">
+                                            {label 'data_'.$i->id /}
+                                            {input 'data_'.$i->id class => 'form-control' }
+                                        </div>
+                                    </div>
+
+                                    <div n:if="$i->types_id == \ContentParametersEntity::TYPE_WSW" class="col-sm-12">
+                                        <div class="form-group">
+                                            {label 'data_'.$i->id /}
+                                        {input 'data_'.$i->id class => 'form-control wsw h-200' }
+                                        </div>
+                                    </div>
+
+                                    <div n:if="$i->types_id == \ContentParametersEntity::TYPE_IMG" class="col-sm-6">
+                                        <div class="form-group">
+                                            {label 'image_'.$i->id /}
+                                            {input 'image_'.$i->id class => 'form-control' }
+                                            {control attachment:image, isset($i) ? $i : NULL, 'data', 'admin', 'ContentParametersRepository'}
+                                        </div>
+                                    </div>
+
+                                    <div n:if="$i->types_id == \ContentParametersEntity::TYPE_DATE" class="col-sm-6">
+                                        <div class="form-group">
+                                            {label 'data_'.$i->id /}
+                                            {input 'data_'.$i->id class => 'form-control date-picker' }
+                                        </div>
+                                    </div>
+
+                                    <div n:if="$i->types_id == \ContentParametersEntity::TYPE_COLOR" class="col-sm-6">
+                                        <div class="form-group">
+                                            {label 'data_'.$i->id /}
+                                            {input 'data_'.$i->id class => 'form-control color-picker' }
+                                        </div>
+                                    </div>
+
+                                    <div n:if="$i->types_id == \ContentParametersEntity::TYPE_ICON" class="col-sm-6">
+                                        <div class="form-group">
+                                            {label 'data_'.$i->id /}
+                                            {input 'data_'.$i->id class => 'form-control icon-picker' }
+                                        </div>
+                                    </div>
+
+                                    <div n:if="$i->types_id == \ContentParametersEntity::TYPE_BOOL" class="col-sm-6">
+                                        <div class="form-group">
+                                            {label 'data_'.$i->id /}
+                                            {input 'data_'.$i->id class => 'form-control' }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {include APP_DIR.'/AdminModule/__inc/formButtons.latte'}
+            </div>
+
+        </div>
+		{/form}
+    </div>
+</div>
+
+{snippetArea modalWrapper}
+    {include '_modal-contentParametersForm.latte'}
+{/snippetArea}

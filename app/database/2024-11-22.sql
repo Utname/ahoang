@@ -1,0 +1,1 @@
+ALTER TABLE `products` ADD `consumption_types_id` TINYINT(1) NULL DEFAULT NULL AFTER `ingredients`;

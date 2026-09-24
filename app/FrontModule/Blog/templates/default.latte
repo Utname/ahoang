@@ -1,0 +1,62 @@
+{block content}
+
+{control breadcrumbs}
+
+<div class="blog-area pt-120 pb-120">
+	<div class="container">
+		<div class="row">
+			<div n:if="count($items)" class="col-lg-9">
+				<div class="row">
+					<div n:foreach="$items as $item" class="col-lg-6 col-md-6 col-12 col-sm-6">
+						<div class="blog-wrap mb-40">
+							<div class="blog-img mb-20">
+								<a n:if="$item->image" href="{$page->full_url}/{$item->getUrl()}">
+									<img src="{$item->image|image:blogList}" alt="{$item->image|imageTitle}">
+								</a>
+							</div>
+							<div class="blog-content">
+								<div class="blog-meta">
+									<ul>
+										<li n:foreach="$item->getCategories() as $itemCategory">
+											<a href="{$page->full_url}/{$itemCategory->getUrl()}">{$itemCategory->name}</a>
+										</li>
+										<li>{$item->date|datetime:FALSE}</li>
+									</ul>
+								</div>
+								<h1>
+									<a href="{$page->full_url}/{$item->getUrl()}">{$item->name}</a>
+								</h1>
+								<p n:if="$item->perex">
+									{$item->perex|brakes|noescape}
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+				{control paginator}
+			</div>
+
+			<div n:if="count($categories)" class="col-lg-3">
+				<div class="sidebar-wrapper sidebar-wrapper-mrg-left">
+					<div class="sidebar-widget shop-sidebar-border mb-35 pt-40">
+						<h4 class="sidebar-widget-title">{content('blog', 'category_title')} </h4>
+						<div class="shop-catigory">
+							<ul>
+								<li>
+									<a n:class="is_null($category) ? 'active' : ''" href="{$page->full_url}">
+										{content('blog', 'category_view_all')}
+									</a>
+								</li>
+								<li n:foreach="$categories as $item">
+									<a n:class="!is_null($category) && $category->id == $item->id ? 'active' : ''" href="{$page->full_url}/{$item->getUrl()}">
+										{$item->name}
+									</a>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

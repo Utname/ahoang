@@ -1,0 +1,22 @@
+<div class="clearfix m-b-sm b import-export-container import-container">
+	<div class="row">
+		<div class="col-lg-4">
+			{form importForm}
+				<div class="form-group">
+					{label branches_id /}
+					{input branches_id class => 'form-control'}
+				</div>
+				<div class="form-group">
+					{label file /}
+					{input file class => 'form-control'}
+					<div class="help-block">{_admin.terms.langImportHintFile}</div>
+				</div>
+				<div class="form-group-btns m-t-lg">
+					<button n:name="submit" class="btn btn-success btn-addon with-confirm" data-message="{_admin.terms.productImportMessage}">
+						<i class="far fa-check"></i> {_admin.buttons.save}
+					</button>
+				</div>
+			{/form}
+		</div>
+	</div>
+</div>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>
+		{$GLOBALS['container']->getEshopName()}
+	</title>
+
+	<meta content="width=device-width, initial-scale=1" name="viewport"/>
+	<meta charset="UTF-8">
+	<meta name="description" content=""/>
+	<meta name="keywords" content=""/>
+	<meta name="author" content="Pro-idea s.r.o. | www.pro-idea.cz"/>
+	{isset($settings->favicon) ? \SettingsEntity::getFaviconCode($settings->favicon) : ''|noescape}
+
+</head>
+
+<body>
+	{include #content}
+</body>
+
+</html>

@@ -1,0 +1,44 @@
+<div id="modal-mailingQueueReply" class="modal fade">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            {snippet mailing_queue_reply}
+                {form mailingQueueReplyForm class => 'ajax ajax-modal-close'}
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span>×</span></button>
+                        <h4 class="modal-title">{_admin.terms.reply}</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    {label email /}
+									{input email class => 'form-control'}
+                                </div>
+                                <div class="form-group">
+                                    {label email_reply /}
+									{input email_reply class => 'form-control'}
+                                </div>
+                                <div class="form-group">
+                                    {label subject /}
+									{input subject class => 'form-control'}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            {label text /}
+							{input text class => 'form-control wsw wp-100 h-500'}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button n:name="submit" class="btn btn-addon btn-success">
+                            <i class="far fa-check"></i> {_admin.actions.send}
+                        </button>
+                        <button type="button" class="btn btn-addon btn-default" data-dismiss="modal">
+                            <i class="far fa-times"></i> {_admin.actions.close}
+                        </button>
+                    </div>
+                {/form}
+            {/snippet}
+        </div>
+    </div>
+</div>

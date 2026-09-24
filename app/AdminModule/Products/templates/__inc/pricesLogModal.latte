@@ -1,0 +1,92 @@
+{* Modal: Price history log *}
+
+<div id="modal-pricesLog" class="modal fade">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" title="{_admin.buttons.close}">
+					<span aria-hidden="true">×</span>
+				</button>
+				<h4>Historie cen</h4>
+			</div>
+
+			<div class="modal-body clearfix" n:snippet="pricesLog">
+				<table n:ifset="$priceChanges" class="table table-striped table-hover table-compact">
+					<thead>
+					<tr>
+						<th>
+							{_admin.terms.datetime}
+						</th>
+						<th class="w-120 text-right">
+							Původní cena
+						</th>
+						<th class="w-120 text-right">
+							Nová cena
+						</th>
+						<th class="w-80 text-right">
+							Sleva
+						</th>
+						<th class="w-120 text-right">
+							Referenční cena
+						</th>
+						<th class="w-100">
+							Akce od
+						</th>
+						<th class="w-100">
+							Akce do
+						</th>
+						<th class="w-40 text-center">
+						</th>
+					</tr>
+					</thead>
+					<tbody>
+					<tr n:foreach="$priceChanges as $priceChange">
+						<td>
+							{$priceChange->datetime?->format('d.m.Y H:i:s')}
+						</td>
+						<td class="text-right">
+							{$priceChange->price_origin ? ($priceChange->price_origin|price) : '-'}
+						</td>
+						<td class="text-right">
+							{$priceChange->price_new|price}
+							<i n:if="$priceChange->price_ref && $priceChange->price_new > $priceChange->price_origin" class="fas fa-up text-danger"></i>
+							<i n:if="$priceChange->price_ref && $priceChange->price_new < $priceChange->price_origin" class="fas fa-down text-success"></i>
+						</td>
+						<td class="text-right">
+							{$priceChange->price_ref ? $priceChange->getDiscountPercent().' %' : '-'}
+						</td>
+						<td class="text-right">
+							{$priceChange->price_ref ? ($priceChange->price_ref|price) : '-'}
+						</td>
+						<td>
+							{$priceChange->action_from?->format('d.m.Y')}
+						</td>
+						<td>
+							{$priceChange->action_to?->format('d.m.Y')}
+						</td>
+						<td class="text-center">
+							<a n:href="deletePriceLog! logId => $priceChange->id" class="ajax with-confirm" data-message="Opravdu chcete smazat tento záznam?" title="Smazat záznam">
+								<i class="fa fa-trash"></i>
+							</a>
+						</td>
+					</tr>
+					</tbody>
+				</table>
+
+				<div n:if="isset($priceLogProductsId, $priceLogBranchesId) && isset($priceChanges) && $priceChanges" class="text-right" style="margin-top: 10px;">
+					<a n:href="exportPricesLog! productsId => $priceLogProductsId, branchesId => $priceLogBranchesId" class="btn btn-primary btn-addon">
+						<i class="far fa-download"></i> Export CSV
+					</a>
+				</div>
+			</div>
+
+			<div class="modal-footer">
+				<div class="btns">
+					<button type="button" class="btn btn-default btn-addon" data-dismiss="modal">
+						<i class="far fa-times"></i> {_admin.buttons.close}
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

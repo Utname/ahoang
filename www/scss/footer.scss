@@ -1,0 +1,36 @@
+footer {
+    background: $dark_bg;
+    padding: 4rem 0;
+    color: $white;
+    h3, h4, p {
+        color: $white;
+    }
+
+    h4 {
+        margin-bottom: 1.6rem;
+    }
+
+    p {
+        font-weight: 500;
+    }
+}
+
+.footer {
+    &-inner {
+        
+    }
+
+    &-logo {
+        margin-bottom: 4rem;
+        display: inline-block;
+    }
+
+    &-bottom {
+        border-top: 1px solid #4A4A4A;
+        padding-top: 2.4rem;
+        margin-top: 1.6rem;
+        p {
+            margin-bottom: 0;
+        }
+    }
+}

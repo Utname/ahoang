@@ -1,0 +1,10 @@
+{if isset($customButtonHtml)}
+	{$customButtonHtml->toHtml()|noescape}
+{else}
+	<a n:if="!$control->getButtonText()" n:href="prepareModal!" class="btn btn-default ajax-modal" data-target="#modal-quickCreator-{$control->getName()}">
+		<i class="far fa-plus"></i>
+	</a>
+	<a n:if="$control->getButtonText()" n:href="prepareModal!" class="text-gray m-r-md ajax-modal" data-target="#modal-quickCreator-{$control->getName()}">
+		<i class="far fa-plus-circle"></i> {$control->getButtonText()}
+	</a>
+{/if}

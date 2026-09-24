@@ -1,0 +1,138 @@
+{block topButtons}
+
+    <a n:if="count($filters)" n:href="resetFilters!" class="btn btn-danger btn-addon">
+        <i class="far fa-times"></i> {_admin.filters.reset}
+    </a>
+    <a n:if="$aps->has('create')" n:href="new" class="btn btn-success btn-addon">
+        <i class="far fa-plus"></i> {_admin.actions.new}
+    </a>
+
+{/block}
+
+
+{block content}
+
+    <div class="col-md-12">
+        <div class="panel panel-white">
+            <div class="panel-body">
+                <div class="clearfix m-b-sm">
+                    <div class="pull-right">
+                        {control bulkActions:button}
+                    </div>
+                </div>
+                {control bulkActions}
+                {form filters-form}
+                    <div class="table-responsive dataTables_wrapper">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                            <tr>
+                                <th class="w-40"></th>
+                                <th>
+                                    <div class="w-300">{_admin.terms.name}</div>
+                                </th>
+
+                                <th class="w-150">
+                                    {_admin.terms.expression}
+                                </th>
+                                <th class="w-150 text-center">
+                                    {_admin.terms.createdAt}
+                                </th>
+                                <th class="w-150 text-center">
+                                    {_admin.terms.lastRunAt}
+                                </th>
+                                <th class="w-170 text-center">
+                                    {_admin.terms.nextRunAt}
+                                </th>
+                                <th class="w-50 text-center">
+                                    <i class="far fa-eye" data-toggle="tooltip" title="{_admin.terms.isActive}"></i>
+                                </th>
+                                <th class="w-50 text-center">
+
+                                </th>
+                                <th class="w-40">
+                                    <div class="w-30"></div>
+                                </th>
+                            </tr>
+                            <tr class="filters">
+                                <td>
+                                    {control bulkActions:headCheckbox}
+                                </td>
+                                <td>
+                                    {input name class => 'form-control w-300'}
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td>
+                                    <button type="submit" class="btn btn-default wp-100">
+                                        <i class="far fa-filter"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            </thead>
+                            <tbody n:snippet="list">
+                            <tr n:foreach="$items as $item" class="row-as-link" data-id="{$item->id}">
+                                <td class="row-as-link-ignore">
+                                    {control bulkActions:checkbox $item}
+                                </td>
+                                <td>
+                                    <strong>{$item->name}</strong>
+                                </td>
+                                <td>
+                                   <code data-toggle="tooltip" {if $item->isValidExpression() }title="{_admin.terms.validExpression}"{else}title="{_admin.terms.notValidExpression}"{/if} class="text-dark">{$item->getExpression(TRUE)|noescape}</code>
+                                </td>
+                                <td class="text-center">
+                                  {$item->created_at|date:'d.m.Y H:i'}
+                                </td>
+                                <td class="text-center">
+                                  {if $item->last_run_at}
+                                      {$item->last_run_at|date:'d.m.Y H:i'}
+                                  {else}
+                                      -
+                                  {/if}
+                                </td>
+                                <td class="text-center">
+                                    {if $item->next_run_at && $item->is_active}
+                                        {if strtotime($item->next_run_at) < time()}
+                                            < <span data-toggle="tooltip" data-html="true" title="<b>{_admin.terms.shouldBeExecutedAt}</b><br>{$item->next_run_at|date:'d.m.Y H:i'}">{time()|date:'d.m.Y H:i'}</span> <i class="far fa-spinner fa-spin m-l-xxs" data-toggle="tooltip" data-html="true" title="{_admin.terms.waitingToBeExecuted}"></i>
+                                        {else}
+                                            {$item->next_run_at|date:'d.m.Y H:i'} <i class="far fa-info-circle m-l-xxs" data-toggle="tooltip" data-html="true" title="<b>{_admin.terms.nextRunAtInfo}</b><br>{foreach $item->getPlannedRunnings() as $dateTime}{$dateTime|date:'d.m.Y H:i'}{sep}<br>{/sep}{/foreach}"></i>
+                                        {/if}
+                                    {else}
+                                        -
+                                    {/if}
+                                </td>
+                                <td class="text-center row-as-link-ignore">
+                                    {include APP_DIR.'/AdminModule/__inc/boolSwitch.latte', 'item' => $item, 'param' => 'is_active'}
+                                </td>
+                                <td class="text-center row-as-link-ignore">
+                                    <a data-toggle="tooltip" title="{_admin.terms.runCron}" target="_blank" href="/cron/?run={$item->hash}">
+                                        <i class="fa fa-play"></i>
+                                    </a>
+                                </td>
+                                <td class="actions actions-small row-as-link-ignore">
+                                    <div class="dropdown pull-left">
+                                        <a class="dropdown-toggle btn btn-default" data-toggle="dropdown" href="#">
+                                            <i class="fa fa-bars"></i>
+                                        </a>
+                                        <ul class="dropdown-menu dropdown-menu-right dropdown-list">
+                                            {control baseActions $item, $iterator}
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+
+                        {control paginator}
+                    </div>
+
+                {/form}
+            </div>
+        </div>
+    </div>
+
+{/block}

@@ -1,0 +1,73 @@
+<html>
+<head>
+    <script n:if="!empty($windowClose)">
+		window.close();
+    </script>
+    <style>
+		body { margin: 0; }
+
+		.overlay-1 { width: 198px; font-family: "Times New Roman", serif; font-weight: 600; text-align: center; height: 133px; overflow: hidden }
+		.overlay-1 .headline { font-size: 16px; padding-bottom: 0px; border-bottom: 1px solid #000; text-align: center; width: 100%; }
+		.overlay-1 .product-name { font-size: 11px; text-align: center; height: 26px; overflow: hidden; width: 100%; }
+		.overlay-1 .main-info { margin-bottom: 3px; display: inline-block; width: 100%; text-align: center; font-size: 9px; font-weight: 400; float: left; line-height: 8px; }
+        .overlay-1 .base-info { margin-bottom: 5px; display: inline-block; width: 100%; }
+		.overlay-1 .base-info > div { text-align: center; font-size: 16px; font-weight: 600; float: left; }
+		.overlay-1 .base-info > div.base-info-left { width: 40%; font-size: 9px; }
+		.overlay-1 .base-info > div.base-info-right { width: 60%; }
+		.overlay-1 .price { padding: 0 2px; margin: 0 auto; background-color: #000; color: #fff; display: inline-block; font-size: 19px; font-weight: 700; }
+		.overlay-1 .barcode > span { font-size: 9px; font-weight: 400; }
+		.overlay-1 .barcode svg { width: 140px; height: auto; }
+
+		.overlay-2 { width: 182px; font-family: "Times New Roman", serif; font-weight: 600; text-align: left; height: 125px; overflow: hidden; font-size: 9px; padding: 4px 8px; }
+    </style>
+</head>
+<body>
+{foreach $presenter->getBarcodePricesManualList(TRUE) as $item}
+    {var $itemData = $item->getData()}
+    {var $productCountry = ($itemData->productCountry ?? '')}
+    {var $productConsumption = ($itemData->consumption ?? '')}
+
+    {if $item->type_id == \PrintLabelsEntity::TYPE_PRICE_MANUAL.App\AdminModule\Presenters\ProductLabelsPresenter::TYPE_PRICE_MANUAL_PRICE}
+        {var $barcode = $presenter->getBarcode($itemData->productEan)}
+        <div class="overlay-1">
+            <div class="headline">
+                FIKKO market
+            </div>
+            <div class="product-name">
+                {$itemData->productName ?? ''}
+            </div>
+            <div n:if="$productCountry" class="main-info">
+                Země původu: {$productCountry}
+            </div>
+            <div n:if="$productConsumption" class="main-info">
+                {$productConsumption}
+            </div>
+            <div class="base-info">
+                <div class="base-info-left">
+                    {(($itemData->weight ?? 0) / 1000)|number,3,'.',''} <span>Kg</span><br>
+                    {($itemData->unitPrice ?? 0)|number,2,',',''} <span>Kč/Kg</span>
+                </div>
+                <div class="base-info-right">
+                    <div class="price">
+                        {round($itemData->totalPrice ?? 0, 2)|number,2,',',''} Kč
+                    </div>
+                </div>
+            </div>
+            <div n:if="$barcode" class="barcode">
+                {$barcode|noescape}<br>
+                <span>{$itemData->productEan}</span>
+            </div>
+        </div>
+    {elseif $item->type_id == \PrintLabelsEntity::TYPE_PRICE_MANUAL.App\AdminModule\Presenters\ProductLabelsPresenter::TYPE_PRICE_MANUAL_INSTRUCTIONS}
+        {var $itemDataTextCount = mb_strlen($itemData->description ?? '')}
+        <div class="overlay-2"{if $itemDataTextCount > 550} style="font-size: 7px;"{elseif $itemDataTextCount > 400} style="font-size: 8px;"{/if}>
+            {$itemData->description ?? ''}
+        </div>
+    {/if}
+{/foreach}
+</body>
+<script type="text/javascript">
+	window.print();
+	window.onfocus=function(){ window.close();}
+</script>
+</html>

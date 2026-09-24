@@ -1,0 +1,5 @@
+<div class="form-group">
+    {label $field/}
+    {input $field class => 'form-control', disabled => $presenter->getAction() == 'copy' }
+    {control attachment:image, isset($item) ? $item : NULL, $field, 'admin'}
+</div>

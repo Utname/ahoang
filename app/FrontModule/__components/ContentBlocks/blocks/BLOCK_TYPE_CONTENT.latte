@@ -1,0 +1,68 @@
+<div class="text-block">
+    {var $text = $block->getValue('text')}
+    {var $image = $block->getValue('image')}
+    {var $imagePosition = $block->getValue('imagePosition')}
+    {var $imageLink = $block->getValue('imageLink')}
+    {var $images = $block->getContentImages('images')}
+    {var $files = $block->getContentFiles('files')}
+
+    {var $cta = getCta([$block->getValue('cta')])}
+	{var $ctaItem = !empty($cta) ? reset($cta) : NULL}
+
+	<div n:if="$image && $imagePosition == 'top'">
+        {if $imageLink}<a href="{$imageLink}" target="_blank">{/if}
+			<img src="{$image|image:original}" alt="{$image|imageTitle}" class="img-fluid mb-3">
+            {if $imageLink}</a>{/if}
+	</div>
+
+    {if $image && $imagePosition == 'left'}
+	<div class="row">
+		<div class="col-sm-4">
+            {if $imageLink}<a href="{$imageLink}" target="_blank">{/if}
+				<img src="{$image|image:original}" alt="{$image|imageTitle}" class="img-fluid">
+                {if $imageLink}</a>{/if}
+		</div>
+		<div class="col-sm-8">
+            {/if}
+
+            {if $image && $imagePosition == 'right'}
+			<div class="row">
+				<div class="col-sm-8">
+                    {/if}
+
+                    {!$control->prepareHtml($text)}
+
+					<p n:foreach="$files as $file">
+						<a href="/files/files/{\FilesService::getFileDir($file->file)}/{$file->file}" target="_blank" class="download-link">
+							<span class="text">{$file->name}</span>
+							<span class="file">{\Helpers::getExtension($file->file)|upper} - {\Helpers::getFormattedFileSize($file->file)}</span>
+						</a>
+					</p>
+
+					<div n:if="count($images)" class="lightbox-gallery">
+						<a n:foreach="$images as $image" href="{$image->file|image:original}" class="content-photo">
+							<img src="{$image->file|image:thumb}" alt="{$image->file|imageTitle}" class="img-fluid">
+						</a>
+					</div>
+
+                    {if $image && $imagePosition == 'right'}
+				</div>
+				<div class="col-sm-4">
+                    {if $imageLink}<a href="{$imageLink}" target="_blank">{/if}
+						<img src="{$image|image:original}"  alt="{$image|imageTitle}" class="img-fluid">
+                        {if $imageLink}</a>{/if}
+				</div>
+			</div>
+            {/if}
+
+            {if $image && $imagePosition == 'left'}
+		</div>
+	</div>
+    {/if}
+
+	<div n:if="$image && $imagePosition == 'bottom'">
+        {if $imageLink}<a href="{$imageLink}" target="_blank">{/if}
+			<img src="{$image|image:original}" alt="{$image|imageTitle}" class="img-fluid mb-3">
+            {if $imageLink}</a>{/if}
+	</div>
+</div>

@@ -1,0 +1,31 @@
+<div id="modal-mailingQueueDetail" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" title="Zavřít">
+                    <span aria-hidden="true">×</span>
+                </button>
+                <h4>{_admin.modules.mailingQueue|menu}</h4>
+            </div>
+            <div class="modal-body clearfix" n:snippet="mailingQueueDetail">
+                <div n:if="$mailingQueueDetail" style="padding-top: 20px;">
+                    <p>
+                        <span class="display-inline w-100">{_admin.terms.datetime_created}:</span> {$mailingQueueDetail->created_at->format('d.m.Y H:i:s')}<br />
+                        <span class="display-inline w-100">{_admin.terms.datetime_sent}:</span> {if $mailingQueueDetail->sent_at}{$mailingQueueDetail->sent_at->format('d.m.Y H:i:s')}{else}-{/if}<br />
+                        <span class="display-inline w-100">{_admin.terms.subject}:</span> <strong>{$mailingQueueDetail->subject}</strong><br />
+                        <span class="display-inline w-100">{_admin.terms.sender}:</span> <a href="mailto:{$mailingQueueDetail->email_from}">{$mailingQueueDetail->email_from}</a><br />
+                        <span class="display-inline w-100">{_admin.terms.recipient}:</span> <a href="mailto:{$mailingQueueDetail->email_to}">{$mailingQueueDetail->email_to}</a>
+                    </p>
+
+                    <div n:if="$mailingQueueDetail->error_message" class="alert alert-danger">
+                        <p>{$mailingQueueDetail->error_message|breakLines}</p>
+                    </div>
+
+                    <hr />
+
+                    <iframe src="?printBody={$mailingQueueDetail->id}" style="border: none; width: 100%; height: calc(100vh - 340px); min-height: 400px;"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

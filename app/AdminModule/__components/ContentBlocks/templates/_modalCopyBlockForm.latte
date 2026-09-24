@@ -1,0 +1,77 @@
+<div id="modal-{$control->getName()}-copyBlockForm" class="modal fade">
+	<div class="modal-dialog modal-md">
+		<div class="modal-content" n:snippet="copyBlockForm">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" title="{_admin.buttons.close}">
+					<span aria-hidden="true">×</span>
+				</button>
+				<h4>{_admin.terms.contents_copy_block}</h4>
+			</div>
+			{form copyBlockForm class => 'ajax ajax-modal-close copy-block-form', href => $control->link('copyBlockSetParameters!', ['replace_sectionsId', 'replace_languagesId', 'replace_tableName', 'replace_itemId'])}
+				<div class="modal-body clearfix">
+					<div class="form-group">
+						{label languages_id /}
+						{input languages_id class => "form-control"}
+					</div>
+					<div class="form-group">
+						{label table_name /}
+						{input table_name class => "form-control"}
+					</div>
+					<div class="form-group">
+						{label items_id /}
+						{input items_id class => "form-control"}
+					</div>
+					{if isset($content) && $content}
+						<div class="row content-list">
+							<div class="col-sm-12">
+								{var $sections = $content->getSections()}
+
+								<div n:if="!count($sections)" class="alert alert-info">
+									<p>
+										{_admin.terms.contents_no_sections}
+									</p>
+								</div>
+
+								<div class="content-blocks-sections">
+									<div n:foreach="$sections as $section" n:if="$sectionDefinition = $control->getSectionDefinition($section)" class="b b-default p-v-sm p-h-sm m-b-sm content-blocks-section">
+										<div class="row m-b-sm">
+											<div class="col-sm-12 text-gray">
+												<input type="checkbox" class="section-check-all" id="section_{$section->id}">
+												{if $section->name}
+													{$section->name}
+												{else}
+													{_admin.terms.contents_section} - {_$sectionDefinition[\ContentSectionsDefinition::NAME]}
+												{/if}
+											</div>
+										</div>
+										<div class="content-blocks-blocks">
+											<label n:foreach="$section->getBlocks($section) as $block" n:if="$blockDefinition = $control->getBlockDefinition($block)" for="block__{$block->id}" class="alert w-100p b m-b-xxs content-blocks-block">
+												<div class="row">
+													<div class="col-sm-12 content-block-row-info">
+														<div class="m-r-xs"><input type="checkbox" name="block__{$block->id}" id="block__{$block->id}"></div>
+														<div>
+															{$control->getFormattedBlockName($block, $iterator->counter, $blockDefinition)|noescape}
+														</div>
+													</div>
+												</div>
+											</label>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+					{/if}
+				</div>
+				<div class="modal-footer">
+					<button n:name="submit" class="btn btn-success btn-addon">
+						<i class="far fa-copy"></i> {_admin.buttons.copy}
+					</button>
+					<button type="button" class="btn btn-default btn-addon" data-dismiss="modal">
+						<i class="far fa-times"></i> {_admin.buttons.close}
+					</button>
+				</div>
+			{/form}
+		</div>
+	</div>
+</div>

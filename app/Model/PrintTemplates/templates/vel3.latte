@@ -1,0 +1,146 @@
+{* Computed before <style> (not after, where every other per-instance var in this
+   file lives) specifically so $saveBadgeWidthMm and $ribbonBadgeBrushFlatDataUri can be
+   interpolated directly into the .fikko-vel3 .save{} rule below, as ONE stylesheet
+   rule with both properties together. Two separate <style> blocks for the same
+   selector (main block + a second one added just for background-image) were tried
+   first and silently didn't apply the second block's property at all in Dompdf,
+   even though the generated HTML was well-formed — so both properties must live in
+   the SAME rule, which is why this whole block moved above <style>. *}
+{* 3-digit final prices shift .price-major further left (.price-digits-3, less
+   horizontal budget available on this narrow 182mm label) — the suffix cannot fit
+   there even for a short saving value, so it's dropped whenever priceDigits>=3,
+   not just when the saving value itself is long. *}
+{var $saveSuffixFits = mb_strlen($savingText) <= 5 && $priceDigits < 3}
+{* Explicit badge width (mm), formula fitted to real Dompdf measurements of this exact
+   markup/font/padding (not one hardcoded value): base 31.33mm (Ušetříte + padding/gaps
+   with an empty value) + 3mm per character of "$savingText Kč" + 23.8mm if the
+   suffix is shown. Verified against measured widths for "5,00"/"10,00"/"45,00 Kč"
+   (with suffix) and "125,50 Kč" (without) within ±0.1mm. *}
+{var $saveBadgeWidthMm = 31.33 + mb_strlen($savingText) * 3 + ($saveSuffixFits ? 23.8 : 0)}
+<style>
+    @page { margin: 0; }
+    html, body { margin: 0; padding: 0; background: #fff; color: #111; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
+    .fikko-vel3 { box-sizing: border-box; position: relative; width: 182mm; height: 56mm; overflow: hidden; }
+    .fikko-vel3 .header { position: absolute; top: 0; left: 0; width: 182mm; height: 11mm; background: #111; }
+    .fikko-vel3 .heading-text { position: absolute; top: 0; left: 16mm; width: 150mm; height: 11mm; display: table; text-align: center; }
+    .fikko-vel3 .heading-text span { display: table-cell; vertical-align: middle; color: #fff; font-family: Nunito, sans-serif; font-weight: 900; font-style: italic; font-size: 7mm; line-height: 1; letter-spacing: .02em; }
+    .fikko-vel3 .logo-box { position: absolute; top: 0; width: 13.6mm; height: 8.6mm; background: #fff; border: .4mm solid #111; padding: .8mm; }
+    .fikko-vel3 .logo-box.left { left: 0; }
+    .fikko-vel3 .logo-box.right { right: 0; }
+    .fikko-vel3 .logo { display: block; width: 100%; height: 100%; object-fit: contain; filter: grayscale(1) contrast(1.15); }
+    .fikko-vel3 .name { position: absolute; top: 11mm; left: 0; width: 182mm; text-align: center; font-size: 4.6mm; font-weight: 800; line-height: 1.15; }
+    .fikko-vel3 .more-species { position: absolute; top: 18.08mm; left: 0; width: 182mm; text-align: center; font-family: Nunito, sans-serif; font-weight: 900; font-style: italic; font-size: 3.6mm; line-height: 1.1; }
+    .fikko-vel3 .note1 { position: absolute; top: 22.34mm; left: 0; width: 182mm; text-align: center; font-family: Nunito, sans-serif; font-weight: 900; font-style: italic; font-size: 3.6mm; line-height: 1.1; white-space: nowrap; }
+    .fikko-vel3 .origin { position: absolute; top: 18.48mm; left: 0; display: table; white-space: nowrap; }
+    .fikko-vel3 .origin-label { display: table-cell; vertical-align: middle; padding-right: 1.5mm; font-family: Nunito, sans-serif; font-weight: 900; font-style: italic; font-size: 2.8mm; }
+    .fikko-vel3 .origin-flag { display: table-cell; vertical-align: middle; width: 8.53mm; }
+    .fikko-vel3 .origin-flag img { display: block; width: 8.53mm; height: 8.53mm; border-radius: 50%; border: .2mm solid #111; box-sizing: border-box; }
+    .fikko-vel3 .origin-name { display: table-cell; vertical-align: middle; padding-left: 1.5mm; font-family: Nunito, sans-serif; font-weight: 900; font-style: italic; font-size: 2.8mm; white-space: nowrap; }
+    .fikko-vel3 .note2 { position: absolute; top: 18.48mm; right: 0; font-family: Nunito, sans-serif; font-weight: 900; font-style: italic; font-size: 2.8mm; white-space: nowrap; }
+    .fikko-vel3 .base-label { position: absolute; top: 30mm; left: 37.36mm; font-size: 2.8mm; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
+    .fikko-vel3 .base-value { position: absolute; top: 27.82mm; left: 60.52mm; font-family: Nunito, sans-serif; font-weight: 900; font-style: italic; font-size: 6mm; line-height: 1; white-space: nowrap; }
+    /* The badge must fit "Ušetříte X Kč oproti běžné ceně" for any length of X
+       (5 Kč vs 125,50 Kč) without clipping or overlapping "Naše cena" to its right.
+       width and background-image are both interpolated straight into THIS ONE
+       stylesheet rule (which is why $saveBadgeWidthMm/$saveSuffixFits are computed
+       near the top of this file, before <style>, instead of down by the markup like
+       every other per-instance value here) — two things were tried and rejected
+       first: (1) an <img> element (position:absolute;inset:0;width:100%), the
+       pattern every other "Ušetříte" badge in this project uses (A4/A5/Vel.2B) —
+       rendered correctly in Chrome's PDF.js but bled tens of mm past the box's
+       right edge, covering "Naše cena", in Chrome's actual built-in PDF viewer
+       (PDFium, what a real user sees) — confirmed the bleed persisted with
+       z-index removed, the brush recolored, overflow:hidden added, and rotate()
+       removed, and stopped only once the <img> was gone entirely; (2) the same
+       background-image set inline via style="" alongside width — the width applied
+       but the image silently never painted, in a SEPARATE <style> block targeting
+       the same selector, in Dompdf. Keeping both properties in one rule, in the
+       main stylesheet, is the one arrangement that measures the right width AND
+       actually attempts to paint the brush.
+       Getting the box sized/positioned right still wasn't enough: background-image
+       painted as a flat navy rectangle, no brush texture, even though the generated
+       CSS was valid and the GD buffer Dompdf composited internally (dumped to disk
+       mid-render) had the correct jagged brush edges. Root cause, confirmed by
+       instrumenting vendor/dompdf: Cpdf::addImagePngAlpha — the pure-GD path used to
+       embed a background-image with an alpha channel — has a real bug with 8-bit
+       RGBA PNGs (its own source has a "FIXME: doesn't work well with 8bit PNGs"
+       comment on the affected branch); it silently produces an invisible image while
+       reporting no error, leaving only the background-color underneath visible. A
+       plain <img> tag with the exact same alpha PNG renders fine (it goes through
+       the same function but is never invisible in practice), so this is specific to
+       the background-image call path. Fix: use $ribbonBadgeBrushFlatDataUri (NOT the
+       plain $ribbonBadgeBrushDataUri A4/A5/Vel.2B use via <img> — kept separate on
+       purpose, see PrintTemplatesService), which points at
+       brush-20-ribbon-badge-flat.png, the same navy artwork pre-flattened onto an
+       opaque white background (no alpha channel — PNG color type 2, not 6), which
+       sidesteps the buggy code path entirely. This only works because this badge
+       always sits on the label's plain white background; background-color stays as
+       a cheap fallback in case the image ever fails to load for an unrelated reason.
+       IMPORTANT — always verify anything touching this element's image against
+       pdf_screenshot_headed.js (opens the real PDF in Chrome's own viewer), not
+       pdf_to_png.js (PDF.js canvas) alone; the two have disagreed more than once. */
+    .fikko-vel3 .save { position: absolute; top: 36.5mm; left: 32.6mm; width: {$saveBadgeWidthMm|noescape}mm; height: 9.8mm; color: #fff; white-space: nowrap; background-color: #14142e; background-image: url('{$ribbonBadgeBrushFlatDataUri|noescape}'); background-repeat: no-repeat; background-size: 100% 100%; }
+    .fikko-vel3 .save-content { position: absolute; top: 0; left: 4mm; right: 4mm; height: 100%; display: table; }
+    .fikko-vel3 .save-copy, .fikko-vel3 .save-value, .fikko-vel3 .save-suffix { display: table-cell; vertical-align: middle; }
+    .fikko-vel3 .save-copy { font-size: 2.6mm; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+    .fikko-vel3 .save-value { padding-left: 1.5mm; font-family: Nunito, sans-serif; font-weight: 900; font-style: italic; font-size: 5mm; line-height: 1; }
+    .fikko-vel3 .save-suffix { padding-left: 1.5mm; font-size: 2.2mm; font-weight: 600; }
+    /* Design positions (measured directly off velikost 3.dc.html, matched exactly
+       before this shift): our-price-label left:108.2mm, price-major left:102.11mm,
+       price-minor/currency left:126.91mm. Now that the Ušetříte badge next to this
+       has an explicit, measured width (see .save above) instead of growing
+       unboundedly, only a small +3mm safety margin is needed — not the +10mm this
+       carried while that was still unresolved — to clear the badge's worst case
+       (5-char saving with the suffix shown, e.g. "45,00 Kč oproti běžné ceně", ends
+       at 32.6mm + ~70.1mm ≈ 102.7mm) while staying as close as possible to the
+       source design. */
+    .fikko-vel3 .our-price-label { position: absolute; top: 25.71mm; left: 111.2mm; font-size: 2.8mm; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
+    .fikko-vel3 .price-major { position: absolute; top: 26mm; left: 105.11mm; font-family: Nunito, sans-serif; font-weight: 900; font-style: italic; font-size: 19mm; line-height: .85; white-space: nowrap; }
+    .fikko-vel3 .price-minor { position: absolute; top: 27.8mm; left: 129.91mm; font-family: Nunito, sans-serif; font-weight: 900; font-style: italic; font-size: 9mm; line-height: 1; white-space: nowrap; }
+    .fikko-vel3 .price-currency { position: absolute; top: 37.12mm; left: 129.91mm; font-family: Nunito, sans-serif; font-weight: 900; font-style: italic; font-size: 5.5mm; line-height: 1; white-space: nowrap; }
+    .fikko-vel3 .ean-text { position: absolute; left: 0; bottom: 3.5mm; font-size: 3mm; font-weight: 600; white-space: nowrap; }
+    .fikko-vel3 .notes-bottom { position: absolute; left: 80.67mm; bottom: 3.5mm; font-family: Nunito, sans-serif; font-weight: 900; font-style: italic; font-size: 2.8mm; white-space: nowrap; }
+    .fikko-vel3 .unit { position: absolute; right: 0; bottom: 3.5mm; font-family: Nunito, sans-serif; font-weight: 900; font-style: italic; font-size: 2.8mm; white-space: nowrap; }
+    .fikko-vel3.long-name .more-species { top: 23.5mm; }
+    .fikko-vel3.long-name .note1 { top: 27.8mm; }
+    .fikko-vel3.long-name .origin { top: 23.9mm; }
+    .fikko-vel3.long-name .note2 { top: 23.9mm; }
+    .fikko-vel3.price-digits-3 .our-price-label { left: 96mm; }
+    .fikko-vel3.price-digits-3 .price-major { left: 90mm; font-size: 15mm; }
+    .fikko-vel3.price-digits-3 .price-minor { left: 121mm; top: 29.1mm; font-size: 7mm; }
+    .fikko-vel3.price-digits-3 .price-currency { left: 121mm; top: 36.1mm; font-size: 4.5mm; }
+</style>
+
+{var $vel3Classes = 'fikko-vel3' . ($priceDigits >= 3 ? ' price-digits-3' : '') . ($labelNameLength > 62 ? ' long-name' : '')}
+{var $logoMarkup = '<img class="logo" src="' . $logoDataUri . '" alt="Fikko market">'}
+{var $flagMarkup = $flagIconDataUri ? '<img src="' . $flagIconDataUri . '" alt="">' : ''}
+<section class="{$vel3Classes}">
+    <div class="header"></div>
+    <div class="heading-text"><span>FIKKO CENA</span></div>
+    <div class="logo-box left">{$logoMarkup|noescape}</div>
+    <div class="logo-box right">{$logoMarkup|noescape}</div>
+
+    <div class="name">{$labelName}</div>
+    <div n:if="$label && $label->is_more_species" class="more-species">Více druhů</div>
+    <div n:if="$label && $label->note_1" class="note1">{$label->note_1}</div>
+
+    <div n:if="$country" class="origin">
+        <div class="origin-label">Země původu:</div>
+        <div class="origin-flag">{$flagMarkup|noescape}</div>
+        <div class="origin-name">{$country->name}</div>
+    </div>
+    <div n:if="$label && $label->note_2" class="note2">{$label->note_2}</div>
+
+    <div class="base-label">Běžná cena</div>
+    <div class="base-value">{$basePriceText} {$currencySymbol}</div>
+    <div n:if="$saving > 0" class="save"><div class="save-content"><span class="save-copy">Ušetříte</span><span class="save-value">{$savingText} {$currencySymbol}</span><span n:if="$saveSuffixFits" class="save-suffix">oproti běžné ceně</span></div></div>
+
+    <div class="our-price-label">Naše cena</div>
+    <div class="price-major">{$finalPriceMajor}</div>
+    <div class="price-minor">{$finalPriceMinor}</div>
+    <div class="price-currency">{$currencySymbol} / 1 ks</div>
+
+    <div class="ean-text">EAN {$eanText}</div>
+    <div n:if="$label && $label->note_3" class="notes-bottom">{$label->note_3}</div>
+    <div n:if="$unit" class="unit">cena za {$unit->unitWeight}{$unit->unitShort} = {$unit->price|number:2,',',''} {$currencySymbol}</div>
+</section>

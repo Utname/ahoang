@@ -1,0 +1,16 @@
+<div n:if="!is_null($item) && $item->getValue($field)" class="clearfix">
+    <div class="input-group container_del_box m-t-xxs">
+        <input {$control->getAction() == 'copy' ? 'disabled' : ''} data-href="{link setFileTitle! $item->getValue($field), 'replace_title'}" type="text" class="form-control file-title" value="{$item->getValue($field)|fileTitle}" placeholder="{$item->getValue($field)}">
+        <span class="input-group-btn">
+            <a href="{plink downloadFile! $item->getValue($field)}" class="btn btn-default" data-toggle="tooltip" title="{_admin.actions.download}">
+                <i class="far fa-download"></i>
+            </a>
+        </span>
+        <span class="input-group-btn">
+            <a n:if="$control->getAction() != 'copy'" n:href="setValue! $item->id, $field, '', $repository" class="btn btn-default ico_del text-danger" data-toggle="tooltip" title="{_admin.actions.delete}">
+                <i class="far fa-trash"></i>
+            </a>
+        </span>
+        <span class="input-group-addon"><i class="far fa-check"></i></span>
+    </div>
+</div>

@@ -1,0 +1,11 @@
+<section n:if="$text = $control->getTitle()" class="product-list-section mt-2 mt-md-3 mb-2 mb-md-3">
+    <div class="container">
+        <h1>{$text}</h1>
+    </div>
+</section>
+
+<section n:if="$text = $control->getText()" class="product-list-section mt-2 mt-md-3 mb-2 mb-md-3">
+    <div class="container">
+        {$text|noescape}
+    </div>
+</section>

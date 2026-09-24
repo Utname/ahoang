@@ -1,0 +1,20 @@
+<div class="row">
+	<div class="col-sm-4">
+		<div class="form-group">
+			{label is_active /}
+            {input is_active class => 'form-control toggle-trigger', data-target => '.active-dates'}
+		</div>
+	</div>
+	<div class="col-sm-4">
+		<div class="form-group active-dates" data-show-on="1">
+			{label is_active_from /}
+            {input is_active_from class => 'form-control date-picker', value => (isset($item) && $item->is_active_from) ? $item->is_active_from->format('d.m.Y') : '', autocomplete => 'off'}
+		</div>
+	</div>
+	<div class="col-sm-4">
+		<div class="form-group active-dates" data-show-on="1">
+			{label is_active_to /}
+            {input is_active_to class => 'form-control date-picker', value => (isset($item) && $item->is_active_to) ? $item->is_active_to->format('d.m.Y') : '', autocomplete => 'off'}
+		</div>
+	</div>
+</div>

@@ -1,0 +1,49 @@
+{block content}
+
+<div class="col-md-12">
+	<div class="panel panel-white">
+		{form editForm}
+		<div class="panel-body">
+
+			<div role="tabpanel">
+				<ul class="nav nav-tabs" role="tablist">
+					<li role="presentation" class="active">
+						<a href="#section-01" role="tab" data-toggle="tab">{_admin.tabs.basicInfo}</a>
+					</li>
+				</ul>
+
+				<div class="tab-content">
+					<div role="tabpanel" class="tab-pane active clearfix" id="section-01">
+						<div class="col-lg-4">
+							<div class="clearfix">
+								<h4>{_admin.terms.mainInfo}</h4>
+								<div class="form-group">
+									{label name /}
+									{input name class => 'form-control form-control-bigger'}
+								</div>
+								<div class="form-group">
+									{label link /}
+                                    {input link class => 'form-control'}
+								</div>
+								<div class="form-group">
+									{label icon /}
+                                    {input icon class => 'form-control icon-picker'}
+								</div>
+							</div>
+
+							<div class="clearfix">
+								<h4>{_admin.terms.details}</h4>
+								{include APP_DIR.'/AdminModule/__inc/isActiveInputs.latte'}
+							</div>
+
+						</div>
+					</div>
+				</div>
+
+				{include APP_DIR.'/AdminModule/__inc/formButtons.latte'}
+			</div>
+
+		</div>
+		{/form}
+	</div>
+</div>

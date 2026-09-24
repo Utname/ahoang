@@ -1,0 +1,118 @@
+{block content}
+
+<div class="col-md-12">
+	<div class="panel panel-white">
+		{form editForm}
+			<div class="panel-body">
+
+				<div role="tabpanel">
+					<ul class="nav nav-tabs" role="tablist">
+						<li role="presentation" class="active">
+							<a href="#section-01" role="tab" data-toggle="tab">{_admin.tabs.basicInfo}</a>
+						</li>
+					</ul>
+
+					<div class="tab-content">
+						<div role="tabpanel" class="tab-pane active clearfix" id="section-01">
+							<div class="col-lg-4">
+								<div class="clearfix">
+									<h4>{_admin.terms.mainInfo}</h4>
+
+									<div n:ifset="$form['options_view']" class="row">
+										<div class="col-sm-6">
+											<div class="form-group">
+												{label options_view /}
+											{input options_view class => 'form-control'}
+											</div>
+										</div>
+									</div>
+
+									<div n:ifset="$form['name']" class="form-group">
+										{label name /}
+									{input name class => 'form-control form-control-bigger'}
+									</div>
+									<div class="row">
+										<div n:ifset="$form['button_text']" class="col-sm-6">
+											<div class="form-group">
+												{label button_text /}
+											{input button_text class => 'form-control'}
+											</div>
+										</div>
+										<div class="col-sm-6">
+											<div n:ifset="$form['button_link']" class="form-group">
+												{label button_link /}
+											{input button_link class => 'form-control'}
+											</div>
+										</div>
+									</div>
+
+									<div n:if="isset($form['button_text_2']) || isset($form['button_link_2']) " class="row">
+										<div n:ifset="$form['button_text_2']" class="col-sm-6">
+											<div class="form-group">
+												{label button_text_2 /}
+											{input button_text_2 class => 'form-control'}
+											</div>
+										</div>
+										<div n:ifset="$form['button_link_2']" class="col-sm-6">
+											<div n:ifset="$form['button_link']" class="form-group">
+												{label button_link_2 /}
+											{input button_link_2 class => 'form-control'}
+											</div>
+										</div>
+									</div>
+
+									{if isset($form['image'])}
+										{include APP_DIR.'/AdminModule/__inc/formImage.latte' field => 'image'}
+									{/if}
+
+								{if isset($form['image_mobile'])}
+										{include APP_DIR.'/AdminModule/__inc/formImage.latte' field => 'image_mobile'}
+									{/if}
+								</div>
+
+								<div class="clearfix">
+									<h4>{_admin.terms.details}</h4>
+
+									<div class="row">
+										<div class="col-sm-6">
+											<div class="form-group">
+												{label is_active /}
+											{input is_active class => 'form-control'}
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div class="col-lg-7 col-lg-offset-1">
+
+								{if isset($form['text'])}
+									<h4>{_admin.terms.content}</h4>
+
+									<div class="row">
+										<div n:ifset="$form['title']" class="col-sm-10">
+											<div class="form-group">
+												{label title /}
+											{input title class => 'form-control'}
+											</div>
+										</div>
+
+										<div n:ifset="$form['text']" class="col-sm-12">
+											<div class="form-group">
+												{label text /}
+											{input text class => 'form-control wsw h-300'}
+											</div>
+										</div>
+									</div>
+								{/if}
+							</div>
+						</div>
+					</div>
+
+					{include APP_DIR.'/AdminModule/__inc/formButtons.latte'}
+				</div>
+
+			</div>
+		{/form}
+	</div>
+</div>

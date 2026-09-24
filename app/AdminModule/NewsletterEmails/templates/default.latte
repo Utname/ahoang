@@ -1,0 +1,119 @@
+{block topButtons}
+
+    {if isset($settings->is_vat_payer) && $settings->is_vat_payer}
+        <a n:if="count($filters)" n:href="resetFilters!" class="btn btn-danger btn-addon">
+            <i class="far fa-times"></i> {_admin.filters.reset}
+        </a>
+        <a n:if="$aps->has('create')" n:href="new" class="btn btn-success btn-addon">
+            <i class="far fa-plus"></i> {_admin.actions.new}
+        </a>
+    {/if}
+
+{/block}
+
+
+{block content}
+
+    <div class="col-md-12">
+        <div class="panel panel-white">
+            <div class="panel-body">
+                <div class="clearfix m-b-sm">
+                    <div class="pull-right">
+                        {control bulkActions:button}
+                        <a href="#" class="btn btn-default slide-toggle" data-target=".ecomail-container">
+                            {_admin.permissions.ecomail} <i class="fa fa-chevron-down m-l-xxs"></i>
+                        </a>
+                    </div>
+                </div>
+                {control bulkActions}
+                {form filters-form}
+                    <div class="table-responsive dataTables_wrapper">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                            <tr>
+                                <th class="w-40"></th>
+                                <th>
+                                    <div class="w-300">{_admin.terms.email} {control sorting 'email'}</div>
+                                </th>
+                                <th class="w-150">
+                                    <div class="w-130">{_admin.terms.language}</div>
+                                </th>
+                                <th class="w-150 text-center">
+                                    <div class="w-150">{_admin.terms.createdAt} {control sorting 'created_at'}</div>
+                                </th>
+                                <th class="w-150 text-center">
+                                    <div class="w-150">{_admin.terms.confirmedAt} {control sorting 'confirmed_at'}</div>
+                                </th>
+                                <th class="w-40">
+                                    <div class="w-30"></div>
+                                </th>
+                            </tr>
+                            <tr class="filters">
+                                <td>
+                                    {control bulkActions:headCheckbox}
+                                </td>
+                                <td>
+                                    <div class="w-300">
+                                        {input email class => 'form-control'}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="w-150">
+                                        {input lang_id class => 'form-control'}
+                                    </div>
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td>
+                                    <button type="submit" class="btn btn-default wp-100">
+                                        <i class="far fa-filter"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            </thead>
+                            <tbody n:snippet="list">
+                            <tr n:foreach="$items as $item" class="row-as-link" data-id="{$item->id}">
+                                <td class="row-as-link-ignore">
+                                    {control bulkActions:checkbox $item}
+                                </td>
+                                <td>
+                                    <strong>{$item->email}</strong>
+                                    {include '../../__inc/mailingBlacklist.latte', 'email' => $item->email}
+                                </td>
+                                <td>
+                                    {$item->getLang()?->name}
+                                </td>
+                                <td class="text-center">
+                                    {$item->created_at?->format('d.m.Y H:i:s')}
+                                </td>
+                                <td class="text-center">
+                                    {$item->confirmed_at?->format('d.m.Y H:i:s')}
+                                </td>
+                                <td class="actions actions-small row-as-link-ignore">
+                                    <div class="dropdown pull-left">
+                                        <a class="dropdown-toggle btn btn-default" data-toggle="dropdown" href="#">
+                                            <i class="fa fa-bars"></i>
+                                        </a>
+                                        <ul class="dropdown-menu dropdown-menu-right dropdown-list">
+                                            <li n:if="$aps->has('edit')">
+                                                <a n:href="sendConfirmationRequest! $item->id">
+                                                    <i class="fas fa-paper-plane"></i> {_admin.actions.sendConfirmationRequest}
+                                                </a>
+                                            </li>
+                                            {control baseActions $item, $iterator}
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+
+                        {control paginator}
+                    </div>
+
+                {/form}
+            </div>
+        </div>
+    </div>
+
+{/block}

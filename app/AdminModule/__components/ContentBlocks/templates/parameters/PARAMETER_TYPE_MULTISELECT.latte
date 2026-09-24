@@ -1,0 +1,28 @@
+<div class="form-group">
+	{var $options = $control->getInputOptions($parameter)}
+	<h4 n:if="$label">{$label}</h4>
+	<p n:if="$helpBlockText" class="help-block">{$helpBlockText}</p>
+	<div class="multiplicator with-selects sortable m-b-sm" data-multiplicator-init-count="3">
+
+		<div class="multiplicator-pattern sortable-item m-b-sm">
+			<select name="types_id-{$sectionTypeKey}-{$parameterKey}[]" class="{$customClass}">
+				<option n:foreach="$options as $optionKey => $optionName" value="{$optionKey}">{$optionName}</option>
+			</select>
+			<a class="move-handler text-gray" data-toggle="tooltip" title="{_admin.actions.move}"><i class="far fa-bars"></i></a>
+			<a class="multiplicator-remove text-gray" href="#" data-toggle="tooltip" title="{_admin.actions.delete}"><i class="far fa-trash"></i></a>
+		</div>
+
+		<div class="multiplicator-items">
+			{if is_array($value)}
+				<div n:foreach="$value as $valueItem" class="multiplicator-item sortable-item m-b-sm">
+					<select name="types_id-{$sectionTypeKey}-{$parameterKey}[]" class="{$customClass}">
+						<option n:foreach="$options as $optionKey => $optionName" {if $valueItem == $optionKey} selected="selected"{/if} value="{$optionKey}">{isset($parameter[\ContentBlocksDefinition::OPTIONS]) ? $control->getTranslator()->translate($optionName) : $optionName}</option>
+					</select>
+					<a class="move-handler text-gray" data-toggle="tooltip" title="{_admin.actions.move}"><i class="far fa-bars"></i></a>
+					<a class="multiplicator-remove text-gray" href="#" data-toggle="tooltip" title="{_admin.actions.delete}"><i class="far fa-trash"></i></a>
+				</div>
+			{/if}
+		</div>
+		<a class="multiplicator-add text-gray" href="#"><i class="far fa-plus-circle"></i> {_admin.terms.add}</a>
+	</div>
+</div>

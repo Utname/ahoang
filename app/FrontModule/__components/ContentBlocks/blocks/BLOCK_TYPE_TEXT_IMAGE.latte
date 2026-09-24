@@ -1,0 +1,43 @@
+{var $title = $block->getValue('title')}
+{var $text = $block->getValue('text')}
+
+{var $btnText = $block->getValue('btnText')}
+{var $btnLink = $block->getValue('btnLink')}
+
+{var $images = $block->getContentImages('images')}
+{var $imagesParts = []}
+{for $i=0; $i<=count($images); $i++}
+    {var $imagesParts[$i] = array_splice($images, 0, !$i ? 3 : 2)}
+    {breakIf !count($imagesParts)}
+{/for}
+
+<div class="section text-img-section" id="o-spolecnosti">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 col-lg-5 text-img-txt-col">
+                <div class="text-img-txt">
+                    <h2 n:if="$title" class="h-line">{$title}</h2>
+                    {($text ?? '')|noescape}
+                    <a n:if="$btnText && $btnLink" href="{$btnLink}" class="btn btn-primary">{$btnText}</a>
+                </div>
+            </div>
+            <div n:if="count($imagesParts)" class="col-12 col-lg-7 text-img-image-col">
+                <div n:foreach="$imagesParts as $imagesPartIter => $imagesPart" class="text-img-list">
+                    <div n:if="!$imagesPartIter && $image = reset($imagesPart)" class="text-img-big">
+                        <img src="{$image->file|image:textImageHeight}" alt="{$image->file|imageTitle}" class="img-fluid">
+                    </div>
+                    <div n:if="$imagesPartIter && $image = reset($imagesPart)" class="text-img-small-list">
+                        <div class="text-img-small text-img-small-left">
+                            <img src="{$image->file|image:textImageStandard}" alt="{$image->file|imageTitle}" class="img-fluid">
+                        </div>
+                    </div>
+                    <div class="text-img-small-list">
+                        <div n:foreach="$imagesPart as $image" n:if="!$iterator->first" class="text-img-small">
+                            <img src="{$image->file|image:textImageStandard}" alt="{$image->file|imageTitle}" class="img-fluid">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

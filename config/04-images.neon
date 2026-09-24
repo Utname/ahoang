@@ -1,0 +1,39 @@
+# Format: W-H-F-Q
+#	- W => width (int)
+#	- H => height (int)
+#	- F => flag (enum [f, e, w])
+#	- Q => quality (int, optional, default 90)
+#	- W => watermark  (enum, optional [w])
+#
+# Image flags:
+#	- f => Image::FIT
+#	- e => Image::EXACT
+#	- w => Image::FIT + white background
+#	- b => Image::FIT + black background
+
+parameters:
+	images:
+		originalSm: 400-400-f-80
+		admin: 300-300-f-60
+		adminWide: 800-0-f-60
+		adminGallery: 300-300-e-60
+		ogImage: 1200-630-e-60
+		original: 1600-1600-f-80
+		lang: 42-28-e-80
+		icon: 120-120-f-60
+		header: 2880-500-e-60
+		slider: 1920-780-f-60
+
+		logo: 160-152-f-60
+		categorySlider: 541-353-e-60
+		category: 706-706-f-60
+		textImageHeight: 339-614-e-60
+		textImageStandard: 339-299-e-60
+		product: 302-426-e-60
+		productDefault: 412-580-w-60
+		link: 40-40-e-60
+		detailProduct: 768-1084-w-60
+		country: 32-32-e-60
+		branch: 200-80-e-60
+		branchImage: 412-412-e-60
+		branchDetail: 1600-550-e-60

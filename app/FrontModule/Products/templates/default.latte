@@ -1,0 +1,75 @@
+{block content}
+
+<section class="product-list-section mt-2 mt-md-3 mb-2 mb-md-3">
+    <div class="container">
+        <div class="product-list-wrapper">
+            <div class="main-content" style="width: 100%">
+                <h6 class="mb-1">{content('products', 'branchesTitle')}</h6>
+                <div class="row product-list-row">
+                    <div n:foreach="$branches as $branchMenu" class="col-12 col-sm-6 col-xl-3 product-item-col">
+                        <a n:class="'product-item', $branch && $branch->id == $branchMenu->id ? 'btn-primary'" href="{$page->full_url."/".$branchMenu->slug}">
+                            <span class="product-item-name mb-0">{$branchMenu->name}</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section n:if="$branch" class="product-list-section mt-2 mt-md-3 mb-2 mb-md-3">
+	<div class="container">
+		<div n:snippet="products" class="product-list-wrapper">
+			<div class="main-content" style="width: 100%">
+                <div n:if="$branch?->sale_text" class="row product-list-row">
+                    <div class="col-12">
+                        {$branch->sale_text|noescape}
+                    </div>
+                </div>
+                <div style="display: flex; flex-wrap: wrap; margin-bottom: 20px;">
+                    <a n:class="'product-item ajax', empty($productsCategoryId) ? 'btn-primary'" href="{$GLOBALS['uri']->getPath()}?do=setCategory" style="width: auto; padding: 10px; margin: 0 20px 10px 0px;">
+                        <span class="product-item-name mb-0">{content('products', 'filter_all')}</span>
+                    </a>
+                    <a n:foreach="$productCategories as $productCategory" n:class="'product-item ajax', !empty($productsCategoryId) && $productsCategoryId == $productCategory->id ? 'btn-primary'" href="{$GLOBALS['uri']->getPath()}?do=setCategory&id={!empty($productsCategoryId) && $productsCategoryId == $productCategory->id ? NULL : $productCategory->id}" style="width: auto; padding: 10px; margin: 0 20px 10px 0px;">
+                        <span class="product-item-name mb-0">{$productCategory->name}</span>
+                    </a>
+                </div>
+                <div n:if="!$products" class="row product-list-row">
+                    <div n:if="!$productsCategoryId && $emptyProductsInfoText = content('products', 'emptyProductsActionInfoText')" class="alert" role="alert">{$emptyProductsInfoText|noescape}</div>
+                    <div n:if="$productsCategoryId && $emptyProductsInfoTextCategory = content('products', 'emptyProductsActionInfoTextCategory')" class="alert" role="alert">{$emptyProductsInfoTextCategory|noescape}</div>
+                </div>
+				<div n:if="$products" class="row product-list-row">
+
+                    <div n:foreach="$products as $product" class="col-6 col-xl-3 product-item-col">
+                    {var $price = $product->price->price_action ? $product->price->price_action : $product->price->price}
+                        {var $image = $product->getImage()?->file ? $product->getImage()?->file : content('products', 'defaultImage')}
+
+                        {var $url = $page->full_url."/".$branch->slug."/".$product->id}
+
+                        {var $priceValues = $product->getPriceWithLog($branch->id)}
+                        {var $price = $priceValues->price_action ? $priceValues->price_action : $priceValues->price}
+                        {var $unitValue = $product->getUnitValue($price)}
+
+                        <div class="product-item">
+                            <a href="{$url}" class="product-item-img">
+                                <img src="{$image|image:productDefault}" class="img-fluid" alt="">
+                            </a>
+
+                            <div n:if="$product->getCountry() && $imageCountry = $product->getCountry()->image" class="product-item-flag"><img src="{$imageCountry|image:country}" alt="{$imageCountry|imageTitle}"></div>
+                            <a href="{$url}" class="product-item-name">{$product->name}</a>
+                            <div n:if="$unitValue" class="product-item-weight">{$product->weight} {$unitValue->basicUnit}</div>
+                            <div class="product-item-bottom">
+                                <div class="product-item-price">
+                                    <div n:if="$discount = $product->getPercentDiscount($branch->id)" class="price-sale">{$discount}</div>
+                                    {if $priceValues->price_action && $priceValues->price_action < $priceValues->price}<span class='price-old'>{$priceValues->price|price}</span>{/if}
+                                    <div class="price-actual">{$price|price}</div>
+                                </div>
+                                <div class="text-muted">{if $unitValue}{$unitValue->price|price:2} / {$unitValue->unitWeight} {$unitValue->unitShort}{/if}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+			</div>
+		</div>
+	</div>
+</section>

@@ -1,0 +1,127 @@
+{block topButtons}
+
+    <a n:if="count($filters)" n:href="resetFilters!" class="btn btn-danger btn-addon">
+        <i class="far fa-times"></i> {_admin.filters.reset}
+    </a>
+    <a n:if="$aps->has('create')" n:href="new" class="btn btn-success btn-addon">
+        <i class="far fa-plus"></i> {_admin.actions.new}
+    </a>
+
+{/block}
+
+
+{block content}
+
+    <div class="col-md-12">
+        <div class="panel panel-white">
+            <div class="panel-body">
+
+                <div class="clearfix m-b-sm">
+                    <div class="pull-right">
+                        {control bulkActions:button}
+                    </div>
+                </div>
+                {control bulkActions}
+                {form filters-form}
+                    <div class="table-responsive dataTables_wrapper">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                            <tr>
+                                <th class="w-40"></th>
+                                <th>
+                                    <div class="w-300">{_admin.terms.name}</div>
+                                </th>
+                                <th class="w-100">
+                                    <div class="w-100">{_admin.terms.isoCode3}</div>
+                                </th>
+                                <th class="w-100 text-right">
+                                    <div class="w-100">{_admin.terms.pricesFormat}</div>
+                                </th>
+                                <th class="w-150 text-center">
+                                    <div class="w-150">{_admin.terms.exchangeRate}</div>
+                                </th>
+                                <th class="w-50 text-center">
+                                    <i class="far fa-star" data-toggle="tooltip" title="{_admin.terms.isDefault}"></i>
+                                </th>
+                                <th class="w-50 text-center">
+                                    <i class="far fa-eye" data-toggle="tooltip" title="{_admin.terms.isActive}"></i>
+                                </th>
+                                <th class="w-40">
+                                    <div class="w-30"></div>
+                                </th>
+                            </tr>
+                            <tr class="filters">
+                                <td>
+                                    {control bulkActions:headCheckbox}
+                                </td>
+                                <td>
+                                    {input name class => 'form-control w-300'}
+                                </td>
+                                <td>
+                                    {input iso_code_3 class => 'form-control'}
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td>
+                                    <button type="submit" class="btn btn-default wp-100">
+                                        <i class="far fa-filter"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            </thead>
+                            <tbody n:snippet="list">
+                            <tr n:foreach="$items as $item" class="row-as-link" data-id="{$item->id}">
+                                <td class="row-as-link-ignore">
+                                    {control bulkActions:checkbox $item}
+                                </td>
+                                <td>
+                                    <span n:if="$aps->has('edit')" class="far fa-bars m-r-xxs move-handler text-default" data-toggle="tooltip" title="{_admin.actions.move}"></span>
+                                    <strong>{$item->name}</strong>
+                                </td>
+                                <td>
+                                    {$item->iso_code_3}
+                                </td>
+                                <td class="text-right">
+                                    {\CurrenciesService::formatPrice(2500.49, $item)}
+                                </td>
+                                <td class="text-center">
+                                    {if $defaultCurrency}
+                                        {\CurrenciesService::formatPrice(1, $item)} = {\CurrenciesService::formatPrice($item->exchange_rate, NULL, 2)}
+                                    {/if}
+                                </td>
+                                <td class="text-center row-as-link-ignore">
+                                    <a n:if="$aps->has('edit') && !$item->is_default" n:href="setAsDefault! $item->id" data-toggle="tooltip" title="{_admin.terms.setAsDefault}">
+                                        <i class="far fa-times-circle text-danger"></i>
+                                    </a>
+                                    <span n:if="!$aps->has('edit') || $item->is_default" data-toggle="tooltip" title="{_}admin.globals.bool.{$item->is_default ? 'true' : 'false'}{/_}">
+										<i n:class="'far', $item->is_default ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'"></i>
+									</span>
+                                </td>
+                                <td class="text-center row-as-link-ignore">
+                                    {include APP_DIR.'/AdminModule/__inc/boolSwitch.latte', 'item' => $item, 'param' => 'is_active', 'disabled' => $item->is_default}
+                                </td>
+                                <td class="actions actions-small row-as-link-ignore">
+                                    <div class="dropdown pull-left">
+                                        <a class="dropdown-toggle btn btn-default" data-toggle="dropdown" href="#">
+                                            <i class="fa fa-bars"></i>
+                                        </a>
+                                        <ul class="dropdown-menu dropdown-menu-right dropdown-list">
+                                            {control baseActions $item, $iterator}
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+
+                        {control paginator}
+                    </div>
+
+                {/form}
+            </div>
+        </div>
+    </div>
+
+{/block}

@@ -1,0 +1,28 @@
+<div id="modal-{$control->getName()}-createBlockForm" class="modal fade">
+	<div class="modal-dialog modal-sm-2">
+		<div class="modal-content" n:snippet="createBlockForm">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" title="{_admin.buttons.close}">
+					<span aria-hidden="true">×</span>
+				</button>
+				<h4>{_admin.terms.contents_block}</h4>
+			</div>
+			{form createBlockForm class => 'ajax ajax-modal-close'}
+				<div class="modal-body clearfix">
+					<div class="form-group">
+						{label types_id /}
+						{input types_id class => "form-control toggle-trigger", data-target => ".toggle-content-block_types_id"}
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button n:name="submit" data-open-after-submit="#modal-contentBlocks-editBlockForm" class="btn btn-success btn-addon">
+						<i class="far fa-check"></i> {_admin.buttons.save}
+					</button>
+					<button type="button" class="btn btn-default btn-addon" data-dismiss="modal">
+						<i class="far fa-times"></i> {_admin.buttons.close}
+					</button>
+				</div>
+			{/form}
+		</div>
+	</div>
+</div>

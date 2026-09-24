@@ -1,0 +1,97 @@
+{block topButtons}
+
+    <a n:if="count($filters)" n:href="resetFilters!" class="btn btn-danger btn-addon">
+        <i class="far fa-times"></i> {_admin.filters.reset}
+    </a>
+
+{/block}
+
+
+{block content}
+
+    <div class="col-md-12">
+        <div class="panel panel-white">
+            <div class="panel-body">
+                {form filters-form}
+
+                    <div class="clearfix m-b-sm">
+                        <div class="pull-right">
+
+                        </div>
+                    </div>
+
+                    <div class="table-responsive dataTables_wrapper">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                            <tr>
+                                <th class="w-150">
+                                    <div class="w-150">{_admin.terms.datetime} {control sorting 'date'}</div>
+                                </th>
+                                <th>
+                                    <div class="w-300">{_admin.terms.subject} {control sorting 'subject'}</div>
+                                </th>
+                                <th class="w-250">
+                                    <div class="w-250">{_admin.terms.sender} {control sorting 'email_from'}</div>
+                                </th>
+                                <th class="w-250">
+                                    <div class="w-250">{_admin.terms.recipient} {control sorting 'email_to'}</div>
+                                </th>
+                                <th class="w-90 text-center"></th>
+                            </tr>
+                            <tr class="filters">
+                                <td></td>
+                                <td>
+                                    {input subject class => 'form-control w-300'}
+                                </td>
+                                <td>
+                                    {input email_from class => 'form-control'}
+                                </td>
+                                <td>
+                                    {input email_to class => 'form-control'}
+                                </td>
+                                <td></td>
+                            </tr>
+                            </thead>
+                            <tbody n:snippet="list">
+                            <tr n:foreach="$items as $item" class="row-as-link" data-id="{$item->id}">
+                                <td>
+                                    {$item->created_at->format('d.m.Y H:i:s')}
+                                    <i n:if="!$item->sent_at && $item->error_message" class="far fa-exclamation-triangle text-danger pull-right m-t-xxs" data-toggle="tooltip" title="{_admin.messages.errorMailingQueue}"></i>
+                                    <i n:if="!$item->sent_at && !$item->error_message" class="far fa-spinner fa-spin text-grey pull-right m-t-xxs" data-toggle="tooltip" title="{_admin.messages.waitingMailingQueue}"></i>
+                                    <i n:if="$item->sent_at" class="far fa-check-circle text-success pull-right m-t-xxs" data-toggle="tooltip" title="{_admin.messages.successMailingQueue}"></i>
+                                </td>
+                                <td>
+                                    {$item->subject}
+                                </td>
+                                <td class="row-as-link-ignore">
+                                    {$item->email_from}
+                                </td>
+                                <td class="row-as-link-ignore">
+                                    {$item->email_to}
+                                </td>
+                                <td class="actions-small text-center row-as-link-ignore">
+                                    <a n:href="mailingQueueDetail! $item->id" class="btn btn-default row-as-link-target ajax-modal" data-target="#modal-mailingQueueDetail">
+                                        <i class="far fa-search"></i>
+                                    </a>
+                                    <a n:href="mailingQueueReply! $item->id" n:class="'btn ajax-modal pull-right', $item->is_reply ? 'btn-success' : 'btn-default'" data-target="#modal-mailingQueueReply">
+                                        <i class="far fa-reply"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+
+                        {control paginator}
+                    </div>
+
+                {/form}
+            </div>
+        </div>
+    </div>
+
+    {snippetArea modalWrapper}
+        {include '_modal-mailingQueueDetail.latte'}
+        {include '_modal-mailingQueueReply.latte'}
+    {/snippetArea}
+
+

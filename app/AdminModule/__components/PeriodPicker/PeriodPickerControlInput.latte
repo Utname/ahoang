@@ -1,0 +1,9 @@
+<div class="period-picker input-group w-350">
+    <input type="text" class="form-control" placeholder="{_admin.periodPicker.period}" disabled value="{$control->getInputValueFormatted()}" title="{$control->getInputValuePeriodFormatted()}">
+    <span class="input-group-btn">
+        <a class="btn btn-default" href="#" data-toggle="modal" data-target="#modal-periodPicker-{$control->getName()}" type="button"><i class="far fa-cog"></i></a>
+        <a n:if="$control->isPeriodSet()" class="btn btn-default {!$control->isHandlePrevValid() ? 'disabled btn-disabled' : ''}" n:href="prev!"><i class="far fa-angle-left"></i></a>
+        <a n:if="$control->isPeriodSet()" class="btn btn-default {!$control->isHandleNextValid() ? 'disabled btn-disabled' : ''}" n:href="next!"><i class="far fa-angle-right"></i></a>
+        <a n:if="$control->isPeriodSet()" class="btn btn-default" n:href="reset!"><i class="far fa-trash"></i></a>
+    </span>
+</div>

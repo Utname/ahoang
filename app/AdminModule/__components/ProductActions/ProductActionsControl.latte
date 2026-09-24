@@ -1,0 +1,7 @@
+{snippet list}
+    {var $item = $control->getItem()}
+    {var $price = $item->getPrice($control->getBranchesId())}
+    <i n:class="'far', $price && $price->is_action ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'"></i>
+    <div class="clearfix m-b-xxs"></div>
+    <i class="far fa-circle-info text-default" data-toggle="tooltip" title="{$item?->formatBranchTooltip($control->getBranchesPairs(), 'is_action') ?: ''}"></i>
+{/snippet}

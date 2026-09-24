@@ -1,0 +1,45 @@
+<div class="clearfix">
+    <h4>{_admin.terms.categoriesClassification}</h4>
+
+    {var $ids = isset($item) ? $item->getCategoryIds() : []}
+    <table n:if="!empty($categories)" class="table table-striped table-hover table-compact">
+        <thead>
+        <tr>
+            <th class="w-30">
+                <div class="w-30"></div>
+            </th>
+            <th>
+                <div class="w-150">{_admin.terms.category}</div>
+            </th>
+            <th class="w-50 text-center">
+                <i class="far fa-eye" data-toggle="tooltip" title="{_admin.terms.isActive}"></i>
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr  n:foreach="$categories as $i">
+            <td class="text-center">
+               <span>
+                    <input name="categories[{$i->id}]" type="checkbox"{if in_array($i->id, $ids)} checked="checked"{/if} />
+                </span>
+            </td>
+            <td>
+                {$i->name}
+            </td>
+            <td class="text-center row-as-link-ignore">
+                {include APP_DIR.'/AdminModule/__inc/boolSwitch.latte', 'item' => $i, 'param' => 'is_active', disabled => TRUE}
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <div n:if="empty($categories)" class="alert alert-info">
+        <p>
+            {_admin.terms.noBlogCategories}
+        </p>
+    </div>
+
+    <div class="row-links m-b-sm">
+        {control categoriesQuickCreator:button}
+    </div>
+
+</div>

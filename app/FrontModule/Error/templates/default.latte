@@ -1,0 +1,9 @@
+{layout '../../@layout.latte'}
+
+{block content}
+
+<section class="product-list-section mt-2 mt-md-3 mb-2 mb-md-3">
+    <div class="container">
+        {content('error', 'text') ? content('error', 'text') : '<p></p>'|noescape}
+    </div>
+</section>

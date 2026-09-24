@@ -1,0 +1,2 @@
+ALTER TABLE `admin_users` ADD `default_branches_id` INT(11) NULL DEFAULT NULL AFTER `is_all_branches_permission`;
+ALTER TABLE `admin_users` ADD FOREIGN KEY (`default_branches_id`) REFERENCES `branches`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;

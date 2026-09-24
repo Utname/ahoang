@@ -1,0 +1,64 @@
+{form generalForm}
+	<div class="col-lg-3">
+		<h4 class="m-t-no">{_admin.terms.general}</h4>
+		<div class="form-group">
+			{label website_name /}
+			{input website_name class => 'form-control form-control-bigger'}
+		</div>
+
+	</div>
+	<div class="col-lg-3 col-lg-offset-1">
+		<h4 class="m-t-no">{_admin.terms.images}</h4>
+
+		<div class="form-group">
+			{label logo /}
+			{input logo class => 'form-control upload-input'}
+			<div n:if="$image = isset($settings->logo) ? $settings->logo" class="image_box container_del_box">
+				<img src="{$image|image:admin}?{time()}" />
+				<div class="image-controls">
+					<a n:href="deleteValue! 'logo'" class="far fa-trash ico_del" title="{_admin.terms.delete}"></a>
+				</div>
+			</div>
+		</div>
+
+		<div class="form-group">
+			{label logo_footer /}
+			{input logo_footer class => 'form-control upload-input'}
+			<div n:if="$image = isset($settings->logo_footer) ? $settings->logo_footer" class="image_box container_del_box">
+				<img src="{$image|image:admin}?{time()}" />
+				<div class="image-controls">
+					<a n:href="deleteValue! 'logo_footer'" class="far fa-trash ico_del" title="{_admin.terms.delete}"></a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-lg-3 col-lg-offset-1">
+		<h4 class="m-t-no">{_admin.terms.favicons}</h4>
+
+		<div class="form-group">
+			{label favicon_zip /}
+			{input favicon_zip class => 'form-control upload-input'}
+			{var $path = \SettingsEntity::getFaviconImage()}
+			<div n:if="$path" class="image_box container_del_box">
+				<img src="{$path}?{time()}" />
+				<div class="image-controls">
+					<a n:href="removeFavicon!" class="far fa-trash ico_del" title="{_admin.terms.delete}"></a>
+				</div>
+			</div>
+		</div>
+
+		<div class="form-group">
+			{label favicon /}
+			{input favicon class => 'form-control h-200'}
+		</div>
+
+	</div>
+
+	<div class="col-lg-12">
+		<div class="form-group-btns p-v-xs">
+			<button n:name="submit" class="btn btn-success btn-addon m-r-xs">
+				<i class="far fa-check"></i> {_admin.buttons.save}
+			</button>
+		</div>
+	</div>
+{/form}

@@ -1,0 +1,111 @@
+{block topButtons}
+
+    <a n:if="count($filters)" n:href="resetFilters!" class="btn btn-danger btn-addon">
+        <i class="far fa-times"></i> {_admin.filters.reset}
+    </a>
+    <a n:if="$aps->has('create')" n:href="new" class="btn btn-success btn-addon">
+        <i class="far fa-plus"></i> {_admin.actions.new}
+    </a>
+
+{/block}
+
+
+{block content}
+
+    <div class="col-md-12">
+        <div class="panel panel-white">
+            <div class="panel-body">
+                <div class="clearfix m-b-sm">
+                    <div class="pull-right">
+                        {control bulkActions:button}
+                        <a href="#" class="btn btn-default slide-toggle" data-target=".settings-container">
+                            {_admin.terms.settings} <i class="fa fa-chevron-down m-l-xxs"></i>
+                        </a>
+                    </div>
+                </div>
+                {control bulkActions}
+                {form filters-form}
+                    <div class="table-responsive dataTables_wrapper">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                            <tr>
+                                <th class="w-40"></th>
+                                <th class="w-300">
+                                    <div class="w-300">{_admin.terms.name} {control sorting 'name'}</div>
+                                </th>
+                                <th>
+                                    <div class="w-300">{_admin.terms.subject} {control sorting 'subject'}</div>
+                                </th>
+                                <th class="w-250">
+                                    <div class="w-250">{_admin.terms.sender} {control sorting 'email_from'}</div>
+                                </th>
+                                <th class="w-250">
+                                    <div class="w-250">{_admin.terms.recipients}</div>
+                                </th>
+                                <th class="w-40">
+                                    <div class="w-30"></div>
+                                </th>
+                            </tr>
+                            <tr class="filters">
+                                <td>
+                                    {control bulkActions:headCheckbox}
+                                </td>
+                                <td>
+                                    {input name class => 'form-control'}
+                                </td>
+                                <td>
+                                    {input subject class => 'form-control w-300'}
+                                </td>
+                                <td>
+                                    {input email_from class => 'form-control'}
+                                </td>
+                                <td>
+                                    {input email_to class => 'form-control'}
+                                </td>
+                                <td>
+                                    <button type="submit" class="btn btn-default wp-100">
+                                        <i class="far fa-filter"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            </thead>
+                            <tbody n:snippet="list">
+                            <tr n:foreach="$items as $item" class="row-as-link" data-id="{$item->id}">
+                                <td class="row-as-link-ignore">
+                                    {control bulkActions:checkbox $item}
+                                </td>
+                                <td>
+                                    <strong>{$item->name}</strong>
+                                </td>
+                                <td>
+                                    {$item->subject}
+                                </td>
+                                <td>
+                                    {$item->email_from}
+                                </td>
+                                <td>
+                                    {$item->email_to}
+                                </td>
+                                <td class="actions actions-small row-as-link-ignore">
+                                    <div class="dropdown pull-left">
+                                        <a class="dropdown-toggle btn btn-default" data-toggle="dropdown" href="#">
+                                            <i class="fa fa-bars"></i>
+                                        </a>
+                                        <ul class="dropdown-menu dropdown-menu-right dropdown-list">
+                                            {control baseActions $item, $iterator}
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+
+                        {control paginator}
+                    </div>
+
+                {/form}
+            </div>
+        </div>
+    </div>
+
+{/block}

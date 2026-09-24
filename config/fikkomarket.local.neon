@@ -1,0 +1,8 @@
+application:
+	catchExceptions: FALSE
+
+database:
+	dsn: 'mysql:host=localhost;dbname=fikkomarket_cz'
+	user: 'root'
+	password: 'root'
+

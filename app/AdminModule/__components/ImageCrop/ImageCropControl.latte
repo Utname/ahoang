@@ -1,0 +1,21 @@
+<div id="modal-{$control->getName()}" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span>×</span></button>
+                <h4 class="modal-title">{_admin.terms.image_crop_title}</h4>
+            </div>
+            {snippet imageCrop}
+                <div n:if="isset($image)" class="modal-body clearfix">
+                    <div class="col-lg-12">
+                        <img class="wp-100 image_crop" src="{isset($imagePath) ? $imagePath : ''}" {if !is_null($imageData)}data-init-x="{$imageData->crop_x}" data-init-y="{$imageData->crop_y}" data-init-width="{$imageData->crop_width}" data-init-height="{$imageData->crop_height}"{/if} />
+                    </div>
+                </div>
+                <div n:if="isset($image)" class="modal-footer">
+                    <a n:if="isset($imageData) && ($imageData->crop_x != 0 || $imageData->crop_y != 0 || $imageData->crop_width != 0 || $imageData->crop_height != 0)" n:href="removeImageCropData! $image" data-dismiss="modal" class="btn btn-default crop-remove btn-addon"><i class="fa fa-times"></i> {_admin.terms.remove_crop}</a>
+                    <a n:href="processImageCrop! $image, 0, 0, 0, 0" data-dismiss="modal" class="btn btn-success crop-send btn-addon"><i class="fa fa-check"></i> {_admin.buttons.save}</a>
+                </div>
+            {/snippet}
+        </div>
+    </div>
+</div>

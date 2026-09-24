@@ -1,0 +1,74 @@
+parameters:
+	smtpMailer:
+		host: smtpx.stable.cz
+		username: notif.bily@pro-idea.cz
+		password: %smtpPassword%
+		secured: ssl
+		campaignId: yJO0ybjqFtPJybetGp0j
+
+
+application:
+	errorPresenter: Front:Error
+	mapping:
+		*: App\*Module\Presenters\*Presenter
+
+
+session:
+	expiration: 14 days
+
+
+services:
+	nette.cacheJournal: Nette\Caching\Storages\SQLiteJournal(%tempDir%/journal.s3db)
+	security.passwords: Nette\Security\Passwords(::PASSWORD_BCRYPT, [cost: 12])
+
+	- App\Router\RouterFactory::createRouter
+
+	nette.latteFactory:
+		setup:
+			- addFilter(image, [@imageFilter, process])
+			- addFilter(imageTitle, [@imageTitleFilter, process])
+			- addFilter(price, [@priceFilter, process])
+			- addFilter(float, [@floatFilter, process])
+			- addFilter(perc, [@percFilter, process])
+			- addFilter(datetime, [@datetimeFilter, process])
+			- addFilter(filesize, [@fileSizeFilter, process])
+			- addFilter(menu, [@menuFilter, process])
+			- addFilter(brakes, [@brakesText, process])
+			- addFilter(file, [@fileFilter, process])
+			- addFilter(fileTitle, [@fileTitleFilter, process])
+			- addFilter(month, [@monthFilter, process])
+			- addFilter(day, [@dayFilter, process])
+			- addFilter(wrap, [@wrapFilter, process])
+			- addFilter(fileIcon, [@fileIconFilter, process])
+			- addFilter(faIcon, [@faIconFilter, process])
+
+	imageFilter: ImageFilter(%images%)
+	imageTitleFilter: ImageTitleFilter
+	priceFilter: PriceFilter
+	floatFilter: FloatFilter
+	percFilter: PercFilter
+	datetimeFilter: DatetimeFilter
+	fileSizeFilter: FileSizeFilter
+	menuFilter: MenuFilter
+	brakesText: BrakesFilter
+	fileFilter: FileFilter
+	fileTitleFilter: FileTitleFilter
+	monthFilter: MonthFilter
+	dayFilter: DayFilter
+	wrapFilter: WrapFilter
+	fileIconFilter: FileIconFilter
+	faIconFilter: FaIconFilter
+
+
+extensions:
+	translation: Contributte\Translation\DI\TranslationExtension
+
+
+translation:
+	locales:
+		default: cs_CZ
+		fallback: [cs_CZ]
+	dirs:
+		- %appDir%/locale
+	localeResolvers:
+		- Contributte\Translation\LocalesResolvers\Session

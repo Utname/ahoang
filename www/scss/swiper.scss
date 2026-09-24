@@ -1,0 +1,71 @@
+.swiper {
+    &-scrollbar {
+        background: $white;
+        &.swiper-scrollbar-horizontal {
+            height: 1px;
+        }
+
+        &-drag {
+            height: 3px;
+            background: $white;
+            margin-top: -1px;
+        }
+    }
+
+    &-button-next,
+    &-button-prev {
+        width: 4.8rem;
+        height: 4.8rem;
+        background: $primary;
+        border-radius: 50%;
+        transition: all 0.3s;
+        &:hover {
+            background-color: #e3630b;
+        }
+
+        svg {
+            width: 1.65rem;
+        }
+
+        &:after {
+            display: none;
+        }
+
+        margin-top: auto;
+        top: unset;
+        bottom: 0;
+        margin-bottom: 4rem;
+
+        &.swiper-button-disabled {
+            background: $white;
+            opacity: 1;
+
+            svg {
+                path {
+                    fill: $primary;
+                }
+            }
+        }
+    }
+
+    &-pagination {
+        &-bullet {
+            width: 1.2rem;
+            height: 1.2rem;
+            border: 1px solid $white;
+            background: transparent;
+            &-active {
+                background: $white;
+            }
+        }
+    }
+}
+
+@media(max-width: 991px) {
+    .swiper-button-next, .swiper-button-prev {
+        margin-bottom: 3rem;
+    }
+    .swiper-scrollbar.swiper-scrollbar-horizontal {
+        bottom: 2rem;
+    }
+}

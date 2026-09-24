@@ -1,0 +1,13 @@
+<div class="clearfix">
+    <h4>{_admin.terms.metaTags}</h4>
+
+    <div class="form-group">
+        {label meta_title /}
+        {input meta_title class => 'form-control'}
+    </div>
+    <div class="form-group">
+        {label meta_desc /}
+		{input meta_desc class => 'form-control h-100'}
+    </div>
+    {include 'formImage.latte' field => 'meta_image'}
+</div>

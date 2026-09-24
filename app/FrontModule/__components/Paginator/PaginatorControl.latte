@@ -1,0 +1,7 @@
+<div n:if="$control->getPaginator()->getPageCount() > 1" class="pro-pagination-style text-center mt-10">
+  <ul>
+    <li n:if="$control->getPaginator()->page > 1"><a n:class="$control->isAjax() ? 'ajax' : '', 'prev'" n:href="changePage! ($control->getPaginator()->page - 1), $control->getUrlParameters()"><i class="fal fa-chevron-left"></i></a></li>
+    <li n:foreach="$control->getPages() as $i"><a n:class="($i == $control->getPaginator()->page) ? 'active' : '', $control->isAjax() ? 'ajax' : ''" n:href="changePage! $i, $control->getUrlParameters()">{$i}</a></li>
+    <li n:if="$control->getPaginator()->getPageCount() > $control->getPaginator()->page"><a n:class="$control->isAjax() ? 'ajax' : '', 'next'" n:href="changePage! ($control->getPaginator()->page + 1), $control->getUrlParameters()"><i class="fal fa-chevron-right"></i></a></li>
+  </ul>
+</div>

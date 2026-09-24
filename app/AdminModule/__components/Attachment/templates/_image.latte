@@ -1,0 +1,18 @@
+<div n:if="!is_null($item) && $item->getValue($field)" class="clearfix">
+    <div class="image_box container_del_box container_rotate_box">
+        {var $pathInfo = pathinfo($item->getValue($field))}
+        {var $isSvg = (strtolower($pathInfo['extension']) == 'svg')}
+        <a href="{$item->getValue($field)|image:original}" n:class="(!$isSvg) ? 'photo-popup' : '', 'zoom'" {if $isSvg}target="_blank"{/if}>
+            <img src="{$item->getValue($field)|image:$imageType}?{time()}" />
+        </a>
+        <div n:if="$control->getAction() != 'copy'" class="image-controls">
+            <a n:if="!$isSvg" n:href="rotateImage! $item->getValue($field)" class="far fa-redo-alt ico_rotate" data-toggle="tooltip" title="{_admin.terms.rotate}"></a>
+            <a n:if="!$isSvg" n:href="cropImage! $item->getValue($field)" class="far fa-crop ico_crop ajax-modal" data-target="#modal-imageCrop" data-toggle="tooltip" title="{_admin.terms.image_crop}"></a>
+            <a n:href="setValue! $item->id, $field, '', $repository" class="far fa-trash ico_del" data-toggle="tooltip" title="{_admin.terms.delete}"></a>
+        </div>
+        <div class="input-group">
+            <input {$control->getAction() == 'copy' ? 'disabled' : ''} data-href="{link setImageTitle! $item->getValue($field), 'replace_title'}" type="text" class="form-control image-title input-sm" placeholder="{_admin.terms.image_title}" value="{$item->getValue($field)|imageTitle}">
+            <span class="input-group-addon"><i class="far fa-check"></i></span>
+        </div>
+    </div>
+</div>

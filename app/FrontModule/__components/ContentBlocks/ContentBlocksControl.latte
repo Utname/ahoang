@@ -1,0 +1,34 @@
+{snippetArea contentBlocks}
+    {var $content = $control->getContent()}
+    {if $content}
+        {foreach $content->getSections() as $section}
+
+            {foreach $section->getBlocks() as $block}
+                {if $block->is_active}
+                    <div id="block-{$iterator->counter}" class="viewport" data-url="{isset($GLOBALS['language']) && !$GLOBALS['language']->is_default ? "/".$GLOBALS['language']->id}{$block->slug ? "/".$block->slug}">
+
+                    {if $block->types_id == \ContentBlocksDefinition::BLOCK_TYPE_TEXT}
+                        {include 'blocks/BLOCK_TYPE_TEXT.latte', 'block' => $block}
+                    {elseif $block->types_id == \ContentBlocksDefinition::BLOCK_TYPE_MAP}
+                        {include 'blocks/BLOCK_TYPE_MAP.latte', 'block' => $block}
+                    {elseif $block->types_id == \ContentBlocksDefinition::BLOCK_TYPE_FORM_WITH_BRANCHES}
+                        {include 'blocks/BLOCK_TYPE_FORM_WITH_BRANCHES.latte', 'block' => $block}
+                    {elseif $block->types_id == \ContentBlocksDefinition::BLOCK_TYPE_PRODUCTS}
+                        {include 'blocks/BLOCK_TYPE_PRODUCTS.latte', 'block' => $block}
+                    {elseif $block->types_id == \ContentBlocksDefinition::BLOCK_TYPE_CATEGORIES}
+                        {include 'blocks/BLOCK_TYPE_CATEGORIES.latte', 'block' => $block}
+                    {elseif $block->types_id == \ContentBlocksDefinition::BLOCK_TYPE_TEXT_IMAGE}
+                        {include 'blocks/BLOCK_TYPE_TEXT_IMAGE.latte', 'block' => $block}
+
+                        {*ALL FEATURES SAMPLE*}
+                        {*{elseif $block->types_id == \ContentBlocksDefinition::BLOCK_TYPE_CONTENT}
+                            {include 'blocks/BLOCK_TYPE_CONTENT.latte', 'block' => $block}*}
+                    {/if}
+
+                    </div>
+                {/if}
+            {/foreach}
+
+        {/foreach}
+    {/if}
+{/snippetArea}

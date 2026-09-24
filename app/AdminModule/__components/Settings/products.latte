@@ -1,0 +1,18 @@
+{form productsForm}
+	<div class="col-lg-3">
+		<h4 class="m-t-no m-b-no">{_admin.terms.defaultBranch}</h4>
+		<div class="help-block">{_admin.terms.defaultBranchTip}</div>
+		<div class="form-group">
+			{label default_branch /}
+			{input default_branch class => 'form-control'}
+		</div>
+
+	</div>
+	<div class="col-lg-12">
+		<div class="form-group-btns p-v-xs">
+			<button n:name="submit" class="btn btn-success btn-addon m-r-xs">
+				<i class="far fa-check"></i> {_admin.buttons.save}
+			</button>
+		</div>
+	</div>
+{/form}

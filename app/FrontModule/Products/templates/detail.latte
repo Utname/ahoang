@@ -1,0 +1,42 @@
+{block content}
+
+{var $priceValues = $item->getPriceWithLog($branch->id)}
+{var $price = $priceValues->price_action ? $priceValues->price_action : $priceValues->price}
+{var $unitValue = $item->getUnitValue($price)}
+{var $productPage = page('products', 'products')}
+
+<section class="product-detail-section">
+    <div class="container">
+        <div class="product-detail">
+            <div class="product-detail-left">
+                {var $image = $item->getImage()?->file ? $item->getImage()?->file : content('products', 'defaultImage')}
+                <a href="{$image|image:original}" data-lightbox="galerie" class="product-detail-img">
+                    <img src="{$image|image:detailProduct}" class="img-fluid" alt="">
+                </a>
+            </div>
+            <div class="product-detail-right">
+                <h1 n:if="$item->name">{$item->name}</h1>
+
+                {$item->text ? $item->text|noescape}
+
+                <div n:if="$unitValue" class="product-item-weight">{$item->weight} {$unitValue->basicUnit}</div>
+
+                <div n:if="$unitValue" class="price-value">
+                    <span><small>{$unitValue->price|price:2} / {$unitValue->unitWeight} {$unitValue->unitShort}</small></span>
+                </div>
+                <div n:if="$priceValues->is_valid_action" class="product-detail-price">
+                    <div n:if="$discount = $item->getPercentDiscount($branch->id)" class="price-sale">{$discount}</div>
+                    {if $priceValues->price_action && $priceValues->price_action < $priceValues->price}<span class='price-old'>{$priceValues->price|price}</span>{/if}
+                    <div n:if="$price" class="price-actual">{$price|price}</div>
+                </div>
+                <div n:if="!$priceValues->is_valid_action">
+                    {content('products', 'end_of_action')|replace:'{*URL*}',($productPage->full_url.'/'.$branch->slug)|noescape}
+                </div>
+
+                <div class="product-detail-map" n:if="$branch->lat && $branch->lng" >
+                    <iframe n:if="$apiKey = $presenter->getSettings('google_maps_api_key')" src="https://www.google.com/maps/embed/v1/place?key={$apiKey}&amp;q={$branch->lat},{$branch->lng}&amp;zoom=15" width="100%" height="410" frameborder="0" style="border:0" allowfullscreen=""></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

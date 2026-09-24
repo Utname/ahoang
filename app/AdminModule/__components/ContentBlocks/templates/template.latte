@@ -1,0 +1,59 @@
+<div class="row">
+	<div class="col-sm-12" n:snippet="contentBlocks">
+		{var $sections = $control->getSections()}
+
+		<div n:if="!count($sections)" class="alert alert-info">
+			<p>
+				{_admin.terms.contents_no_sections}
+				<a n:if="$aps->has('create') && !$isCopy" n:href="createSection!" data-target="#modal-{$control->getName()}-sectionForm" class="ajax-modal">{_admin.terms.contents_no_sections_click}</a>.
+			</p>
+		</div>
+
+		<div n:if="count($sections)" class="text-right m-b-xs">
+			<a n:if="$aps->has('create') && !$isCopy" n:href="createSection!" data-target="#modal-{$control->getName()}-sectionForm" class="ajax-modal text-gray"><i class="far fa-plus-circle"></i> {_admin.terms.contents_create_section}</a>
+		</div>
+
+		<div class="content-blocks-sections">
+			<div n:foreach="$control->getSections() as $section" n:if="$sectionDefinition = $control->getSectionDefinition($section)" class="b b-default p-v-sm p-h-sm m-b-sm content-blocks-section b-gray" data-id="{$section->id}" data-control-name="{$control->getName()}">
+				<div class="row m-b-sm">
+					<div class="col-sm-8 text-gray">
+						<i n:if="$aps->has('edit') && !$isCopy" class="far fa-bars text-gray m-r-xxs move-handler" data-toggle="tooltip" title="{_admin.terms.contents_move_section}"></i>
+						{if $section->name}
+							{$section->name}
+						{else}
+							{_admin.terms.contents_section} - {_$sectionDefinition[\ContentSectionsDefinition::NAME]}
+						{/if}
+					</div>
+					<div class="col-sm-4 text-right">
+						<a n:if="$aps->has('create') && !$isCopy" n:href="createBlock! $section->id" data-target="#modal-{$control->getName()}-createBlockForm" class="ajax-modal text-gray m-l-xxs" data-toggle="tooltip" title="{_admin.terms.contents_create_block}"><i class="far fa-plus-circle"></i></a>
+						<a n:if="$aps->has('create') && !$isCopy" n:href="copyBlock! $section->id" data-target="#modal-{$control->getName()}-copyBlockForm" class="ajax-modal text-gray m-l-xxs" data-toggle="tooltip" title="{_admin.terms.contents_copy_block}"><i class="far fa-copy"></i></a>
+						<a n:if="$aps->has('edit') && !$isCopy" n:href="editSection! $section->id" data-target="#modal-{$control->getName()}-sectionForm" class="ajax-modal text-gray m-l-xxs" data-toggle="tooltip" title="{_admin.actions.edit}"><i class="far fa-pencil"></i></a>
+						<a n:if="$aps->has('delete') && !$isCopy" n:href="removeSection! $section->id" class="ajax text-gray m-l-xxs with-confirm" data-message="{_admin.dialogs.delete}" data-toggle="tooltip" title="{_admin.actions.delete}"><i class="far fa-trash"></i></a>
+					</div>
+				</div>
+				<div class="content-blocks-blocks">
+					<div n:foreach="$control->getBlocks($section) as $block" n:if="$blockDefinition = $control->getBlockDefinition($block)" class="alert b m-b-xxs content-blocks-block" data-id="{$block->id}" data-control-name="{$control->getName()}">
+						<div class="content-block-row-info">
+							<i n:if="$aps->has('edit') && !$isCopy" class="far fa-bars m-r-xs move-handler" data-toggle="tooltip" title="{_admin.terms.contents_move_block}"></i>
+							<div>
+								{$control->getFormattedBlockName($block, $iterator->counter, $blockDefinition)|noescape}
+							</div>
+						</div>
+						<div class="content-block-row-controls">
+							<a n:if="$aps->has('edit') && !$isCopy" n:href="setActiveState! $block->id" class="ajax m-l-xxs" data-toggle="tooltip" title="{_}admin.terms.{$block->is_active ? 'active' : 'inactive'}{/_}">
+								<i n:class="'far', $block->is_active ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'"></i>
+							</a>
+
+							<a n:if="$aps->has('edit') && isset($block->is_in_menu)" n:href="setActiveMenu! $block->id" class="ajax m-l-xxs" data-toggle="tooltip" title="{_}admin.terms.{$block->is_in_menu ? 'isInMenu' : 'not_menu'}{/_}">
+								<i n:class="'far', $block->is_in_menu ? 'fa-eye text-success' : 'fa-eye text-danger'"></i>
+							</a>
+
+							<a n:if="$aps->has('edit') && !$isCopy && isset($blockDefinition[\ContentBlocksDefinition::PARAMETERS]) && count($blockDefinition[\ContentBlocksDefinition::PARAMETERS])"n:href="editBlock! $block->id"  data-target="#modal-{$control->getName()}-editBlockForm" class="ajax-modal text-gray m-l-xxs edit-trigger" data-toggle="tooltip" title="{_admin.actions.edit}"><i class="far fa-pencil"></i></a>
+							<a n:if="$aps->has('delete') && !$isCopy" n:href="removeBlock! $block->id" class="ajax text-gray m-l-xxs with-confirm" data-message="{_admin.dialogs.delete}" data-toggle="tooltip" title="{_admin.actions.delete}"><i class="far fa-trash"></i></a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

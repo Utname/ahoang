@@ -1,0 +1,66 @@
+html {
+  font-size: 62.5%;
+}
+@media (max-width: 991px) {
+  html {
+    font-size: 60%;
+  }
+}
+@media (max-width: 767px) {
+  html {
+    font-size: 50%;
+  }
+}
+
+@mixin pseudo {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+
+h2{
+  font-weight: 500;
+}
+
+
+.h-line {
+  position: relative;
+  display: inline-block;
+  z-index: 1;
+  &:after {
+    height: 8px;
+    left: 0;
+    right: 0;
+    position: absolute;
+    content: "";
+    background: $primary;
+    bottom: 7px;
+    z-index: -1;
+  }
+}
+
+.light-bg {
+  background: #FFF6F0;
+  padding: 8rem 0;
+}
+
+@media(max-width: 991px) {
+  h2, .h2 {
+    font-size: 3.6rem;
+    margin-bottom: 2.4rem;
+  }
+
+  .h-line {
+    &:after {
+      height: 4px;
+      bottom: 5px;
+    }
+  }
+
+  .light-bg {
+    padding: 4rem 0;
+  }
+}

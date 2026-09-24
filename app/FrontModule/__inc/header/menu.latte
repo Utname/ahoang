@@ -1,0 +1,10 @@
+<ul>
+    <li n:foreach="$presenter->getMenuItems() as $item">
+        <a href="{$item->url}"{$item->blank ? ' target="_blank"' : ''} n:class="$item->current ? 'active' : ''">{$item->name}</a>
+        <ul n:if="isset($item->items) && count($item->items)" class="sub-menu-style">
+            <li n:foreach="$item->items as $subitem">
+                <a href="{$subitem->url}"{$subitem->blank ? ' target="_blank"' : ''}>{$subitem->name}</a>
+            </li>
+        </ul>
+    </li>
+</ul>

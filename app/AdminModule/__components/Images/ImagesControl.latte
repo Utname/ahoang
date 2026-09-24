@@ -1,0 +1,45 @@
+<div class="dz-container dropzone-component">
+
+    <div n:if="$control->getAction() != 'copy'" class="row">
+        <div class="col-sm-12">
+            <div class="panel panel-white">
+                <div class="panel-body dropzone" id="dropzone_images-{$control->getName()}" data-directory="{$control->getTempDir()}">
+                    <div class="fallback">
+                        <input name="file" type="file" multiple/>
+                    </div>
+
+                    <div class="dz-message d-flex flex-column">
+                        <p>{_admin.terms.imageUploadTitle}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="gallery_images_box">
+        <div n:if="$control->getImages()" class="dz-images-box list">
+            <div n:foreach="$control->getImages() as $image" class="dz-image-box sortable_box item-list container_rotate_box" data-dropzone="{json_encode($image)}">
+                {var $pathInfo = pathinfo($image->file)}
+				{var $isSvg = (strtolower($pathInfo['extension']) == 'svg')}
+
+                <a href="{$image->file|image:original}" n:class="(!$isSvg) ? 'dz-image photo-popup' : ''" {if $isSvg}target="_blank"{/if}>
+                    <img src="{$image->file|image:adminGallery}"/>
+                </a>
+
+                <div n:if="$control->getAction() != 'copy'" class="dz-buttons">
+                    <a href="#" class="far fa-arrows dz-move ico_move dropzone-component-move-button" data-toggle="tooltip" title="{_admin.actions.move}"></a>
+                    <a n:if="!$isSvg" n:href="rotateImage! $image->file" class="far fa-redo-alt ico_rotate" data-toggle="tooltip" title="{_admin.terms.rotate}"></a>
+                    <a n:if="!$isSvg" n:href="cropImage! $image->file" class="far fa-crop ico_crop ajax-modal" data-target="#modal-imageCrop" data-toggle="tooltip" title="{_admin.terms.image_crop}"></a>
+                    <a href="#" class="far fa-trash ico_del dropzone-component-remove-button" data-toggle="tooltip" title="{_admin.actions.delete}"></a>
+                </div>
+                <div n:if="$control->getAction() != 'copy'" class="dz-input">
+                    <div class="input-group">
+                        <input data-href="{link setImageTitle! $image->file, 'replace_title'}" type="text" class="input-sm form-control image-title" placeholder="{_admin.terms.image_title}" value="{$image->file|imageTitle}">
+                        <span class="input-group-addon"><i class="far fa-check"></i></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <textarea name="images" class="hidden dropzone-component-list">{implode('; ', $control->getJsonImages())}</textarea>
+</div>

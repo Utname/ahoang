@@ -1,0 +1,71 @@
+{form watermarkForm}
+	<div class="col-lg-3">
+		<div class="row">
+			<div class="col-lg-6">
+				<div class="form-group">
+					{label watermark /}
+					{input watermark class => 'form-control toggle-trigger', data-target => '.watermark'}
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="clearfix"></div>
+	<div class="col-lg-3 watermark" data-show-on="1">
+		<div class="row">
+			<div class="col-lg-6">
+				<div class="form-group">
+					{label watermark_pos_x /}
+					{input watermark_pos_x class => 'form-control'}
+				</div>
+			</div>
+			<div class="col-lg-6">
+				<div class="form-group">
+					{label watermark_pos_y /}
+					{input watermark_pos_y class => 'form-control'}
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="clearfix"></div>
+	<div class="col-lg-3 watermark" data-show-on="1">
+		<div class="row">
+			<div class="col-lg-6">
+				<div class="form-group">
+					{label watermark_transparency /}
+					{input watermark_transparency class => 'form-control'}
+				</div>
+			</div>
+			<div class="col-lg-6">
+				<div class="form-group">
+					{label watermark_ratio /}
+					{input watermark_ratio class => 'form-control'}
+				</div>
+			</div>
+		</div>
+
+	</div>
+	<div class="clearfix"></div>
+	<div class="col-lg-3 watermark" data-show-on="1">
+		<div class="form-group">
+			{label watermark_image /}
+									{input watermark_image class => 'form-control'}
+			<div n:if="!$GLOBALS['container']->getWatermarkInfo()->is_png" class="alert alert-danger m-t-xs">
+				{_admin.terms.watermarkPngInfo}
+			</div>
+			<div n:if="$image = isset($settings->watermark_image) ? $settings->watermark_image" class="image_box container_del_box">
+				<img src="{$image|image:admin}?{time()}" />
+				<div class="image-controls">
+					<a n:href="deleteValue! 'watermark_image'" class="far fa-trash ico_del" title="{_admin.terms.delete}"></a>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="col-lg-12">
+		<div class="form-group-btns p-v-xs">
+			<button n:name="submit" class="btn btn-success btn-addon m-r-xs">
+				<i class="far fa-check"></i> {_admin.buttons.save}
+			</button>
+		</div>
+	</div>
+{/form}

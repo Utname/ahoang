@@ -1,0 +1,136 @@
+.m-t-10{
+    margin-top: 10px!important;
+}
+
+.m-t-15{
+    margin-top: 15px!important;
+}
+.m-t-20{
+    margin-top: 20px!important;
+}
+
+.m-t-25{
+    margin-top: 25px!important;
+}
+
+.m-t-40{
+    margin-top: 40px!important;
+}
+
+.m-t-50{
+    margin-top: 50px!important;
+}
+
+.m-t-80{
+    margin-top: 80px;
+}
+.m-b-80{
+    margin-bottom: 80px;
+}
+
+.m-b-25{
+    margin-bottom: 25px!important;
+}
+
+.p0{
+    padding: 0px!important;
+}
+
+.p-t-0{
+    padding-top: 0px!important;
+}
+
+.p-t-25{
+    padding-top: 25px!important;
+}
+
+.p-t-50{
+    padding-top: 50px;
+}
+
+.p-t-75{
+    padding-top: 75px;
+}
+
+.p-b-0{
+    padding-bottom: 0px!important;
+}
+
+.p-b-10{
+    padding-bottom: 10px;
+}
+
+.p-b-50{
+    padding-bottom: 50px;
+}
+
+.p-b-60 {
+    padding-bottom: 60px;
+}
+
+.p-r-10{
+    padding-right: 10px;
+}
+
+.p-l-10{
+    padding-left: 10px;
+}
+
+.d-block{
+    display: block!important;
+}
+
+.h-100{
+    height: 100px!important;
+}
+
+.text-left{
+    text-align: left;
+}
+
+.display-inline-b{
+    display: inline-block;
+}
+
+.white{
+    color: white!important;
+}
+
+.uf-center{
+    float: unset;
+    text-align: center;
+    margin: 0px auto;
+}
+
+.agree .check-box {
+    padding-bottom: 15px;
+}
+.agree .check-box label{
+    padding-left: 22px;
+}
+
+.agree .check-box label .agree-checkbox {
+    position: absolute;
+    left: 0px;
+    top: 6px;
+    width: auto;
+    height: auto !important;
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+}
+
+.project-details h3{
+    font-size: 30px;
+    margin-bottom: 15px;
+}
+
+ul.ul-styled{
+    padding-left: 25px;
+}
+
+.previous.btn{
+    padding: 12px 20px;
+}
+
+

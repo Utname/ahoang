@@ -1,0 +1,21 @@
+<footer>
+    <div class="container">
+        <div class="footer-inner">
+            <div class="row">
+                <div class="col-md-8">
+                    <a n:if="$logo = settings('logo_footer')" class="footer-logo" href="{page('home')->full_url}">
+                        <img src="{$logo|image:logo}" alt="{$logo|imageTitle}" data-src="{$logo|image:logo}" data-ret="{$logo|image:logo}" />
+                    </a>
+                    <h4 n:if="$title = content('footer','textTitle')">{$title}</h4>
+                    <div n:if="$text = content('footer','text')">{$text|noescape}</div>
+                </div>
+                <div n:if="isset($page) && $page->system == 'branches' && !empty($item) && isset($item->fb_url) && $item->fb_url" class="col-md-4">
+                    <div class="fb-page" data-href="{$item->fb_url}" data-tabs="" data-width="" data-height="" data-small-header="false" data-adapt-container-width="true" data-hide-cover="false" data-show-facepile="true"><blockquote cite="{$item->fb_url}" class="fb-xfbml-parse-ignore"><a href="{$item->fb_url}"></a></blockquote></div>
+                </div>
+            </div>
+            <div n:if="$content = content('footer', 'copyright')" class="footer-bottom">
+                {$content|replace:['{*Y*}' => date('Y')]|noescape}
+            </div>
+        </div>
+    </div>
+</footer>

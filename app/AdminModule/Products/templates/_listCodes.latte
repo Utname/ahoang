@@ -1,0 +1,51 @@
+<div class="clearfix">
+    <h4>{_admin.terms.productCodes}</h4>
+
+    {var $codes = isset($item) ? $item->getCodes() : []}
+    <table n:if="count($codes)" class="table table-striped table-hover table-compact">
+        <thead>
+        <tr>
+            <th>
+                <div class="w-150">{_admin.terms.value}</div>
+            </th>
+            <th class="w-40"></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr  n:foreach="$codes as $i" class="row-as-link" data-id="{$i->id}">
+            <td>
+                <strong>{$i->value}</strong>
+            </td>
+            <td class="actions actions-small row-as-link-ignore">
+                <div class="dropdown pull-left">
+                    <a class="dropdown-toggle btn btn-default" data-toggle="dropdown" href="#">
+                        <i class="fa fa-bars"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-right dropdown-list">
+                        <li>
+                            <a n:href="editCode! $i->id" class="row-as-link-target ajax-modal" data-target="#modal-codesForm">
+                                <i class="fas fa-pencil"></i> {_admin.actions.edit}
+                            </a>
+                        </li>
+                        <li>
+                            <a n:href="deleteCode! $i->id" class="ajax with-confirm" data-message="{_admin.dialogs.delete}">
+                                <i class="fa fa-trash"></i> {_admin.actions.delete}
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <div n:if="!count($codes)" class="alert alert-info">
+        <p>
+            {_admin.terms.noItemsFound}
+        </p>
+    </div>
+    <div class="row-links m-b-sm">
+        <a n:href="createCode!" class="text-gray m-r-md ajax-modal" data-target="#modal-codesForm">
+            <i class="far fa-plus-circle"></i> {_admin.actions.new}
+        </a>
+    </div>
+</div>

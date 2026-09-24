@@ -1,0 +1,24 @@
+{var $show = content('cookies', 'show')}
+<link n:if="$show" rel="stylesheet" href="/css/front/core/cookies.min.css">
+<script n:if="$show" src="/js/front/core/cookies.min.js"></script>
+<script n:if="$show">
+	window.addEventListener("load", function(){
+		window.cookieconsent.initialise({
+			"palette": {
+				"popup": {
+					"background": "#000",
+					"text": "#fff"
+				},
+				"button": {
+					"background": "#666",
+					"text": "#fff"
+				}
+			},
+			"content": {
+				"message": {content('cookies', 'text')},
+				"dismiss": {content('cookies', 'button')},
+				"link": {content('cookies', 'more_info')},
+				"href": {content('cookies', 'more_info_link')}
+			}
+		}) });
+</script>

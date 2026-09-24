@@ -1,0 +1,8 @@
+application:
+	catchExceptions: FALSE
+
+database:
+	dsn: 'mysql:host=mysql;dbname=website'
+	user: 'root'
+	password: 'toor'
+

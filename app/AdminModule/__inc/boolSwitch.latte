@@ -1,0 +1,14 @@
+{var $disabled = isset($disabled) && $disabled}
+{var $param = isset($param) ? $param : NULL}
+
+<a n:if="$aps->has('edit') && !$disabled" n:href="setValue! $item->id, $param, !$item->$param" data-toggle="tooltip" title="{_}admin.globals.bool.{$item->$param ? 'true' : 'false'}{/_}">
+	<i n:class="'far', isset($isEye) && $isEye ? ($item->$param ? 'fa-eye text-success' : 'fa-eye text-danger') : ($item->$param ? 'fa-check-circle text-success' : 'fa-times-circle text-danger')"></i>
+</a>
+<span n:if="!$aps->has('edit') || $disabled" data-toggle="tooltip" title="{_}admin.globals.bool.{$item->$param ? 'true' : 'false'}{/_}">
+	<i n:class="'far', isset($isEye) && $isEye ? ($item->$param ? 'fa-eye text-success' : 'fa-eye text-danger') : ($item->$param ? 'fa-check-circle text-success' : 'fa-times-circle text-danger')"></i>
+</span>
+{if $param == 'is_active'}
+	<br n:if="(isset($item->is_active_from) && $item->is_active_from) || (isset($item->is_active_to) && $item->is_active_to)">
+	<small n:if="isset($item->is_active_from) && $item->is_active_from">{_admin.terms.from} {$item->is_active_from->format('d.m.Y')}</small>
+	<small n:if="isset($item->is_active_to) && $item->is_active_to">{_admin.terms.to} {$item->is_active_to->format('d.m.Y')}</small>
+{/if}

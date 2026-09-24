@@ -1,0 +1,161 @@
+{block content}
+
+{var $contentBlocksControl = isset($item) ? $presenter->getComponent('contentBlocks', FALSE) : NULL}
+
+<div class="col-md-12">
+	<div class="panel panel-white">
+		{form editForm}
+		<div class="panel-body">
+
+			<div role="tabpanel">
+				<ul class="nav nav-tabs" role="tablist">
+					<li role="presentation" class="active">
+						<a href="#section-01" role="tab" data-toggle="tab">{_admin.tabs.basicInfo}</a>
+					</li>
+					<li role="presentation">
+						<a href="#section-02" role="tab" data-toggle="tab">{_admin.tabs.advanced}</a>
+					</li>
+				</ul>
+
+				<div class="tab-content">
+					<div role="tabpanel" class="tab-pane active clearfix" id="section-01">
+						<div class="col-lg-4">
+							<div class="clearfix">
+								<h4>{_admin.terms.mainInfo}</h4>
+
+								<div class="form-group">
+									{label name /}
+									{input name class => 'form-control form-control-bigger url-source', data-target => '.webalize'}
+								</div>
+								<div class="form-group clearfix">
+									{label slug /}
+
+									<div n:class="isset($item) ? 'input-group pull-left m-b-sm' : ''">
+										{input slug class => 'form-control webalize'}
+
+										<span n:if="isset($item)" class="input-group-btn" data-toggle="tooltip" title="" data-original-title="{_admin.actionsTitle.clipboard}">
+											<a href="javascript:void(0)" data-prefix="{$GLOBALS['container']->getUrlScript()->getHostUrl()}{isset($language) && $language->id ? '/'.$language->id}" class="btn btn-default clipboard-copy"><i class="far fa-copy"></i></a>
+										</span>
+
+										<span n:if="isset($item)" class="input-group-btn" data-toggle="tooltip" title="" data-original-title="{_admin.actionsTitle.viewEshop}">
+											<a href="{$item->full_url}" target="_blank" class="btn btn-default"><i class="far fa-eye"></i></a>
+										</span>
+									</div>
+								</div>
+							</div>
+
+							<div class="clearfix">
+								<h4>{_admin.terms.details}</h4>
+
+								<div class="row">
+									<div class="col-sm-6">
+										<div class="form-group">
+											{label is_active /}
+											{input is_active class => 'form-control'}
+										</div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-sm-6">
+										<div class="form-group">
+											{label is_in_menu /}
+											{input is_in_menu class => 'form-control'}
+										</div>
+									</div>
+									<div class="col-sm-6">
+										<div class="form-group">
+											{label is_in_footer /}
+											{input is_in_footer class => 'form-control'}
+										</div>
+									</div>
+								</div>
+								<div class="form-group">
+									{label link /}
+									{input link class => 'form-control'}
+								</div>
+								<div class="row">
+									<div class="col-sm-6">
+										<div class="form-group">
+											{label open_to_blank /}
+											{input open_to_blank class => 'form-control'}
+										</div>
+									</div>
+								</div>
+
+								<div class="clearfix" n:if="isset($item)">
+									<h4>{_admin.terms.sortingBlocksInMenu}</h4>
+									{if $contentBlocksControl}
+										{$contentBlocksControl->renderSorting()}
+									{/if}
+								</div>
+							</div>
+						</div>
+
+						<div class="col-lg-7 col-lg-offset-1">
+							<div class="page-contents-wrapper">
+								<h4>{_admin.terms.content}</h4>
+								<div class="form-group">
+									{label title /}
+									{input title class => 'form-control'}
+								</div>
+								<div class="form-group">
+									{label text /}
+									{input text class => 'form-control wsw h-300'}
+								</div>
+							</div>
+							<div n:if="isset($item)" class="page-content-blocks-wrapper">
+								<h4 class="m-b-no">{_admin.terms.content}</h4>
+								{if $contentBlocksControl}
+									{$contentBlocksControl->render()}
+								{/if}
+							</div>
+						</div>
+					</div>
+
+					<div role="tabpanel" class="tab-pane clearfix" id="section-02">
+						<div class="col-lg-4">
+							{include APP_DIR.'/AdminModule/__inc/formMetaTags.latte'}
+
+							<div class="clearfix">
+								<h4>{_admin.terms.breadcrumbs}</h4>
+
+								<div class="form-group">
+									{label breadcrumb /}
+									{input breadcrumb class => 'form-control'}
+								</div>
+							</div>
+
+							<div class="clearfix">
+								<h4>{_admin.terms.systemSettings}</h4>
+								<div n:snippet="pageTypesInput" class="form-group">
+									{label page_types_id /}
+									<div class="input-group pull-left m-b-sm">
+										{input page_types_id class => 'form-control', data-show-content-blocks-on => $contentPageTypeIds}
+										<span class="input-group-btn" data-toggle="tooltip" title="{_admin.actionsTitle.createNewItem}">
+											{control pageTypesQuickCreator:button}
+										</span>
+									</div>
+								</div>
+								<div class="form-group">
+									{label system /}
+									{input system class => 'form-control'}
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				{include APP_DIR.'/AdminModule/__inc/formButtons.latte'}
+			</div>
+
+		</div>
+		{/form}
+	</div>
+</div>
+
+{if $contentBlocksControl}
+	{$contentBlocksControl->renderModals()}
+{/if}
+
+
+{control pageTypesQuickCreator}

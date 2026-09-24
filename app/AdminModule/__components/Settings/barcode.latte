@@ -1,0 +1,31 @@
+{form barcodeForm}
+	<div class="col-lg-3">
+		<div class="form-group">
+			{label barcode_prefixes /}
+			{input barcode_prefixes class => 'form-control'}
+		</div>
+		<div class="form-group">
+			{label barcode_plu_length /}
+			{input barcode_plu_length class => 'form-control'}
+		</div>
+		<div class="form-group">
+			{label barcode_checksum_1_length /}
+			{input barcode_checksum_1_length class => 'form-control'}
+		</div>
+		<div class="form-group">
+			{label barcode_weight_length /}
+			{input barcode_weight_length class => 'form-control'}
+		</div>
+		<div class="form-group">
+			{label barcode_checksum_2_length /}
+			{input barcode_checksum_2_length class => 'form-control'}
+		</div>
+	</div>
+	<div class="col-lg-12">
+		<div class="form-group-btns p-v-xs">
+			<button n:name="submit" class="btn btn-success btn-addon m-r-xs">
+				<i class="far fa-check"></i> {_admin.buttons.save}
+			</button>
+		</div>
+	</div>
+{/form}

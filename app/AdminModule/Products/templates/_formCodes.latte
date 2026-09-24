@@ -1,0 +1,41 @@
+<div id="modal-codesForm" class="modal fade">
+	<div class="modal-dialog modal-sm">
+		<div class="modal-content">
+			{form codesForm class => 'ajax ajax-modal-close'}
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" title="{_admin.buttons.close}">
+						<span aria-hidden="true">×</span>
+					</button>
+					<h4>{_admin.terms.productCode}</h4>
+				</div>
+
+				<div class="modal-body clearfix">
+					<div class="row">
+						<div class="col-lg-12">
+							<div n:snippet="codesForm">
+								<div class="hidden">
+									{input id}
+								</div>
+								<div class="form-group">
+									{label value /}
+									{input value class => 'form-control'}
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="modal-footer">
+					<div class="btns">
+						<button n:name="submit" class="btn btn-success btn-addon">
+							<i class="far fa-check"></i> {_admin.buttons.save}
+						</button>
+						<button type="button" class="btn btn-default btn-addon" data-dismiss="modal">
+							<i class="far fa-times"></i> {_admin.buttons.close}
+						</button>
+					</div>
+				</div>
+			{/form}
+		</div>
+	</div>
+</div>

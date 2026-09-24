@@ -1,0 +1,248 @@
+{block content}
+
+<script n:if="intval($presenter->getParameter('fct'))">
+	window.close();
+</script>
+
+<div class="col-md-12">
+	<div class="panel panel-white">
+		{form editForm}
+		<div class="panel-body">
+
+			<div role="tabpanel">
+				<ul class="nav nav-tabs" role="tablist">
+					<li role="presentation" class="active">
+						<a href="#section-01" role="tab" data-toggle="tab">{_admin.tabs.basicInfo}</a>
+					</li>
+					<li role="presentation">
+						<a href="#section-02" role="tab" data-toggle="tab">{_admin.terms.parameters}</a>
+					</li>
+					<li role="presentation">
+						<a href="#section-03" role="tab" data-toggle="tab">{_admin.terms.images}</a>
+					</li>
+					<li role="presentation">
+						<a href="#section-09" role="tab" data-toggle="tab">{_admin.tabs.advanced}</a>
+					</li>
+				</ul>
+
+				<div class="tab-content">
+					<div role="tabpanel" class="tab-pane active clearfix" id="section-01">
+						<div class="col-lg-6">
+							<div class="clearfix">
+								<h4>{_admin.terms.mainInfo}</h4>
+								<div class="row">
+									<div class="col-sm-4">
+										<div class="form-group">
+											{label is_active /}
+											{input is_active class => 'form-control'}
+										</div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-lg-6">
+										<div class="form-group">
+											{label name /}
+											{input name class => 'form-control form-control-bigger url-source', data-target => '.webalize'}
+										</div>
+									</div>
+									<div class="col-lg-6">
+										<div class="form-group clearfix">
+											{label slug /}
+											<div n:if="!isset($item)">
+												{input slug class => 'form-control webalize'}
+											</div>
+											<div n:if="isset($item)" class="input-group pull-left">
+												{input slug class => 'form-control webalize'}
+												<span class="input-group-btn" data-toggle="tooltip" title="" data-original-title="{_admin.actionsTitle.clipboard}">
+													<a href="javascript:void(0)" data-prefix="{$globalContainer->getUrlScript()->getHostUrl()}{isset($language) && $language->id ? '/'.$language->id}" data-sufix="{$item->id}" class="btn btn-default clipboard-copy">
+														<i class="far fa-copy"></i>
+													</a>
+												</span>
+												<span class="input-group-btn" data-toggle="tooltip" title="" data-original-title="{_admin.actionsTitle.viewEshop}">
+													<a href="{$item->getUrl()}" target="_blank" class="btn btn-default">
+														<i class="far fa-eye"></i>
+													</a>
+												</span>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col-lg-6">
+										<div class="form-group">
+											{label country_origin /}
+											{input country_origin class => 'form-control'}
+										</div>
+									</div>
+									<div class="col-lg-6">
+										<div class="form-group">
+											{label code_ean /}
+											{input code_ean class => 'form-control'}
+										</div>
+									</div>
+								</div>
+
+
+								<div class="row">
+									<div class="col-lg-6">
+										<div class="form-group">
+											{label weight /}
+											<div class="row">
+												<div class="col-lg-6">
+													{input weight class => 'form-control'}
+												</div>
+												<div class="col-lg-6">
+													{input units_id class => 'form-control'}
+												</div>
+											</div>
+										</div>
+									</div>
+									<div class="col-lg-6">
+										<div class="form-group">
+											{label default_units_weight /}
+											<div class="row">
+												<div class="col-lg-6">
+													{input default_units_weight class => 'form-control'}
+												</div>
+												<div class="col-lg-6">
+													{input default_units_id class => 'form-control'}
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<h4>{_admin.terms.description}</h4>
+
+							<div class="form-group">
+								{label perex /}
+								{input perex class => 'form-control wsw h-100'}
+							</div>
+							<div class="form-group">
+								{label text /}
+								{input text class => 'form-control wsw h-400'}
+							</div>
+						</div>
+
+						<div class="col-lg-6">
+							{include '_formVariantsInfo.latte', 'variant' => NULL}
+						</div>
+					</div>
+
+
+					<div role="tabpanel" class="tab-pane clearfix" id="section-02">
+						<div class="col-lg-6">
+							{snippet productCategoriesList}
+								{include '_formCategories.latte'}
+							{/snippet}
+
+							{if !empty($item)}
+								{snippet codesList}
+									{include '_listCodes.latte'}
+								{/snippet}
+							{/if}
+
+							<div class="clearfix">
+								<h4>{_admin.terms.labels}</h4>
+								<div class="form-group">
+									{label label_note_1 /}
+									{input label_note_1 class => 'form-control'}
+								</div>
+								<div class="form-group">
+									{label label_note_2 /}
+									{input label_note_2 class => 'form-control'}
+								</div>
+								<div class="form-group">
+									{label label_note_3 /}
+									{input label_note_3 class => 'form-control'}
+								</div>
+							</div>
+						</div>
+
+						<div class="col-lg-6">
+							<div class="clearfix">
+								<div class="form-group">
+									{label ingredients /}
+									{input ingredients class => 'form-control h-200'}
+								</div>
+								<div class="form-group">
+									{label consumption_types_id /}
+									{input consumption_types_id class => 'form-control'}
+								</div>
+							</div>
+
+							{var $nutritionValues = $presenter->nutritionValuesRepo->findAll()->order('pos_order, id')->fetchAll()}
+							<div n:if="count($nutritionValues)" class="clearfix">
+								<h4>{_admin.terms.nutritionValues}</h4>
+								<div class="row">
+									<div class="col-sm-6">
+										<div class="form-group">
+											{label nutrition_reference_amount /}
+											{input nutrition_reference_amount class => 'form-control'}
+										</div>
+									</div>
+									<div class="col-sm-6">
+										<div class="form-group">
+											{label nutrition_reference_unit /}
+											{input nutrition_reference_unit class => 'form-control'}
+										</div>
+									</div>
+								</div>
+								<div class="table-responsive">
+									<table class="table table-striped">
+										<thead>
+											<tr>
+												<th>{_admin.terms.name}</th>
+												<th class="w-150">{_admin.terms.value}</th>
+												<th class="w-80">{_admin.terms.unit}</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr n:foreach="$nutritionValues as $nutritionValue">
+												{var $nutritionFieldName = 'nutrition_value__'.$nutritionValue->id}
+												<td>{$nutritionValue->name}</td>
+												<td>{input $nutritionFieldName class => 'form-control'}</td>
+												<td>{$nutritionValue->unit}</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+
+
+					<div role="tabpanel" class="tab-pane clearfix" id="section-03">
+						<div class="col-lg-12">
+							<div class="form-group">
+								<label class="w-200 pull-left">{_admin.terms.externalUrl}:</label>
+								<input type="text" class="form-control" name="image_external_url">
+							</div>
+							{control images}
+						</div>
+					</div>
+
+
+					<div role="tabpanel" class="tab-pane clearfix" id="section-09">
+						<div class="col-lg-4">
+							{include APP_DIR.'/AdminModule/__inc/formMetaTags.latte'}
+						</div>
+					</div>
+				</div>
+
+				{include APP_DIR.'/AdminModule/__inc/formButtons.latte'}
+			</div>
+
+		</div>
+		{/form}
+	</div>
+</div>
+
+
+{control categoriesQuickCreator}
+
+{snippetArea modalWrapper}
+	{include '_formCodes.latte'}
+	{include APP_DIR . '/AdminModule/Products/templates/__inc/pricesLogModal.latte'}
+{/snippetArea}

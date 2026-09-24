@@ -1,0 +1,142 @@
+button {
+    &:focus {
+        outline: none;
+    }
+}
+
+
+.btn {
+    &-primary {
+        border: 1px solid $primary;
+    }
+
+    &-transparent {
+        border: 1px solid #FFF9F5;
+        color: $white;
+        &:hover {
+            background: $white;
+            color: $dark;
+        }
+    }
+}
+
+@media(max-width: 991px) {
+    .btn {
+        padding: 1.6rem 2.4rem;
+    }
+}
+
+.form-group {
+    margin-bottom: 1.6rem;
+}
+
+.form-control {
+    border: 1px solid #F4F4F4;
+    height: 4.8rem;
+    box-shadow: none;
+    outline: none;
+    padding: 1.6rem 1.6rem;
+    color: $dark;
+
+    &:focus {
+        color: $dark;
+        box-shadow: none;
+        outline: none;
+        border-color: $primary;
+    }
+}
+
+textarea.form-control {
+    height: 12rem;
+}
+
+.check-styled {
+    position: relative;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    display: flex;
+    width: 100%;
+    margin-bottom: 0.8rem;
+    color: $white;
+    input {
+
+        &[type="checkbox"],
+        &[type="radio"] {
+            opacity: 0;
+            display: block;
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            margin: 0;
+            padding: 0;
+
+            &+label {
+                display: flex;
+                width: 100%;
+                margin: 0;
+                min-height: 2.4rem;
+                margin: 0;
+                vertical-align: middle;
+                padding-left: 3.2rem;
+                cursor: pointer;
+                padding-top: 0.4rem;
+                line-height: 1.2;
+                position: relative;
+                transition: all 0.3s;
+                color: $dark;
+                font-size: 1.4rem;
+                font-weight: 300;
+
+                span {
+                    display: inline-block;
+                }
+
+                &:hover {
+                    &:before {
+                        border-color: $primary;
+                    }
+                }
+
+                &:before {
+                    width: 2.4rem;
+                    height: 2.4rem;
+                    border-radius: 0px;
+                    border: 1px solid #F4F4F4;
+                    background-color: transparent;
+                    content: "";
+                    position: absolute;
+                    left: 0;
+                    top: 0;
+                    transition: all 0.3s;
+                    display: block;
+                }
+
+                &:after {
+                    display: flex;
+                    width: 2.4rem;
+                    height: 2.4rem;
+                    border-radius: 0px;
+                    content: "";
+                    position: absolute;
+                    left: 0;
+                    top: 0;
+                    transition: all 0.3s;
+                    opacity: 0;
+                    background: url("./../images/check.svg") no-repeat center;
+                }
+            }
+
+            &:checked {
+                &+label {
+                    &:before {
+                        background: $primary;
+                    }
+
+                    &:after {
+                        opacity: 1;
+                    }
+                }
+            }
+        }
+    }
+}

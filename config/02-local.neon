@@ -1,0 +1,11 @@
+parameters:
+	devMode: TRUE
+	devModeEmail: 'dev13@vnvc.vn'
+
+application:
+	catchExceptions: FALSE
+
+database:
+	dsn: 'mysql:host=127.0.0.1;dbname=website'
+	user: 'root'
+	password: 'toor'

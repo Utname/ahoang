@@ -1,0 +1,15 @@
+/log/
+/temp/
+/tmp/
+/.env
+/vendor/
+/a4_id3_after_strip.html
+/.idea/
+/www/files/editor/
+/www/files/favicon/
+/www/files/files/
+/www/files/images/
+/www/files/temp/
+/www/media/*
+/www/xml/*
+.DS_Store

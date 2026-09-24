@@ -1,0 +1,46 @@
+parameters:
+	isMultilang: TRUE
+	availableModules: [
+		'AdminRoles',
+		'AdminUsers',
+		'BlacklistEmails',
+		#'Blog',
+		#'BlogCategories',
+		'Branches',
+		'Categories',
+		'Contents',
+		'Countries',
+		'Crons',
+		#'Currencies'
+		#'Cta',
+		#'Downloads', #unused now
+		'EmailTemplates',
+		#'Faq',
+		#'Galleries', #unused now
+		#'IndexBanners',
+		#'InfoBoxes',
+		'Languages',
+		'Links',
+		'MailingQueue',
+		#'NewsletterEmails',
+		'Pages',
+		'PageTypes',
+		#'Partners',
+		#'PromoBoxes',
+		'Products',
+		#'PriceGroups'
+		'ProductLabels'
+		'ProductPrices'
+		'Redirects',
+		#'Services', #unused now
+		'Settings',
+		'Sliders',
+		#'Team',
+		#'Testimonials',
+		'ProductLabelHeaders',
+		'AdminIpAddresses',
+		'ProductLabelActionTypes',
+		'NutritionValues',
+		'Messages',
+		'PrintTemplates',
+	]
