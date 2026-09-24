@@ -22,6 +22,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 		libfreetype6-dev \
 		libsqlite3-dev \
 		libcurl4-openssl-dev \
+		libonig-dev \
 		unzip \
 		git \
 		curl \
@@ -37,7 +38,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 		sqlite3 \
 		zip \
 		curl \
-	&& apt-get purge -y --auto-remove libicu-dev libzip-dev libpng-dev libjpeg62-turbo-dev libfreetype6-dev libsqlite3-dev libcurl4-openssl-dev \
+	&& apt-get purge -y --auto-remove libicu-dev libzip-dev libpng-dev libjpeg62-turbo-dev libfreetype6-dev libsqlite3-dev libcurl4-openssl-dev libonig-dev \
 	&& rm -rf /var/lib/apt/lists/*
 
 RUN a2enmod rewrite deflate expires headers
