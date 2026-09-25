@@ -12,4 +12,9 @@ set -e
 PORT="${PORT:-80}"
 sed -i "s/__PORT__/${PORT}/g" /etc/apache2/ports.conf /etc/apache2/sites-available/000-default.conf
 
-exec apache2-foreground
+# TEMPORARY: stay alive instead of starting Apache so `railway ssh` can get
+# into a live container to debug the "More than one MPM loaded" crash
+# in-place (SSH can't reach a container that crash-loops and exits).
+# Revert to `exec apache2-foreground` once diagnosed.
+echo "DEBUG MODE: sleeping instead of starting Apache"
+exec sleep infinity

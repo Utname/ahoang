@@ -34,20 +34,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # mpm_prefork specifically, since mod_php itself isn't thread-safe.
 RUN a2dismod mpm_event mpm_worker 2>/dev/null; a2enmod mpm_prefork rewrite deflate expires headers
 
-# TEMPORARY diagnostic: the a2dismod/a2enmod step above provably leaves only
-# mpm_prefork enabled at build time, yet Railway still crashes at container
-# start with "More than one MPM loaded" — this dumps the actual
-# mods-enabled directory and apache2ctl's module list into the build log so
-# the real cause (something not touched by a2dismod/a2enmod, e.g. a stray
-# mpm_itk or a duplicate LoadModule line) can be seen instead of guessed at.
-# Remove once the crash is understood and fixed.
-RUN echo "--- mods-enabled (mpm*) ---" \
-	&& ls -la /etc/apache2/mods-enabled/ | grep -i mpm \
-	&& echo "--- apache2ctl -M ---" \
-	&& apache2ctl -M 2>&1 \
-	&& echo "--- grep LoadModule mpm across conf ---" \
-	&& grep -rn "mpm" /etc/apache2/mods-enabled/ /etc/apache2/apache2.conf 2>/dev/null || true
-
 COPY docker/apache-vhost.conf /etc/apache2/sites-available/000-default.conf
 COPY docker/ports.conf /etc/apache2/ports.conf
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
