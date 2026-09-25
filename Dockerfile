@@ -27,7 +27,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 	&& install-php-extensions gd intl mbstring mysqli pdo_mysql pdo_sqlite sqlite3 zip curl \
 	&& rm -rf /var/lib/apt/lists/*
 
-RUN a2enmod rewrite deflate expires headers
+# install-php-extensions leaves mpm_event enabled alongside the base image's
+# default mpm_prefork, and Apache refuses to start at all with two MPMs
+# loaded ("More than one MPM loaded" — confirmed via a real Railway deploy
+# crash). Classic mod_php (this Dockerfile doesn't use PHP-FPM) requires
+# mpm_prefork specifically, since mod_php itself isn't thread-safe.
+RUN a2dismod mpm_event mpm_worker 2>/dev/null; a2enmod mpm_prefork rewrite deflate expires headers
 
 COPY docker/apache-vhost.conf /etc/apache2/sites-available/000-default.conf
 COPY docker/ports.conf /etc/apache2/ports.conf
