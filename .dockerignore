@@ -16,6 +16,10 @@ www/files/temp
 www/media
 www/xml
 docker-compose.yml
+# Local Windows dev php.ini (hardcoded extension_dir under a WinGet path) —
+# shipping it broke every PHP extension load in the Linux container; real
+# extensions come from install-php-extensions in the Dockerfile instead.
+php.ini
 README.md
 QUY-TAC-THIET-KE-MAU-IN.md
 *.log

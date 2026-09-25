@@ -14,7 +14,15 @@ Allow from all
     #RewriteRule ^(.*)$ https://www.%{HTTP_HOST}/$1 [R=301,L]
 
     # all redirection HTTP -> HTTPS
+    # Behind a reverse proxy that terminates TLS (Railway or similar), the
+    # connection to Apache itself is always plain HTTP, so %{HTTPS} alone
+    # is always "off" and would redirect forever. mod_rewrite's %{HTTPS}
+    # doesn't reliably reflect the SetEnvIf-based HTTPS=on override without
+    # mod_ssl loaded (confirmed: it stayed "off" even with the proxy's
+    # X-Forwarded-Proto: https header present) — checking the forwarded
+    # header directly here is what actually works.
     RewriteCond %{HTTPS} off
+    RewriteCond %{HTTP:X-Forwarded-Proto} !https [NC]
     RewriteCond %{HTTP_HOST} !local [NC]
     RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 
