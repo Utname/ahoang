@@ -29,10 +29,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # install-php-extensions leaves mpm_event enabled alongside the base image's
 # default mpm_prefork, and Apache refuses to start at all with two MPMs
-# loaded ("More than one MPM loaded" — confirmed via a real Railway deploy
-# crash). Classic mod_php (this Dockerfile doesn't use PHP-FPM) requires
-# mpm_prefork specifically, since mod_php itself isn't thread-safe.
-RUN a2dismod mpm_event mpm_worker 2>/dev/null; a2enmod mpm_prefork rewrite deflate expires headers
+# loaded ("More than one MPM loaded"). Classic mod_php (this Dockerfile
+# doesn't use PHP-FPM) requires mpm_prefork specifically, since mod_php
+# itself isn't thread-safe. This used to be a build-time RUN step here, but
+# a Railway build reused a stale cached layer from before the fix existed
+# and silently shipped an image with both MPMs still enabled (confirmed via
+# `railway ssh` — the symlinks carried the base image's original install
+# timestamp) — so it now runs in docker/entrypoint.sh on every container
+# start instead, where there's no build cache to go stale.
 
 COPY docker/apache-vhost.conf /etc/apache2/sites-available/000-default.conf
 COPY docker/ports.conf /etc/apache2/ports.conf
