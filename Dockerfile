@@ -49,6 +49,14 @@ WORKDIR /var/www/html
 
 COPY . .
 
+# www/files/images (2.6GB of real product photos) is excluded via
+# .dockerignore — far too big to ship in the image. deploy/sample-images
+# holds just the handful of images for the ~20 sample products seeded into
+# the Railway database (see the DB import done via `railway ssh`), laid out
+# under the same 2-level filename-shard path ImagesService::getImageDir()
+# expects, so it can be copied straight into place.
+COPY deploy/sample-images/ www/files/images/
+
 # No require-dev in composer.json, so --no-dev has nothing to exclude today,
 # but stays here since a real deploy should never install dev-only deps even
 # if some get added later.
