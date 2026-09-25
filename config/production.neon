@@ -1,3 +1,12 @@
+parameters:
+	# This Railway deployment is being used as a test/staging environment,
+	# not the real customer-facing production site — keeps the CZ->VI
+	# translate widget (and other dev-only conveniences gated by isDevMode())
+	# working here. Remove this once a real production domain gets its own
+	# config/<domain>.neon instead of going through APP_ENV=production.
+	devMode: TRUE
+	devModeEmail: 'dev13@vnvc.vn'
+
 database:
 	dsn: 'mysql:host=%dbHost%;port=%dbPort%;dbname=%dbName%'
 	user: %dbUser%

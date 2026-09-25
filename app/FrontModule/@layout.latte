@@ -76,8 +76,10 @@
 {* Auto-translate CZ -> VI on load, local dev only (config/02-local.neon: devMode) *}
 <div id="google_translate_element" style="display:none;"></div>
 <script n:syntax="off">
-    document.cookie = 'googtrans=/cs/vi; path=/';
-    document.cookie = 'googtrans=/cs/vi; path=/; domain=' + location.hostname;
+    if (!/(?:^|; )googtrans=/.test(document.cookie)) {
+        document.cookie = 'googtrans=/cs/vi; path=/';
+        document.cookie = 'googtrans=/cs/vi; path=/; domain=' + location.hostname;
+    }
     function googleTranslateElementInit() {
         new google.translate.TranslateElement({pageLanguage: 'cs', includedLanguages: 'vi', autoDisplay: false}, 'google_translate_element');
     }
