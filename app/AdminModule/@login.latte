@@ -119,7 +119,13 @@
 {if $GLOBALS['container']->isDevMode()}
 {* Auto-translate CZ -> VI on load, local dev only (config/02-local.neon: devMode) *}
 <div id="google_translate_element" style="display:none;"></div>
+<div style="position:fixed;bottom:8px;right:8px;z-index:9999;background:#fff;border:1px solid #ccc;border-radius:4px;padding:4px 8px;font-size:12px;box-shadow:0 1px 4px rgba(0,0,0,.2);">
+	<a href="#" onclick="document.cookie='googtrans=/cs/vi;path=/';document.cookie='googtrans=/cs/vi;path=/;domain='+location.hostname;location.reload();return false;">VI</a>
+	|
+	<a href="#" onclick="document.cookie='googtrans=/cs/cs;path=/';document.cookie='googtrans=/cs/cs;path=/;domain='+location.hostname;location.reload();return false;">CS</a>
+</div>
 <script n:syntax="off">
+    {* Google's own "show original" toggle only affects the current DOM, not the googtrans cookie — it never survives a reload, hence the VI/CS links above giving explicit, persistent control instead. This only sets a default on the very first visit (no googtrans cookie yet); once either link is clicked the cookie always exists, so this never overrides that choice again. *}
     if (!/(?:^|; )googtrans=/.test(document.cookie)) {
         document.cookie = 'googtrans=/cs/vi; path=/';
         document.cookie = 'googtrans=/cs/vi; path=/; domain=' + location.hostname;
