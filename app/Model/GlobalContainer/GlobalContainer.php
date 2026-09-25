@@ -61,7 +61,19 @@ class GlobalContainer
 	 */
 	public function getParameters(string $key = NULL): mixed
 	{
-		return $key && isset($this->parameters[$key]) ? $this->parameters[$key] : $this->parameters;
+		if ($key === NULL) {
+			return $this->parameters;
+		}
+
+		// Used to fall back to returning the *entire* parameters array when
+		// $key wasn't set (instead of NULL) — harmless for callers that
+		// always expect the key to exist, but silently broke isDevMode() on
+		// any config that never mentions `devMode` (i.e. everything except
+		// config/02-local.neon): (bool) of a non-empty array is always TRUE,
+		// so dev-only behaviour (admin IP whitelist bypass, mail redirected
+		// to devModeEmail, the CZ->VI translate widget) was actually active
+		// in production too.
+		return $this->parameters[$key] ?? NULL;
 	}
 
 
