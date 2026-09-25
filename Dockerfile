@@ -6,38 +6,25 @@
 # behind a reverse proxy (Railway or similar).
 FROM php:8.2-apache
 
-# The libFoo-dev packages below are only needed to build the PHP extensions
-# further down and are purged again afterward so they don't bloat the final
-# image. `curl` (the CLI tool, unrelated to the `curl` PHP extension built
-# below from libcurl4-openssl-dev) and `default-mysql-client` (the `mysql`
-# CLI) are kept as runtime tools: curl so a Railway Cron service can hit
-# /cron/default on a schedule, mysql so app/database/*.sql can be applied by
-# shelling into the running container instead of installing a client
-# separately.
+# docker-php-ext-install (the bundled helper) reliably broke on sqlite3 with
+# "Cannot find config.m4" in this image regardless of extension order or
+# whether calls were combined or split — mlocati/docker-php-extension-installer
+# is the standard, far more robust replacement (used across huge numbers of
+# PHP Docker images): it resolves each extension's system package
+# dependencies itself, so the manual libFoo-dev list this used to need is
+# gone. `curl` (the CLI tool, unrelated to the `curl` PHP extension) and
+# `default-mysql-client` are kept as runtime tools: curl so a Railway Cron
+# service can hit /cron/default on a schedule, mysql so app/database/*.sql
+# can be applied by shelling into the running container instead of
+# installing a client separately.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-		libicu-dev \
-		libzip-dev \
-		libpng-dev \
-		libjpeg62-turbo-dev \
-		libfreetype6-dev \
-		libsqlite3-dev \
-		libcurl4-openssl-dev \
-		libonig-dev \
+		curl \
 		unzip \
 		git \
-		curl \
 		default-mysql-client \
-	&& docker-php-ext-configure gd --with-freetype --with-jpeg \
-	&& docker-php-ext-install -j"$(nproc)" gd \
-	&& docker-php-ext-install -j"$(nproc)" intl \
-	&& docker-php-ext-install -j"$(nproc)" mbstring \
-	&& docker-php-ext-install -j"$(nproc)" mysqli \
-	&& docker-php-ext-install -j"$(nproc)" pdo_mysql \
-	&& docker-php-ext-install -j"$(nproc)" sqlite3 \
-	&& docker-php-ext-install -j"$(nproc)" pdo_sqlite \
-	&& docker-php-ext-install -j"$(nproc)" zip \
-	&& docker-php-ext-install -j"$(nproc)" curl \
-	&& apt-get purge -y --auto-remove libicu-dev libzip-dev libpng-dev libjpeg62-turbo-dev libfreetype6-dev libsqlite3-dev libcurl4-openssl-dev libonig-dev \
+	&& curl -sSLf -o /usr/local/bin/install-php-extensions https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions \
+	&& chmod +x /usr/local/bin/install-php-extensions \
+	&& install-php-extensions gd intl mbstring mysqli pdo_mysql pdo_sqlite sqlite3 zip curl \
 	&& rm -rf /var/lib/apt/lists/*
 
 RUN a2enmod rewrite deflate expires headers
