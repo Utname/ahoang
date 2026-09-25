@@ -28,16 +28,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 		curl \
 		default-mysql-client \
 	&& docker-php-ext-configure gd --with-freetype --with-jpeg \
-	&& docker-php-ext-install -j"$(nproc)" \
-		gd \
-		intl \
-		mbstring \
-		mysqli \
-		pdo_mysql \
-		pdo_sqlite \
-		sqlite3 \
-		zip \
-		curl \
+	&& docker-php-ext-install -j"$(nproc)" gd \
+	&& docker-php-ext-install -j"$(nproc)" intl \
+	&& docker-php-ext-install -j"$(nproc)" mbstring \
+	&& docker-php-ext-install -j"$(nproc)" mysqli \
+	&& docker-php-ext-install -j"$(nproc)" pdo_mysql \
+	&& docker-php-ext-install -j"$(nproc)" sqlite3 \
+	&& docker-php-ext-install -j"$(nproc)" pdo_sqlite \
+	&& docker-php-ext-install -j"$(nproc)" zip \
+	&& docker-php-ext-install -j"$(nproc)" curl \
 	&& apt-get purge -y --auto-remove libicu-dev libzip-dev libpng-dev libjpeg62-turbo-dev libfreetype6-dev libsqlite3-dev libcurl4-openssl-dev libonig-dev \
 	&& rm -rf /var/lib/apt/lists/*
 
