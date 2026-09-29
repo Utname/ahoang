@@ -40,9 +40,24 @@
                             <i class="fa fa-copy"></i> {_admin.terms.editMultipleLabels ?? 'Biên tập nhãn'}
                         </a>
                     </li>
+                    <li class="divider"></li>
+                    <li class="dropdown-header" style="padding:3px 15px;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;">
+                        <i class="fas fa-file-pdf text-danger m-r-xxs"></i> In nhanh (Tải 1 bản)
+                    </li>
+                    {foreach $GLOBALS['global']['productLabelTypes'] as $labelTypeId => $term}
+                        <li>
+                            <a href="{plink downloadSingleProductLabelPdf! $item->id, $labelTypeId}" target="_blank">
+                                <i class="fa fa-download text-primary"></i> Tải PDF {$term}
+                            </a>
+                        </li>
+                    {/foreach}
+                    <li class="divider"></li>
+                    <li class="dropdown-header" style="padding:3px 15px;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;">
+                        <i class="fas fa-edit m-r-xxs"></i> Chỉnh sửa tem
+                    </li>
                     {foreach $GLOBALS['global']['productLabelTypes'] as $labelTypeId => $term}
                         {var $label = $labels[$labelTypeId] ?? NULL}
-                        <li n:if="$label">
+                        <li>
                             <a href="{plink label! $item->id, $labelTypeId}" class="ajax-modal" data-target="#modal-labelsForm">
                                 <i class="fas fa-pencil"></i> {_admin.actions.edit} {$term}
                             </a>
