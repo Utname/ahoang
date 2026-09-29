@@ -34,32 +34,42 @@
                 <a class="dropdown-toggle btn btn-xs btn-default" data-toggle="dropdown" href="#" title="Tùy chọn chi tiết" style="padding:2px 5px;border-radius:5px;">
                     <i class="fa fa-ellipsis-v"></i>
                 </a>
-                <ul class="dropdown-menu dropdown-menu-right dropdown-list">
+                <ul class="dropdown-menu dropdown-menu-right dropdown-list" style="min-width:210px;padding:6px 0;">
                     <li>
                         <a href="{plink multiLabel! $item->id}" class="ajax-modal" data-target="#modal-multiLabelsForm">
-                            <i class="fa fa-copy"></i> {_admin.terms.editMultipleLabels ?? 'Biên tập nhãn'}
+                            <i class="fa fa-sliders-h text-primary"></i> <strong>{_admin.terms.editMultipleLabels ?? 'Biên tập tất cả nhãn'}</strong>
                         </a>
                     </li>
                     <li class="divider"></li>
-                    <li class="dropdown-header" style="padding:3px 15px;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;">
-                        <i class="fas fa-file-pdf text-danger m-r-xxs"></i> In nhanh (Tải 1 bản)
+                    <li class="dropdown-header" style="padding:4px 15px;font-size:11px;font-weight:700;color:#0284c7;text-transform:uppercase;letter-spacing:0.5px;">
+                        <i class="fas fa-eye m-r-xxs"></i> Xem trước (Tab mới)
                     </li>
                     {foreach $GLOBALS['global']['productLabelTypes'] as $labelTypeId => $term}
                         <li>
-                            <a href="{plink downloadSingleProductLabelPdf! $item->id, $labelTypeId}" target="_blank">
-                                <i class="fa fa-download text-primary"></i> Tải PDF {$term}
+                            <a href="{plink downloadSingleProductLabelPdf! $item->id, $labelTypeId, 0}" target="_blank">
+                                <i class="far fa-eye text-info"></i> Xem trước {$term}
                             </a>
                         </li>
                     {/foreach}
                     <li class="divider"></li>
-                    <li class="dropdown-header" style="padding:3px 15px;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;">
-                        <i class="fas fa-edit m-r-xxs"></i> Chỉnh sửa tem
+                    <li class="dropdown-header" style="padding:4px 15px;font-size:11px;font-weight:700;color:#0d9488;text-transform:uppercase;letter-spacing:0.5px;">
+                        <i class="fas fa-file-download m-r-xxs"></i> Tải xuống PDF
                     </li>
                     {foreach $GLOBALS['global']['productLabelTypes'] as $labelTypeId => $term}
-                        {var $label = $labels[$labelTypeId] ?? NULL}
+                        <li>
+                            <a href="{plink downloadSingleProductLabelPdf! $item->id, $labelTypeId, 1}" target="_blank">
+                                <i class="fa fa-download text-success"></i> Tải PDF {$term}
+                            </a>
+                        </li>
+                    {/foreach}
+                    <li class="divider"></li>
+                    <li class="dropdown-header" style="padding:4px 15px;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">
+                        <i class="fas fa-edit m-r-xxs"></i> Sửa chi tiết
+                    </li>
+                    {foreach $GLOBALS['global']['productLabelTypes'] as $labelTypeId => $term}
                         <li>
                             <a href="{plink label! $item->id, $labelTypeId}" class="ajax-modal" data-target="#modal-labelsForm">
-                                <i class="fas fa-pencil"></i> {_admin.actions.edit} {$term}
+                                <i class="fas fa-pencil text-muted"></i> Sửa {$term}
                             </a>
                         </li>
                     {/foreach}

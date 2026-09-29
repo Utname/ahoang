@@ -421,14 +421,15 @@ trait ProductLabelsTrait
 
 
 	/**
-	 * Download / print 1 single label immediately for a product & label size.
+	 * Download / print / preview 1 single label for a product & label size.
 	 *
 	 * @param int $productsId
 	 * @param int $typeId
+	 * @param bool $isDownload TRUE = download attachment, FALSE = preview inline in browser
 	 * @return void
 	 * @throws AbortException
 	 */
-	public function handleDownloadSingleProductLabelPdf(int $productsId, int $typeId): void
+	public function handleDownloadSingleProductLabelPdf(int $productsId, int $typeId, bool $isDownload = TRUE): void
 	{
 		$branchesId = $this->session->filters[$this->getName()]['custom__branches'] ?? 0;
 		$adminUserId = $this->adminUser->id ?? 0;
@@ -464,7 +465,7 @@ trait ProductLabelsTrait
 		}
 
 		if ($label) {
-			$this->handleDownloadPdf($label->id, TRUE);
+			$this->handleDownloadPdf($label->id, $isDownload);
 		}
 	}
 
@@ -658,9 +659,10 @@ trait ProductLabelsTrait
 
 	/**
 	 * @param int $typeId
+	 * @param bool $isDownload TRUE = download attachment, FALSE = preview inline in browser
 	 * @return void
 	 */
-	public function handleDownloadPdfGroup(int $typeId)
+	public function handleDownloadPdfGroup(int $typeId, bool $isDownload = TRUE)
 	{
 		$branchesId = (int)($this->session->filters[$this->getName()]['custom__branches'] ?? 0);
 		$adminUserId = (int)($this->adminUser->id ?? 0);
@@ -678,18 +680,20 @@ trait ProductLabelsTrait
 			$this->redirect('this');
 		}
 
-		$file = $this->productLabelsService->generatePdf($branchesId, TRUE, array_values($labelIds));
+		$file = $this->productLabelsService->generatePdf($branchesId, (bool)$isDownload, array_values($labelIds));
 		if ($file) {
 			$this->session->labelsIsPrint = TRUE;
 			$typeName = $this->global['productLabelTypes'][$typeId] ?? ('group-'.$typeId);
 			$filename = \Nette\Utils\Strings::webalize($typeName) . '-' . date('Y_m_d') . '-' . time() . '.pdf';
+			$disposition = $isDownload ? 'attachment' : 'inline';
+			$tcpdfMode = $isDownload ? 'D' : 'I';
 			if ($file instanceof \TCPDF) {
-				$file->Output($filename, 'D');
+				$file->Output($filename, $tcpdfMode);
 				exit;
 			}
 			elseif ($file instanceof \Dompdf\Dompdf) {
 				header('Content-Type: application/pdf');
-				header('Content-Disposition: attachment; filename="' . $filename . '"');
+				header('Content-Disposition: ' . $disposition . '; filename="' . $filename . '"');
 				echo $file->output();
 				exit;
 			}
