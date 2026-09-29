@@ -393,15 +393,17 @@ trait ProductLabelsTrait
 			];
 		}
 
-		if ($file = $this->productLabelsService->generatePdf($this->session->filters[$this->getName()]['custom__branches'], $printed, $itemId ? [$itemId] : [], $priceOverride)) {
+		$isDownload = !in_array($printed, [FALSE, 0, '0', 'false', 'FALSE', ''], TRUE);
+
+		if ($file = $this->productLabelsService->generatePdf($this->session->filters[$this->getName()]['custom__branches'], (bool)$isDownload, $itemId ? [$itemId] : [], $priceOverride)) {
 			$this->session->labelsIsPrint = TRUE;
 			if ($file instanceof \TCPDF) {
-				$file->Output(date('Y_m_d').'-'.time().'.pdf');
+				$file->Output(date('Y_m_d').'-'.time().'.pdf', $isDownload ? 'D' : 'I');
 				exit;
 			}
 			elseif ($file instanceof \Dompdf\Dompdf) {
 				header('Content-Type: application/pdf');
-				header('Content-Disposition: inline; filename='.date('Y_m_d').'-'.time().'.pdf');
+				header('Content-Disposition: ' . ($isDownload ? 'attachment' : 'inline') . '; filename="' . date('Y_m_d') . '-' . time() . '.pdf"');
 				echo $file->output();
 				exit;
 			}
