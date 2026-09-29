@@ -449,7 +449,7 @@ trait ProductLabelsTrait
 				'products_id' => $product->id,
 				'branches_id' => $branchesId,
 				'admin_users_id' => $adminUserId,
-				'count' => 1,
+				'count' => $isDownload ? 0 : 1,
 				'datetime_printed' => NULL,
 				'type_id' => $typeId,
 				'sale_text' => '',
@@ -465,6 +465,10 @@ trait ProductLabelsTrait
 		}
 
 		if ($label) {
+			if ($isDownload && (int)$label->count <= 0) {
+				$this->flashMessage($this->trans('admin.terms.noLabelsToPrint') ?? 'Vui lòng chọn số lượng tem lớn hơn 0 để tải.', 'warning');
+				$this->redirect('this');
+			}
 			$this->handleDownloadPdf($label->id, $isDownload);
 		}
 	}
