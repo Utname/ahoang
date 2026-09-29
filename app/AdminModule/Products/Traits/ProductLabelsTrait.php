@@ -475,6 +475,118 @@ trait ProductLabelsTrait
 
 
 	/**
+	 * Preview or download all label types for a single product row.
+	 *
+	 * @param int $productsId
+	 * @param bool $isDownload TRUE = download attachment, FALSE = preview inline in browser
+	 * @param string|null $overridePrice
+	 * @param string|null $overridePriceAction
+	 * @param string|null $overrideActionFrom
+	 * @param string|null $overrideActionTo
+	 * @return void
+	 * @throws AbortException
+	 */
+	public function handleDownloadProductAllLabelsPdf(int $productsId, bool $isDownload = TRUE, $overridePrice = NULL, $overridePriceAction = NULL, $overrideActionFrom = NULL, $overrideActionTo = NULL): void
+	{
+		$branchesId = (int)($this->session->filters[$this->getName()]['custom__branches'] ?? 0);
+		$adminUserId = (int)($this->adminUser->id ?? 0);
+		$product = $this->repository->findEntity($productsId);
+
+		if (!$product) {
+			$this->redirect('this');
+		}
+
+		$priceOverride = NULL;
+		if ($overridePrice !== NULL || $overridePriceAction !== NULL || $overrideActionFrom !== NULL || $overrideActionTo !== NULL) {
+			$parseDate = static function (?string $value): ?string {
+				if (!$value) {
+					return NULL;
+				}
+				$dt = \DateTime::createFromFormat('d.m.Y', $value);
+				return $dt ? $dt->format('Y-m-d') : NULL;
+			};
+			$priceOverride = [
+				'price' => $overridePrice !== NULL && $overridePrice !== '' ? (float)$overridePrice : NULL,
+				'price_action' => $overridePriceAction !== NULL && $overridePriceAction !== '' ? (float)$overridePriceAction : NULL,
+				'action_from' => $parseDate($overrideActionFrom),
+				'action_to' => $parseDate($overrideActionTo),
+			];
+		}
+
+		$labelIds = [];
+		foreach ($this->global['productLabelTypes'] as $typeId => $term) {
+			$label = $this->productLabelsRepo->findEntityBy([
+				'products_id' => $productsId,
+				'branches_id' => $branchesId,
+				'admin_users_id' => $adminUserId,
+				'type_id' => $typeId,
+			]);
+
+			if (!$label) {
+				$productPrice = $product->getPrice($branchesId);
+				$labelHeader = $this->productLabelHeadersRepo->findAll()->order('pos_order')->limit(1)->fetch();
+				$label = $this->productLabelsRepo->insertEntity([
+					'product_label_headers_id' => $labelHeader ? $labelHeader->id : NULL,
+					'products_id' => $product->id,
+					'branches_id' => $branchesId,
+					'admin_users_id' => $adminUserId,
+					'count' => $isDownload ? 0 : 1,
+					'datetime_printed' => NULL,
+					'type_id' => $typeId,
+					'sale_text' => '',
+					'sale_percent' => $productPrice ? $productPrice->getActionPercents(TRUE) : 0,
+					'is_more_species' => 0,
+					'price_text' => \ProductLabelsEntity::PRICE_TYPE_CZK,
+					'origin_countries_id' => $product->country_origin ?: NULL,
+					'name' => $product->name,
+					'note_1' => $product->label_note_1,
+					'note_2' => $product->label_note_2,
+					'note_3' => $product->label_note_3,
+				]);
+			}
+
+			if ($label) {
+				if ($isDownload) {
+					if ((int)$label->count > 0) {
+						$labelIds[] = $label->id;
+					}
+				} else {
+					$labelIds[] = $label->id;
+				}
+			}
+		}
+
+		if (empty($labelIds)) {
+			if ($isDownload) {
+				$this->flashMessage($this->trans('admin.terms.noLabelsToPrint') ?? 'Sản phẩm này chưa được chọn số lượng tem để tải.', 'warning');
+				$this->redirect('this');
+			}
+		}
+
+		$file = $this->productLabelsService->generatePdf($branchesId, (bool)$isDownload, $labelIds, $priceOverride);
+		if ($file) {
+			$this->session->labelsIsPrint = TRUE;
+			$filename = \Nette\Utils\Strings::webalize($product->name) . '-labels-' . date('Y_m_d') . '-' . time() . '.pdf';
+			$disposition = $isDownload ? 'attachment' : 'inline';
+			$tcpdfMode = $isDownload ? 'D' : 'I';
+			if ($file instanceof \TCPDF) {
+				$file->Output($filename, $tcpdfMode);
+				exit;
+			}
+			elseif ($file instanceof \Dompdf\Dompdf) {
+				header('Content-Type: application/pdf');
+				header('Content-Disposition: ' . $disposition . '; filename="' . $filename . '"');
+				echo $file->output();
+				exit;
+			}
+		}
+
+		echo '<script>window.close();</script>';
+		exit;
+	}
+
+
+	/**
 	 * @return void
 	 */
 	public function handleRemovePrint()

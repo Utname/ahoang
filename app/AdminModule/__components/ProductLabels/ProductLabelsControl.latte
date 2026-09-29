@@ -52,9 +52,11 @@
                             </tr>
                         </thead>
                         <tbody>
+                            {var $totalRowLabels = 0}
                             {foreach $GLOBALS['global']['productLabelTypes'] as $labelTypeId => $term}
                                 {var $lbl = $labels[$labelTypeId] ?? NULL}
                                 {var $lblCount = ($lbl && $lbl->isToPrint()) ? (int)$lbl->count : 0}
+                                {var $totalRowLabels += $lblCount}
                                 <tr style="border-bottom:1px solid #f1f5f9;">
                                     <td style="padding:6px 6px;font-weight:700;color:#1e293b;vertical-align:middle;">
                                         {$term}
@@ -84,6 +86,21 @@
                             {/foreach}
                         </tbody>
                     </table>
+
+                    <div style="margin-top:10px;padding-top:8px;border-top:1px solid #eef2f6;display:flex;align-items:center;justify-content:space-between;gap:6px;">
+                        <a href="{plink downloadProductAllLabelsPdf! $item->id, 0}" target="_blank" class="btn btn-xs btn-default" style="flex:1;text-align:center;padding:5px 6px;font-size:11px;font-weight:600;color:#0369a1;background:#f0f9ff;border:1px solid #bae6fd;border-radius:6px;" title="Xem trước tất cả các khổ tem của sản phẩm này">
+                            <i class="far fa-eye m-r-xxs"></i> Xem trước tất cả
+                        </a>
+                        {if $totalRowLabels > 0}
+                            <a href="{plink downloadProductAllLabelsPdf! $item->id, 1}" target="_blank" class="btn btn-xs btn-default" style="flex:1;text-align:center;padding:5px 6px;font-size:11px;font-weight:700;color:#042f2e;background:#ccfbf1;border:1px solid #5eead4;border-radius:6px;" title="Tải xuống tất cả {$totalRowLabels} tem đã chọn của sản phẩm này">
+                                <i class="fa fa-download m-r-xxs text-success"></i> Tải tất cả ({$totalRowLabels})
+                            </a>
+                        {else}
+                            <span class="btn btn-xs btn-default disabled" style="flex:1;text-align:center;padding:5px 6px;font-size:11px;color:#94a3b8;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;cursor:not-allowed;opacity:0.6;" title="Chưa chọn số lượng tem nào cho sản phẩm này">
+                                <i class="fa fa-download m-r-xxs"></i> Tải tất cả (0)
+                            </span>
+                        {/if}
+                    </div>
                 </div>
             </div>
         </div>
