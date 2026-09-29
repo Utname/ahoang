@@ -455,4 +455,152 @@ trait ProductLabelsTrait
 
 		$this->sendPayload();
 	}
+
+
+	/**
+	 * @return array
+	 */
+	public function getQueuedPrintSummary(): array
+	{
+		$branchesId = (int)($this->session->filters[$this->getName()]['custom__branches'] ?? 0);
+		$adminUserId = (int)($this->adminUser->id ?? 0);
+
+		$labels = $this->productLabelsRepo->findAll()
+			->where('branches_id', $branchesId)
+			->where('admin_users_id', $adminUserId)
+			->where('datetime_printed IS NULL')
+			->where('count > ?', 0)
+			->where('type_id > ?', 0);
+
+		$totalLabels = 0;
+		$productIds = [];
+		$grouped = [
+			\ProductLabelsEntity::TYPE_A4 => ['key' => 'a4', 'typeId' => 1, 'name' => 'A4', 'dims' => '210 × 297 mm', 'perPage' => 1, 'w' => '150px', 'h' => '212px', 'items' => [], 'count' => 0],
+			\ProductLabelsEntity::TYPE_A5 => ['key' => 'a5', 'typeId' => 2, 'name' => 'A5', 'dims' => '210 × 148 mm', 'perPage' => 2, 'w' => '150px', 'h' => '106px', 'items' => [], 'count' => 0],
+			\ProductLabelsEntity::TYPE_SIZE_1 => ['key' => 'v1', 'typeId' => 3, 'name' => 'Vel. 1', 'dims' => '150 × 44 mm', 'perPage' => 3, 'w' => '160px', 'h' => '48px', 'items' => [], 'count' => 0],
+			\ProductLabelsEntity::TYPE_SIZE_2 => ['key' => 'v2', 'typeId' => 4, 'name' => 'Vel. 2', 'dims' => '133 × 52 mm', 'perPage' => 2, 'w' => '150px', 'h' => '58px', 'items' => [], 'count' => 0],
+			\ProductLabelsEntity::TYPE_SIZE_3 => ['key' => 'v3', 'typeId' => 5, 'name' => 'Vel. 3', 'dims' => '182 × 56 mm', 'perPage' => 2, 'w' => '170px', 'h' => '56px', 'items' => [], 'count' => 0],
+		];
+
+		foreach ($labels as $row) {
+			$label = \ProductLabelsRepository::getEntity($row);
+			$count = (int)$label->count;
+			$totalLabels += $count;
+			$productIds[$label->products_id] = TRUE;
+
+			if (isset($grouped[$label->type_id])) {
+				$grouped[$label->type_id]['count'] += $count;
+				$product = $label->getProduct();
+				$price = $product ? $product->getPrice($branchesId) : NULL;
+				$grouped[$label->type_id]['items'][] = [
+					'label' => $label,
+					'product' => $product,
+					'price' => $price,
+					'count' => $count,
+				];
+			}
+		}
+
+		foreach ($grouped as $typeId => &$group) {
+			$group['pages'] = (int)ceil($group['count'] / max(1, $group['perPage']));
+		}
+
+		return [
+			'totalLabels' => $totalLabels,
+			'selectedProductsCount' => count($productIds),
+			'groups' => array_filter($grouped, static fn($g) => $g['count'] > 0),
+			'allGroups' => $grouped,
+		];
+	}
+
+
+	/**
+	 * @return void
+	 */
+	public function handleClearAllPrintCounts()
+	{
+		$branchesId = (int)($this->session->filters[$this->getName()]['custom__branches'] ?? 0);
+		$adminUserId = (int)($this->adminUser->id ?? 0);
+
+		$this->productLabelsRepo->findAll()
+			->where('branches_id', $branchesId)
+			->where('admin_users_id', $adminUserId)
+			->where('datetime_printed IS NULL')
+			->update(['count' => 0]);
+
+		if ($this->isAjax()) {
+			$this->redrawControl('list');
+			$this->redrawControl('printSummary');
+			$this->redrawControl('headerPrintBtn');
+			$this->redrawControl('printPreviewSnippet');
+		} else {
+			$this->redirect('this');
+		}
+	}
+
+
+	/**
+	 * @param int $labelId
+	 * @return void
+	 */
+	public function handleRemoveFromQueue(int $labelId)
+	{
+		if ($label = $this->productLabelsRepo->findEntity($labelId)) {
+			$label->count = 0;
+			$this->productLabelsRepo->update($label);
+		}
+
+		if ($this->isAjax()) {
+			$this->redrawControl('list');
+			$this->redrawControl('printSummary');
+			$this->redrawControl('headerPrintBtn');
+			$this->redrawControl('printPreviewSnippet');
+		} else {
+			$this->redirect('this');
+		}
+	}
+
+
+	/**
+	 * @param int $typeId
+	 * @return void
+	 */
+	public function handleDownloadPdfGroup(int $typeId)
+	{
+		$branchesId = (int)($this->session->filters[$this->getName()]['custom__branches'] ?? 0);
+		$adminUserId = (int)($this->adminUser->id ?? 0);
+
+		$labelIds = $this->productLabelsRepo->findAll()
+			->where('branches_id', $branchesId)
+			->where('admin_users_id', $adminUserId)
+			->where('type_id', $typeId)
+			->where('datetime_printed IS NULL')
+			->where('count > ?', 0)
+			->fetchPairs(NULL, 'id');
+
+		if (!$labelIds) {
+			$this->flashMessage($this->trans('admin.terms.noLabelsToPrint') ?? 'Không có nhãn nào cần in.', 'warning');
+			$this->redirect('this');
+		}
+
+		$file = $this->productLabelsService->generatePdf($branchesId, TRUE, array_values($labelIds));
+		if ($file) {
+			$this->session->labelsIsPrint = TRUE;
+			$typeName = $this->global['productLabelTypes'][$typeId] ?? ('group-'.$typeId);
+			$filename = \Nette\Utils\Strings::webalize($typeName) . '-' . date('Y_m_d') . '-' . time() . '.pdf';
+			if ($file instanceof \TCPDF) {
+				$file->Output($filename, 'D');
+				exit;
+			}
+			elseif ($file instanceof \Dompdf\Dompdf) {
+				header('Content-Type: application/pdf');
+				header('Content-Disposition: attachment; filename="' . $filename . '"');
+				echo $file->output();
+				exit;
+			}
+		}
+
+		echo '<script>window.close();</script>';
+		exit;
+	}
 }

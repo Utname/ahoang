@@ -322,6 +322,12 @@ class ProductsPresenter extends BaseModulePresenter
 		$this->template->categories = $this->categories = $this->categoriesRepo->findAllEntities();
 		$this->template->newProductModal = $this->newProductModal || ($newProductModalSearch && !$newProductModalCount);
 		$this->template->newProductModalEan = $newProductModalSearch && !$newProductModalCount ? $newProductModalEan : NULL;
+
+		$summary = $this->getQueuedPrintSummary();
+		$this->template->queuedPrintSummary = $summary;
+		$this->template->totalLabels = $summary['totalLabels'];
+		$this->template->selectedProductsCount = $summary['selectedProductsCount'];
+		$this->template->printGroups = $summary['groups'];
 	}
 
 

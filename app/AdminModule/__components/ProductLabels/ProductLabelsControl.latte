@@ -1,53 +1,55 @@
 {snippet list}
     {var $item = $control->getItem()}
-    {var $price = $item->getPrice($control->getBranchesId())}
-    {var $labels = $item->getProductLabels($control->getBranchesId())}
+    {var $price = $item ? $item->getPrice($control->getBranchesId()) : NULL}
+    {var $labels = $item ? $item->getProductLabels($control->getBranchesId()) : []}
 
-    <span n:if="!$price" class="text-danger">{_admin.terms.noBasicPrice}</span>
+    <span n:if="!$price" class="text-danger" style="font-size:11px;">{_admin.terms.noBasicPrice}</span>
     {if $price}
-        <a href="{plink multiLabel! $item->id}" class="btn btn-default ajax-modal" data-target="#modal-multiLabelsForm">
-            <i class="fa fa-copy"></i>
-        </a>
-        <div n:foreach="$GLOBALS['global']['productLabelTypes'] as $labelTypeId => $term" class="d-inline-block">
-            {* Clicking the chip activates the label directly (count=1, using
-               the same product-derived defaults as the count input below —
-               handleSaveLabelCount()) instead of requiring the modal + Save
-               step first. "Biên tập" in the dropdown below still opens the
-               modal for anyone who wants to customize the label afterward. *}
-            <a n:if="!isset($labels[$labelTypeId]) || !$labels[$labelTypeId]->isToPrint()" href="{link saveLabelCount! $labelTypeId, isset($labels[$labelTypeId]) ? $labels[$labelTypeId]->id : NULL}&productLabels-{$item->id}-count=1" class="btn btn-default ajax w-50">
-                {$term}
-            </a>
-            <div n:if="isset($labels[$labelTypeId]) && $labels[$labelTypeId]->isToPrint()" class="dropdown pull-left">
-                <a class="dropdown-toggle btn btn-success w-50-important" data-toggle="dropdown" href="#" style="width: auto;">
-                    {$term}
+        <div class="product-labels-steppers-container" style="display:inline-flex;align-items:center;gap:5px;flex-wrap:nowrap;">
+            {foreach $GLOBALS['global']['productLabelTypes'] as $labelTypeId => $term}
+                {var $label = $labels[$labelTypeId] ?? NULL}
+                {var $count = ($label && $label->isToPrint()) ? (int)$label->count : 0}
+                {var $hasCount = $count > 0}
+                <div class="label-stepper-item" style="display:inline-flex;flex-direction:column;align-items:center;min-width:62px;">
+                    <div class="label-stepper-box" style="display:inline-flex;align-items:stretch;border:1px solid {$hasCount ? '#14b8a6' : '#d9e0e8'|noescape};border-radius:7px;overflow:hidden;background:#fff;height:24px;box-shadow:{$hasCount ? '0 0 0 1px #14b8a6' : 'none'|noescape};">
+                        <a href="{link decrement! $labelTypeId, $label ? $label->id : NULL}" 
+                           class="ajax label-stepper-btn label-stepper-dec" 
+                           style="width:19px;display:flex;align-items:center;justify-content:center;background:#fff;color:#5d6a7d;text-decoration:none;font-size:12px;font-weight:700;line-height:1;border-right:1px solid #eef1f5;cursor:pointer;" 
+                           title="−">−</a>
+                        
+                        <div class="label-stepper-val" style="min-width:22px;padding:0 3px;height:100%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:{$hasCount ? '800' : '500'};color:{$hasCount ? '#042f2e' : '#8794a5'};background:{$hasCount ? '#ccfbf1' : '#fff'};">
+                            {$count}
+                        </div>
+
+                        <a href="{link increment! $labelTypeId, $label ? $label->id : NULL}" 
+                           class="ajax label-stepper-btn label-stepper-inc" 
+                           style="width:19px;display:flex;align-items:center;justify-content:center;background:#fff;color:#5d6a7d;text-decoration:none;font-size:12px;font-weight:700;line-height:1;border-left:1px solid #eef1f5;cursor:pointer;" 
+                           title="+">+</a>
+                    </div>
+                    <span style="font-size:10px;color:#8794a5;margin-top:2px;font-weight:600;letter-spacing:0.02em;">{$term}</span>
+                </div>
+            {/foreach}
+            
+            <div class="dropdown m-l-xxs" style="margin-top:-14px;">
+                <a class="dropdown-toggle btn btn-xs btn-default" data-toggle="dropdown" href="#" title="Tùy chọn chi tiết" style="padding:2px 5px;border-radius:5px;">
+                    <i class="fa fa-ellipsis-v"></i>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-right dropdown-list">
                     <li>
-                        <a href="{plink label! $item->id, $labelTypeId}" class="ajax-modal" data-target="#modal-labelsForm">
-                            <i class="fas fa-pencil"></i> {_admin.actions.edit}
+                        <a href="{plink multiLabel! $item->id}" class="ajax-modal" data-target="#modal-multiLabelsForm">
+                            <i class="fa fa-copy"></i> {_admin.terms.editMultipleLabels ?? 'Biên tập nhãn'}
                         </a>
                     </li>
-                    <li>
-                        {* class + data-products-id let a click handler in custom.js read the
-                           row's own (possibly unsaved) price/date inputs and append them as
-                           override query params before navigating — see handleDownloadPdf(). *}
-                        <a href="{plink downloadPdf! $labels[$labelTypeId]->id, FALSE}" target="_blank" class="print-with-live-price" data-products-id="{$item->id}">
-                            <i class="fas fa-file-pdf"></i> {_admin.actions.preview}
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{plink downloadPdf! $labels[$labelTypeId]->id, TRUE}" target="_blank" class="print-with-live-price" data-products-id="{$item->id}">
-                            <i class="fas fa-file-download"></i> {_admin.actions.download}
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{plink deleteLabel! $labels[$labelTypeId]->id}" class="ajax">
-                            <i class="fas fa-trash"></i> {_admin.actions.delete}
-                        </a>
-                    </li>
+                    {foreach $GLOBALS['global']['productLabelTypes'] as $labelTypeId => $term}
+                        {var $label = $labels[$labelTypeId] ?? NULL}
+                        <li n:if="$label">
+                            <a href="{plink label! $item->id, $labelTypeId}" class="ajax-modal" data-target="#modal-labelsForm">
+                                <i class="fas fa-pencil"></i> {_admin.actions.edit} {$term}
+                            </a>
+                        </li>
+                    {/foreach}
                 </ul>
-            </div><br>
-            <input type="number" value="{isset($labels[$labelTypeId]) ? $labels[$labelTypeId]->count : 0}" min="1" step="1" class="form-control w-50 without-arrows text-center change-handler" data-handler="{link saveLabelCount! $labelTypeId, isset($labels[$labelTypeId]) ? $labels[$labelTypeId]->id : NULL}&productLabels-{$item->id}-count=">
+            </div>
         </div>
     {/if}
 {/snippet}

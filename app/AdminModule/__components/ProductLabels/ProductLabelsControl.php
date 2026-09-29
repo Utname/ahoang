@@ -90,13 +90,116 @@ class ProductLabelsControl extends \Nette\Application\UI\Control
 	/**
 	 * @param $typeId
 	 * @param $idItem
+	 * @return void
+	 */
+	public function handleIncrement($typeId, $idItem = NULL)
+	{
+		$branchesId = $this->getBranchesId();
+		$adminUserId = $GLOBALS['adminUser']->id ?? 0;
+		$product = $this->getItem();
+
+		if ($idItem && $item = $this->productLabelsRepo->findEntity($idItem)) {
+			$item->count = (int)$item->count + 1;
+			$item->datetime_printed = NULL;
+			$this->productLabelsRepo->update($item);
+		}
+		elseif ($typeId && $branchesId && $product) {
+			$existing = $this->productLabelsRepo->findEntityBy([
+				'products_id' => $product->id,
+				'branches_id' => $branchesId,
+				'admin_users_id' => $adminUserId,
+				'type_id' => $typeId,
+			]);
+
+			if ($existing) {
+				$existing->count = (int)$existing->count + 1;
+				$existing->datetime_printed = NULL;
+				$this->productLabelsRepo->update($existing);
+			}
+			else {
+				$productPrice = $product->getPrice($branchesId);
+				$labelHeader = $this->productLabelHeadersRepo->findAll()->order('pos_order')->limit(1)->fetch();
+				$values = [
+					'product_label_headers_id' => $labelHeader ? $labelHeader->id : NULL,
+					'products_id' => $product->id,
+					'branches_id' => $branchesId,
+					'admin_users_id' => $adminUserId,
+					'count' => 1,
+					'datetime_printed' => NULL,
+					'type_id' => $typeId,
+					'sale_text' => '',
+					'sale_percent' => $productPrice ? $productPrice->getActionPercents(TRUE) : 0,
+					'is_more_species' => 0,
+					'price_text' => \ProductLabelsEntity::PRICE_TYPE_CZK,
+					'origin_countries_id' => $product->country_origin ?: NULL,
+					'name' => $product->name,
+					'note_1' => $product->label_note_1,
+					'note_2' => $product->label_note_2,
+					'note_3' => $product->label_note_3,
+				];
+				$this->productLabelsRepo->insert($values);
+			}
+		}
+
+		$this->redrawControl('list');
+		if ($presenter = $this->getPresenter()) {
+			$presenter->redrawControl('printSummary');
+			$presenter->redrawControl('headerPrintBtn');
+			$presenter->redrawControl('printPreviewSnippet');
+		}
+	}
+
+
+	/**
+	 * @param $typeId
+	 * @param $idItem
+	 * @return void
+	 */
+	public function handleDecrement($typeId, $idItem = NULL)
+	{
+		$branchesId = $this->getBranchesId();
+		$adminUserId = $GLOBALS['adminUser']->id ?? 0;
+		$product = $this->getItem();
+
+		if ($idItem && $item = $this->productLabelsRepo->findEntity($idItem)) {
+			$item->count = max(0, (int)$item->count - 1);
+			$item->datetime_printed = NULL;
+			$this->productLabelsRepo->update($item);
+		}
+		elseif ($typeId && $branchesId && $product) {
+			$existing = $this->productLabelsRepo->findEntityBy([
+				'products_id' => $product->id,
+				'branches_id' => $branchesId,
+				'admin_users_id' => $adminUserId,
+				'type_id' => $typeId,
+			]);
+
+			if ($existing) {
+				$existing->count = max(0, (int)$existing->count - 1);
+				$existing->datetime_printed = NULL;
+				$this->productLabelsRepo->update($existing);
+			}
+		}
+
+		$this->redrawControl('list');
+		if ($presenter = $this->getPresenter()) {
+			$presenter->redrawControl('printSummary');
+			$presenter->redrawControl('headerPrintBtn');
+			$presenter->redrawControl('printPreviewSnippet');
+		}
+	}
+
+
+	/**
+	 * @param $typeId
+	 * @param $idItem
 	 * @param int $count
 	 * @return void
 	 */
 	public function handleSaveLabelCount($typeId, $idItem = NULL, int $count = 0)
 	{
 		if ($idItem && $item = $this->productLabelsRepo->findEntity($idItem)) {
-			$item->count = $count;
+			$item->count = max(0, $count);
 			$item->datetime_printed = NULL;
 			$this->productLabelsRepo->update($item);
 		}
@@ -109,7 +212,7 @@ class ProductLabelsControl extends \Nette\Application\UI\Control
 				'products_id' => $product->id,
 				'branches_id' => $this->getBranchesId(),
 				'admin_users_id' => $GLOBALS['adminUser']->id,
-				'count' => $count,
+				'count' => max(0, $count),
 				'datetime_printed' => NULL,
 				'type_id' => $typeId,
 				'sale_text' => '',
@@ -127,5 +230,10 @@ class ProductLabelsControl extends \Nette\Application\UI\Control
 		}
 
 		$this->redrawControl('list');
+		if ($presenter = $this->getPresenter()) {
+			$presenter->redrawControl('printSummary');
+			$presenter->redrawControl('headerPrintBtn');
+			$presenter->redrawControl('printPreviewSnippet');
+		}
 	}
 }

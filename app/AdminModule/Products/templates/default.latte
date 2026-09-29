@@ -101,18 +101,21 @@
                             </div>
                         </div>
                         <div class="pull-right m-t-xxs m-r-xxs">
-                            <a n:href="removePrint!" class="btn btn-primary btn-addon with-confirm" data-message="{_admin.terms.reallyRemoveLabels}">
-                                <i class="fa fa-trash"></i> {_admin.terms.removeLabels}
-                            </a>
-                        </div>
-                        <div class="pull-right m-t-xxs m-r-xxs">
-                            <a n:href="downloadPdf!" target="_blank" class="btn btn-primary btn-addon">
-                                <i class="fa fa-file-download"></i> {_admin.terms.downloadLabels}
-                            </a>
+                            {snippet headerPrintBtn}
+                                <a href="#" class="btn btn-addon" style="background:#0f172a;color:#fff;border-radius:8px;font-weight:700;display:inline-flex;align-items:center;gap:8px;border:none;box-shadow:0 2px 6px rgba(15,23,42,0.25);" onclick="$('#modal-printPreview').modal('show'); return false;">
+                                    <span>🖨 {_admin.terms.downloadLabels ?? 'In tem giá'}</span>
+                                    <span style="background:#14b8a6;color:#042f2e;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:800;">{$totalLabels ?? 0}</span>
+                                </a>
+                            {/snippet}
                         </div>
                         <div class="pull-right m-t-xxs m-r-xxs">
                             <a n:href="toPrint!" class="btn btn-default btn-addon">
                                 <i class="fa fa-filter"></i> {_admin.terms.toPrint}
+                            </a>
+                        </div>
+                        <div class="pull-right m-t-xxs m-r-xxs">
+                            <a n:href="clearAllPrintCounts!" class="btn btn-default btn-addon ajax with-confirm" data-message="{_admin.terms.reallyRemoveLabels ?? 'Bạn có chắc chắn muốn xóa tất cả tem trong hàng đợi in?'}">
+                                <i class="fa fa-trash text-danger"></i> {_admin.terms.removeLabels}
                             </a>
                         </div>
                     </div>
@@ -137,8 +140,8 @@
                                 <th class="w-450 text-center" colspan="4">
                                     <div class="w-450"><strong>{_admin.terms.action}</strong></div>
                                 </th>
-                                <th class="w-330 text-center">
-                                    <div class="w-330"><strong>{_admin.terms.labels}</strong></div>
+                                <th class="w-380 text-center">
+                                    <div class="w-380"><strong>{_admin.terms.labels}</strong> (A4 · A5 · Vel. 1 · Vel. 2 · Vel. 3)</div>
                                 </th>
                                 <th class="w-60 text-center">
                                     <i class="far fa-eye" data-toggle="tooltip" title="{_admin.terms.isActive}"></i>
@@ -263,6 +266,23 @@
                         </table>
 
                     {control paginator}
+
+                    {snippet printSummary}
+                        <div class="print-summary-sticky-bar" style="position:sticky;bottom:10px;z-index:90;background:#fff;border:1px solid #14b8a6;border-radius:12px;padding:12px 20px;margin-top:20px;box-shadow:0 4px 18px rgba(0,0,0,0.12);display:flex;align-items:center;justify-content:space-between;gap:15px;">
+                            <div style="font-size:13.5px;color:#5d6a7d;display:flex;align-items:center;gap:10px;">
+                                <i class="fas fa-tags" style="color:#14b8a6;font-size:18px;"></i>
+                                <span>{_admin.terms.selected ?? 'Đã chọn'} <strong style="color:#17202b;font-size:15px;">{$selectedProductsCount ?? 0}</strong> {_admin.terms.products ?? 'sản phẩm'} · <strong style="color:#042f2e;background:#ccfbf1;padding:3px 10px;border-radius:999px;font-size:14px;font-weight:800;">{$totalLabels ?? 0} {_admin.terms.labels ?? 'tem'}</strong></span>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <a n:href="clearAllPrintCounts!" class="btn btn-default ajax with-confirm" data-message="{_admin.terms.reallyRemoveLabels ?? 'Bạn có chắc chắn muốn xóa tất cả tem trong hàng đợi in?'}" style="border:1px solid #d9e0e8;border-radius:8px;padding:7px 14px;font-weight:600;color:#5d6a7d;font-size:13px;">
+                                    <i class="fa fa-trash-alt text-muted m-r-xxs"></i> {_admin.terms.clearAll ?? 'Xóa hết'}
+                                </a>
+                                <a href="#" class="btn" style="border:none;border-radius:8px;background:#14b8a6;color:#042f2e;padding:8px 20px;font-size:13.5px;font-weight:800;box-shadow:0 2px 6px rgba(20,184,166,0.3);text-decoration:none;display:inline-flex;align-items:center;gap:6px;" onclick="$('#modal-printPreview').modal('show'); return false;">
+                                    {_admin.terms.previewAndPrint ?? 'Xem trước & in'} →
+                                </a>
+                            </div>
+                        </div>
+                    {/snippet}
                 </div>
         </div>
     </div>
@@ -848,6 +868,98 @@
 	    window.open('/admin/products/edit/{$editProductWindowId}?ct=1', '_blank');
     </script>
 {/snippet}
+
+<div id="modal-printPreview" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog" style="width: 92%; max-width: 1200px;">
+        <div class="modal-content" style="border-radius:14px;overflow:hidden;border:1px solid #e6eaf0;box-shadow:0 10px 30px rgba(0,0,0,0.15);">
+            <div class="modal-header" style="background:#fff;padding:16px 22px;border-bottom:1px solid #eef1f5;display:flex;align-items:center;justify-content:space-between;">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius:8px;font-weight:600;padding:6px 14px;font-size:13px;border:1px solid #d9e0e8;">
+                        ← {_admin.terms.back ?? 'Quay lại'}
+                    </button>
+                    <h4 class="modal-title" style="margin:0;font-weight:800;font-size:18px;color:#0f172a;">
+                        {_admin.terms.printPreviewTitle ?? 'Xem trước in'} <span style="color:#8794a5;font-weight:500;font-size:14px;">· {$totalLabels ?? 0} {_admin.terms.labels ?? 'tem'}</span>
+                    </h4>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <a n:href="clearAllPrintCounts!" class="btn btn-default ajax with-confirm" data-message="{_admin.terms.reallyRemoveLabels ?? 'Bạn có chắc chắn muốn xóa tất cả tem trong hàng đợi in?'}" style="border-radius:8px;font-weight:600;color:#c0392b;background:#fde8e8;border:none;padding:8px 14px;font-size:13px;">
+                        <i class="fa fa-trash-alt m-r-xxs"></i> {_admin.terms.clearAll ?? 'Xóa hết'}
+                    </a>
+                    <a n:href="downloadPdf!" target="_blank" class="btn" style="border:none;border-radius:8px;background:#14b8a6;color:#042f2e;padding:8px 22px;font-size:14px;font-weight:800;box-shadow:0 2px 6px rgba(20,184,166,0.3);text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
+                        <i class="fa fa-print"></i> {_admin.terms.printAll ?? '🖨 In tất cả'}
+                    </a>
+                </div>
+            </div>
+            <div class="modal-body" style="background:#f6f7f9;padding:22px;max-height:calc(85vh - 120px);overflow-y:auto;">
+                {snippet printPreviewSnippet}
+                    {if empty($printGroups)}
+                        <div class="text-center" style="padding:50px 20px;color:#8794a5;">
+                            <i class="fas fa-tags" style="font-size:45px;margin-bottom:15px;color:#cbd5e1;"></i>
+                            <p style="font-size:16px;font-weight:700;color:#334155;margin-bottom:6px;">{_admin.terms.noLabelsInQueue ?? 'Chưa có tem nào trong danh sách in'}</p>
+                            <p style="font-size:13px;color:#64748b;">{_admin.terms.addLabelsHint ?? 'Hãy bấm dấu [+] ở các cột khổ tem trên danh sách sản phẩm để thêm vào hàng đợi in.'}</p>
+                        </div>
+                    {else}
+                        <div style="display:flex;flex-direction:column;gap:20px;">
+                            {foreach $printGroups as $group}
+                                <div style="background:#fff;border:1px solid #e6eaf0;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+                                    <div style="display:flex;align-items:center;gap:10px;padding:12px 18px;background:#fafbfc;border-bottom:1px solid #eef1f5;">
+                                        <div style="font-size:16px;font-weight:800;color:#0f172a;">{$group['name']}</div>
+                                        <div style="font-size:12px;color:#8794a5;font-weight:500;">({$group['dims']})</div>
+                                        <div style="flex:1;"></div>
+                                        <div style="font-size:13px;color:#5d6a7d;margin-right:15px;">
+                                            <strong style="color:#042f2e;background:#ccfbf1;padding:2px 8px;border-radius:6px;font-size:13px;">{$group['count']} {_admin.terms.labels ?? 'tem'}</strong> · <strong style="color:#0f172a;">{$group['pages']}</strong> {_admin.terms.pagesA4 ?? 'trang A4'}
+                                        </div>
+                                        <a n:href="downloadPdfGroup! $group['typeId']" target="_blank" class="btn btn-sm btn-default" style="border:1px solid #d9e0e8;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;color:#17202b;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,0.05);">
+                                            <i class="fa fa-print m-r-xxs" style="color:#14b8a6;"></i> {_admin.terms.printSize ?? 'In'} {$group['name']}
+                                        </a>
+                                    </div>
+                                    <div style="display:flex;gap:12px;padding:16px;flex-wrap:wrap;background:#fff;">
+                                        {foreach $group['items'] as $it}
+                                            <div style="position:relative;border:1px dashed #b6c2d0;border-radius:8px;width:235px;min-height:105px;padding:10px;box-sizing:border-box;display:flex;flex-direction:column;font-size:11px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,0.03);">
+                                                <div style="position:absolute;top:7px;right:7px;display:flex;align-items:center;gap:3px;">
+                                                    <a href="{plink productLabels-$it['product']->id:decrement! $group['typeId'], $it['label']->id}" class="ajax" style="width:18px;height:18px;border:1px solid #d9e0e8;border-radius:5px;background:#fff;display:flex;align-items:center;justify-content:center;color:#5d6a7d;text-decoration:none;font-size:11px;line-height:1;font-weight:700;">−</a>
+                                                    <div style="background:#0f172a;color:#fff;border-radius:999px;padding:1px 7px;font-size:10px;font-weight:700;">{$it['count']}×</div>
+                                                    <a href="{plink productLabels-$it['product']->id:increment! $group['typeId'], $it['label']->id}" class="ajax" style="width:18px;height:18px;border:1px solid #d9e0e8;border-radius:5px;background:#fff;display:flex;align-items:center;justify-content:center;color:#5d6a7d;text-decoration:none;font-size:11px;line-height:1;font-weight:700;">+</a>
+                                                    <a n:href="removeFromQueue! $it['label']->id" class="ajax" title="{_admin.terms.removeFromQueue ?? 'Xóa khỏi danh sách in'}" style="width:18px;height:18px;border:none;border-radius:5px;background:#fde8e8;display:flex;align-items:center;justify-content:center;color:#c0392b;text-decoration:none;font-size:11px;font-weight:700;margin-left:2px;">×</a>
+                                                </div>
+                                                <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;">
+                                                    <span style="background:#17202b;color:#fff;font-weight:800;font-style:italic;padding:1px 5px;font-size:9px;border-radius:3px;">Fikko Cena</span>
+                                                </div>
+                                                <div style="font-weight:700;line-height:1.25;padding-right:75px;margin-bottom:6px;color:#0f172a;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">
+                                                    {$it['product']->name}
+                                                </div>
+                                                <div style="margin-top:auto;display:flex;align-items:baseline;justify-content:space-between;gap:6px;">
+                                                    <div style="font-size:10px;color:#5d6a7d;">
+                                                        Běžná <strong>{$it['price'] ? $it['price']->price : 0|price}</strong>
+                                                    </div>
+                                                    <div style="font-weight:800;font-style:italic;font-size:16px;color:#0d9488;">
+                                                        {$it['price'] && $it['price']->price_action ? $it['price']->price_action : ($it['price'] ? $it['price']->price : 0)|price}
+                                                    </div>
+                                                </div>
+                                                <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:4px;border-top:1px dashed #f1f4f8;padding-top:3px;font-size:8.5px;color:#8794a5;">
+                                                    <div>{if $it['product']->code_ean}EAN: {$it['product']->code_ean}{/if}</div>
+                                                    <div style="font-weight:600;">{$group['name']}</div>
+                                                </div>
+                                            </div>
+                                        {/foreach}
+                                    </div>
+                                </div>
+                            {/foreach}
+                        </div>
+                    {/if}
+                {/snippet}
+            </div>
+            <div class="modal-footer" style="background:#fff;padding:12px 22px;border-top:1px solid #eef1f5;display:flex;align-items:center;justify-content:space-between;">
+                <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius:8px;font-weight:600;">
+                    {_admin.buttons.close}
+                </button>
+                <a n:href="downloadPdf!" target="_blank" class="btn" style="border:none;border-radius:8px;background:#14b8a6;color:#042f2e;padding:8px 22px;font-size:14px;font-weight:800;box-shadow:0 2px 6px rgba(20,184,166,0.3);text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
+                    <i class="fa fa-print"></i> {_admin.terms.printAll ?? '🖨 In tất cả'}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 
 {snippetArea modalWrapper}
 	{include APP_DIR . '/AdminModule/Products/templates/__inc/pricesLogModal.latte'}
