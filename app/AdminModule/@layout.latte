@@ -199,26 +199,11 @@
 <script src="/js/admin/modern.js"></script>
 <script src="/js/admin/custom.js?v={$antiCache}"></script>
 
-{if $GLOBALS['container']->isDevMode()}
-{* Auto-translate CZ -> VI on load, local dev only (config/02-local.neon: devMode) *}
-<div id="google_translate_element" style="display:none;"></div>
-<div style="position:fixed;bottom:8px;right:8px;z-index:9999;background:#fff;border:1px solid #ccc;border-radius:4px;padding:4px 8px;font-size:12px;box-shadow:0 1px 4px rgba(0,0,0,.2);">
-	<a href="#" onclick="document.cookie='googtrans=/cs/vi;path=/';document.cookie='googtrans=/cs/vi;path=/;domain='+location.hostname;location.reload();return false;">VI</a>
-	|
-	<a href="#" onclick="document.cookie='googtrans=/cs/cs;path=/';document.cookie='googtrans=/cs/cs;path=/;domain='+location.hostname;location.reload();return false;">CS</a>
+<div style="position:fixed;bottom:8px;right:8px;z-index:9999;background:#fff;border:1px solid #cbd5e1;border-radius:6px;padding:4px 8px;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.15);display:flex;align-items:center;gap:6px;">
+	<a n:href="switchLocale! 'vi_VN'" style="font-weight:{if $locale == 'vi_VN'}700{else}400{/if};color:{if $locale == 'vi_VN'}#0284c7{else}#64748b{/if};text-decoration:none;padding:2px 4px;border-radius:3px;background:{if $locale == 'vi_VN'}#e0f2fe{else}transparent{/if};">VI</a>
+	<span style="color:#cbd5e1;">|</span>
+	<a n:href="switchLocale! 'cs_CZ'" style="font-weight:{if $locale == 'cs_CZ'}700{else}400{/if};color:{if $locale == 'cs_CZ'}#0284c7{else}#64748b{/if};text-decoration:none;padding:2px 4px;border-radius:3px;background:{if $locale == 'cs_CZ'}#e0f2fe{else}transparent{/if};">CS</a>
 </div>
-<script n:syntax="off">
-    {* Google's own "show original" toggle only affects the current DOM, not the googtrans cookie — it never survives a reload, hence the VI/CS links above giving explicit, persistent control instead. This only sets a default on the very first visit (no googtrans cookie yet); once either link is clicked the cookie always exists, so this never overrides that choice again. *}
-    if (!/(?:^|; )googtrans=/.test(document.cookie)) {
-        document.cookie = 'googtrans=/cs/vi; path=/';
-        document.cookie = 'googtrans=/cs/vi; path=/; domain=' + location.hostname;
-    }
-    function googleTranslateElementInit() {
-        new google.translate.TranslateElement({pageLanguage: 'cs', includedLanguages: 'vi', autoDisplay: false}, 'google_translate_element');
-    }
-</script>
-<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-{/if}
 
 </body>
 
