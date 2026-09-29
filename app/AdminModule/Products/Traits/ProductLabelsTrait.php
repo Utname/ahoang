@@ -444,7 +444,7 @@ trait ProductLabelsTrait
 		if (!$label && ($product = $this->repository->findEntity($productsId))) {
 			$productPrice = $product->getPrice($branchesId);
 			$labelHeader = $this->productLabelHeadersRepo->findAll()->order('pos_order')->limit(1)->fetch();
-			$label = $this->productLabelsRepo->insertEntity([
+			$row = $this->productLabelsRepo->insert([
 				'product_label_headers_id' => $labelHeader ? $labelHeader->id : NULL,
 				'products_id' => $product->id,
 				'branches_id' => $branchesId,
@@ -462,6 +462,7 @@ trait ProductLabelsTrait
 				'note_2' => $product->label_note_2,
 				'note_3' => $product->label_note_3,
 			]);
+			$label = \ProductLabelsRepository::getEntity($row);
 		}
 
 		if ($label) {
@@ -525,7 +526,7 @@ trait ProductLabelsTrait
 			if (!$label) {
 				$productPrice = $product->getPrice($branchesId);
 				$labelHeader = $this->productLabelHeadersRepo->findAll()->order('pos_order')->limit(1)->fetch();
-				$label = $this->productLabelsRepo->insertEntity([
+				$row = $this->productLabelsRepo->insert([
 					'product_label_headers_id' => $labelHeader ? $labelHeader->id : NULL,
 					'products_id' => $product->id,
 					'branches_id' => $branchesId,
@@ -543,6 +544,7 @@ trait ProductLabelsTrait
 					'note_2' => $product->label_note_2,
 					'note_3' => $product->label_note_3,
 				]);
+				$label = \ProductLabelsRepository::getEntity($row);
 			}
 
 			if ($label) {
