@@ -1306,3 +1306,4 @@ terms:
 	consumptionType: 'Typ spotřeby'
 	weight_2: 'Hmotnost'
 	addressee: 'Adresát'
+	editMultipleLabels: 'Hromadná úprava štítků'
