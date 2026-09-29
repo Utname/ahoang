@@ -103,7 +103,7 @@
                         <div class="pull-right m-t-xxs m-r-xxs">
                             {snippet headerPrintBtn}
                                 <a href="#" class="btn btn-addon" style="background:#0f172a;color:#fff;border-radius:8px;font-weight:700;display:inline-flex;align-items:center;gap:8px;border:none;box-shadow:0 2px 6px rgba(15,23,42,0.25);" onclick="$('#modal-printPreview').modal('show'); return false;">
-                                    <span>🖨 {_admin.terms.downloadLabels ?? 'In tem giá'}</span>
+                                    <span>🖨 {_admin.terms.downloadLabels}</span>
                                     <span style="background:#14b8a6;color:#042f2e;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:800;">{$totalLabels ?? 0}</span>
                                 </a>
                             {/snippet}
@@ -114,7 +114,7 @@
                             </a>
                         </div>
                         <div class="pull-right m-t-xxs m-r-xxs">
-                            <a n:href="clearAllPrintCounts!" class="btn btn-default btn-addon ajax with-confirm" data-message="{_admin.terms.reallyRemoveLabels ?? 'Bạn có chắc chắn muốn xóa tất cả tem trong hàng đợi in?'}">
+                            <a n:href="clearAllPrintCounts!" class="btn btn-default btn-addon ajax with-confirm" data-message="{_admin.terms.reallyRemoveLabels}">
                                 <i class="fa fa-trash text-danger"></i> {_admin.terms.removeLabels}
                             </a>
                         </div>
@@ -271,14 +271,14 @@
                         <div class="print-summary-sticky-bar" style="position:sticky;bottom:10px;z-index:90;background:#fff;border:1px solid #14b8a6;border-radius:12px;padding:12px 20px;margin-top:20px;box-shadow:0 4px 18px rgba(0,0,0,0.12);display:flex;align-items:center;justify-content:space-between;gap:15px;">
                             <div style="font-size:13.5px;color:#5d6a7d;display:flex;align-items:center;gap:10px;">
                                 <i class="fas fa-tags" style="color:#14b8a6;font-size:18px;"></i>
-                                <span>{_admin.terms.selected ?? 'Đã chọn'} <strong style="color:#17202b;font-size:15px;">{$selectedProductsCount ?? 0}</strong> {_admin.terms.products ?? 'sản phẩm'} · <strong style="color:#042f2e;background:#ccfbf1;padding:3px 10px;border-radius:999px;font-size:14px;font-weight:800;">{$totalLabels ?? 0} {_admin.terms.labels ?? 'tem'}</strong></span>
+                                <span>{_admin.terms.selected} <strong style="color:#17202b;font-size:15px;">{$selectedProductsCount ?? 0}</strong> {_admin.terms.products} · <strong style="color:#042f2e;background:#ccfbf1;padding:3px 10px;border-radius:999px;font-size:14px;font-weight:800;">{$totalLabels ?? 0} {_admin.terms.labels}</strong></span>
                             </div>
                             <div style="display:flex;align-items:center;gap:10px;">
-                                <a n:href="clearAllPrintCounts!" class="btn btn-default ajax with-confirm" data-message="{_admin.terms.reallyRemoveLabels ?? 'Bạn có chắc chắn muốn xóa tất cả tem trong hàng đợi in?'}" style="border:1px solid #d9e0e8;border-radius:8px;padding:7px 14px;font-weight:600;color:#5d6a7d;font-size:13px;">
-                                    <i class="fa fa-trash-alt text-muted m-r-xxs"></i> {_admin.terms.clearAll ?? 'Xóa hết'}
+                                <a n:href="clearAllPrintCounts!" class="btn btn-default ajax with-confirm" data-message="{_admin.terms.reallyRemoveLabels}" style="border:1px solid #d9e0e8;border-radius:8px;padding:7px 14px;font-weight:600;color:#5d6a7d;font-size:13px;">
+                                    <i class="fa fa-trash-alt text-muted m-r-xxs"></i> {_admin.terms.clearAll}
                                 </a>
                                 <a href="#" class="btn" style="border:none;border-radius:8px;background:#14b8a6;color:#042f2e;padding:8px 20px;font-size:13.5px;font-weight:800;box-shadow:0 2px 6px rgba(20,184,166,0.3);text-decoration:none;display:inline-flex;align-items:center;gap:6px;" onclick="$('#modal-printPreview').modal('show'); return false;">
-                                    {_admin.terms.previewAndPrint ?? 'Xem trước & in'} →
+                                    {_admin.terms.previewAndPrint} →
                                 </a>
                             </div>
                         </div>
@@ -875,18 +875,18 @@
             <div class="modal-header" style="background:#fff;padding:16px 22px;border-bottom:1px solid #eef1f5;display:flex;align-items:center;justify-content:space-between;">
                 <div style="display:flex;align-items:center;gap:12px;">
                     <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius:8px;font-weight:600;padding:6px 14px;font-size:13px;border:1px solid #d9e0e8;">
-                        ← {_admin.terms.back ?? 'Quay lại'}
+                        ← {_admin.terms.back}
                     </button>
                     <h4 class="modal-title" style="margin:0;font-weight:800;font-size:18px;color:#0f172a;">
-                        {_admin.terms.printPreviewTitle ?? 'Xem trước in'} <span style="color:#8794a5;font-weight:500;font-size:14px;">· {$totalLabels ?? 0} {_admin.terms.labels ?? 'tem'}</span>
+                        {_admin.terms.printPreviewTitle} <span style="color:#8794a5;font-weight:500;font-size:14px;">· {$totalLabels ?? 0} {_admin.terms.labels}</span>
                     </h4>
                 </div>
                 <div style="display:flex;align-items:center;gap:10px;">
-                    <a n:href="clearAllPrintCounts!" class="btn btn-default ajax with-confirm" data-message="{_admin.terms.reallyRemoveLabels ?? 'Bạn có chắc chắn muốn xóa tất cả tem trong hàng đợi in?'}" style="border-radius:8px;font-weight:600;color:#c0392b;background:#fde8e8;border:none;padding:8px 14px;font-size:13px;">
-                        <i class="fa fa-trash-alt m-r-xxs"></i> {_admin.terms.clearAll ?? 'Xóa hết'}
+                    <a n:href="clearAllPrintCounts!" class="btn btn-default ajax with-confirm" data-message="{_admin.terms.reallyRemoveLabels}" style="border-radius:8px;font-weight:600;color:#c0392b;background:#fde8e8;border:none;padding:8px 14px;font-size:13px;">
+                        <i class="fa fa-trash-alt m-r-xxs"></i> {_admin.terms.clearAll}
                     </a>
                     <a n:href="downloadPdf!" target="_blank" class="btn" style="border:none;border-radius:8px;background:#14b8a6;color:#042f2e;padding:8px 22px;font-size:14px;font-weight:800;box-shadow:0 2px 6px rgba(20,184,166,0.3);text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
-                        <i class="fa fa-print"></i> {_admin.terms.printAll ?? '🖨 In tất cả'}
+                        <i class="fa fa-print"></i> {_admin.terms.printAll}
                     </a>
                 </div>
             </div>
@@ -895,8 +895,8 @@
                     {if empty($printGroups)}
                         <div class="text-center" style="padding:50px 20px;color:#8794a5;">
                             <i class="fas fa-tags" style="font-size:45px;margin-bottom:15px;color:#cbd5e1;"></i>
-                            <p style="font-size:16px;font-weight:700;color:#334155;margin-bottom:6px;">{_admin.terms.noLabelsInQueue ?? 'Chưa có tem nào trong danh sách in'}</p>
-                            <p style="font-size:13px;color:#64748b;">{_admin.terms.addLabelsHint ?? 'Hãy bấm dấu [+] ở các cột khổ tem trên danh sách sản phẩm để thêm vào hàng đợi in.'}</p>
+                            <p style="font-size:16px;font-weight:700;color:#334155;margin-bottom:6px;">{_admin.terms.noLabelsInQueue}</p>
+                            <p style="font-size:13px;color:#64748b;">{_admin.terms.addLabelsHint}</p>
                         </div>
                     {else}
                         <div style="display:flex;flex-direction:column;gap:20px;">
@@ -907,10 +907,10 @@
                                         <div style="font-size:12px;color:#8794a5;font-weight:500;">({$group['dims']})</div>
                                         <div style="flex:1;"></div>
                                         <div style="font-size:13px;color:#5d6a7d;margin-right:15px;">
-                                            <strong style="color:#042f2e;background:#ccfbf1;padding:2px 8px;border-radius:6px;font-size:13px;">{$group['count']} {_admin.terms.labels ?? 'tem'}</strong> · <strong style="color:#0f172a;">{$group['pages']}</strong> {_admin.terms.pagesA4 ?? 'trang A4'}
+                                            <strong style="color:#042f2e;background:#ccfbf1;padding:2px 8px;border-radius:6px;font-size:13px;">{$group['count']} {_admin.terms.labels}</strong> · <strong style="color:#0f172a;">{$group['pages']}</strong> {_admin.terms.pagesA4}
                                         </div>
                                         <a n:href="downloadPdfGroup! $group['typeId']" target="_blank" class="btn btn-sm btn-default" style="border:1px solid #d9e0e8;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;color:#17202b;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,0.05);">
-                                            <i class="fa fa-print m-r-xxs" style="color:#14b8a6;"></i> {_admin.terms.printSize ?? 'In'} {$group['name']}
+                                            <i class="fa fa-print m-r-xxs" style="color:#14b8a6;"></i> {_admin.terms.printSize} {$group['name']}
                                         </a>
                                     </div>
                                     <div style="display:flex;gap:12px;padding:16px;flex-wrap:wrap;background:#fff;">
@@ -920,7 +920,7 @@
                                                     <a n:href="decrementQueue! $it['label']->id" class="ajax" style="width:18px;height:18px;border:1px solid #d9e0e8;border-radius:5px;background:#fff;display:flex;align-items:center;justify-content:center;color:#5d6a7d;text-decoration:none;font-size:11px;line-height:1;font-weight:700;">−</a>
                                                     <div style="background:#0f172a;color:#fff;border-radius:999px;padding:1px 7px;font-size:10px;font-weight:700;">{$it['count']}×</div>
                                                     <a n:href="incrementQueue! $it['label']->id" class="ajax" style="width:18px;height:18px;border:1px solid #d9e0e8;border-radius:5px;background:#fff;display:flex;align-items:center;justify-content:center;color:#5d6a7d;text-decoration:none;font-size:11px;line-height:1;font-weight:700;">+</a>
-                                                    <a n:href="removeFromQueue! $it['label']->id" class="ajax" title="{_admin.terms.removeFromQueue ?? 'Xóa khỏi danh sách in'}" style="width:18px;height:18px;border:none;border-radius:5px;background:#fde8e8;display:flex;align-items:center;justify-content:center;color:#c0392b;text-decoration:none;font-size:11px;font-weight:700;margin-left:2px;">×</a>
+                                                    <a n:href="removeFromQueue! $it['label']->id" class="ajax" title="{_admin.terms.removeFromQueue}" style="width:18px;height:18px;border:none;border-radius:5px;background:#fde8e8;display:flex;align-items:center;justify-content:center;color:#c0392b;text-decoration:none;font-size:11px;font-weight:700;margin-left:2px;">×</a>
                                                 </div>
                                                 <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;">
                                                     <span style="background:#17202b;color:#fff;font-weight:800;font-style:italic;padding:1px 5px;font-size:9px;border-radius:3px;">Fikko Cena</span>
@@ -954,7 +954,7 @@
                     {_admin.buttons.close}
                 </button>
                 <a n:href="downloadPdf!" target="_blank" class="btn" style="border:none;border-radius:8px;background:#14b8a6;color:#042f2e;padding:8px 22px;font-size:14px;font-weight:800;box-shadow:0 2px 6px rgba(20,184,166,0.3);text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
-                    <i class="fa fa-print"></i> {_admin.terms.printAll ?? '🖨 In tất cả'}
+                    <i class="fa fa-print"></i> {_admin.terms.printAll}
                 </a>
             </div>
         </div>

@@ -5,6 +5,7 @@ project:
 locales:
 	cs_CZ: 'Česky'
 	en_US: 'Anglicky'
+	vi_VN: 'Vietnamsky'
 
 modules:
 	accessDeny: 'Přístup zamítnut'
