@@ -543,6 +543,52 @@ trait ProductLabelsTrait
 	 * @param int $labelId
 	 * @return void
 	 */
+	public function handleIncrementQueue(int $labelId)
+	{
+		if ($label = $this->productLabelsRepo->findEntity($labelId)) {
+			$label->count = (int)$label->count + 1;
+			$label->datetime_printed = NULL;
+			$this->productLabelsRepo->update($label);
+		}
+
+		if ($this->isAjax()) {
+			$this->redrawControl('list');
+			$this->redrawControl('printSummary');
+			$this->redrawControl('headerPrintBtn');
+			$this->redrawControl('printPreviewSnippet');
+		} else {
+			$this->redirect('this');
+		}
+	}
+
+
+	/**
+	 * @param int $labelId
+	 * @return void
+	 */
+	public function handleDecrementQueue(int $labelId)
+	{
+		if ($label = $this->productLabelsRepo->findEntity($labelId)) {
+			$label->count = max(0, (int)$label->count - 1);
+			$label->datetime_printed = NULL;
+			$this->productLabelsRepo->update($label);
+		}
+
+		if ($this->isAjax()) {
+			$this->redrawControl('list');
+			$this->redrawControl('printSummary');
+			$this->redrawControl('headerPrintBtn');
+			$this->redrawControl('printPreviewSnippet');
+		} else {
+			$this->redirect('this');
+		}
+	}
+
+
+	/**
+	 * @param int $labelId
+	 * @return void
+	 */
 	public function handleRemoveFromQueue(int $labelId)
 	{
 		if ($label = $this->productLabelsRepo->findEntity($labelId)) {
