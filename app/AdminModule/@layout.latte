@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 
-{var $antiCache = date('YmdH').'-29'}
+{var $antiCache = date('YmdH').'-33'}
 
 <head>
 	<title>
@@ -16,7 +16,7 @@
 	<meta name="author" content="Pro-idea s.r.o. | www.pro-idea.cz"/>
 	{isset($settings->favicon) ? \SettingsEntity::getFaviconCode($settings->favicon) : ''|noescape}
 
-	<link href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,600' rel='stylesheet' type='text/css'>
+	<link href='https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap' rel='stylesheet' type='text/css'>
 	<link href="/plugins/pace-master/themes/blue/pace-theme-flash.css" rel="stylesheet"/>
 	<link href="/plugins/uniform/css/uniform.default.min.css" rel="stylesheet"/>
 	<link href="/plugins/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"/>
@@ -56,90 +56,130 @@
 <div class="overlay"></div>
 
 <main class="page-content content-wrap">
-	<div class="navbar">
+	<!-- MOSAIC TOP NAVBAR -->
+	<div class="navbar mosaic-navbar">
 		<div class="navbar-inner">
-			<div class="sidebar-pusher">
-				<a href="javascript:void(0);" class="push-sidebar">
-					<i class="fa fa-bars"></i>
+			<!-- Logo on Top-Left -->
+			<div class="logo-box mosaic-logo-box">
+				<a n:href="Homepage:" class="mosaic-logo-link">
+					<div class="mosaic-logo-badge">
+						<i class="fas fa-shapes"></i>
+					</div>
+					<div class="mosaic-logo-text-group">
+						<span class="mosaic-logo-title">{_admin.project.name}</span>
+						<span class="mosaic-logo-subtitle">MANAGEMENT</span>
+					</div>
 				</a>
 			</div>
 
-			<div class="logo-box">
-				<a n:href="Homepage:" class="logo-text">
-					<span>{_admin.project.name}</span>
-				</a>
-			</div>
+			<div class="topmenu-outer mosaic-topmenu-outer">
+				<div class="top-menu mosaic-top-menu">
+					<!-- Left: Sidebar Toggle & Search Bar -->
+					<div class="mosaic-header-left">
+						<button type="button" class="push-sidebar mosaic-sidebar-toggle" title="Thu gọn / Mở rộng Menu">
+							<i class="fas fa-bars-staggered"></i>
+						</button>
 
-			<div class="topmenu-outer">
-				<div class="top-menu">
-					<ul class="nav navbar-nav navbar-right">
-						<li n:if="count($locales) > 1" class="dropdown">
-							<a href="#" class="dropdown-toggle" data-toggle="dropdown">
-								<span class="user-name">
-									<b>{_admin.terms.admin}:</b> {_'admin.locales.'.$locale}
-									<i class="far fa-angle-down"></i>
-								</span>
+						<div class="mosaic-search-box" onclick="document.getElementById('mosaicQuickSearchInput').focus();">
+							<i class="fas fa-search mosaic-search-icon"></i>
+							<input type="text" id="mosaicQuickSearchInput" class="mosaic-search-input" placeholder="Tìm nhanh sản phẩm, mã EAN, danh mục... (Ctrl+K)">
+							<kbd class="mosaic-search-kbd">Ctrl K</kbd>
+						</div>
+					</div>
+
+					<!-- Right: Actions, Language, User Dropdown -->
+					<div class="mosaic-header-right">
+						<!-- Store Preview -->
+						<a href="/" target="_blank" class="mosaic-nav-icon-btn" title="Xem website ngoài">
+							<i class="fas fa-arrow-up-right-from-square"></i>
+						</a>
+
+						<!-- Locale Switcher -->
+						<div n:if="count($locales) > 1" class="dropdown mosaic-dropdown">
+							<a href="#" class="dropdown-toggle mosaic-lang-btn" data-toggle="dropdown">
+								<i class="fas fa-globe text-slate"></i>
+								<span class="mosaic-lang-current">{if $locale == 'vi_VN'}Tiếng Việt{elseif $locale == 'cs_CZ'}Čeština{else}{$locale}{/if}</span>
+								<i class="fas fa-chevron-down mosaic-arrow-icon"></i>
 							</a>
-							<ul class="dropdown-menu dropdown-list" role="menu">
+							<ul class="dropdown-menu dropdown-menu-right mosaic-dropdown-menu" role="menu">
 								<li n:foreach="$locales as $l" role="presentation">
-									<a n:href="switchLocale! $l">{_'admin.locales.'.$l}</a>
+									<a n:href="switchLocale! $l" n:class="$locale == $l ? 'active'">
+										<span class="mosaic-lang-code">{$l|upper|substr:0,2}</span>
+										<span>{_'admin.locales.'.$l}</span>
+										<i n:if="$locale == $l" class="fas fa-check mosaic-active-check"></i>
+									</a>
 								</li>
 							</ul>
-						</li>
-					<ul class="nav navbar-nav navbar-right">
-						<li n:if="count($languages) > 1" class="dropdown">
-							<a href="#" class="dropdown-toggle" data-toggle="dropdown">
-								<span class="user-name">
-									<b>{_admin.terms.content}:</b> {$language->name}
-									<i class="far fa-angle-down"></i>
-								</span>
-							</a>
-							<ul class="dropdown-menu dropdown-list" role="menu">
-								<li n:foreach="$languages as $l" role="presentation">
-									<a n:href="switchLanguage! $l->id">{$l->name}</a>
-								</li>
-							</ul>
-						</li>
+						</div>
 
-						<li class="dropdown">
-							<a href="#" class="dropdown-toggle" data-toggle="dropdown">
-								<span class="user-name">
-									<i class="far fa-user m-r-xxs"></i>
-									{$adminUser->name}
-									<i class="far fa-angle-down"></i>
-								</span>
+						<!-- Content Language Switcher -->
+						<div n:if="count($languages) > 1" class="dropdown mosaic-dropdown">
+							<a href="#" class="dropdown-toggle mosaic-lang-btn" data-toggle="dropdown">
+								<i class="fas fa-language text-slate"></i>
+								<span class="mosaic-lang-current">{$language->name}</span>
+								<i class="fas fa-chevron-down mosaic-arrow-icon"></i>
 							</a>
-							<ul class="dropdown-menu dropdown-list" role="menu">
+							<ul class="dropdown-menu dropdown-menu-right mosaic-dropdown-menu" role="menu">
+								<li n:foreach="$languages as $l" role="presentation">
+									<a n:href="switchLanguage! $l->id" n:class="$language->id == $l->id ? 'active'">
+										<span>{$l->name}</span>
+										<i n:if="$language->id == $l->id" class="fas fa-check mosaic-active-check"></i>
+									</a>
+								</li>
+							</ul>
+						</div>
+
+						<div class="mosaic-divider-v"></div>
+
+						<!-- User Profile Dropdown -->
+						<div class="dropdown mosaic-dropdown">
+							<a href="#" class="dropdown-toggle mosaic-user-btn" data-toggle="dropdown">
+								<div class="mosaic-user-avatar">
+									{var $initial = $adminUser->name ? substr($adminUser->name, 0, 1) : 'A'}
+									<span>{$initial|upper}</span>
+								</div>
+								<div class="mosaic-user-info hidden-xs">
+									<span class="mosaic-user-name">{$adminUser->name}</span>
+									<span class="mosaic-user-role">{_admin.terms.admin}</span>
+								</div>
+								<i class="fas fa-chevron-down mosaic-arrow-icon hidden-xs"></i>
+							</a>
+							<ul class="dropdown-menu dropdown-menu-right mosaic-dropdown-menu mosaic-user-menu" role="menu">
+								<li class="mosaic-user-menu-header">
+									<div class="mosaic-user-menu-name">{$adminUser->name}</div>
+									<div class="mosaic-user-menu-email">{isset($adminUser->email) ? $adminUser->email : 'Quản trị viên'}</div>
+								</li>
+								<li class="divider"></li>
 								<li role="presentation">
-									<a n:href="AdminUserAccount:"><i class="far fa-user"></i>{_admin.account.title}</a>
+									<a n:href="AdminUserAccount:"><i class="fas fa-user-circle"></i>{_admin.account.title}</a>
 								</li>
 								<li role="presentation">
-									<a n:href="AdminUserAccount:"><i class="far fa-lock"></i>{_admin.changePassword.title}</a>
+									<a n:href="AdminUserAccount:"><i class="fas fa-key"></i>{_admin.changePassword.title}</a>
 								</li>
 								{if $aps->has('AdminUsers_list')}
-									<li role="presentation" class="divider"></li>
 									<li role="presentation">
-										<a n:href="AdminUsers:"><i class="far fa-cog m-r-xs"></i>{_admin.modules.adminUsers|menu}</a>
+										<a n:href="AdminUsers:"><i class="fas fa-users-gear"></i>{_admin.modules.adminUsers|menu}</a>
 									</li>
 								{/if}
+								<li class="divider"></li>
+								<li role="presentation">
+									<a n:href="signOut!" class="mosaic-logout-link">
+										<i class="fas fa-arrow-right-from-bracket"></i>
+										<span>{_admin.logout.logout}</span>
+									</a>
+								</li>
 							</ul>
-						</li>
-
-						<li>
-							<a n:href="signOut!" class="log-out">
-								<span><i class="far fa-sign-out m-r-xs"></i>{_admin.logout.logout}</span>
-							</a>
-						</li>
-					</ul>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
 	</div>
 
-	<div class="page-sidebar sidebar">
+	<!-- MOSAIC SLATE SIDEBAR -->
+	<div class="page-sidebar sidebar mosaic-sidebar">
 		<div class="page-sidebar-inner">
 			<ul class="menu accordion-menu">
-				<li class="divider"></li>
 				{renderMenu()|noescape}
 			</ul>
 		</div>
@@ -196,8 +236,36 @@
 <script src="/js/admin/alertify.js"></script>
 <script src="/js/admin/live-form-validation.js"></script>
 <script src="/plugins/fontawesome-iconpicker/js/fontawesome-iconpicker.min.js"></script>
+<script src="/plugins/chartsjs/Chart.bundle.min.js"></script>
 <script src="/js/admin/modern.js"></script>
 <script src="/js/admin/custom.js?v={$antiCache}"></script>
+
+<script>
+document.addEventListener('keydown', function(e) {
+	if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
+		e.preventDefault();
+		var searchInput = document.getElementById('mosaicQuickSearchInput');
+		if (searchInput) {
+			searchInput.focus();
+			searchInput.select();
+		}
+	}
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+	var searchInput = document.getElementById('mosaicQuickSearchInput');
+	if (searchInput) {
+		searchInput.addEventListener('keydown', function(e) {
+			if (e.key === 'Enter') {
+				var val = this.value.trim();
+				if (val) {
+					window.location.href = {plink Products:default} + '?search=' + encodeURIComponent(val);
+				}
+			}
+		});
+	}
+});
+</script>
 
 <div style="position:fixed;bottom:8px;right:8px;z-index:9999;background:#fff;border:1px solid #cbd5e1;border-radius:6px;padding:4px 8px;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.15);display:flex;align-items:center;gap:6px;">
 	<a n:href="switchLocale! 'vi_VN'" style="font-weight:{if $locale == 'vi_VN'}700{else}400{/if};color:{if $locale == 'vi_VN'}#0284c7{else}#64748b{/if};text-decoration:none;padding:2px 4px;border-radius:3px;background:{if $locale == 'vi_VN'}#e0f2fe{else}transparent{/if};">VI</a>

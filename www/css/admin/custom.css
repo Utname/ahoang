@@ -1336,3 +1336,2474 @@ input.without-arrows[type=number] {
     display: flex !important;
     align-items: center !important;
 }
+
+/* ============================================================
+   MOSAIC DASHBOARD MODERN STYLING (CRUIP TAILWIND DESIGN SYSTEM)
+   ============================================================ */
+.mosaic-dashboard {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    color: #1e293b !important;
+    width: 100% !important;
+    margin-bottom: 30px !important;
+}
+
+/* 1. Welcome Banner */
+.mosaic-banner {
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #312e81 100%) !important;
+    border-radius: 16px !important;
+    padding: 24px 28px !important;
+    color: #ffffff !important;
+    margin-bottom: 22px !important;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15) !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.mosaic-banner::after {
+    content: '' !important;
+    position: absolute !important;
+    top: -50px !important;
+    right: -50px !important;
+    width: 200px !important;
+    height: 200px !important;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.25) 0%, transparent 70%) !important;
+    border-radius: 50% !important;
+    pointer-events: none !important;
+}
+
+.mosaic-banner-content {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 20px !important;
+    position: relative !important;
+    z-index: 2 !important;
+}
+
+.mosaic-banner-text h2 {
+    font-size: 24px !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
+    margin: 0 0 6px 0 !important;
+    letter-spacing: -0.02em !important;
+}
+
+.mosaic-banner-text p {
+    color: #cbd5e1 !important;
+    font-size: 13.5px !important;
+    margin: 0 !important;
+    line-height: 1.5 !important;
+    max-width: 650px !important;
+}
+
+.mosaic-banner-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    flex-shrink: 0 !important;
+}
+
+.mosaic-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    padding: 9px 16px !important;
+    border-radius: 8px !important;
+    transition: all 0.15s ease !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    border: none !important;
+    line-height: 1.3 !important;
+}
+
+.mosaic-btn-primary {
+    background: #6366f1 !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4) !important;
+}
+.mosaic-btn-primary:hover {
+    background: #4f46e5 !important;
+    color: #ffffff !important;
+    transform: translateY(-1px) !important;
+}
+
+.mosaic-btn-secondary {
+    background: rgba(255, 255, 255, 0.12) !important;
+    color: #ffffff !important;
+    backdrop-filter: blur(8px) !important;
+}
+.mosaic-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.22) !important;
+    color: #ffffff !important;
+}
+
+.mosaic-btn-outline-sm {
+    background: transparent !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #475569 !important;
+    padding: 6px 12px !important;
+    font-size: 12px !important;
+    border-radius: 6px !important;
+}
+.mosaic-btn-outline-sm:hover {
+    background: #f8fafc !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+}
+
+/* 2. Metric Grid */
+.mosaic-metrics-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 18px !important;
+    margin-bottom: 22px !important;
+}
+
+@media (max-width: 1200px) {
+    .mosaic-metrics-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+@media (max-width: 640px) {
+    .mosaic-metrics-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+.mosaic-card {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 14px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+    padding: 20px !important;
+    transition: all 0.2s ease !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.mosaic-metric-card:hover {
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06) !important;
+    transform: translateY(-2px) !important;
+    border-color: #cbd5e1 !important;
+}
+
+.mosaic-card-header-clean {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    margin-bottom: 14px !important;
+}
+
+.mosaic-icon-box {
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 10px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 16px !important;
+}
+
+.bg-indigo { background: #eef2ff !important; color: #6366f1 !important; }
+.bg-emerald { background: #ecfdf5 !important; color: #10b981 !important; }
+.bg-sky { background: #f0f9ff !important; color: #0284c7 !important; }
+.bg-amber { background: #fffbeb !important; color: #d97706 !important; }
+.bg-slate { background: #f1f5f9 !important; color: #475569 !important; }
+.bg-rose { background: #fff1f2 !important; color: #e11d48 !important; }
+
+.mosaic-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    padding: 4px 8px !important;
+    border-radius: 9999px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    line-height: 1 !important;
+}
+
+.badge-emerald { background: #dcfce7 !important; color: #15803d !important; }
+.badge-sky { background: #e0f2fe !important; color: #0369a1 !important; }
+.badge-amber { background: #fef3c7 !important; color: #b45309 !important; }
+.badge-slate { background: #f1f5f9 !important; color: #475569 !important; }
+
+.mosaic-badge-code {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #334155 !important;
+    padding: 3px 6px !important;
+    border-radius: 4px !important;
+    font-family: monospace !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+}
+
+.mosaic-metric-title {
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    color: #64748b !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+    margin-bottom: 4px !important;
+}
+
+.mosaic-metric-value {
+    font-size: 28px !important;
+    font-weight: 800 !important;
+    color: #0f172a !important;
+    line-height: 1.15 !important;
+    letter-spacing: -0.02em !important;
+}
+
+.mosaic-card-footer-clean {
+    margin-top: 14px !important;
+    padding-top: 12px !important;
+    border-top: 1px solid #f1f5f9 !important;
+}
+
+.mosaic-card-link {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #6366f1 !important;
+    text-decoration: none !important;
+    transition: all 0.15s ease !important;
+}
+.mosaic-card-link:hover {
+    color: #4338ca !important;
+    gap: 9px !important;
+}
+
+/* 3. Grid 2 Columns for Charts & Shortcuts */
+.mosaic-grid-2col {
+    display: grid !important;
+    grid-template-columns: 1.2fr 0.8fr !important;
+    gap: 18px !important;
+    margin-bottom: 22px !important;
+}
+
+@media (max-width: 992px) {
+    .mosaic-grid-2col {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+.mosaic-card-title-row {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    margin-bottom: 16px !important;
+    padding-bottom: 12px !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+}
+
+.mosaic-card-heading {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+}
+
+.mosaic-chart-container {
+    height: 220px !important;
+    position: relative !important;
+    margin-bottom: 16px !important;
+}
+
+.mosaic-category-breakdown {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    margin-top: 10px !important;
+}
+
+.mosaic-cat-item {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+}
+
+.mosaic-cat-info {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    font-size: 12.5px !important;
+    color: #334155 !important;
+}
+
+.mosaic-cat-name {
+    font-weight: 600 !important;
+}
+
+.mosaic-cat-count {
+    color: #64748b !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+}
+
+.mosaic-progress-bar {
+    width: 100% !important;
+    height: 6px !important;
+    background: #f1f5f9 !important;
+    border-radius: 9999px !important;
+    overflow: hidden !important;
+}
+
+.mosaic-progress-fill {
+    height: 100% !important;
+    background: linear-gradient(90deg, #6366f1, #818cf8) !important;
+    border-radius: 9999px !important;
+    transition: width 0.4s ease !important;
+}
+
+/* Shortcuts */
+.mosaic-shortcuts-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 10px !important;
+    margin-bottom: 16px !important;
+}
+
+@media (max-width: 480px) {
+    .mosaic-shortcuts-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+.mosaic-shortcut-item {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    padding: 12px 8px !important;
+    border-radius: 10px !important;
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    text-decoration: none !important;
+    transition: all 0.15s ease !important;
+    gap: 8px !important;
+}
+
+.mosaic-shortcut-item:hover {
+    background: #ffffff !important;
+    border-color: #cbd5e1 !important;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05) !important;
+    transform: translateY(-2px) !important;
+}
+
+.mosaic-shortcut-icon {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 14px !important;
+}
+
+.mosaic-shortcut-label {
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    color: #334155 !important;
+    line-height: 1.2 !important;
+}
+
+/* System box */
+.mosaic-system-box {
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    padding: 12px 14px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+}
+
+.mosaic-system-row {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    font-size: 12px !important;
+}
+
+.mosaic-system-label {
+    color: #64748b !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+.mosaic-system-val {
+    color: #0f172a !important;
+    font-weight: 600 !important;
+}
+
+/* 4. Mosaic Table */
+.mosaic-table-responsive {
+    overflow-x: auto !important;
+    width: 100% !important;
+}
+
+.mosaic-table {
+    width: 100% !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+}
+
+.mosaic-table thead th {
+    background: #f8fafc !important;
+    color: #64748b !important;
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+    padding: 10px 14px !important;
+    border-top: 1px solid #f1f5f9 !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    text-align: left !important;
+}
+
+.mosaic-table tbody td {
+    padding: 12px 14px !important;
+    font-size: 13px !important;
+    color: #334155 !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    vertical-align: middle !important;
+}
+
+.mosaic-table tbody tr:hover td {
+    background: #f8fafc !important;
+}
+
+.mosaic-prod-cell {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+}
+
+.mosaic-prod-avatar {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 6px !important;
+    background: #f1f5f9 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    color: #94a3b8 !important;
+}
+
+.mosaic-prod-meta {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+}
+
+.mosaic-prod-name {
+    font-weight: 600 !important;
+    color: #0f172a !important;
+    text-decoration: none !important;
+    transition: color 0.15s ease !important;
+}
+.mosaic-prod-name:hover {
+    color: #6366f1 !important;
+}
+
+.mosaic-prod-sub {
+    font-size: 11.5px !important;
+    color: #64748b !important;
+}
+
+.mosaic-action-btns {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    justify-content: flex-end !important;
+}
+
+.mosaic-action-btn {
+    width: 30px !important;
+    height: 30px !important;
+    border-radius: 6px !important;
+    background: #f1f5f9 !important;
+    color: #475569 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-decoration: none !important;
+    transition: all 0.15s ease !important;
+    font-size: 12px !important;
+}
+
+.mosaic-action-btn:hover {
+    background: #6366f1 !important;
+    color: #ffffff !important;
+}
+
+.mosaic-action-btn.action-print:hover {
+    background: #10b981 !important;
+    color: #ffffff !important;
+}
+
+/* ============================================================
+   MOSAIC HEADER & TOPBAR COMPONENTS
+   ============================================================ */
+.mosaic-navbar,
+.page-header-fixed .navbar.mosaic-navbar {
+    height: 64px !important;
+    background: #ffffff !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 999 !important;
+}
+
+.mosaic-logo-box,
+.page-header-fixed .navbar .mosaic-logo-box {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 225px !important;
+    height: 64px !important;
+    background: #0f172a !important;
+    border-right: 1px solid #1e293b !important;
+    border-bottom: 1px solid #1e293b !important;
+    display: flex !important;
+    align-items: center !important;
+    padding: 0 16px !important;
+    z-index: 1000 !important;
+    transition: all 0.2s ease !important;
+}
+
+.mosaic-logo-link {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    text-decoration: none !important;
+    width: 100% !important;
+}
+
+.mosaic-logo-badge {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 8px !important;
+    background: linear-gradient(135deg, #6366f1, #3b82f6) !important;
+    color: #ffffff !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 15px !important;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4) !important;
+    flex-shrink: 0 !important;
+}
+
+.mosaic-logo-text-group {
+    display: flex !important;
+    flex-direction: column !important;
+    line-height: 1.15 !important;
+}
+
+.mosaic-logo-title {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: #f8fafc !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
+}
+
+.mosaic-logo-subtitle {
+    font-size: 9px !important;
+    font-weight: 600 !important;
+    color: #64748b !important;
+    letter-spacing: 0.12em !important;
+}
+
+.mosaic-topmenu-outer {
+    margin-left: 225px !important;
+    height: 64px !important;
+    background: #ffffff !important;
+}
+
+.mosaic-top-menu {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    height: 64px !important;
+    padding: 0 20px !important;
+}
+
+.mosaic-header-left {
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px !important;
+    flex: 1 !important;
+    max-width: 480px !important;
+}
+
+.mosaic-sidebar-toggle {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 8px !important;
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #475569 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+    font-size: 14px !important;
+    outline: none !important;
+    padding: 0 !important;
+}
+
+.mosaic-sidebar-toggle:hover {
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+}
+
+.mosaic-search-box {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    padding: 0 10px !important;
+    height: 36px !important;
+    width: 100% !important;
+    max-width: 380px !important;
+    cursor: text !important;
+    transition: all 0.15s ease !important;
+}
+
+.mosaic-search-box:focus-within {
+    background: #ffffff !important;
+    border-color: #6366f1 !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12) !important;
+}
+
+.mosaic-search-icon {
+    color: #94a3b8 !important;
+    font-size: 13px !important;
+}
+
+.mosaic-search-input {
+    border: none !important;
+    background: transparent !important;
+    outline: none !important;
+    font-size: 12.5px !important;
+    color: #0f172a !important;
+    width: 100% !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+}
+
+.mosaic-search-kbd {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 4px !important;
+    font-size: 10px !important;
+    font-family: monospace !important;
+    color: #64748b !important;
+    padding: 2px 5px !important;
+    line-height: 1 !important;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05) !important;
+    white-space: nowrap !important;
+}
+
+.mosaic-header-right {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+}
+
+.mosaic-nav-icon-btn {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 8px !important;
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #64748b !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-decoration: none !important;
+    transition: all 0.15s ease !important;
+    font-size: 13px !important;
+}
+
+.mosaic-nav-icon-btn:hover {
+    background: #f1f5f9 !important;
+    color: #6366f1 !important;
+    border-color: #cbd5e1 !important;
+}
+
+.mosaic-lang-btn {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    padding: 7px 10px !important;
+    font-size: 12.5px !important;
+    font-weight: 500 !important;
+    color: #334155 !important;
+    text-decoration: none !important;
+    transition: all 0.15s ease !important;
+    height: 36px !important;
+}
+
+.mosaic-lang-btn:hover {
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+}
+
+.mosaic-divider-v {
+    width: 1px !important;
+    height: 24px !important;
+    background: #e2e8f0 !important;
+    margin: 0 4px !important;
+}
+
+.mosaic-user-btn {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    border-radius: 10px !important;
+    padding: 4px 8px 4px 4px !important;
+    text-decoration: none !important;
+    transition: all 0.15s ease !important;
+    height: 42px !important;
+}
+
+.mosaic-user-btn:hover {
+    background: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+}
+
+.mosaic-user-avatar {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 50% !important;
+    background: linear-gradient(135deg, #6366f1, #4f46e5) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3) !important;
+}
+
+.mosaic-user-info {
+    display: flex !important;
+    flex-direction: column !important;
+    line-height: 1.15 !important;
+    text-align: left !important;
+}
+
+.mosaic-user-name {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #0f172a !important;
+}
+
+.mosaic-user-role {
+    font-size: 11px !important;
+    color: #64748b !important;
+    font-weight: 400 !important;
+}
+
+.mosaic-arrow-icon {
+    font-size: 10px !important;
+    color: #94a3b8 !important;
+    margin-left: 2px !important;
+}
+
+.mosaic-dropdown-menu {
+    border-radius: 12px !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12) !important;
+    padding: 6px !important;
+    min-width: 200px !important;
+    background: #ffffff !important;
+    margin-top: 6px !important;
+}
+
+.mosaic-dropdown-menu li a {
+    padding: 8px 12px !important;
+    border-radius: 6px !important;
+    font-size: 12.5px !important;
+    color: #334155 !important;
+    font-weight: 500 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    transition: all 0.15s ease !important;
+    text-decoration: none !important;
+}
+
+.mosaic-dropdown-menu li a:hover,
+.mosaic-dropdown-menu li a.active {
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+}
+
+.mosaic-dropdown-menu li a.active {
+    font-weight: 700 !important;
+    color: #6366f1 !important;
+}
+
+.mosaic-user-menu-header {
+    padding: 10px 12px !important;
+    background: #f8fafc !important;
+    border-radius: 8px !important;
+    margin-bottom: 4px !important;
+}
+
+.mosaic-user-menu-name {
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    font-size: 13px !important;
+}
+
+.mosaic-user-menu-email {
+    font-size: 11.5px !important;
+    color: #64748b !important;
+}
+
+.mosaic-logout-link {
+    color: #e11d48 !important;
+}
+
+.mosaic-logout-link:hover {
+    background: #fff1f2 !important;
+    color: #be123c !important;
+}
+
+.mosaic-lang-code {
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    background: #e0f2fe !important;
+    color: #0369a1 !important;
+    padding: 2px 4px !important;
+    border-radius: 4px !important;
+}
+
+.mosaic-active-check {
+    color: #10b981 !important;
+    margin-left: auto !important;
+    font-size: 11px !important;
+}
+
+/* Page inner adjustment with 64px header */
+.page-sidebar-fixed.page-header-fixed .page-inner {
+    padding-top: 64px !important;
+}
+.page-sidebar-fixed .sidebar {
+    padding-top: 64px !important;
+}
+
+/* ============================================================
+   MOSAIC PHASE 2: CORE UI COMPONENTS & DESIGN SYSTEM
+   ============================================================ */
+
+/* 1. BUTTONS (Mosaic Modern Styling) */
+.btn {
+    border-radius: 8px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    padding: 7px 14px !important;
+    line-height: 1.4 !important;
+    transition: all 0.15s ease !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+    text-decoration: none !important;
+    border: 1px solid transparent !important;
+    cursor: pointer !important;
+}
+
+.btn:active {
+    transform: scale(0.98) !important;
+}
+
+/* Primary Button */
+.btn-primary,
+.btn-indigo {
+    background: #6366f1 !important;
+    border-color: #6366f1 !important;
+    color: #ffffff !important;
+    box-shadow: 0 1px 3px rgba(99, 102, 241, 0.3) !important;
+}
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-indigo:hover {
+    background: #4f46e5 !important;
+    border-color: #4f46e5 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35) !important;
+}
+
+/* Default / Secondary Button */
+.btn-default,
+.btn-secondary {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #334155 !important;
+}
+.btn-default:hover,
+.btn-default:focus,
+.btn-secondary:hover {
+    background: #f8fafc !important;
+    color: #0f172a !important;
+    border-color: #94a3af !important;
+}
+
+/* Success Button */
+.btn-success {
+    background: #10b981 !important;
+    border-color: #10b981 !important;
+    color: #ffffff !important;
+    box-shadow: 0 1px 3px rgba(16, 185, 129, 0.3) !important;
+}
+.btn-success:hover,
+.btn-success:focus {
+    background: #059669 !important;
+    border-color: #059669 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35) !important;
+}
+
+/* Danger Button */
+.btn-danger {
+    background: #f43f5e !important;
+    border-color: #f43f5e !important;
+    color: #ffffff !important;
+    box-shadow: 0 1px 3px rgba(244, 63, 94, 0.3) !important;
+}
+.btn-danger:hover,
+.btn-danger:focus {
+    background: #e11d48 !important;
+    border-color: #e11d48 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(244, 63, 94, 0.35) !important;
+}
+
+/* Warning Button */
+.btn-warning {
+    background: #f59e0b !important;
+    border-color: #f59e0b !important;
+    color: #ffffff !important;
+    box-shadow: 0 1px 3px rgba(245, 158, 11, 0.3) !important;
+}
+.btn-warning:hover,
+.btn-warning:focus {
+    background: #d97706 !important;
+    border-color: #d97706 !important;
+    color: #ffffff !important;
+}
+
+/* Info Button */
+.btn-info {
+    background: #0ea5e9 !important;
+    border-color: #0ea5e9 !important;
+    color: #ffffff !important;
+    box-shadow: 0 1px 3px rgba(14, 165, 233, 0.3) !important;
+}
+.btn-info:hover,
+.btn-info:focus {
+    background: #0284c7 !important;
+    border-color: #0284c7 !important;
+    color: #ffffff !important;
+}
+
+/* Button Sizes */
+.btn-lg {
+    padding: 10px 20px !important;
+    font-size: 14.5px !important;
+    border-radius: 10px !important;
+}
+.btn-sm {
+    padding: 5px 10px !important;
+    font-size: 12px !important;
+    border-radius: 6px !important;
+}
+.btn-xs {
+    padding: 3px 8px !important;
+    font-size: 11px !important;
+    border-radius: 5px !important;
+}
+
+/* 2. FORM CONTROLS & INPUTS (Mosaic Style) */
+.form-control,
+input[type="text"].form-control,
+input[type="search"].form-control,
+input[type="password"].form-control,
+input[type="email"].form-control,
+input[type="number"].form-control,
+select.form-control,
+textarea.form-control {
+    background-color: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+    height: 38px !important;
+    padding: 7px 12px !important;
+    font-size: 13px !important;
+    color: #0f172a !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;
+    transition: all 0.15s ease !important;
+}
+
+textarea.form-control {
+    height: auto !important;
+    min-height: 80px !important;
+}
+
+.form-control:focus,
+input[type="text"].form-control:focus,
+input[type="password"].form-control:focus,
+select.form-control:focus,
+textarea.form-control:focus {
+    border-color: #6366f1 !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
+    outline: none !important;
+}
+
+.form-control::placeholder {
+    color: #94a3b8 !important;
+    font-size: 12.5px !important;
+}
+
+/* Select2 Customization */
+.select2-container--default .select2-selection--single {
+    height: 38px !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+    background-color: #ffffff !important;
+    display: flex !important;
+    align-items: center !important;
+    padding: 0 6px !important;
+    transition: all 0.15s ease !important;
+}
+
+.select2-container--default.select2-container--open .select2-selection--single,
+.select2-container--default.select2-container--focus .select2-selection--single {
+    border-color: #6366f1 !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
+    outline: none !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: #0f172a !important;
+    font-size: 13px !important;
+    line-height: 36px !important;
+    padding-left: 6px !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 36px !important;
+    right: 8px !important;
+}
+
+.select2-dropdown {
+    border-radius: 10px !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12) !important;
+    background-color: #ffffff !important;
+    padding: 6px !important;
+    z-index: 10500 !important;
+}
+
+.select2-container--default .select2-results__option {
+    padding: 7px 12px !important;
+    font-size: 12.5px !important;
+    border-radius: 6px !important;
+    color: #334155 !important;
+    margin-bottom: 2px !important;
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: #6366f1 !important;
+    color: #ffffff !important;
+}
+
+.select2-container--default .select2-results__option[aria-selected=true] {
+    background-color: #e0e7ff !important;
+    color: #4338ca !important;
+    font-weight: 600 !important;
+}
+
+/* 3. DATA PANELS & CARDS */
+.panel,
+.panel-white {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 14px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+    margin-bottom: 20px !important;
+    overflow: hidden !important;
+}
+
+.panel-heading {
+    background: #ffffff !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    padding: 16px 20px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+}
+
+.panel-title {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    letter-spacing: -0.01em !important;
+    margin: 0 !important;
+}
+
+.panel-body {
+    padding: 18px 20px !important;
+}
+
+/* 4. DATA TABLES (Mosaic Table Style) */
+table.table,
+.table {
+    width: 100% !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    margin-bottom: 0 !important;
+    font-size: 13px !important;
+}
+
+table.table > thead > tr > th,
+.table > thead > tr > th {
+    background: #f8fafc !important;
+    color: #64748b !important;
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+    padding: 11px 14px !important;
+    border-top: none !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    vertical-align: middle !important;
+    white-space: nowrap !important;
+}
+
+table.table > tbody > tr > td,
+.table > tbody > tr > td {
+    padding: 11px 14px !important;
+    color: #334155 !important;
+    border-top: none !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    border-left: none !important;
+    border-right: none !important;
+    vertical-align: middle !important;
+}
+
+table.table > tbody > tr:hover > td,
+.table > tbody > tr:hover > td {
+    background-color: #f8fafc !important;
+}
+
+table.table > tbody > tr:last-child > td,
+.table > tbody > tr:last-child > td {
+    border-bottom: none !important;
+}
+
+/* 5. BADGES & LABELS (Pills) */
+.badge,
+.label {
+    border-radius: 9999px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    padding: 3px 8px !important;
+    line-height: 1.2 !important;
+    height: auto !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    letter-spacing: 0.02em !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+
+.badge-success,
+.label-success {
+    background: #dcfce7 !important;
+    color: #15803d !important;
+}
+
+.badge-danger,
+.label-danger {
+    background: #ffe4e6 !important;
+    color: #be123c !important;
+}
+
+.badge-warning,
+.label-warning {
+    background: #fef3c7 !important;
+    color: #b45309 !important;
+}
+
+.badge-info,
+.label-info {
+    background: #e0f2fe !important;
+    color: #0369a1 !important;
+}
+
+.badge-primary,
+.label-primary {
+    background: #e0e7ff !important;
+    color: #4338ca !important;
+}
+
+.badge-default,
+.label-default {
+    background: #f1f5f9 !important;
+    color: #475569 !important;
+}
+
+/* 6. MODALS (Mosaic Popups) */
+.modal-backdrop,
+.modal-backdrop.in {
+    background-color: #0f172a !important;
+    opacity: 0.5 !important;
+    backdrop-filter: blur(4px) !important;
+}
+
+.modal-dialog {
+    margin-top: 50px !important;
+}
+
+.modal-content {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 16px !important;
+    box-shadow: 0 25px 60px rgba(15, 23, 42, 0.2) !important;
+    overflow: hidden !important;
+}
+
+.modal-header {
+    background: #ffffff !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    padding: 16px 22px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+}
+
+.modal-header h4,
+.modal-title {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    margin: 0 !important;
+}
+
+.modal-header .close {
+    font-size: 20px !important;
+    color: #94a3b8 !important;
+    opacity: 1 !important;
+    transition: color 0.15s ease !important;
+    margin-top: 0 !important;
+}
+
+.modal-header .close:hover {
+    color: #0f172a !important;
+}
+
+.modal-body {
+    padding: 22px !important;
+}
+
+.modal-footer {
+    background: #f8fafc !important;
+    border-top: 1px solid #f1f5f9 !important;
+    padding: 14px 22px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
+}
+
+/* 7. PAGINATION (Mosaic Style) */
+.pagination {
+    margin: 14px 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+}
+
+.pagination > li > a,
+.pagination > li > span {
+    border-radius: 6px !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #475569 !important;
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    padding: 6px 12px !important;
+    background: #ffffff !important;
+    transition: all 0.15s ease !important;
+}
+
+.pagination > li > a:hover,
+.pagination > li > span:hover {
+    background-color: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+    color: #0f172a !important;
+}
+
+.pagination > .active > a,
+.pagination > .active > span,
+.pagination > .active > a:hover {
+    background-color: #6366f1 !important;
+    border-color: #6366f1 !important;
+    color: #ffffff !important;
+    box-shadow: 0 1px 3px rgba(99, 102, 241, 0.3) !important;
+}
+
+.pagination > .disabled > a,
+.pagination > .disabled > span {
+    color: #cbd5e1 !important;
+    background-color: #f8fafc !important;
+    border-color: #f1f5f9 !important;
+    cursor: not-allowed !important;
+}
+
+/* 8. FILTER CONTAINERS & TOOLBARS */
+.filters-container,
+.filters-view-container,
+.import-export-container,
+.bulk-events-container {
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    padding: 14px 16px !important;
+    margin-bottom: 16px !important;
+}
+
+.filters-container .form-group,
+.filters-view-container .form-group {
+    margin-bottom: 10px !important;
+}
+
+/* ============================================================
+   MOSAIC PHASE 3: PRODUCT & CORE MODULES ADVANCED STYLING
+   ============================================================ */
+
+/* 1. Modern Segmented Tabs (.nav-tabs) */
+.nav-tabs {
+    background: #f1f5f9 !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    padding: 4px !important;
+    display: inline-flex !important;
+    flex-wrap: wrap !important;
+    gap: 4px !important;
+    margin-bottom: 22px !important;
+}
+
+.nav-tabs > li {
+    float: none !important;
+    margin: 0 !important;
+    display: inline-block !important;
+}
+
+.nav-tabs > li > a {
+    border: none !important;
+    border-radius: 8px !important;
+    color: #64748b !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    padding: 8px 16px !important;
+    background: transparent !important;
+    transition: all 0.15s ease !important;
+    line-height: 1.3 !important;
+    margin-right: 0 !important;
+}
+
+.nav-tabs > li > a:hover {
+    color: #0f172a !important;
+    background: rgba(255, 255, 255, 0.6) !important;
+    border: none !important;
+}
+
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:hover,
+.nav-tabs > li.active > a:focus {
+    background: #ffffff !important;
+    color: #6366f1 !important;
+    font-weight: 700 !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08) !important;
+    border: none !important;
+}
+
+.tab-content {
+    background: transparent !important;
+    padding-top: 6px !important;
+}
+
+/* 2. Form Groups & Section Headings */
+h4,
+.form-group h4 {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    margin-top: 18px !important;
+    margin-bottom: 14px !important;
+    padding-bottom: 8px !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.form-group {
+    margin-bottom: 18px !important;
+}
+
+.form-group label {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #475569 !important;
+    margin-bottom: 5px !important;
+    display: block !important;
+}
+
+/* 3. Form Action Buttons Bar */
+.form-group-btns {
+    border-top: 1px solid #e2e8f0 !important;
+    padding: 18px 0 6px 0 !important;
+    margin-top: 24px !important;
+    background: transparent !important;
+}
+
+.form-group-btns .m-t-xs {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    flex-wrap: wrap !important;
+    margin-top: 0 !important;
+}
+
+.btn-addon {
+    padding-left: 12px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.btn-addon i {
+    background: transparent !important;
+    margin-right: 0 !important;
+    font-size: 13px !important;
+}
+
+/* 4. Product Table Special Cell Treatments */
+.product-price-fields input,
+.product-date-fields input {
+    border-radius: 6px !important;
+    border: 1px solid #cbd5e1 !important;
+    font-size: 11.5px !important;
+    padding: 4px 8px !important;
+    height: 30px !important;
+    background: #ffffff !important;
+    transition: all 0.15s ease !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;
+}
+
+.product-price-fields input:focus,
+.product-date-fields input:focus {
+    border-color: #6366f1 !important;
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15) !important;
+}
+
+.product-price-fields label,
+.product-date-fields label {
+    font-size: 10px !important;
+    color: #64748b !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+    margin-bottom: 2px !important;
+    display: block !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.03em !important;
+}
+
+.calendar-today-btn {
+    height: 30px !important;
+    width: 30px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 6px !important;
+    border: 1px solid #cbd5e1 !important;
+    background: #f8fafc !important;
+    color: #475569 !important;
+    flex-shrink: 0 !important;
+    padding: 0 !important;
+    transition: all 0.15s ease !important;
+}
+
+.calendar-today-btn:hover {
+    background: #e0e7ff !important;
+    color: #4338ca !important;
+    border-color: #a5b4fc !important;
+}
+
+/* ============================================================
+   MOSAIC SIDEBAR (Dark Slate)
+   ============================================================ */
+
+/* Override body/global font to Inter */
+body,
+.page-sidebar,
+.mosaic-sidebar,
+.mosaic-navbar,
+.navbar,
+.menu,
+.panel,
+.modal,
+.form-control,
+input, select, textarea, button {
+    font-family: 'Inter', 'Open Sans', sans-serif !important;
+}
+
+/* Sidebar base */
+.page-sidebar.mosaic-sidebar,
+.mosaic-sidebar {
+    background: #0f172a !important;
+    border-right: 1px solid #1e293b !important;
+    width: 225px !important;
+    position: fixed !important;
+    top: 64px !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    z-index: 900 !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: #334155 transparent !important;
+    transition: width 0.25s ease !important;
+}
+
+.page-sidebar.mosaic-sidebar::-webkit-scrollbar {
+    width: 4px !important;
+}
+.page-sidebar.mosaic-sidebar::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+.page-sidebar.mosaic-sidebar::-webkit-scrollbar-thumb {
+    background: #334155 !important;
+    border-radius: 4px !important;
+}
+
+.page-sidebar-inner {
+    padding: 12px 0 24px !important;
+}
+
+/* Accordion menu */
+.menu.accordion-menu {
+    width: 225px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    list-style: none !important;
+}
+
+/* Menu section label */
+.menu.accordion-menu > li.menu-section {
+    padding: 18px 16px 6px !important;
+    font-size: 9.5px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.12em !important;
+    text-transform: uppercase !important;
+    color: #475569 !important;
+}
+
+/* Top-level menu items */
+.menu.accordion-menu > li > a {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 9px 16px !important;
+    color: #94a3b8 !important;
+    font-size: 12.5px !important;
+    font-weight: 500 !important;
+    text-decoration: none !important;
+    border-radius: 0 !important;
+    transition: all 0.15s ease !important;
+    position: relative !important;
+    white-space: nowrap !important;
+}
+
+.menu.accordion-menu > li > a:hover {
+    background: #1e293b !important;
+    color: #f8fafc !important;
+}
+
+.menu.accordion-menu > li.active > a,
+.menu.accordion-menu > li.open > a {
+    background: rgba(99, 102, 241, 0.15) !important;
+    color: #a5b4fc !important;
+    font-weight: 600 !important;
+}
+
+/* Active indicator line */
+.menu.accordion-menu > li.active > a::before {
+    content: '' !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 4px !important;
+    bottom: 4px !important;
+    width: 3px !important;
+    background: #6366f1 !important;
+    border-radius: 0 4px 4px 0 !important;
+}
+
+/* Menu icons */
+.menu.accordion-menu > li > a i,
+.menu.accordion-menu > li > a .menu-icon,
+.menu.accordion-menu li a i {
+    width: 18px !important;
+    font-size: 13px !important;
+    text-align: center !important;
+    flex-shrink: 0 !important;
+    color: inherit !important;
+}
+
+/* Arrow icon for droplinks */
+.menu.accordion-menu > li.droplink > a::after {
+    content: '\f054' !important;
+    font-family: 'Font Awesome 6 Free' !important;
+    font-weight: 900 !important;
+    font-size: 9px !important;
+    margin-left: auto !important;
+    color: #475569 !important;
+    transition: transform 0.2s ease !important;
+}
+
+.menu.accordion-menu > li.droplink.open > a::after {
+    transform: rotate(90deg) !important;
+    color: #6366f1 !important;
+}
+
+/* Sub-menu */
+.menu.accordion-menu .sub-menu {
+    list-style: none !important;
+    padding: 2px 0 4px 0 !important;
+    margin: 0 !important;
+    background: rgba(0, 0, 0, 0.2) !important;
+    display: none !important;
+}
+
+.menu.accordion-menu li.open .sub-menu {
+    display: block !important;
+}
+
+.menu.accordion-menu .sub-menu li a {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 7px 16px 7px 44px !important;
+    color: #64748b !important;
+    font-size: 12px !important;
+    font-weight: 400 !important;
+    text-decoration: none !important;
+    transition: all 0.15s ease !important;
+    white-space: nowrap !important;
+}
+
+.menu.accordion-menu .sub-menu li a:hover,
+.menu.accordion-menu .sub-menu li.active > a {
+    color: #c7d2fe !important;
+    background: rgba(99, 102, 241, 0.1) !important;
+}
+
+.menu.accordion-menu .sub-menu li.active > a {
+    font-weight: 600 !important;
+    color: #a5b4fc !important;
+}
+
+/* Page inner - adjust for sidebar + header */
+.page-sidebar-fixed.page-header-fixed .page-inner,
+.page-inner {
+    margin-left: 225px !important;
+    padding-top: 64px !important;
+    min-height: 100vh !important;
+    background: #f8fafc !important;
+    transition: margin-left 0.25s ease !important;
+}
+
+.page-inner .page-title {
+    padding: 20px 24px 0 24px !important;
+    margin-bottom: 0 !important;
+}
+
+.page-inner .page-title h3 {
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    margin: 0 !important;
+    letter-spacing: -0.02em !important;
+}
+
+.page-inner #main-wrapper {
+    padding: 20px 24px 24px !important;
+}
+
+.page-footer {
+    padding: 16px 24px !important;
+    border-top: 1px solid #e2e8f0 !important;
+    color: #94a3b8 !important;
+    font-size: 12px !important;
+    background: #f8fafc !important;
+}
+
+/* ============================================================
+   MOSAIC DASHBOARD - METRIC CARDS
+   ============================================================ */
+
+.mosaic-dashboard {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 24px !important;
+}
+
+/* Welcome Banner */
+.mosaic-banner {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #312e81 100%) !important;
+    border-radius: 16px !important;
+    padding: 28px 32px !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.mosaic-banner::before {
+    content: '' !important;
+    position: absolute !important;
+    top: -40px !important;
+    right: -40px !important;
+    width: 200px !important;
+    height: 200px !important;
+    background: rgba(99, 102, 241, 0.15) !important;
+    border-radius: 50% !important;
+}
+
+.mosaic-banner-content {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 20px !important;
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+.mosaic-banner-text h2 {
+    font-size: 22px !important;
+    font-weight: 700 !important;
+    color: #f8fafc !important;
+    margin: 0 0 6px 0 !important;
+    letter-spacing: -0.02em !important;
+}
+
+.mosaic-banner-text p {
+    font-size: 13.5px !important;
+    color: #94a3b8 !important;
+    margin: 0 !important;
+    max-width: 500px !important;
+    line-height: 1.5 !important;
+}
+
+.mosaic-banner-actions {
+    display: flex !important;
+    gap: 10px !important;
+    flex-shrink: 0 !important;
+}
+
+/* Mosaic Buttons */
+.mosaic-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 9px 18px !important;
+    border-radius: 8px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+    transition: all 0.2s ease !important;
+    cursor: pointer !important;
+    border: 1px solid transparent !important;
+    white-space: nowrap !important;
+}
+
+.mosaic-btn-primary {
+    background: #6366f1 !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35) !important;
+}
+
+.mosaic-btn-primary:hover {
+    background: #4f46e5 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.45) !important;
+    transform: translateY(-1px) !important;
+    text-decoration: none !important;
+}
+
+.mosaic-btn-secondary {
+    background: rgba(255,255,255,0.1) !important;
+    color: #e2e8f0 !important;
+    border-color: rgba(255,255,255,0.2) !important;
+}
+
+.mosaic-btn-secondary:hover {
+    background: rgba(255,255,255,0.2) !important;
+    color: #ffffff !important;
+    text-decoration: none !important;
+}
+
+.mosaic-btn-outline-sm {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 6px 12px !important;
+    border-radius: 6px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #6366f1 !important;
+    border: 1px solid #c7d2fe !important;
+    background: transparent !important;
+    text-decoration: none !important;
+    transition: all 0.15s ease !important;
+}
+
+.mosaic-btn-outline-sm:hover {
+    background: #e0e7ff !important;
+    color: #4338ca !important;
+    text-decoration: none !important;
+}
+
+/* Metrics Grid */
+.mosaic-metrics-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 18px !important;
+}
+
+@media (max-width: 1200px) {
+    .mosaic-metrics-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .mosaic-metrics-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* Cards */
+.mosaic-card {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 14px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+    overflow: hidden !important;
+    transition: box-shadow 0.2s ease, transform 0.2s ease !important;
+}
+
+.mosaic-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+    transform: translateY(-1px) !important;
+}
+
+.mosaic-metric-card {
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.mosaic-card-header-clean {
+    padding: 18px 20px 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+}
+
+.mosaic-card-body-clean {
+    padding: 0 20px 14px !important;
+}
+
+.mosaic-card-footer-clean {
+    padding: 12px 20px !important;
+    border-top: 1px solid #f1f5f9 !important;
+    margin-top: auto !important;
+}
+
+.mosaic-card-link {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #6366f1 !important;
+    text-decoration: none !important;
+    transition: gap 0.15s ease !important;
+}
+
+.mosaic-card-link:hover {
+    gap: 10px !important;
+    color: #4f46e5 !important;
+    text-decoration: none !important;
+}
+
+/* Icon boxes */
+.mosaic-icon-box {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 10px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 18px !important;
+    color: #ffffff !important;
+}
+
+.bg-indigo { background: linear-gradient(135deg, #6366f1, #4f46e5) !important; }
+.bg-emerald { background: linear-gradient(135deg, #10b981, #059669) !important; }
+.bg-sky { background: linear-gradient(135deg, #0ea5e9, #0284c7) !important; }
+.bg-amber { background: linear-gradient(135deg, #f59e0b, #d97706) !important; }
+.bg-rose { background: linear-gradient(135deg, #f43f5e, #e11d48) !important; }
+.bg-slate { background: linear-gradient(135deg, #64748b, #475569) !important; }
+.bg-violet { background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important; }
+
+/* Metric values */
+.mosaic-metric-title {
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    color: #64748b !important;
+    margin-bottom: 4px !important;
+}
+
+.mosaic-metric-value {
+    font-size: 30px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    letter-spacing: -0.03em !important;
+    line-height: 1.1 !important;
+}
+
+/* Badges */
+.mosaic-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    padding: 3px 9px !important;
+    border-radius: 9999px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    line-height: 1.3 !important;
+}
+
+.badge-emerald {
+    background: #d1fae5 !important;
+    color: #065f46 !important;
+}
+
+.badge-sky {
+    background: #e0f2fe !important;
+    color: #0369a1 !important;
+}
+
+.badge-amber {
+    background: #fef3c7 !important;
+    color: #92400e !important;
+}
+
+.badge-slate {
+    background: #f1f5f9 !important;
+    color: #475569 !important;
+}
+
+.badge-rose {
+    background: #ffe4e6 !important;
+    color: #9f1239 !important;
+}
+
+.badge-indigo {
+    background: #e0e7ff !important;
+    color: #3730a3 !important;
+}
+
+/* Text utilities */
+.text-indigo { color: #6366f1 !important; }
+.text-emerald { color: #10b981 !important; }
+.text-sky { color: #0ea5e9 !important; }
+.text-amber { color: #f59e0b !important; }
+.text-rose { color: #f43f5e !important; }
+.text-slate { color: #64748b !important; }
+.text-muted { color: #94a3b8 !important; }
+.text-xs { font-size: 11.5px !important; }
+.font-mono { font-family: 'JetBrains Mono', 'Consolas', monospace !important; }
+.font-bold { font-weight: 700 !important; }
+.text-right { text-align: right !important; }
+.text-center { text-align: center !important; }
+
+/* ============================================================
+   MOSAIC DASHBOARD - CHARTS & ANALYTICS ROW
+   ============================================================ */
+
+/* 2-column grid */
+.mosaic-grid-2col {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 18px !important;
+}
+
+@media (max-width: 992px) {
+    .mosaic-grid-2col {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* Card title row */
+.mosaic-card-title-row {
+    padding: 18px 20px 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+}
+
+.mosaic-card-heading {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    letter-spacing: -0.01em !important;
+}
+
+.mosaic-card-content {
+    padding: 18px 20px !important;
+}
+
+/* Chart container */
+.mosaic-chart-container {
+    height: 220px !important;
+    position: relative !important;
+    margin-bottom: 16px !important;
+}
+
+/* Category breakdown bars */
+.mosaic-category-breakdown {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+}
+
+.mosaic-cat-item {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 3px !important;
+}
+
+.mosaic-cat-info {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+}
+
+.mosaic-cat-name {
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    color: #334155 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 160px !important;
+}
+
+.mosaic-cat-count {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    color: #64748b !important;
+    white-space: nowrap !important;
+}
+
+.mosaic-progress-bar {
+    height: 5px !important;
+    background: #f1f5f9 !important;
+    border-radius: 9999px !important;
+    overflow: hidden !important;
+}
+
+.mosaic-progress-fill {
+    height: 100% !important;
+    background: linear-gradient(90deg, #6366f1, #a5b4fc) !important;
+    border-radius: 9999px !important;
+    min-width: 4% !important;
+    transition: width 0.6s ease !important;
+}
+
+/* ============================================================
+   MOSAIC DASHBOARD - SHORTCUTS GRID
+   ============================================================ */
+
+.mosaic-shortcuts-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 10px !important;
+    margin-bottom: 18px !important;
+}
+
+.mosaic-shortcut-item {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 14px 8px !important;
+    border-radius: 10px !important;
+    border: 1px solid #f1f5f9 !important;
+    background: #fafafa !important;
+    text-decoration: none !important;
+    transition: all 0.15s ease !important;
+    text-align: center !important;
+}
+
+.mosaic-shortcut-item:hover {
+    background: #f0f1ff !important;
+    border-color: #c7d2fe !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.12) !important;
+    text-decoration: none !important;
+}
+
+.mosaic-shortcut-icon {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 10px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 16px !important;
+    color: #ffffff !important;
+}
+
+.mosaic-shortcut-label {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    color: #475569 !important;
+    line-height: 1.2 !important;
+}
+
+.mosaic-shortcut-item:hover .mosaic-shortcut-label {
+    color: #4338ca !important;
+}
+
+/* System info box */
+.mosaic-system-box {
+    background: #f8fafc !important;
+    border: 1px solid #f1f5f9 !important;
+    border-radius: 10px !important;
+    overflow: hidden !important;
+}
+
+.mosaic-system-row {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 9px 14px !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+}
+
+.mosaic-system-row:last-child {
+    border-bottom: none !important;
+}
+
+.mosaic-system-label {
+    font-size: 12px !important;
+    color: #64748b !important;
+    font-weight: 500 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+.mosaic-system-val {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #0f172a !important;
+}
+
+/* ============================================================
+   MOSAIC DASHBOARD - RECENT PRODUCTS TABLE
+   ============================================================ */
+
+.mosaic-table-responsive {
+    overflow-x: auto !important;
+    border-radius: 0 !important;
+}
+
+.mosaic-table {
+    width: 100% !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    font-size: 13px !important;
+}
+
+.mosaic-table thead tr th {
+    background: #f8fafc !important;
+    color: #64748b !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.06em !important;
+    padding: 11px 16px !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    white-space: nowrap !important;
+}
+
+.mosaic-table tbody tr td {
+    padding: 12px 16px !important;
+    color: #334155 !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    vertical-align: middle !important;
+}
+
+.mosaic-table tbody tr:last-child td {
+    border-bottom: none !important;
+}
+
+.mosaic-table tbody tr:hover td {
+    background: #f8fafc !important;
+}
+
+/* Product cell */
+.mosaic-prod-cell {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+}
+
+.mosaic-prod-avatar {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 8px !important;
+    background: #f1f5f9 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+}
+
+.mosaic-prod-meta {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+    min-width: 0 !important;
+}
+
+.mosaic-prod-name {
+    font-weight: 600 !important;
+    color: #0f172a !important;
+    text-decoration: none !important;
+    font-size: 13px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 240px !important;
+    display: block !important;
+}
+
+.mosaic-prod-name:hover {
+    color: #6366f1 !important;
+    text-decoration: none !important;
+}
+
+.mosaic-prod-sub {
+    font-size: 11.5px !important;
+    color: #94a3b8 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 240px !important;
+    display: block !important;
+}
+
+/* Code badge */
+.mosaic-badge-code {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    color: #334155 !important;
+    background: #f1f5f9 !important;
+    padding: 2px 8px !important;
+    border-radius: 5px !important;
+    font-family: 'JetBrains Mono', monospace !important;
+}
+
+/* Action buttons */
+.mosaic-action-btns {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    justify-content: flex-end !important;
+}
+
+.mosaic-action-btn {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 7px !important;
+    background: #f1f5f9 !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #64748b !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-decoration: none !important;
+    transition: all 0.15s ease !important;
+    font-size: 12px !important;
+}
+
+.mosaic-action-btn:hover {
+    background: #6366f1 !important;
+    color: #ffffff !important;
+    border-color: #6366f1 !important;
+}
+
+.mosaic-action-btn.action-print:hover {
+    background: #10b981 !important;
+    color: #ffffff !important;
+    border-color: #10b981 !important;
+}
+
+/* ============================================================
+   MOSAIC PAGE CONTENT BACKGROUND
+   ============================================================ */
+
+.content-wrap,
+main.page-content {
+    background: #f8fafc !important;
+    min-height: 100vh !important;
+}
+
+/* Overlay */
+.overlay {
+    display: none !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: rgba(15, 23, 42, 0.4) !important;
+    z-index: 800 !important;
+    backdrop-filter: blur(2px) !important;
+}
+
+/* ============================================================
+   MOSAIC FLASH MESSAGES & ALERTIFY OVERRIDES
+   ============================================================ */
+
+.flash-messages {
+    position: fixed !important;
+    bottom: 24px !important;
+    right: 24px !important;
+    z-index: 9999 !important;
+    background: #0f172a !important;
+    color: #f8fafc !important;
+    padding: 14px 20px !important;
+    border-radius: 10px !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2) !important;
+    max-width: 380px !important;
+}
+
+.flash-messages.success {
+    background: #065f46 !important;
+    border-left: 4px solid #10b981 !important;
+}
+
+.flash-messages.error {
+    background: #7f1d1d !important;
+    border-left: 4px solid #ef4444 !important;
+}
+
+.flash-messages.warning {
+    background: #78350f !important;
+    border-left: 4px solid #f59e0b !important;
+}
+
+.flash-messages.info {
+    background: #0c4a6e !important;
+    border-left: 4px solid #0ea5e9 !important;
+}
+
+/* ============================================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================================ */
+
+@media (max-width: 1024px) {
+    .mosaic-banner-content {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+    }
+    .mosaic-banner-actions {
+        flex-wrap: wrap !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-inner {
+        margin-left: 0 !important;
+    }
+    .page-sidebar.mosaic-sidebar {
+        transform: translateX(-100%) !important;
+        transition: transform 0.25s ease !important;
+    }
+    .page-sidebar.mosaic-sidebar.visible {
+        transform: translateX(0) !important;
+    }
+    .mosaic-topmenu-outer {
+        margin-left: 0 !important;
+    }
+    .mosaic-logo-box {
+        position: relative !important;
+        width: auto !important;
+    }
+}
