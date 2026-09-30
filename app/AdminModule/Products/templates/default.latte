@@ -1,169 +1,241 @@
 {block topButtons}
-
-    <a n:if="count($filters)" n:href="resetFilters!" class="btn btn-danger btn-addon">
-        <i class="far fa-times"></i> {_admin.filters.reset}
-    </a>
-    <a n:if="$aps->has('create')" n:href="new" class="btn btn-success btn-addon">
-        <i class="far fa-plus"></i> {_admin.actions.new}
-    </a>
+    <div style="display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <a n:if="count($filters)" n:href="resetFilters!" class="btn btn-default" style="color:#e11d48;background:#fff1f2;border:1px solid #fecdd3;border-radius:8px;font-weight:600;padding:7px 14px;font-size:13px;">
+            <i class="far fa-times m-r-xxs"></i> {_'admin.filters.reset'}
+        </a>
+        <a href="#" class="btn btn-default slide-toggle" data-target=".import-container" style="border-radius:8px;font-weight:600;padding:7px 14px;font-size:13px;border:1px solid #cbd5e1;background:#fff;">
+            <i class="fa fa-file-import m-r-xxs text-muted"></i> {_'admin.terms.import'} <i class="fa fa-chevron-down m-l-xxs" style="font-size:10px;"></i>
+        </a>
+        <a n:href="Categories:" class="btn btn-default" style="border-radius:8px;font-weight:600;padding:7px 14px;font-size:13px;border:1px solid #cbd5e1;background:#fff;">
+            <i class="fa fa-folder-tree m-r-xxs text-primary"></i> {_'admin.terms.categories'}
+        </a>
+        <div class="dropdown" style="display:inline-block;">
+            <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" style="border-radius:8px;font-weight:600;padding:7px 14px;font-size:13px;border:1px solid #cbd5e1;background:#fff;">
+                <i class="fa fa-bolt m-r-xxs text-warning"></i> Thao tác giá <i class="fa fa-angle-down m-l-xxs"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-right dropdown-list" style="border-radius:10px;box-shadow:0 10px 25px rgba(0,0,0,0.1);padding:6px 0;min-width:210px;">
+                <li>
+                    <a n:href="prepareMultiSale!" class="ajax-modal" data-target="#modal-multiSaleForm">
+                        <i class="fa fa-percent text-danger m-r-xs"></i> {_'admin.terms.multipleSale'}
+                    </a>
+                </li>
+                <li>
+                    <a n:href="multiPrices!" class="ajax-modal" data-target="#modal-multiPricesForm">
+                        <i class="fa fa-file-invoice-dollar text-primary m-r-xs"></i> {_'admin.terms.multiplePrice'}
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <a n:if="$aps->has('create')" n:href="product!" class="btn btn-primary ajax-modal" data-target="#modal-productsForm" style="border-radius:8px;font-weight:700;padding:7px 18px;font-size:13px;background:#2563eb;border:none;box-shadow:0 2px 6px rgba(37,99,235,0.3);">
+            <i class="fa fa-plus m-r-xxs"></i> {_'admin.terms.newProduct'}
+        </a>
+    </div>
 {/block}
 
 
 {block content}
 
+<style>
+.table-compact > thead > tr > th {
+    background: #f8fafc;
+    color: #475569;
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 10px 8px;
+    vertical-align: middle;
+}
+.table-compact > tbody > tr > td {
+    padding: 10px 8px;
+    vertical-align: middle;
+    border-top: 1px solid #f1f5f9;
+}
+.table-compact > tbody > tr:hover {
+    background-color: #f8fafc !important;
+}
+.product-price-fields input,
+.product-date-fields input {
+    border-radius: 6px !important;
+    border: 1px solid #cbd5e1 !important;
+    font-size: 11.5px !important;
+    padding: 3px 6px !important;
+    height: 28px !important;
+    transition: all 0.15s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02) !important;
+}
+.product-price-fields input:focus,
+.product-date-fields input:focus {
+    border-color: #0ea5e9 !important;
+    box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.15) !important;
+}
+.product-price-fields label,
+.product-date-fields label {
+    font-size: 10px;
+    color: #64748b;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 2px;
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+.product-search-box {
+    position: relative;
+    flex: 1;
+    min-width: 280px;
+    max-width: 550px;
+}
+.product-search-box input.form-control {
+    padding-left: 42px !important;
+    padding-right: 14px !important;
+    height: 38px !important;
+    border-radius: 8px !important;
+    border: 1px solid #cbd5e1 !important;
+    background: #fff !important;
+    font-size: 13px !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03) !important;
+}
+.product-search-box input.form-control:focus {
+    border-color: #0ea5e9 !important;
+    box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.15) !important;
+}
+.product-search-box .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 14px;
+    pointer-events: none;
+    z-index: 5;
+}
+.td-image img {
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    object-fit: cover;
+}
+</style>
+
 <div class="col-md-12">
-    <div class="panel panel-white">
-        <div class="panel-body">
-            <div class="clearfix m-b-sm">
-                <div class="pull-left">
-                    <a href="#" class="btn btn-default slide-toggle" data-target=".import-container">
-                        {_admin.terms.import} <i class="fa fa-chevron-down m-l-xxs"></i>
-                    </a>
-                    {control bulkActions:button}
-                </div>
-                <div class="pull-right">
-                    <a n:href="Categories:" class="btn btn-primary btn-addon">
-                        <i class="fa fa-list"></i> {_admin.terms.categories}
-                    </a>
-                </div>
-            </div>
+    <div class="panel panel-white" style="border-radius:10px;border:1px solid #e2e8f0;box-shadow:0 1px 3px rgba(0,0,0,0.05);overflow:hidden;">
+        <div class="panel-body" style="padding:10px 10px;">
             {include '_importDropdown.latte'}
             {control bulkActions}
 
             {snippet topFilters}
                 {form filters-form}
-                    <div class="clearfix m-b-sm">
-                        <div class="pull-left m-r-xs m-t-xxs m-b-xxs w-240">
-                            <div class="input-group pull-left">
-                                <span class="input-group-addon w-100">{_admin.terms.branch}:</span>
-                                <div class="pull-left w-140">
-                                    <div class="form-group m-b-no">
-                                        {input custom__branches class => 'change-to-submit'}
-                                    </div>
-                                </div>
+                    <div style="background:#f8fafc;padding:12px 14px;border-radius:8px;border:1px solid #e2e8f0;margin-bottom:12px;">
+                        
+                        <!-- Row 1: Search (Left) + Print Queue Toolbar (Right) -->
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px;">
+                            <div class="product-search-box">
+                                <i class="fa fa-search search-icon"></i>
+                                {input custom__name class => 'form-control autocomplete change-to-submit', 'data-url' => $presenter->link('productsAutocomplete!'), placeholder => 'Tìm theo tên hoặc mã EAN...'}
                             </div>
-                        </div>
-                        <div class="pull-left m-r-xs m-t-xxs m-b-xxs w-240">
-                            <div class="input-group pull-left">
-                                <span class="input-group-addon w-100">{_admin.terms.isActive}:</span>
-                                <div class="pull-left w-140">
-                                    {input custom__is_active class => 'change-to-submit'}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="pull-left m-r-xs m-t-xxs m-b-xxs w-240">
-                            <div class="input-group pull-left">
-                                <span class="input-group-addon w-100">{_admin.terms.isAction}:</span>
-                                <div class="pull-left w-140">
-                                    {input custom__is_action class => 'change-to-submit'}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="pull-left m-r-xs m-t-xxs m-b-xxs w-240">
-                            <div class="input-group pull-left">
-                                <span class="input-group-addon w-100">{_admin.terms.labels}:</span>
-                                <div class="pull-left w-140">
-                                    {input custom__labels class => 'form-control change-to-submit'}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="pull-right m-t-xxs m-b-xxs">
-                            <a n:href="product!" class="btn btn-primary btn-addon ajax-modal" data-target="#modal-productsForm">
-                                <i class="fa fa-circle-plus"></i> {_admin.terms.newProduct}
-                            </a>
-                        </div>
-                        <div class="pull-right m-t-xxs m-b-xxs m-r-xxs">
-                            <a n:href="multiPrices!" class="btn btn-primary btn-addon ajax-modal" data-target="#modal-multiPricesForm">
-                                <i class="fa fa-files"></i> {_admin.terms.multiplePrice}
-                            </a>
-                        </div>
-                        <div class="pull-right m-t-xxs m-b-xxs m-r-xxs">
-                            <a n:href="prepareMultiSale!" class="btn btn-primary btn-addon ajax-modal" data-target="#modal-multiSaleForm">
-                                <i class="fa fa-percent"></i> {_admin.terms.multipleSale}
-                            </a>
-                        </div>
-                    </div>
-                    <div class="clearfix m-b-sm">
-                        <div class="pull-left m-r-xs m-t-xxs m-b-xxs w-240">
-                            <div class="input-group pull-left">
-                                <span class="input-group-addon w-100">{_admin.terms.category}:</span>
-                                <div class="pull-left w-140">
-                                    {input custom__category class => 'form-control change-to-submit'}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="pull-left m-r-xs m-t-xxs m-b-xxs w-500">
-                            <div class="input-group pull-left">
-                                <span class="input-group-addon w-100">{_admin.terms.name}/{_admin.terms.ean}:</span>
-                                <div class="pull-left w-390">
-                                    {input custom__name class => 'form-control autocomplete change-to-submit', 'data-url' => $presenter->link('productsAutocomplete!')}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="pull-right m-t-xxs m-r-xxs">
-                            {snippet headerPrintBtn}
-                                <a href="#" class="btn btn-addon" style="background:#0f172a;color:#fff;border-radius:8px;font-weight:700;display:inline-flex;align-items:center;gap:8px;border:none;box-shadow:0 2px 6px rgba(15,23,42,0.25);" onclick="$('#modal-printPreview').modal('show'); return false;">
-                                    <span>🖨 {_admin.terms.downloadLabels}</span>
-                                    <span style="background:#14b8a6;color:#042f2e;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:800;">{$totalLabels ?? 0}</span>
+
+                            <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:auto;">
+                                <a n:href="toPrint!" class="btn btn-default" style="border-radius:8px;height:38px;padding:7px 14px;font-weight:600;font-size:12.5px;border:1px solid #cbd5e1;background:#fff;color:#334155;display:inline-flex;align-items:center;gap:6px;box-shadow:0 1px 2px rgba(0,0,0,0.03);" title="Chỉ lọc các sản phẩm đang có tem chờ in">
+                                    <i class="fa fa-filter text-info"></i> {_'admin.terms.toPrint'}
                                 </a>
-                            {/snippet}
+
+                                <a n:href="clearAllPrintCounts!" class="btn btn-default ajax with-confirm" data-message="{_'admin.terms.reallyRemoveLabels'}" style="border-radius:8px;height:38px;padding:7px 12px;font-weight:600;font-size:12.5px;border:1px solid #fee2e2;background:#fff;color:#e11d48;display:inline-flex;align-items:center;gap:6px;box-shadow:0 1px 2px rgba(0,0,0,0.03);" title="Xóa toàn bộ hàng đợi in tem">
+                                    <i class="fa fa-trash-alt"></i> {_'admin.terms.removeLabels'}
+                                </a>
+
+                                {snippet headerPrintBtn}
+                                    <a href="#" class="btn" style="background:#0f172a;color:#fff;border-radius:8px;height:38px;padding:7px 16px;font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:8px;border:none;box-shadow:0 2px 6px rgba(15,23,42,0.25);" onclick="$('#modal-printPreview').modal('show'); return false;">
+                                        <span>🖨 {_'admin.terms.downloadLabels'}</span>
+                                        <span style="background:#14b8a6;color:#042f2e;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:800;">{$totalLabels ?? 0}</span>
+                                    </a>
+                                {/snippet}
+                            </div>
                         </div>
-                        <div class="pull-right m-t-xxs m-r-xxs">
-                            <a n:href="toPrint!" class="btn btn-default btn-addon">
-                                <i class="fa fa-filter"></i> {_admin.terms.toPrint}
-                            </a>
-                        </div>
-                        <div class="pull-right m-t-xxs m-r-xxs">
-                            <a n:href="clearAllPrintCounts!" class="btn btn-default btn-addon ajax with-confirm" data-message="{_admin.terms.reallyRemoveLabels}">
-                                <i class="fa fa-trash text-danger"></i> {_admin.terms.removeLabels}
-                            </a>
+
+                        <!-- Row 2: 5 Filter dropdowns in a dedicated grid with labels -->
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(170px, 1fr));gap:12px;border-top:1px solid #e2e8f0;padding-top:14px;">
+                            <div>
+                                <label style="display:block;font-size:11px;font-weight:700;color:#64748b;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.02em;">
+                                    <i class="fa fa-store m-r-xxs text-primary"></i> {_'admin.terms.branch' ?? 'Chi nhánh'}
+                                </label>
+                                {input custom__branches class => 'form-control change-to-submit', style => 'width:100%;border-radius:7px;height:34px;border:1px solid #cbd5e1;background:#fff;font-size:12.5px;'}
+                            </div>
+
+                            <div>
+                                <label style="display:block;font-size:11px;font-weight:700;color:#64748b;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.02em;">
+                                    <i class="fa fa-folder-tree m-r-xxs text-primary"></i> {_'admin.terms.category' ?? 'Danh mục'}
+                                </label>
+                                {input custom__category class => 'form-control change-to-submit', style => 'width:100%;border-radius:7px;height:34px;border:1px solid #cbd5e1;background:#fff;font-size:12.5px;'}
+                            </div>
+
+                            <div>
+                                <label style="display:block;font-size:11px;font-weight:700;color:#64748b;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.02em;">
+                                    <i class="fa fa-eye m-r-xxs text-info"></i> {_'admin.terms.isActive' ?? 'Trạng thái'}
+                                </label>
+                                {input custom__is_active class => 'form-control change-to-submit', style => 'width:100%;border-radius:7px;height:34px;border:1px solid #cbd5e1;background:#fff;font-size:12.5px;'}
+                            </div>
+
+                            <div>
+                                <label style="display:block;font-size:11px;font-weight:700;color:#64748b;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.02em;">
+                                    <i class="fa fa-percent m-r-xxs text-danger"></i> {_'admin.terms.isAction' ?? 'Khuyến mãi'}
+                                </label>
+                                {input custom__is_action class => 'form-control change-to-submit', style => 'width:100%;border-radius:7px;height:34px;border:1px solid #cbd5e1;background:#fff;font-size:12.5px;'}
+                            </div>
+
+                            <div>
+                                <label style="display:block;font-size:11px;font-weight:700;color:#64748b;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.02em;">
+                                    <i class="fa fa-tags m-r-xxs" style="color:#0d9488;"></i> {_'admin.terms.labels' ?? 'Tem nhãn'}
+                                </label>
+                                {input custom__labels class => 'form-control change-to-submit', style => 'width:100%;border-radius:7px;height:34px;border:1px solid #cbd5e1;background:#fff;font-size:12.5px;'}
+                            </div>
                         </div>
                     </div>
                 {/form}
             {/snippet}
 
 
-                <div class="table-responsive dataTables_wrapper m-t-lg">
-                        <table class="table table-striped table-hover table-compact">
+                <div class="table-responsive dataTables_wrapper m-t-md" style="border:1px solid #e2e8f0;border-radius:10px;background:#fff;padding-bottom:5px;overflow-x:auto;">
+                        <table class="table table-striped table-hover table-compact" style="margin-bottom:0;width:100%;">
                             <thead>
                             <tr>
-                                <th class="w-40"></th>
-                                <th class="w-50"></th>
-                                <th>
-                                    <div class="w-300">
+                                <th class="w-40 text-center" style="width:40px;min-width:40px;"></th>
+                                <th class="w-50 text-center" style="width:50px;min-width:50px;"></th>
+                                <th style="min-width:240px;">
+                                    <div>
                                         <strong>{_admin.terms.name} {control sorting 'name'} / {_admin.terms.code} {control sorting 'code'} / {_admin.terms.createdAt} {control sorting 'created_at'}</strong>
                                     </div>
                                 </th>
-                                <th class="visible-xxl w-200">
+                                <th class="visible-xxl w-200" style="min-width:180px;">
                                     <div class="w-200"><strong>{_admin.terms.category}</strong></div>
                                 </th>
-                                <th class="w-450 text-center" colspan="4">
-                                    <div class="w-450"><strong>{_admin.terms.action}</strong></div>
+                                <th class="w-450 text-center" colspan="4" style="min-width:380px;">
+                                    <div><strong>{_admin.terms.action}</strong></div>
                                 </th>
-                                <th class="w-380 text-center">
+                                <th class="w-380 text-center" style="min-width:370px;">
                                     <div class="w-380"><strong>{_admin.terms.labels}</strong> (A4 · A5 · Vel. 1 · Vel. 2 · Vel. 3)</div>
                                 </th>
-                                <th class="w-60 text-center">
+                                <th class="text-center" style="width:55px;min-width:55px;">
                                     <i class="far fa-eye" data-toggle="tooltip" title="{_admin.terms.isActive}"></i>
                                 </th>
-                                <th class="w-20">
-                                    <div class="w-20"></div>
+                                <th class="text-center" style="width:70px;min-width:70px;padding-right:12px;">
+                                    <i class="fa fa-ellipsis-v text-muted" title="Thao tác"></i>
                                 </th>
                             </tr>
                             <tr>
                                 <th colspan="3"></th>
                                 <th class="visible-xxl"></th>
-                                <th class="w-180 text-center">
-                                    <div class="w-180">{_admin.terms.price}</div>
+                                <th class="w-180 text-center" style="width:140px;min-width:140px;">
+                                    <div style="font-weight:700;">{_admin.terms.price}</div>
                                 </th>
-                                <th class="w-210 text-center">
-                                    <div class="w-210">{_admin.terms.date}</div>
+                                <th class="w-210 text-center" style="width:170px;min-width:170px;">
+                                    <div style="font-weight:700;">{_admin.terms.date}</div>
                                 </th>
-                                <th class="w-40 text-center">
-                                    <div class="w-40"><i class="fa fa-save"></i></div>
+                                <th class="w-40 text-center" style="width:40px;min-width:40px;">
+                                    <div><i class="fa fa-save"></i></div>
                                 </th>
-                                <th class="w-40 text-center">
-                                    <div class="w-40"><i class="far fa-percent"></i></div>
+                                <th class="w-40 text-center" style="width:40px;min-width:40px;">
+                                    <div><i class="far fa-percent"></i></div>
                                 </th>
                                 <th></th>
                                 <th colspan="2">
@@ -174,11 +246,11 @@
                             {foreach $items as $item}
                                 {var $price = $item->getPrice($presenter->session->filters[$presenter->getName()]['custom__branches'])}
                                 <tr class="row-as-link" data-id="{$item->id}">
-                                    <td class="row-as-link-ignore">
+                                    <td class="row-as-link-ignore text-center">
                                         {control bulkActions:checkbox $item}
                                     </td>
 
-                                    <td class="td-image">
+                                    <td class="td-image text-center">
                                         <img n:if="$image = $item->getImage()" src="{$image->file|image:adminGallery}" />
                                     </td>
                                     <td>
@@ -195,46 +267,62 @@
                                             <span>{$i->name}</span>{sep}<br>{/sep}
                                         {/foreach}
                                     </td>
-                                    <td class="row-as-link-ignore product-price-fields">
-                                        <div class="p-relative">
-                                            <label class="pull-left w-70">{_admin.terms.basePrice}:</label>
-                                            <input type="number" data-item-id="{$price->id ?? NULL}" step="0.01" class="form-control form-control-sm pull-left w-90 text-right" name="price__{$item->id}" value="{$price && $price->price? $price->price : 0}">
+                                    <td class="row-as-link-ignore product-price-fields" style="width:140px;min-width:140px;vertical-align:middle;">
+                                        <div style="margin-bottom:6px;">
+                                            <label>{_admin.terms.basePrice}:</label>
+                                            <div style="display:flex;align-items:center;gap:6px;">
+                                                <input type="number" data-item-id="{$price->id ?? NULL}" step="0.01" class="form-control form-control-sm text-right" name="price__{$item->id}" value="{$price && $price->price? $price->price : 0}" style="flex:1;font-weight:600;color:#1e293b;">
+                                                <a n:href="showPricesLog! $item->id, $presenter->session->filters[$presenter->getName()]['custom__branches']" class="ajax-modal" data-target="#modal-pricesLog" title="Lịch sử giá" style="color:#94a3b8;font-size:13px;display:flex;align-items:center;justify-content:center;width:18px;flex-shrink:0;">
+                                                    <i class="far fa-clock"></i>
+                                                </a>
+                                            </div>
                                         </div>
-                                        <a n:href="showPricesLog! $item->id, $presenter->session->filters[$presenter->getName()]['custom__branches']" class="pull-right ajax-modal" data-target="#modal-pricesLog">
-                                            <i class="far fa-clock"></i>
-                                        </a>
-                                        <div class="clearfix m-b-xxs"></div>
-                                        <div class="p-relative">
-                                            <label class="pull-left w-70">{_admin.terms.actionPriceAbb}:</label>
-                                            <input type="number" data-item-id="{$price->id ?? NULL}" step="0.01" class="form-control form-control-sm pull-left w-90 text-right" name="price_action__{$item->id}" value="{$price && $price->price_action ? $price->price_action : ''}">
+
+                                        <div>
+                                            <label>{_admin.terms.actionPriceAbb}:</label>
+                                            <div style="display:flex;align-items:center;gap:6px;">
+                                                <input type="number" data-item-id="{$price->id ?? NULL}" step="0.01" class="form-control form-control-sm text-right" name="price_action__{$item->id}" value="{$price && $price->price_action ? $price->price_action : ''}" placeholder="—" style="flex:1;font-weight:600;color:#e11d48;">
+                                                <span style="display:flex;align-items:center;justify-content:center;width:18px;flex-shrink:0;">
+                                                    <i class="far fa-circle-info text-muted" data-toggle="tooltip" title="{$item->formatBranchTooltip($branchesPairs, 'price_action')}" style="color:#94a3b8;font-size:13px;cursor:help;"></i>
+                                                </span>
+                                            </div>
                                         </div>
-                                        <i class="far fa-circle-info pull-right text-default" data-toggle="tooltip" title="{$item->formatBranchTooltip($branchesPairs, 'price_action')}" style="margin-top: 2px;"></i>
+
                                         {var $refPrice = $item->getRefPrice($presenter->session->filters[$presenter->getName()]['custom__branches'])}
                                         {if $refPrice}
-                                            <div class="clearfix"></div>
-                                            <span class="label label-warning" style="font-weight: normal; font-size: 10px; display: inline-block; margin-top: 2px;" data-toggle="tooltip" title="Na webu se jako přeškrtnutá cena zobrazí {$refPrice|price} (nejnižší cena za posledních 30 dní), nikoliv základní cena.">
-                                                <i class="fas fa-triangle-exclamation"></i> Přeškrtnutá cena: {$refPrice|price}
-                                            </span>
+                                            <div style="margin-top:4px;">
+                                                <span class="label label-warning" style="font-weight: normal; font-size: 9.5px; display: block; white-space: normal; line-height: 1.2; padding: 2px 4px; border-radius: 4px;" data-toggle="tooltip" title="Na webu se jako přeškrtnutá cena zobrazí {$refPrice|price} (nejnižší cena za posledních 30 dní), nikoliv základní cena.">
+                                                    <i class="fas fa-triangle-exclamation"></i> {$refPrice|price}
+                                                </span>
+                                            </div>
                                         {/if}
                                     </td>
-                                    <td class="row-as-link-ignore product-date-fields">
-                                        <div class="calendar-today-overlay">
-                                            <div class="p-relative">
-                                                <label class="pull-left w-70">{_admin.terms.actionFrom}:</label>
-                                                <input type="text" data-item-id="{$price->id ?? NULL}" class="form-control form-control-sm pull-left w-90 text-center date-picker" name="action_from__{$item->id}" value="{$price && $price->action_from ? $price->action_from->format('d.m.Y') : ''}">
+                                    <td class="row-as-link-ignore product-date-fields" style="width:170px;min-width:170px;vertical-align:middle;">
+                                        <div class="calendar-today-overlay" style="margin-bottom:6px;">
+                                            <label>{_admin.terms.actionFrom}:</label>
+                                            <div style="display:flex;align-items:center;gap:5px;">
+                                                <input type="text" data-item-id="{$price->id ?? NULL}" class="form-control form-control-sm text-center date-picker" name="action_from__{$item->id}" value="{$price && $price->action_from ? $price->action_from->format('d.m.Y') : ''}" placeholder="dd.mm.yyyy" style="flex:1;font-weight:500;">
+                                                <a href="#" class="calendar-today-btn btn btn-default btn-xs" title="Hôm nay" style="height:28px;width:28px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;border:1px solid #cbd5e1;background:#f8fafc;color:#475569;flex-shrink:0;padding:0;">
+                                                    <i class="fa fa-calendar-day" style="font-size:11px;"></i>
+                                                </a>
+                                                <span style="display:flex;align-items:center;justify-content:center;width:18px;flex-shrink:0;">
+                                                    <i class="far fa-circle-info text-muted" data-toggle="tooltip" title="{$item->formatBranchTooltip($branchesPairs, 'action_from')}" style="color:#94a3b8;font-size:13px;cursor:help;"></i>
+                                                </span>
                                             </div>
-                                            <a href="#" class="pull-left m-l-xxs calendar-today-btn"><i class="fa fa-calendar-day"></i></a>
                                         </div>
-                                        <i class="far fa-circle-info pull-right text-default" data-toggle="tooltip" title="{$item->formatBranchTooltip($branchesPairs, 'action_from')}" style="margin-top: 2px;"></i>
-                                        <div class="clearfix m-b-xxs"></div>
+
                                         <div class="calendar-today-overlay">
-                                            <div class="p-relative calendar-today-overlay">
-                                                <label class="pull-left w-70">{_admin.terms.actionTo}:</label>
-                                                <input type="text" data-item-id="{$price->id ?? NULL}" class="form-control form-control-sm pull-left w-90 text-center date-picker" name="action_to__{$item->id}" value="{$price && $price->action_to ? $price->action_to->format('d.m.Y') : ''}">
+                                            <label>{_admin.terms.actionTo}:</label>
+                                            <div style="display:flex;align-items:center;gap:5px;">
+                                                <input type="text" data-item-id="{$price->id ?? NULL}" class="form-control form-control-sm text-center date-picker" name="action_to__{$item->id}" value="{$price && $price->action_to ? $price->action_to->format('d.m.Y') : ''}" placeholder="dd.mm.yyyy" style="flex:1;font-weight:500;">
+                                                <a href="#" class="calendar-today-btn btn btn-default btn-xs" title="Hôm nay" style="height:28px;width:28px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;border:1px solid #cbd5e1;background:#f8fafc;color:#475569;flex-shrink:0;padding:0;">
+                                                    <i class="fa fa-calendar-day" style="font-size:11px;"></i>
+                                                </a>
+                                                <span style="display:flex;align-items:center;justify-content:center;width:18px;flex-shrink:0;">
+                                                    <i class="far fa-circle-info text-muted" data-toggle="tooltip" title="{$item->formatBranchTooltip($branchesPairs, 'action_to')}" style="color:#94a3b8;font-size:13px;cursor:help;"></i>
+                                                </span>
                                             </div>
-                                            <a href="#" class="pull-left m-l-xxs calendar-today-btn"><i class="fa fa-calendar-day"></i></a>
                                         </div>
-                                        <i class="far fa-circle-info pull-right text-default" data-toggle="tooltip" title="{$item->formatBranchTooltip($branchesPairs, 'action_to')}" style="margin-top: 2px;"></i>
                                     </td>
                                     <td class="row-as-link-ignore text-center">
                                         <button type="button" class="btn btn-default btn-sm btn-save-prices hidden" title="{_admin.buttons.save}" data-products-id="{$item->id}" style="float: none; margin-right: 0;">
@@ -247,15 +335,15 @@
                                     <td class="row-as-link-ignore text-center">
                                         {control "productLabels-$item->id"}
                                     </td>
-                                    <td class="text-center row-as-link-ignore">
+                                    <td class="text-center row-as-link-ignore" style="width:55px;min-width:55px;vertical-align:middle;">
                                         {include APP_DIR.'/AdminModule/__inc/boolSwitch.latte', 'item' => $item, 'param' => 'is_active', 'isEye' => TRUE}
                                     </td>
-                                    <td class="actions row-as-link-ignore">
-                                        <div class="dropdown pull-left">
-                                            <a class="dropdown-toggle btn btn-default m-r-no" data-toggle="dropdown" href="#">
+                                    <td class="actions row-as-link-ignore text-center" style="width:70px;min-width:70px;padding-right:12px;vertical-align:middle;">
+                                        <div class="dropdown" style="display:inline-block;">
+                                            <a class="dropdown-toggle btn btn-default" data-toggle="dropdown" href="#" style="border-radius:6px;width:32px;height:30px;padding:0;display:inline-flex;align-items:center;justify-content:center;border:1px solid #cbd5e1;background:#fff;color:#475569;" title="Thao tác">
                                                 <i class="fa fa-bars"></i>
                                             </a>
-                                            <ul class="dropdown-menu dropdown-menu-right dropdown-list">
+                                            <ul class="dropdown-menu dropdown-menu-right dropdown-list" style="border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.12);padding:6px 0;min-width:180px;">
                                                 {control baseActions $item, $iterator}
                                             </ul>
                                         </div>
