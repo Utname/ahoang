@@ -3980,12 +3980,34 @@ main.page-content,
         transform: translateX(0) !important;
     }
     .navbar .logo-box,
-    .navbar .mosaic-logo-box {
-        width: 200px !important;
+    .navbar .mosaic-logo-box,
+    .page-header-fixed .navbar .logo-box,
+    .page-header-fixed .navbar .mosaic-logo-box {
+        /* Must match (or beat) the specificity of the unconditional
+           ".page-header-fixed .navbar .logo-box { width: 225px }" rule
+           above — being inside a media query doesn't help against a
+           higher-specificity !important rule outside of one; same
+           importance always falls back to specificity, media query or
+           not. Confirmed via Playwright: without the .page-header-fixed
+           prefix here, that rule kept winning and the logo stayed 225px
+           wide on a 375px viewport regardless of this block. */
+        width: 64px !important;
+        padding: 0 !important;
+        justify-content: center !important;
+    }
+    .navbar .logo-box .mosaic-logo-text-group,
+    .navbar .mosaic-logo-box .mosaic-logo-text-group {
+        display: none !important;
     }
     .navbar .topmenu-outer,
     .navbar .mosaic-topmenu-outer {
-        margin-left: 0 !important;
+        /* Must match the logo-box width above — both are position:fixed,
+           so a mismatch here means they physically overlap and whatever
+           sits first inside topmenu-outer (the hamburger/sidebar-toggle
+           button) becomes unclickable, hidden under the logo. Confirmed
+           via Playwright: the logo's <i> intercepted every click aimed
+           at the toggle button when this was 0. */
+        margin-left: 64px !important;
     }
 }
 
@@ -4281,3 +4303,58 @@ main.page-content,
     margin-top: 18px !important;
     padding-top: 16px !important;
 }
+
+/* ============================================================
+   DESKTOP SIDEBAR COLLAPSE ("Thu gọn / Mở rộng Menu" button)
+   Toggled by www/js/admin/modern.js adding/removing this class on
+   <body>. Everything above hardcodes the sidebar/header/content
+   offsets to 225px with !important — these need to win over that at
+   equal specificity, so they're appended last and each selector
+   matches (or exceeds) the one it's overriding.
+   ============================================================ */
+body.mosaic-sidebar-collapsed .page-sidebar,
+body.mosaic-sidebar-collapsed .page-sidebar.mosaic-sidebar,
+body.mosaic-sidebar-collapsed .mosaic-sidebar,
+body.mosaic-sidebar-collapsed .sidebar {
+    width: 64px !important;
+}
+
+body.mosaic-sidebar-collapsed .navbar .logo-box,
+body.mosaic-sidebar-collapsed .navbar .mosaic-logo-box {
+    width: 64px !important;
+    padding: 0 !important;
+    justify-content: center !important;
+}
+
+body.mosaic-sidebar-collapsed .mosaic-logo-text-group {
+    display: none !important;
+}
+
+body.mosaic-sidebar-collapsed .navbar .topmenu-outer,
+body.mosaic-sidebar-collapsed .navbar .mosaic-topmenu-outer,
+body.mosaic-sidebar-collapsed .topmenu-outer.mosaic-topmenu-outer {
+    margin-left: 64px !important;
+}
+
+body.mosaic-sidebar-collapsed .page-inner,
+body.mosaic-sidebar-collapsed.page-sidebar-fixed.page-header-fixed .page-inner {
+    margin-left: 64px !important;
+}
+
+/* Hide the text label and expand-arrow, keep only the icon, and
+   center it now that there's no label next to it to align with. */
+body.mosaic-sidebar-collapsed .menu.accordion-menu li > a > p,
+body.mosaic-sidebar-collapsed .menu.accordion-menu li > a > span.arrow {
+    display: none !important;
+}
+
+body.mosaic-sidebar-collapsed .menu.accordion-menu > li.top-level > a {
+    justify-content: center !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+/* Collapsed + hover-menu together: the flyout already escapes via
+   JS-positioned position:fixed (see modern.js), so collapsing the
+   sidebar to icon width doesn't break it — it just makes every
+   top-level item behave like the flyout-only items already did. */

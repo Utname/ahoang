@@ -14,8 +14,11 @@ $(document).ready(function () {
         $(this).closest(".panel").children('.panel-body').slideToggle('fast');
     });
 
-    // Push Menu
+    // Push Menu (mobile off-canvas slide-in only — see breakpoint note below)
     $('.push-sidebar').click(function () {
+        if (window.innerWidth > 767) {
+            return;
+        }
         var hidden = $('.sidebar');
 
         if (hidden.hasClass('visible')) {
@@ -26,6 +29,32 @@ $(document).ready(function () {
             hidden.addClass('visible');
             $('.page-inner').addClass('sidebar-visible');
         }
+    });
+
+    // Desktop collapse/expand ("Thu gọn / Mở rộng Menu" button). The
+    // .push-sidebar handler above only toggles a `visible` class that CSS
+    // only reacts to below the 767px mobile breakpoint — on a normal
+    // desktop width it does nothing, which is why this button looked dead.
+    // This toggles a separate body class the Mosaic CSS reacts to, and
+    // remembers the choice across reloads.
+    //
+    // The toggle <button> in @layout.latte carries BOTH the "push-sidebar"
+    // and "mosaic-sidebar-toggle" classes on the same element, so jQuery
+    // binds and fires BOTH handlers on every click. Below 767px that used
+    // to also add `mosaic-sidebar-collapsed` (forcing the sidebar to a
+    // permanent 64px icon rail) at the same time as `visible` (the intended
+    // full-width overlay), producing an icon-only rail instead of the
+    // overlay. Each handler now only acts on its own side of the 767px
+    // breakpoint so only one behavior applies at a time.
+    if (window.innerWidth > 767 && localStorage.getItem('mosaicSidebarCollapsed') === '1') {
+        $('body').addClass('mosaic-sidebar-collapsed');
+    }
+    $('.mosaic-sidebar-toggle').click(function () {
+        if (window.innerWidth <= 767) {
+            return;
+        }
+        var collapsed = $('body').toggleClass('mosaic-sidebar-collapsed').hasClass('mosaic-sidebar-collapsed');
+        localStorage.setItem('mosaicSidebarCollapsed', collapsed ? '1' : '0');
     });
 
     // Sidebar Menu
