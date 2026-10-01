@@ -14,67 +14,40 @@
         <div class="panel mosaic-list-panel">
             <div class="panel-body">
                 {form filters-form}
-
-                    <div class="clearfix m-b-sm">
-                        <div class="pull-left m-r-xs m-t-xxs m-b-xxs w-220">
-                            <div class="input-group pull-left">
-                                <span class="input-group-addon w-80">{_admin.terms.branch}:</span>
-                                <div class="pull-left w-140">
-                                    <div class="form-group m-b-no">
-                                        {input custom__branches class => 'change-to-submit'}
-                                    </div>
-                                </div>
+                    <div class="mosaic-filter-bar">
+                        <div class="mosaic-filter-grid" style="align-items: end;">
+                            <div>
+                                <label><i class="fa fa-store m-r-xxs text-primary"></i> {_admin.terms.branch}</label>
+                                {input custom__branches class => 'form-control change-to-submit'}
                             </div>
-                        </div>
-                        <div class="pull-left m-r-xs m-t-xxs m-b-xxs w-220">
-                            <div class="input-group pull-left">
-                                <span class="input-group-addon w-80">{_admin.terms.currency}:</span>
-                                <div class="pull-left w-140">
-                                    {input custom__currency class => 'change-to-submit'}
-                                </div>
+                            <div>
+                                <label><i class="fa fa-coins m-r-xxs text-primary"></i> {_admin.terms.currency}</label>
+                                {input custom__currency class => 'form-control change-to-submit'}
                             </div>
-                        </div>
-                        <div class="pull-left m-r-xs m-t-xxs m-b-xxs w-220">
-                            <div class="input-group pull-left">
-                                <span class="input-group-addon w-80">{_admin.terms.name}:</span>
-                                <div class="pull-left w-140">
-                                    {input custom__name class => 'form-control change-to-submit'}
-                                </div>
+                            <div>
+                                <label><i class="fa fa-tag m-r-xxs text-primary"></i> {_admin.terms.name}</label>
+                                {input custom__name class => 'form-control change-to-submit'}
                             </div>
-                        </div>
-                        <div class="pull-left m-r-xs m-t-xxs m-b-xxs w-220">
-                            <div class="input-group pull-left">
-                                <span class="input-group-addon w-80">{_admin.terms.ean}:</span>
-                                <div class="pull-left w-140">
-                                    {input custom__code_ean class => 'form-control change-to-submit'}
-                                </div>
+                            <div>
+                                <label><i class="fa fa-barcode m-r-xxs text-primary"></i> {_admin.terms.ean}</label>
+                                {input custom__code_ean class => 'form-control change-to-submit'}
                             </div>
-                        </div>
-                        <div class="pull-left m-r-xs m-t-xxs m-b-xxs w-220">
-                            <div class="input-group pull-left">
-                                <span class="input-group-addon w-80">{_admin.terms.isAction}:</span>
-                                <div class="pull-left w-140">
-                                    {input custom__is_action class => 'change-to-submit'}
-                                </div>
+                            <div>
+                                <label><i class="fa fa-percent m-r-xxs text-danger"></i> {_admin.terms.isAction}</label>
+                                {input custom__is_action class => 'form-control change-to-submit'}
                             </div>
-                        </div>
-                        <div class="pull-left m-r-xs m-t-xxs m-b-xxs w-220">
-                            <div class="input-group pull-left">
-                                <span class="input-group-addon w-80">{_admin.terms.isActive}:</span>
-                                <div class="pull-left w-140">
-                                    {input custom__is_active class => 'change-to-submit'}
-                                </div>
+                            <div>
+                                <label><i class="fa fa-eye m-r-xxs text-info"></i> {_admin.terms.isActive}</label>
+                                {input custom__is_active class => 'form-control change-to-submit'}
                             </div>
-                        </div>
-                        <div class="pull-left m-t-xxs m-b-xxs">
-                            <a n:href="multiPrices!" class="btn btn-primary ajax-modal" data-target="#modal-multiPricesForm">
-                                <i class="fa fa-files"></i>
-                            </a>
-                        </div>
-                        <div class="pull-left m-t-xxs m-b-xxs">
-                            <a n:href="product!" class="btn btn-primary ajax-modal" data-target="#modal-productsForm">
-                                <i class="fa fa-circle-plus"></i>
-                            </a>
+                            <div style="display: flex; gap: 6px;">
+                                <a n:href="multiPrices!" class="btn mosaic-topbtn ajax-modal" data-target="#modal-multiPricesForm" title="{_admin.terms.multiplePrice}">
+                                    <i class="fa fa-files"></i>
+                                </a>
+                                <a n:href="product!" class="btn mosaic-topbtn mosaic-topbtn-primary ajax-modal" data-target="#modal-productsForm" title="{_admin.terms.newProduct}">
+                                    <i class="fa fa-circle-plus"></i>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 {/form}

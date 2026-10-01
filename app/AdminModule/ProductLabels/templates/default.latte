@@ -5,15 +5,11 @@
             <div>
                 <div>
                     {form filters-form}
-                        <div class="clearfix m-b-sm">
-                            <div class="pull-left m-r-xs m-t-xxs m-b-xxs w-240">
-                                <div class="input-group pull-left">
-                                    <span class="input-group-addon w-100">{_admin.terms.branch}:</span>
-                                    <div class="pull-left w-140">
-                                        <div class="form-group m-b-no">
-                                            {input custom__branches class => 'select-default change-to-submit', style => 'border: 1px solid #ccc; height: 27px;'}
-                                        </div>
-                                    </div>
+                        <div class="mosaic-filter-bar">
+                            <div class="mosaic-filter-grid" style="grid-template-columns: 220px;">
+                                <div>
+                                    <label><i class="fa fa-store m-r-xxs text-primary"></i> {_admin.terms.branch}</label>
+                                    {input custom__branches class => 'form-control change-to-submit'}
                                 </div>
                             </div>
                         </div>
@@ -42,7 +38,7 @@
                                     {var $barcodePricesListItems = $presenter->getBarcodePricesList()}
                                     <div class="col-xs-12">
                                         <div n:if="count($barcodePricesListItems)" class="table-responsive dataTables_wrapper m-t-lg">
-                                            <table class="table table-striped table-hover js-filters">
+                                            <table class="table table-striped table-hover mosaic-table-compact js-filters">
                                                 <thead>
                                                 <tr>
                                                     <th class="w-40 text-center">
@@ -181,7 +177,7 @@
                                                         {var $barcodeDescriptionsListItems = $presenter->getBarcodeDescriptionsList($presenter::TYPE_DESCRIPTION_2)}
                                                         <div class="col-xs-12">
                                                             <div n:if="count($barcodeDescriptionsListItems)" class="table-responsive dataTables_wrapper">
-                                                                <table class="table table-striped table-hover js-filters">
+                                                                <table class="table table-striped table-hover mosaic-table-compact js-filters">
                                                                     <thead>
                                                                     <tr>
                                                                         <th class="w-40 text-center">
@@ -249,7 +245,7 @@
                                                         {var $barcodeDescriptionsListItems = $presenter->getBarcodeDescriptionsList($presenter::TYPE_DESCRIPTION_1)}
                                                         <div class="col-xs-12">
                                                             <div n:if="count($barcodeDescriptionsListItems)" class="table-responsive dataTables_wrapper">
-                                                                <table class="table table-striped table-hover js-filters">
+                                                                <table class="table table-striped table-hover mosaic-table-compact js-filters">
                                                                     <thead>
                                                                     <tr>
                                                                         <th class="w-40 text-center">
@@ -317,7 +313,7 @@
                                                         {var $barcodeDescriptionsListItems = $presenter->getBarcodeDescriptionsList($presenter::TYPE_DESCRIPTION_3)}
                                                         <div class="col-xs-12">
                                                             <div n:if="count($barcodeDescriptionsListItems)" class="table-responsive dataTables_wrapper">
-                                                                <table class="table table-striped table-hover js-filters">
+                                                                <table class="table table-striped table-hover mosaic-table-compact js-filters">
                                                                     <thead>
                                                                     <tr>
                                                                         <th class="w-40 text-center">
@@ -436,7 +432,7 @@
                                     {var $barcodePricesListItems = $presenter->getBarcodePricesManualList()}
                                     <div class="col-xs-12">
                                         <div n:if="count($barcodePricesListItems)" class="table-responsive dataTables_wrapper m-t-lg">
-                                            <table class="table table-striped table-hover js-filters">
+                                            <table class="table table-striped table-hover mosaic-table-compact js-filters">
                                                 <thead>
                                                 <tr>
                                                     <th class="w-40 text-center">
