@@ -52,41 +52,46 @@
 	<![endif]-->
 </head>
 
-<body class="page-login">
+<body class="page-login mosaic-login-page">
 
 <main class="page-content">
-	<div class="page-inner">
-		<ul class="nav navbar-nav navbar-right">
-			<li n:if="count($locales) > 1" class="dropdown">
-				<a href="#" class="dropdown-toggle" data-toggle="dropdown">
-					<span class="user-name btn btn-default">
-						{_'admin.locales.'.$locale}
-						<i class="far fa-angle-down"></i>
-					</span>
-				</a>
-				<ul class="dropdown-menu dropdown-list" role="menu">
-					<li n:foreach="$locales as $l" role="presentation">
-						<a n:href="switchLocale! $l">{_'admin.locales.'.$l}</a>
-					</li>
-				</ul>
-			</li>
-		</ul>
-		<div id="main-wrapper">
-			<div class="row">
-				<div class="col-md-3 center">
-					<div class="clearfix"></div>
-					<div class="login-box">
-						<a class="logo-name text-lg text-center">
-							{_admin.project.name}
-						</a>
+	<!-- Language Switcher on Top-Right -->
+	<div n:if="count($locales) > 1" class="mosaic-login-lang">
+		<div class="dropdown">
+			<a href="#" class="dropdown-toggle mosaic-login-lang-btn" data-toggle="dropdown">
+				<i class="fas fa-globe text-slate"></i>
+				<span>{if $locale == 'vi_VN'}Tiếng Việt{elseif $locale == 'cs_CZ'}Čeština{else}{$locale}{/if}</span>
+				<i class="fas fa-chevron-down mosaic-arrow-icon"></i>
+			</a>
+			<ul class="dropdown-menu dropdown-menu-right mosaic-dropdown-menu" role="menu">
+				<li n:foreach="$locales as $l" role="presentation">
+					<a n:href="switchLocale! $l" n:class="$locale == $l ? 'active'">
+						<span class="mosaic-lang-code">{$l|upper|substr:0,2}</span>
+						<span>{_'admin.locales.'.$l}</span>
+						<i n:if="$locale == $l" class="fas fa-check mosaic-active-check"></i>
+					</a>
+				</li>
+			</ul>
+		</div>
+	</div>
 
-						{include content}
-
-						<p class="text-center m-t-xs text-sm">
-							{date('Y')} &copy; {_admin.project.copyright}
-						</p>
-					</div>
+	<div class="mosaic-login-container">
+		<div class="mosaic-login-card">
+			<!-- Branding / Logo -->
+			<div class="mosaic-login-brand">
+				<div class="mosaic-login-logo-badge">
+					<i class="fas fa-shapes"></i>
 				</div>
+				<h1 class="mosaic-login-title">{_admin.project.name}</h1>
+				<span class="mosaic-login-subtitle">HỆ THỐNG QUẢN TRỊ TRUNG TÂM</span>
+			</div>
+
+			<div class="mosaic-login-content">
+				{include content}
+			</div>
+
+			<div class="mosaic-login-footer">
+				<p>{date('Y')} &copy; {_admin.project.copyright}. All rights reserved.</p>
 			</div>
 		</div>
 	</div>

@@ -1,12 +1,12 @@
 {block topButtons}
 
-    <a n:if="count($filters)" n:href="resetFilters!" class="btn btn-danger btn-addon">
+    <a n:if="count($filters)" n:href="resetFilters!" class="btn btn-default mosaic-topbtn mosaic-topbtn-danger">
         <i class="far fa-times"></i> {_admin.filters.reset}
     </a>
-    <a n:if="$aps->has('Products_list')" n:href="Products:" class="btn btn-default btn-addon">
+    <a n:if="$aps->has('Products_list')" n:href="Products:" class="btn btn-default mosaic-topbtn">
         <i class="far fa-arrow-left"></i> {_admin.buttons.back}
     </a>
-    <a n:if="$aps->has('create')" n:href="new" class="btn btn-success btn-addon">
+    <a n:if="$aps->has('create')" n:href="new" class="btn mosaic-topbtn mosaic-topbtn-primary">
         <i class="far fa-plus"></i> {_admin.actions.new}
     </a>
 
@@ -16,7 +16,7 @@
 {block content}
 
     <div class="col-md-12">
-        <div class="panel panel-white">
+        <div class="panel mosaic-list-panel">
             <div class="panel-body">
 
                     <div class="clearfix m-b-sm">
@@ -26,43 +26,35 @@
                     </div>
                     {control bulkActions}
                     {form filters-form}
-                    <div class="table-responsive dataTables_wrapper">
-                        <table class="table table-striped table-hover">
+                    <div class="mosaic-filter-bar">
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <div class="mosaic-list-search-box">
+                                <i class="fa fa-search search-icon"></i>
+                                {input name class => 'form-control', placeholder => _admin.terms.name}
+                            </div>
+                            <button type="submit" class="btn btn-default mosaic-topbtn">
+                                <i class="far fa-filter"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mosaic-list-table-wrap">
+                        <table class="table table-striped table-hover mosaic-table-compact">
                             <thead>
                             <tr>
-                                <th class="w-40"></th>
-                                <th>
-                                    <div class="w-300">{_admin.terms.name}</div>
-                                </th>
-                                <th>
-                                    <div class="w-400">{_admin.terms.url}</div>
-                                </th>
+                                <th class="w-40 text-center" style="width:40px;"></th>
+                                <th>{_admin.terms.name}</th>
+                                <th>{_admin.terms.url}</th>
                                 <th class="w-50 text-center">
                                     <i class="far fa-eye" data-toggle="tooltip" title="{_admin.terms.isActive}"></i>
                                 </th>
-                                <th class="w-40">
-                                    <div class="w-30"></div>
+                                <th class="text-center" style="width:70px;">
+                                    <i class="fa fa-ellipsis-v text-muted" title="{_admin.terms.action}"></i>
                                 </th>
-                            </tr>
-                            <tr class="filters">
-                                <td>
-                                    {control bulkActions:headCheckbox}
-                                </td>
-                                <td class="w-400">
-                                    {input name class => 'form-control w-400'}
-                                </td>
-                                <td></td>
-                                <td></td>
-                                <td>
-                                    <button type="submit" class="btn btn-default wp-100">
-                                        <i class="far fa-filter"></i>
-                                    </button>
-                                </td>
                             </tr>
                             </thead>
                             <tbody n:snippet="list">
                             <tr n:foreach="$items as $item" class="row-as-link" data-id="{$item->id}">
-                                <td class="row-as-link-ignore">
+                                <td class="row-as-link-ignore text-center">
                                     {control bulkActions:checkbox $item}
                                 </td>
                                 <td>
@@ -80,9 +72,9 @@
                                 <td class="text-center row-as-link-ignore">
                                     {include APP_DIR.'/AdminModule/__inc/boolSwitch.latte', 'item' => $item, 'param' => 'is_active'}
                                 </td>
-                                <td class="actions actions-small row-as-link-ignore">
-                                    <div class="dropdown pull-left">
-                                        <a class="dropdown-toggle btn btn-default" data-toggle="dropdown" href="#">
+                                <td class="actions row-as-link-ignore text-center">
+                                    <div class="dropdown" style="display:inline-block;">
+                                        <a class="dropdown-toggle btn btn-default mosaic-row-actions-btn" data-toggle="dropdown" href="#" title="{_admin.terms.action}">
                                             <i class="fa fa-bars"></i>
                                         </a>
                                         <ul class="dropdown-menu dropdown-menu-right dropdown-list">

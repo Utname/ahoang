@@ -8,6 +8,7 @@ locales:
 	vi_VN: 'Tiếng Việt'
 
 modules:
+	homepage: 'Bảng điều khiển'
 	accessDeny: 'Truy cập bị từ chối'
 
 	catalog: 'Danh mục'

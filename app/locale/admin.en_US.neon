@@ -8,6 +8,7 @@ locales:
 	vi_VN: 'Vietnamese'
 
 modules:
+	homepage: 'Dashboard'
 	accessDeny: 'Permission denied'
 
 

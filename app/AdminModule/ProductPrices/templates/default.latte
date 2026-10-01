@@ -1,8 +1,8 @@
 {block topButtons}
-    <a n:if="count($filters)" n:href="resetFilters!" class="btn btn-danger btn-addon">
+    <a n:if="count($filters)" n:href="resetFilters!" class="btn btn-default mosaic-topbtn mosaic-topbtn-danger">
         <i class="far fa-times"></i> {_admin.filters.reset}
     </a>
-    <a n:href="Branches:new" n:if="$aps->has('Branches_create')" class="btn btn-success btn-addon m-l-xxs">
+    <a n:href="Branches:new" n:if="$aps->has('Branches_create')" class="btn mosaic-topbtn mosaic-topbtn-primary m-l-xxs">
         <i class="far fa-plus"></i> {_admin.terms.newBranchesList}
     </a>
 
@@ -11,7 +11,7 @@
 
 {block content}
     <div class="col-md-12">
-        <div class="panel panel-white">
+        <div class="panel mosaic-list-panel">
             <div class="panel-body">
                 {form filters-form}
 
@@ -79,9 +79,9 @@
                     </div>
                 {/form}
 
-                <div class="table-responsive dataTables_wrapper m-t-lg">
+                <div class="mosaic-list-table-wrap dataTables_wrapper m-t-lg">
                     {form pricesForm}
-                        <table class="table table-striped table-hover vertical-middle submit-on-change">
+                        <table class="table table-striped table-hover mosaic-table-compact vertical-middle submit-on-change">
                             <thead>
                             <tr>
                                 <th class="w-60"></th>
@@ -153,10 +153,10 @@
                         </table>
 
                         <div class="text-right">
-                            <button n:name="submit" class="btn btn-success btn-addon m-l-xxs pull-right">
+                            <button n:name="submit" class="btn mosaic-topbtn mosaic-topbtn-primary m-l-xxs pull-right">
                                 <i class="far fa-check"></i> {_admin.buttons.save}
                             </button>
-                            <button n:if="$canChangePage" n:name="submit_next_page" class="btn btn-success btn-addon m-l-xxs pull-right">
+                            <button n:if="$canChangePage" n:name="submit_next_page" class="btn mosaic-topbtn mosaic-topbtn-primary m-l-xxs pull-right">
                                 <i class="far fa-check"></i> {_admin.buttons.saveAndGoToNextPage}
                             </button>
                         </div>
@@ -221,10 +221,10 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button n:name="submit" class="btn btn-success btn-addon">
+                    <button n:name="submit" class="btn mosaic-topbtn mosaic-topbtn-primary">
                         <i class="fa fa-save"></i> {_admin.buttons.save}
                     </button>
-                    <a href="#" class="btn btn-default btn-addon" data-dismiss="modal">
+                    <a href="#" class="btn btn-default mosaic-topbtn" data-dismiss="modal">
                         <i class="fa fa-times"></i> {_admin.buttons.close}
                     </a>
                 </div>
@@ -309,10 +309,10 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button n:name="submit" class="btn btn-success btn-addon">
+                    <button n:name="submit" class="btn mosaic-topbtn mosaic-topbtn-primary">
                         <i class="fa fa-save"></i> {_admin.buttons.save}
                     </button>
-                    <a href="#" class="btn btn-default btn-addon" data-dismiss="modal">
+                    <a href="#" class="btn btn-default mosaic-topbtn" data-dismiss="modal">
                         <i class="fa fa-times"></i> {_admin.buttons.close}
                     </a>
                 </div>

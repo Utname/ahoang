@@ -1,7 +1,7 @@
 {block content}
 
 <div class="col-md-12">
-	<div class="panel panel-white">
+	<div class="panel mosaic-list-panel">
 		{form editForm}
 			<div class="panel-body">
 
@@ -84,7 +84,7 @@
 									</div>
 
 									<div class="row">
-										<div n:ifset="$form['street']" class="col-lg-5">
+										<div n:ifset="$form['street']" class="col-lg-4">
 											<div class="form-group">
 												{label street /}
 												{input street class => 'form-control'}
@@ -96,7 +96,7 @@
 												{input city class => 'form-control'}
 											</div>
 										</div>
-										<div n:ifset="$form['zip']" class="col-lg-2">
+										<div n:ifset="$form['zip']" class="col-lg-3">
 											<div class="form-group">
 												{label zip /}
 												{input zip class => 'form-control'}

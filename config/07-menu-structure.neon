@@ -6,6 +6,9 @@
 parameters:
 	menuStructure: [
 
+		Homepage: [
+			icon: 'fas fa-gauge-high'
+		]
 		Pages: [
 			icon: 'fas fa-list'
 		]

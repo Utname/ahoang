@@ -1,16 +1,16 @@
 {block topButtons}
     <div style="display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;">
-        <a n:if="count($filters)" n:href="resetFilters!" class="btn btn-default" style="color:#e11d48;background:#fff1f2;border:1px solid #fecdd3;border-radius:8px;font-weight:600;padding:7px 14px;font-size:13px;">
+        <a n:if="count($filters)" n:href="resetFilters!" class="btn btn-default mosaic-topbtn mosaic-topbtn-danger">
             <i class="far fa-times m-r-xxs"></i> {_'admin.filters.reset'}
         </a>
-        <a href="#" class="btn btn-default slide-toggle" data-target=".import-container" style="border-radius:8px;font-weight:600;padding:7px 14px;font-size:13px;border:1px solid #cbd5e1;background:#fff;">
+        <a href="#" class="btn btn-default mosaic-topbtn slide-toggle" data-target=".import-container">
             <i class="fa fa-file-import m-r-xxs text-muted"></i> {_'admin.terms.import'} <i class="fa fa-chevron-down m-l-xxs" style="font-size:10px;"></i>
         </a>
-        <a n:href="Categories:" class="btn btn-default" style="border-radius:8px;font-weight:600;padding:7px 14px;font-size:13px;border:1px solid #cbd5e1;background:#fff;">
+        <a n:href="Categories:" class="btn btn-default mosaic-topbtn">
             <i class="fa fa-folder-tree m-r-xxs text-primary"></i> {_'admin.terms.categories'}
         </a>
         <div class="dropdown" style="display:inline-block;">
-            <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" style="border-radius:8px;font-weight:600;padding:7px 14px;font-size:13px;border:1px solid #cbd5e1;background:#fff;">
+            <button class="btn btn-default mosaic-topbtn dropdown-toggle" type="button" data-toggle="dropdown">
                 <i class="fa fa-bolt m-r-xxs text-warning"></i> Thao tác giá <i class="fa fa-angle-down m-l-xxs"></i>
             </button>
             <ul class="dropdown-menu dropdown-menu-right dropdown-list" style="border-radius:10px;box-shadow:0 10px 25px rgba(0,0,0,0.1);padding:6px 0;min-width:210px;">
@@ -26,7 +26,7 @@
                 </li>
             </ul>
         </div>
-        <a n:if="$aps->has('create')" n:href="product!" class="btn btn-primary ajax-modal" data-target="#modal-productsForm" style="border-radius:8px;font-weight:700;padding:7px 18px;font-size:13px;background:#2563eb;border:none;box-shadow:0 2px 6px rgba(37,99,235,0.3);">
+        <a n:if="$aps->has('create')" n:href="product!" class="btn mosaic-topbtn mosaic-topbtn-primary ajax-modal" data-target="#modal-productsForm" style="padding:7px 18px;">
             <i class="fa fa-plus m-r-xxs"></i> {_'admin.terms.newProduct'}
         </a>
     </div>
@@ -36,25 +36,6 @@
 {block content}
 
 <style>
-.table-compact > thead > tr > th {
-    background: #f8fafc;
-    color: #475569;
-    font-size: 11.5px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    border-bottom: 1px solid #e2e8f0;
-    padding: 10px 8px;
-    vertical-align: middle;
-}
-.table-compact > tbody > tr > td {
-    padding: 10px 8px;
-    vertical-align: middle;
-    border-top: 1px solid #f1f5f9;
-}
-.table-compact > tbody > tr:hover {
-    background-color: #f8fafc !important;
-}
 .product-price-fields input,
 .product-date-fields input {
     border-radius: 6px !important;
@@ -81,36 +62,6 @@
     text-transform: uppercase;
     letter-spacing: 0.02em;
 }
-.product-search-box {
-    position: relative;
-    flex: 1;
-    min-width: 280px;
-    max-width: 550px;
-}
-.product-search-box input.form-control {
-    padding-left: 42px !important;
-    padding-right: 14px !important;
-    height: 38px !important;
-    border-radius: 8px !important;
-    border: 1px solid #cbd5e1 !important;
-    background: #fff !important;
-    font-size: 13px !important;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.03) !important;
-}
-.product-search-box input.form-control:focus {
-    border-color: #0ea5e9 !important;
-    box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.15) !important;
-}
-.product-search-box .search-icon {
-    position: absolute;
-    left: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #94a3b8;
-    font-size: 14px;
-    pointer-events: none;
-    z-index: 5;
-}
 .td-image img {
     border-radius: 6px;
     border: 1px solid #e2e8f0;
@@ -119,18 +70,18 @@
 </style>
 
 <div class="col-md-12">
-    <div class="panel panel-white" style="border-radius:10px;border:1px solid #e2e8f0;box-shadow:0 1px 3px rgba(0,0,0,0.05);overflow:hidden;">
-        <div class="panel-body" style="padding:10px 10px;">
+    <div class="panel mosaic-list-panel">
+        <div class="panel-body">
             {include '_importDropdown.latte'}
             {control bulkActions}
 
             {snippet topFilters}
                 {form filters-form}
-                    <div style="background:#f8fafc;padding:12px 14px;border-radius:8px;border:1px solid #e2e8f0;margin-bottom:12px;">
+                    <div class="mosaic-filter-bar">
                         
                         <!-- Row 1: Search (Left) + Print Queue Toolbar (Right) -->
                         <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px;">
-                            <div class="product-search-box">
+                            <div class="mosaic-list-search-box">
                                 <i class="fa fa-search search-icon"></i>
                                 {input custom__name class => 'form-control autocomplete change-to-submit', 'data-url' => $presenter->link('productsAutocomplete!'), placeholder => 'Tìm theo tên hoặc mã EAN...'}
                             </div>
@@ -154,40 +105,40 @@
                         </div>
 
                         <!-- Row 2: 5 Filter dropdowns in a dedicated grid with labels -->
-                        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(170px, 1fr));gap:12px;border-top:1px solid #e2e8f0;padding-top:14px;">
+                        <div class="mosaic-filter-grid">
                             <div>
-                                <label style="display:block;font-size:11px;font-weight:700;color:#64748b;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.02em;">
+                                <label>
                                     <i class="fa fa-store m-r-xxs text-primary"></i> {_'admin.terms.branch' ?? 'Chi nhánh'}
                                 </label>
-                                {input custom__branches class => 'form-control change-to-submit', style => 'width:100%;border-radius:7px;height:34px;border:1px solid #cbd5e1;background:#fff;font-size:12.5px;'}
+                                {input custom__branches class => 'form-control change-to-submit'}
                             </div>
 
                             <div>
-                                <label style="display:block;font-size:11px;font-weight:700;color:#64748b;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.02em;">
+                                <label>
                                     <i class="fa fa-folder-tree m-r-xxs text-primary"></i> {_'admin.terms.category' ?? 'Danh mục'}
                                 </label>
-                                {input custom__category class => 'form-control change-to-submit', style => 'width:100%;border-radius:7px;height:34px;border:1px solid #cbd5e1;background:#fff;font-size:12.5px;'}
+                                {input custom__category class => 'form-control change-to-submit'}
                             </div>
 
                             <div>
-                                <label style="display:block;font-size:11px;font-weight:700;color:#64748b;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.02em;">
+                                <label>
                                     <i class="fa fa-eye m-r-xxs text-info"></i> {_'admin.terms.isActive' ?? 'Trạng thái'}
                                 </label>
-                                {input custom__is_active class => 'form-control change-to-submit', style => 'width:100%;border-radius:7px;height:34px;border:1px solid #cbd5e1;background:#fff;font-size:12.5px;'}
+                                {input custom__is_active class => 'form-control change-to-submit'}
                             </div>
 
                             <div>
-                                <label style="display:block;font-size:11px;font-weight:700;color:#64748b;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.02em;">
+                                <label>
                                     <i class="fa fa-percent m-r-xxs text-danger"></i> {_'admin.terms.isAction' ?? 'Khuyến mãi'}
                                 </label>
-                                {input custom__is_action class => 'form-control change-to-submit', style => 'width:100%;border-radius:7px;height:34px;border:1px solid #cbd5e1;background:#fff;font-size:12.5px;'}
+                                {input custom__is_action class => 'form-control change-to-submit'}
                             </div>
 
                             <div>
-                                <label style="display:block;font-size:11px;font-weight:700;color:#64748b;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.02em;">
+                                <label>
                                     <i class="fa fa-tags m-r-xxs" style="color:#0d9488;"></i> {_'admin.terms.labels' ?? 'Tem nhãn'}
                                 </label>
-                                {input custom__labels class => 'form-control change-to-submit', style => 'width:100%;border-radius:7px;height:34px;border:1px solid #cbd5e1;background:#fff;font-size:12.5px;'}
+                                {input custom__labels class => 'form-control change-to-submit'}
                             </div>
                         </div>
                     </div>
@@ -195,8 +146,8 @@
             {/snippet}
 
 
-                <div class="table-responsive dataTables_wrapper m-t-md" style="border:1px solid #e2e8f0;border-radius:10px;background:#fff;padding-bottom:5px;overflow-x:auto;">
-                        <table class="table table-striped table-hover table-compact" style="margin-bottom:0;width:100%;">
+                <div class="mosaic-list-table-wrap dataTables_wrapper m-t-md">
+                        <table class="table table-striped table-hover mosaic-table-compact" style="margin-bottom:0;width:100%;">
                             <thead>
                             <tr>
                                 <th class="w-40 text-center" style="width:40px;min-width:40px;"></th>
@@ -340,7 +291,7 @@
                                     </td>
                                     <td class="actions row-as-link-ignore text-center" style="width:70px;min-width:70px;padding-right:12px;vertical-align:middle;">
                                         <div class="dropdown" style="display:inline-block;">
-                                            <a class="dropdown-toggle btn btn-default" data-toggle="dropdown" href="#" style="border-radius:6px;width:32px;height:30px;padding:0;display:inline-flex;align-items:center;justify-content:center;border:1px solid #cbd5e1;background:#fff;color:#475569;" title="Thao tác">
+                                            <a class="dropdown-toggle btn btn-default mosaic-row-actions-btn" data-toggle="dropdown" href="#" title="Thao tác">
                                                 <i class="fa fa-bars"></i>
                                             </a>
                                             <ul class="dropdown-menu dropdown-menu-right dropdown-list" style="border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.12);padding:6px 0;min-width:180px;">
@@ -421,10 +372,10 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button n:name="submit" class="btn btn-success btn-addon">
+                    <button n:name="submit" class="btn mosaic-topbtn mosaic-topbtn-primary">
                         <i class="fa fa-save"></i> {_admin.buttons.save}
                     </button>
-                    <a href="#" class="btn btn-default btn-addon" data-dismiss="modal">
+                    <a href="#" class="btn btn-default mosaic-topbtn" data-dismiss="modal">
                         <i class="fa fa-times"></i> {_admin.buttons.close}
                     </a>
                 </div>
@@ -547,13 +498,13 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button n:name="submit" class="btn btn-success btn-addon">
+                    <button n:name="submit" class="btn mosaic-topbtn mosaic-topbtn-primary">
                         <i class="fa fa-save"></i> {_admin.buttons.save}
                     </button>
-                    <button n:name="submit_and_edit" class="btn btn-success btn-addon">
+                    <button n:name="submit_and_edit" class="btn mosaic-topbtn mosaic-topbtn-primary">
                         <i class="fa fa-save"></i> {_admin.buttons.saveAndEdit}
                     </button>
-                    <a href="#" class="btn btn-default btn-addon" data-dismiss="modal">
+                    <a href="#" class="btn btn-default mosaic-topbtn" data-dismiss="modal">
                         <i class="fa fa-times"></i> {_admin.buttons.close}
                     </a>
                 </div>
@@ -663,10 +614,10 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button n:name="submit" class="btn btn-success btn-addon">
+                    <button n:name="submit" class="btn mosaic-topbtn mosaic-topbtn-primary">
                         <i class="fa fa-save"></i> {_admin.buttons.save}
                     </button>
-                    <a href="#" class="btn btn-default btn-addon" data-dismiss="modal">
+                    <a href="#" class="btn btn-default mosaic-topbtn" data-dismiss="modal">
                         <i class="fa fa-times"></i> {_admin.buttons.close}
                     </a>
                 </div>
@@ -783,10 +734,10 @@
 
                 </div>
                 <div class="modal-footer">
-                    <button n:name="submit" class="btn btn-success btn-addon">
+                    <button n:name="submit" class="btn mosaic-topbtn mosaic-topbtn-primary">
                         <i class="fa fa-save"></i> {_admin.buttons.save}
                     </button>
-                    <a href="#" class="btn btn-default btn-addon" data-dismiss="modal">
+                    <a href="#" class="btn btn-default mosaic-topbtn" data-dismiss="modal">
                         <i class="fa fa-times"></i> {_admin.buttons.close}
                     </a>
                 </div>
@@ -846,7 +797,7 @@
                     <div n:if="!empty($multiSaleProducts) && count($multiSaleProducts)" class="row">
                         <div class="col-sm-12">
                             <div class="table-responsive dataTables_wrapper">
-                                <table class="table table-striped table-hover table-compact">
+                                <table class="table table-striped table-hover mosaic-table-compact">
                                     <thead>
                                     <tr>
                                         <th class="w-50"></th>
@@ -926,10 +877,10 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button n:name="submit" class="btn btn-success btn-addon">
+                    <button n:name="submit" class="btn mosaic-topbtn mosaic-topbtn-primary">
                         <i class="fa fa-save"></i> {_admin.buttons.save}
                     </button>
-                    <a href="#" class="btn btn-default btn-addon" data-dismiss="modal">
+                    <a href="#" class="btn btn-default mosaic-topbtn" data-dismiss="modal">
                         <i class="fa fa-times"></i> {_admin.buttons.close}
                     </a>
                 </div>
@@ -1032,9 +983,9 @@
                                                         {$it['price'] && $it['price']->price_action ? $it['price']->price_action : ($it['price'] ? $it['price']->price : 0)|price}
                                                     </div>
                                                 </div>
-                                                <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #f1f5f9;padding-top:8px;margin-top:2px;">
-                                                    <span style="font-size:9px;color:#94a3b8;font-weight:600;">{if $it['product']->code_ean}EAN: {$it['product']->code_ean}{else}{$group['name']}{/if}</span>
-                                                    <div style="display:flex;align-items:center;gap:4px;">
+                                                <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #f1f5f9;padding-top:8px;margin-top:2px;gap:6px;">
+                                                    <span style="font-size:9px;color:#94a3b8;font-weight:600;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="{if $it['product']->code_ean}EAN: {$it['product']->code_ean}{else}{$group['name']}{/if}">{if $it['product']->code_ean}EAN: {$it['product']->code_ean}{else}{$group['name']}{/if}</span>
+                                                    <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
                                                         <a n:href="label! $it['product']->id, $group['typeId']" class="ajax-modal btn btn-xs btn-default" data-target="#modal-labelsForm" title="Sửa chi tiết tem" style="padding:2px 6px;font-size:10px;border-radius:4px;">
                                                             <i class="fas fa-pencil text-muted"></i> Sửa
                                                         </a>

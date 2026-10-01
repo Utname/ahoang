@@ -1,0 +1,370 @@
+{block content}
+
+<div class="mosaic-dashboard">
+
+	<!-- 1. WELCOME BANNER (Mosaic Style) -->
+	<div class="mosaic-banner">
+		<div class="mosaic-banner-content">
+			<div class="mosaic-banner-text">
+				<h2>Xin chào, {$adminUser->name}! 👋</h2>
+				<p>Chào mừng bạn trở lại hệ thống quản trị Fikko Market. Dưới đây là tổng quan tình trạng dữ liệu và hoạt động của cửa hàng.</p>
+			</div>
+			<div class="mosaic-banner-actions">
+				<a n:href="Products:edit" class="mosaic-btn mosaic-btn-primary">
+					<i class="fas fa-plus"></i>
+					<span>Thêm sản phẩm</span>
+				</a>
+				<a n:href="ProductLabels:" class="mosaic-btn mosaic-btn-secondary">
+					<i class="fas fa-print"></i>
+					<span>In tem nhãn</span>
+				</a>
+			</div>
+		</div>
+	</div>
+
+	<!-- 2. METRIC SUMMARY CARDS (Mosaic Card01-04) -->
+	<div class="mosaic-metrics-grid">
+		<!-- Card 1: Products -->
+		<div class="mosaic-card mosaic-metric-card">
+			<div class="mosaic-card-header-clean">
+				<div class="mosaic-icon-box bg-indigo">
+					<i class="fas fa-box-open"></i>
+				</div>
+				<span class="mosaic-badge badge-emerald">
+					<i class="fas fa-check-circle"></i> {$stats['activeProducts']} đang bán
+				</span>
+			</div>
+			<div class="mosaic-card-body-clean">
+				<div class="mosaic-metric-title">Tổng số sản phẩm</div>
+				<div class="mosaic-metric-value">{$stats['totalProducts']|number:0,',','.'}</div>
+			</div>
+			<div class="mosaic-card-footer-clean">
+				<a n:href="Products:" class="mosaic-card-link">
+					<span>Quản lý sản phẩm</span>
+					<i class="fas fa-arrow-right"></i>
+				</a>
+			</div>
+		</div>
+
+		<!-- Card 2: Product Labels -->
+		<div class="mosaic-card mosaic-metric-card">
+			<div class="mosaic-card-header-clean">
+				<div class="mosaic-icon-box bg-emerald">
+					<i class="fas fa-tags"></i>
+				</div>
+				<span class="mosaic-badge badge-sky">
+					<i class="fas fa-file-invoice"></i> Mẫu A4/A5
+				</span>
+			</div>
+			<div class="mosaic-card-body-clean">
+				<div class="mosaic-metric-title">Tem nhãn in ấn</div>
+				<div class="mosaic-metric-value">{$stats['totalLabels']|number:0,',','.'}</div>
+			</div>
+			<div class="mosaic-card-footer-clean">
+				<a n:href="ProductLabels:" class="mosaic-card-link">
+					<span>Xem danh sách nhãn</span>
+					<i class="fas fa-arrow-right"></i>
+				</a>
+			</div>
+		</div>
+
+		<!-- Card 3: Categories -->
+		<div class="mosaic-card mosaic-metric-card">
+			<div class="mosaic-card-header-clean">
+				<div class="mosaic-icon-box bg-sky">
+					<i class="fas fa-folder-tree"></i>
+				</div>
+				<span class="mosaic-badge badge-slate">
+					<i class="fas fa-layer-group"></i> Ngành hàng
+				</span>
+			</div>
+			<div class="mosaic-card-body-clean">
+				<div class="mosaic-metric-title">Danh mục sản phẩm</div>
+				<div class="mosaic-metric-value">{$stats['totalCategories']|number:0,',','.'}</div>
+			</div>
+			<div class="mosaic-card-footer-clean">
+				<a n:href="Categories:" class="mosaic-card-link">
+					<span>Cấu trúc danh mục</span>
+					<i class="fas fa-arrow-right"></i>
+				</a>
+			</div>
+		</div>
+
+		<!-- Card 4: Branches & Contacts -->
+		<div class="mosaic-card mosaic-metric-card">
+			<div class="mosaic-card-header-clean">
+				<div class="mosaic-icon-box bg-amber">
+					<i class="fas fa-store"></i>
+				</div>
+				<span class="mosaic-badge badge-amber">
+					<i class="fas fa-envelope"></i> {$stats['totalMessages']} tin nhắn
+				</span>
+			</div>
+			<div class="mosaic-card-body-clean">
+				<div class="mosaic-metric-title">Chi nhánh cửa hàng</div>
+				<div class="mosaic-metric-value">{$stats['totalBranches']|number:0,',','.'}</div>
+			</div>
+			<div class="mosaic-card-footer-clean">
+				<a n:href="Branches:" class="mosaic-card-link">
+					<span>Xem các chi nhánh</span>
+					<i class="fas fa-arrow-right"></i>
+				</a>
+			</div>
+		</div>
+	</div>
+
+	<!-- 3. CHARTS & ANALYTICS ROW -->
+	<div class="mosaic-grid-2col">
+		<!-- Chart 1: Phân bổ ngành hàng (Doughnut Chart) -->
+		<div class="mosaic-card">
+			<div class="mosaic-card-title-row">
+				<div class="mosaic-card-heading">
+					<i class="fas fa-chart-pie text-indigo"></i>
+					<span>Phân bổ sản phẩm theo Danh mục</span>
+				</div>
+				<span class="text-xs text-muted">Top 6 danh mục</span>
+			</div>
+			<div class="mosaic-card-content">
+				<div class="mosaic-chart-container">
+					<canvas id="categoriesChart" height="220"></canvas>
+				</div>
+				<div class="mosaic-category-breakdown" n:if="!empty($topCategories)">
+					<div n:foreach="$topCategories as $cat" class="mosaic-cat-item">
+						<div class="mosaic-cat-info">
+							<span class="mosaic-cat-name">{$cat['name']}</span>
+							<span class="mosaic-cat-count">{$cat['count']} SP</span>
+						</div>
+						<div class="mosaic-progress-bar">
+							{var $pct = ($stats['totalProducts'] > 0) ? round(($cat['count'] / $stats['totalProducts']) * 100) : 0}
+							<div class="mosaic-progress-fill" style="width: {$pct}%;"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Shortcuts & System Health -->
+		<div class="mosaic-card">
+			<div class="mosaic-card-title-row">
+				<div class="mosaic-card-heading">
+					<i class="fas fa-bolt text-amber"></i>
+					<span>Phím tắt thao tác nhanh</span>
+				</div>
+				<span class="mosaic-badge badge-slate">Tiện ích</span>
+			</div>
+			<div class="mosaic-card-content">
+				<div class="mosaic-shortcuts-grid">
+					<a n:href="Products:" class="mosaic-shortcut-item">
+						<div class="mosaic-shortcut-icon bg-indigo">
+							<i class="fas fa-th-list"></i>
+						</div>
+						<div class="mosaic-shortcut-label">Danh sách sản phẩm</div>
+					</a>
+					<a n:href="ProductLabels:" class="mosaic-shortcut-item">
+						<div class="mosaic-shortcut-icon bg-emerald">
+							<i class="fas fa-barcode"></i>
+						</div>
+						<div class="mosaic-shortcut-label">In nhãn mã vạch</div>
+					</a>
+					<a n:href="PrintTemplates:" class="mosaic-shortcut-item">
+						<div class="mosaic-shortcut-icon bg-sky">
+							<i class="fas fa-file-pdf"></i>
+						</div>
+						<div class="mosaic-shortcut-label">Mẫu in tem giá</div>
+					</a>
+					<a n:href="Settings:" class="mosaic-shortcut-item">
+						<div class="mosaic-shortcut-icon bg-slate">
+							<i class="fas fa-sliders"></i>
+						</div>
+						<div class="mosaic-shortcut-label">Cài đặt chung</div>
+					</a>
+					<a n:href="Currencies:" class="mosaic-shortcut-item">
+						<div class="mosaic-shortcut-icon bg-amber">
+							<i class="fas fa-coins"></i>
+						</div>
+						<div class="mosaic-shortcut-label">Bảng tiền tệ</div>
+					</a>
+					<a n:href="AdminUsers:" class="mosaic-shortcut-item">
+						<div class="mosaic-shortcut-icon bg-rose">
+							<i class="fas fa-users-gear"></i>
+						</div>
+						<div class="mosaic-shortcut-label">Tài khoản quản trị</div>
+					</a>
+				</div>
+
+				<!-- System Info InfoBox -->
+				<div class="mosaic-system-box">
+					<div class="mosaic-system-row">
+						<span class="mosaic-system-label"><i class="fas fa-server"></i> Phiên bản PHP:</span>
+						<span class="mosaic-system-val">{$systemInfo['phpVersion']}</span>
+					</div>
+					<div class="mosaic-system-row">
+						<span class="mosaic-system-label"><i class="fas fa-money-bill-wave"></i> Tiền tệ mặc định:</span>
+						<span class="mosaic-system-val font-bold">{$systemInfo['defaultCurrency']}</span>
+					</div>
+					<div class="mosaic-system-row">
+						<span class="mosaic-system-label"><i class="fas fa-clock"></i> Thời gian máy chủ:</span>
+						<span class="mosaic-system-val">{$systemInfo['serverTime']}</span>
+					</div>
+					<div class="mosaic-system-row">
+						<span class="mosaic-system-label"><i class="fas fa-shield-halved"></i> Trạng thái hệ thống:</span>
+						<span class="mosaic-badge badge-emerald"><i class="fas fa-circle-check"></i> Hoạt động tốt</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- 4. RECENT PRODUCTS TABLE (Mosaic Card07 Style) -->
+	<div class="mosaic-card">
+		<div class="mosaic-card-title-row">
+			<div class="mosaic-card-heading">
+				<i class="fas fa-clock-rotate-left text-sky"></i>
+				<span>Sản phẩm cập nhật gần đây</span>
+			</div>
+			<a n:href="Products:" class="mosaic-btn mosaic-btn-outline-sm">
+				<span>Xem tất cả sản phẩm</span>
+				<i class="fas fa-arrow-right"></i>
+			</a>
+		</div>
+
+		<div class="mosaic-table-responsive">
+			<table class="mosaic-table">
+				<thead>
+					<tr>
+						<th style="width: 60px;">ID</th>
+						<th>Tên sản phẩm</th>
+						<th>Mã Code / EAN</th>
+						<th>Trạng thái</th>
+						<th>Ngày tạo</th>
+						<th class="text-right" style="width: 140px;">Hành động</th>
+					</tr>
+				</thead>
+				<tbody>
+					{if !empty($recentProducts)}
+						<tr n:foreach="$recentProducts as $prod">
+							<td class="text-muted font-mono font-bold">#{$prod->id}</td>
+							<td>
+								<div class="mosaic-prod-cell">
+									<div class="mosaic-prod-avatar">
+										<i class="fas fa-box text-muted"></i>
+									</div>
+									<div class="mosaic-prod-meta">
+										<a n:href="Products:edit $prod->id" class="mosaic-prod-name">
+											{$prod->name ?: 'Chưa đặt tên'}
+										</a>
+										<span class="mosaic-prod-sub" n:ifset="$prod->perex">
+											{$prod->perex|truncate:60}
+										</span>
+									</div>
+								</div>
+							</td>
+							<td>
+								{if $prod->code}
+									<span class="mosaic-badge-code"><i class="fas fa-barcode"></i> {$prod->code}</span>
+								{else}
+									<span class="text-muted text-xs">—</span>
+								{/if}
+							</td>
+							<td>
+								{if $prod->is_active}
+									<span class="mosaic-badge badge-emerald">
+										<i class="fas fa-circle-check"></i> Đang bán
+									</span>
+								{else}
+									<span class="mosaic-badge badge-slate">
+										<i class="fas fa-circle-minus"></i> Ẩn
+									</span>
+								{/if}
+							</td>
+							<td class="text-muted text-xs">
+								{if isset($prod->created_at) && $prod->created_at}
+									{$prod->created_at|date:'d/m/Y H:i'}
+								{else}
+									—
+								{/if}
+							</td>
+							<td class="text-right">
+								<div class="mosaic-action-btns">
+									<a n:href="Products:edit $prod->id" class="mosaic-action-btn" title="Chỉnh sửa">
+										<i class="fas fa-pen-to-square"></i>
+									</a>
+									<a n:href="ProductLabels:default search => $prod->code ?: $prod->name" class="mosaic-action-btn action-print" title="In nhãn">
+										<i class="fas fa-print"></i>
+									</a>
+								</div>
+							</td>
+						</tr>
+					{else}
+						<tr>
+							<td colspan="6" class="text-center py-8 text-muted">
+								<i class="fas fa-inbox fa-2x mb-2 block"></i>
+								Chưa có dữ liệu sản phẩm gần đây
+							</td>
+						</tr>
+					{/if}
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+</div>
+
+<!-- Chart initialization -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+	var ctx = document.getElementById('categoriesChart');
+	if (ctx && typeof Chart !== 'undefined') {
+		var catNames = [];
+		var catCounts = [];
+		{foreach $topCategories as $cat}
+			catNames.push({$cat['name']});
+			catCounts.push({$cat['count']});
+		{/foreach}
+
+		if (catNames.length === 0) {
+			catNames = ['Chưa phân loại'];
+			catCounts = [1];
+		}
+
+		new Chart(ctx, {
+			type: 'doughnut',
+			data: {
+				labels: catNames,
+				datasets: [{
+					data: catCounts,
+					backgroundColor: [
+						'#6366f1', // Indigo
+						'#10b981', // Emerald
+						'#0ea5e9', // Sky
+						'#f59e0b', // Amber
+						'#ec4899', // Pink
+						'#8b5cf6', // Violet
+					],
+					borderWidth: 2,
+					borderColor: '#ffffff',
+				}]
+			},
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+				plugins: {
+					legend: {
+						position: 'bottom',
+						labels: {
+							boxWidth: 12,
+							font: {
+								size: 11,
+								family: "'Inter', sans-serif"
+							},
+							padding: 12
+						}
+					}
+				},
+				cutout: '68%'
+			}
+		});
+	}
+});
+</script>
+{/block}

@@ -1,10 +1,10 @@
 {block topButtons}
 
     {if isset($settings->is_vat_payer) && $settings->is_vat_payer}
-        <a n:if="count($filters)" n:href="resetFilters!" class="btn btn-danger btn-addon">
+        <a n:if="count($filters)" n:href="resetFilters!" class="btn btn-default mosaic-topbtn mosaic-topbtn-danger">
             <i class="far fa-times"></i> {_admin.filters.reset}
         </a>
-        <a n:if="$aps->has('create')" n:href="new" class="btn btn-success btn-addon">
+        <a n:if="$aps->has('create')" n:href="new" class="btn mosaic-topbtn mosaic-topbtn-primary">
             <i class="far fa-plus"></i> {_admin.actions.new}
         </a>
     {/if}
@@ -15,7 +15,7 @@
 {block content}
 
     <div class="col-md-12">
-        <div class="panel panel-white">
+        <div class="panel mosaic-list-panel">
             <div class="panel-body">
                 <div class="clearfix m-b-sm">
                     <div class="pull-right">
@@ -27,8 +27,8 @@
                 </div>
                 {control bulkActions}
                 {form filters-form}
-                    <div class="table-responsive dataTables_wrapper">
-                        <table class="table table-striped table-hover">
+                    <div class="mosaic-list-table-wrap dataTables_wrapper">
+                        <table class="table table-striped table-hover mosaic-table-compact">
                             <thead>
                             <tr>
                                 <th class="w-40"></th>
@@ -91,7 +91,7 @@
                                 </td>
                                 <td class="actions actions-small row-as-link-ignore">
                                     <div class="dropdown pull-left">
-                                        <a class="dropdown-toggle btn btn-default" data-toggle="dropdown" href="#">
+                                        <a class="dropdown-toggle btn btn-default mosaic-row-actions-btn" data-toggle="dropdown" href="#">
                                             <i class="fa fa-bars"></i>
                                         </a>
                                         <ul class="dropdown-menu dropdown-menu-right dropdown-list">

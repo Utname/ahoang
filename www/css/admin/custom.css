@@ -2906,7 +2906,10 @@ input, select, textarea, button {
     left: 0 !important;
     bottom: 0 !important;
     overflow-y: auto !important;
-    overflow-x: hidden !important;
+    /* visible, not hidden: hover-menu's flyout sub-menus are deliberately
+       positioned outside this box (left: 100%) — clipping the x-axis hides
+       every flyout submenu no matter what its own display/visibility is. */
+    overflow-x: visible !important;
     z-index: 900 !important;
     scrollbar-width: thin !important;
     scrollbar-color: #334155 transparent !important;
@@ -3037,6 +3040,19 @@ input, select, textarea, button {
     text-decoration: none !important;
     transition: all 0.15s ease !important;
     white-space: nowrap !important;
+}
+
+/* Level 3 (a sub-menu nested inside another sub-menu, e.g. Cai dat >
+   Cai dat co ban > Chung) needs its own, deeper indent -- without this it
+   inherits the same 44px as its level-2 parent, so both levels line up
+   flush and the hierarchy becomes impossible to read. */
+.menu.accordion-menu .sub-menu .sub-menu li a {
+    padding-left: 64px !important;
+    font-size: 11.5px !important;
+}
+
+.menu.accordion-menu .sub-menu .sub-menu {
+    background: rgba(0, 0, 0, 0.35) !important;
 }
 
 .menu.accordion-menu .sub-menu li a:hover,
@@ -3806,4 +3822,462 @@ main.page-content {
         position: relative !important;
         width: auto !important;
     }
+}
+
+/* ============================================================
+   FINAL LAYOUT FIX OVERRIDES (highest priority - must be last)
+   Fixes all conflicts between modern.css, old custom.css phases
+   ============================================================ */
+
+/* 1. Navbar: always 64px fixed top */
+body.page-header-fixed.page-sidebar-fixed .navbar,
+body.page-header-fixed.page-sidebar-fixed .navbar.mosaic-navbar,
+.navbar.mosaic-navbar {
+    height: 64px !important;
+    min-height: 64px !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 999 !important;
+    padding: 0 !important;
+}
+
+/* 2. Logo box: 225px wide, dark, fixed top-left */
+.navbar .logo-box,
+.navbar .mosaic-logo-box,
+.page-header-fixed .navbar .logo-box,
+.page-header-fixed .navbar .mosaic-logo-box {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 225px !important;
+    height: 64px !important;
+    background: #0f172a !important;
+    border-right: 1px solid #1e293b !important;
+    border-bottom: 1px solid #1e293b !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    padding: 0 16px !important;
+    z-index: 1000 !important;
+    box-sizing: border-box !important;
+}
+
+/* 3. Top menu outer: offset 225px from left */
+.navbar .topmenu-outer,
+.navbar .mosaic-topmenu-outer,
+.topmenu-outer.mosaic-topmenu-outer {
+    margin-left: 225px !important;
+    height: 64px !important;
+    background: #ffffff !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    flex: 1 !important;
+}
+
+/* 4. Sidebar: fixed, 225px, dark, below 64px header */
+.page-sidebar,
+.page-sidebar.mosaic-sidebar,
+.mosaic-sidebar,
+.sidebar {
+    position: fixed !important;
+    top: 64px !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    width: 225px !important;
+    background: #0f172a !important;
+    border-right: 1px solid #1e293b !important;
+    z-index: 900 !important;
+    overflow-y: auto !important;
+    /* visible, not hidden: hover-menu's flyout sub-menus are deliberately
+       positioned outside this box (left: 100%) — clipping the x-axis hides
+       every flyout submenu no matter what its own display/visibility is. */
+    overflow-x: visible !important;
+}
+
+/* 5. Page inner: offset from sidebar & header */
+body.page-sidebar-fixed.page-header-fixed .page-inner,
+.page-sidebar-fixed.page-header-fixed .page-inner,
+.page-inner {
+    margin-left: 225px !important;
+    padding-left: 0 !important;
+    padding-top: 64px !important;
+    padding-bottom: 30px !important;
+    background: #f8fafc !important;
+    min-height: 100vh !important;
+    position: relative !important;
+}
+
+/* 6. Page title inside content */
+.page-inner > .page-title,
+.page-inner .page-title {
+    padding: 18px 24px 0 24px !important;
+    margin-bottom: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+}
+
+.page-inner > .page-title h3,
+.page-inner .page-title h3 {
+    font-size: 19px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    margin: 0 !important;
+    letter-spacing: -0.02em !important;
+}
+
+.page-inner .page-title .buttons {
+    float: none !important;
+}
+
+/* 7. Main wrapper */
+.page-inner #main-wrapper {
+    padding: 18px 24px 24px !important;
+}
+
+.page-inner #main-wrapper > .row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+/* 8. Remove old sidebar padding-top from modern.css (was 60px) */
+.page-sidebar-fixed .sidebar,
+.page-sidebar-fixed .page-sidebar {
+    padding-top: 0 !important;
+}
+
+/* 9. Fix page-content / content-wrap background only */
+main.page-content,
+.content-wrap {
+    background: #f8fafc !important;
+}
+
+/* 10. Fix hover-menu / compact-menu sidebar override */
+.hover-menu:not(.page-horizontal-bar) .accordion-menu > li > ul,
+.compact-menu .accordion-menu > li > ul {
+    left: 225px !important;
+    top: 0 !important;
+}
+
+/* 11. Responsive fix */
+@media (max-width: 991px) {
+    .page-inner,
+    body.page-sidebar-fixed.page-header-fixed .page-inner,
+    .page-sidebar-fixed.page-header-fixed .page-inner {
+        margin-left: 0 !important;
+        padding-left: 0 !important;
+    }
+    .page-sidebar,
+    .page-sidebar.mosaic-sidebar {
+        transform: translateX(-225px) !important;
+        transition: transform 0.25s ease !important;
+    }
+    .page-sidebar.visible,
+    .page-sidebar.mosaic-sidebar.visible {
+        transform: translateX(0) !important;
+    }
+    .navbar .logo-box,
+    .navbar .mosaic-logo-box {
+        width: 200px !important;
+    }
+    .navbar .topmenu-outer,
+    .navbar .mosaic-topmenu-outer {
+        margin-left: 0 !important;
+    }
+}
+
+/* ============================================================
+   MOSAIC LIST/TABLE FRAME (shared across admin list pages)
+   Extracted from Products' default.latte, which had the same look
+   built entirely from inline style="" attributes on that one page.
+   These classes give every other module the same look without
+   repeating the inline styles on every template.
+   ============================================================ */
+
+.mosaic-list-panel {
+    border-radius: 10px !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+    overflow: hidden !important;
+    background: #fff !important;
+}
+
+.mosaic-list-panel .panel-body {
+    padding: 10px !important;
+}
+
+/* Filter bar: the gray box holding the search input + filter dropdowns
+   above the table. No border of its own — a search input (or any control
+   inside it) already draws its own border, so a second bordered rounded
+   rectangle wrapping it just reads as "two overlapping boxes" rather than
+   one grouped toolbar. The background tint alone is enough to set this
+   area apart from the table below. */
+.mosaic-filter-bar {
+    background: #f8fafc;
+    padding: 12px 14px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+.mosaic-list-search-box {
+    position: relative;
+    flex: 1;
+    min-width: 280px;
+    max-width: 550px;
+}
+
+.mosaic-list-search-box input.form-control {
+    padding-left: 42px !important;
+    padding-right: 14px !important;
+    height: 38px !important;
+    border-radius: 8px !important;
+    border: 1px solid #cbd5e1 !important;
+    background: #fff !important;
+    font-size: 13px !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+}
+
+.mosaic-list-search-box input.form-control:focus {
+    border-color: #0ea5e9 !important;
+    box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.15) !important;
+}
+
+.mosaic-list-search-box .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 14px;
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* Grid of labeled filter dropdowns (branch/category/status/...) below the
+   search row. */
+.mosaic-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 12px;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 14px;
+    margin-top: 14px;
+}
+
+.mosaic-filter-grid label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.mosaic-filter-grid .form-control {
+    width: 100% !important;
+    border-radius: 7px !important;
+    height: 34px !important;
+    border: 1px solid #cbd5e1 !important;
+    background: #fff !important;
+    font-size: 12.5px !important;
+}
+
+/* Table itself: compact, uppercase header, subtle row hover. Same rules
+   Products had inline, now named so other modules can opt in with
+   class="table table-striped table-hover mosaic-table-compact". */
+.mosaic-list-table-wrap {
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    background: #fff !important;
+    padding-bottom: 5px !important;
+    overflow-x: auto !important;
+}
+
+.mosaic-table-compact > thead > tr > th {
+    background: #f8fafc;
+    color: #475569;
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 10px 8px;
+    vertical-align: middle;
+}
+
+.mosaic-table-compact > tbody > tr > td {
+    padding: 10px 8px;
+    vertical-align: middle;
+    border-top: 1px solid #f1f5f9;
+}
+
+.mosaic-table-compact > tbody > tr:hover {
+    background-color: #f8fafc !important;
+}
+
+.mosaic-table-compact .td-image img {
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    object-fit: cover;
+}
+
+/* The bulk-converted list pages still keep their filter row inside
+   <thead> (<tr class="filters">) rather than the separate styled
+   .mosaic-filter-bar Categories/Products use — this just makes that
+   row look reasonably at home next to the rest of the Mosaic table
+   without needing to restructure every template. */
+.mosaic-table-compact > thead > tr.filters {
+    background: #fff !important;
+}
+
+.mosaic-table-compact > thead > tr.filters > td {
+    border-left: none !important;
+    border-top: 1px solid #e2e8f0 !important;
+    padding: 6px 8px !important;
+}
+
+.mosaic-table-compact > thead > tr.filters input.form-control {
+    height: 32px !important;
+    border-radius: 6px !important;
+    border: 1px solid #cbd5e1 !important;
+    font-size: 12.5px !important;
+}
+
+.mosaic-table-compact > thead > tr.filters .btn {
+    border-radius: 6px !important;
+    border: 1px solid #cbd5e1 !important;
+    background: #fff !important;
+    color: #475569 !important;
+}
+
+/* Per-row "..." actions dropdown button */
+.mosaic-row-actions-btn {
+    border-radius: 6px !important;
+    width: 32px !important;
+    height: 30px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 1px solid #cbd5e1 !important;
+    background: #fff !important;
+    color: #475569 !important;
+}
+
+/* Top-of-page action buttons (New / Reset filters / Back...) */
+.mosaic-topbtn {
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    padding: 7px 14px !important;
+    font-size: 13px !important;
+    border: 1px solid #cbd5e1 !important;
+    background: #fff !important;
+    color: #334155 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+.mosaic-topbtn-primary {
+    border: none !important;
+    background: #2563eb !important;
+    color: #fff !important;
+    font-weight: 700 !important;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3) !important;
+}
+
+.mosaic-topbtn-danger {
+    color: #e11d48 !important;
+    background: #fff1f2 !important;
+    border: 1px solid #fecdd3 !important;
+}
+
+/* ============================================================
+   MOSAIC EDIT/FORM FRAME (edit.latte + formButtons.latte)
+   ============================================================ */
+
+/* Tabs at the top of an edit form (role="tabpanel" > .nav.nav-tabs) */
+.mosaic-list-panel .nav.nav-tabs {
+    border-bottom: 1px solid #e2e8f0 !important;
+    margin-bottom: 18px !important;
+}
+
+.mosaic-list-panel .nav.nav-tabs > li > a {
+    border: none !important;
+    border-bottom: 2px solid transparent !important;
+    border-radius: 0 !important;
+    color: #64748b !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    padding: 10px 16px !important;
+    background: transparent !important;
+    margin-bottom: -1px !important;
+}
+
+.mosaic-list-panel .nav.nav-tabs > li > a:hover {
+    background: #f8fafc !important;
+    color: #334155 !important;
+    border-bottom-color: #cbd5e1 !important;
+}
+
+.mosaic-list-panel .nav.nav-tabs > li.active > a,
+.mosaic-list-panel .nav.nav-tabs > li.active > a:hover,
+.mosaic-list-panel .nav.nav-tabs > li.active > a:focus {
+    color: #4338ca !important;
+    background: transparent !important;
+    border-bottom-color: #6366f1 !important;
+}
+
+/* A pre-existing rule gives every .nav-tabs a gray rounded "pill" look
+   (background/border/border-radius/padding) — fine for a single top-level
+   tab bar, but when a tab's own content has ANOTHER tab bar nested inside
+   it (e.g. ProductLabels' "Popisné štítky" tab containing its own
+   Cenový/Arch 3x6/Arch 3x8 tabs), that inner one got the exact same pill
+   box, stacking two gray rounded boxes and reading as "a card inside a
+   card". Any .nav-tabs living inside .tab-content is by definition a
+   nested/second-level tab bar (top-level tabs are always a sibling
+   *before* .tab-content, never inside it) — so this un-pills just those,
+   back to a plain underline row.               */
+.tab-content .nav-tabs {
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+}
+
+.tab-content .nav-tabs > li > a {
+    border: none !important;
+    border-bottom: 2px solid transparent !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #64748b !important;
+    font-weight: 600 !important;
+    margin-bottom: -1px !important;
+}
+
+.tab-content .nav-tabs > li > a:hover {
+    background: #f8fafc !important;
+    color: #334155 !important;
+    border-bottom-color: #cbd5e1 !important;
+}
+
+.tab-content .nav-tabs > li.active > a,
+.tab-content .nav-tabs > li.active > a:hover,
+.tab-content .nav-tabs > li.active > a:focus {
+    color: #4338ca !important;
+    background: transparent !important;
+    border-bottom-color: #6366f1 !important;
+}
+
+/* Save / Save&close / Back-to-list bar at the bottom of a form */
+.mosaic-form-btns {
+    border-top: 1px solid #e2e8f0 !important;
+    margin-top: 18px !important;
+    padding-top: 16px !important;
 }

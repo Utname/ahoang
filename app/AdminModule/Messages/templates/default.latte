@@ -1,6 +1,6 @@
 {block topButtons}
 
-    <a n:if="count($filters)" n:href="resetFilters!" class="btn btn-danger btn-addon">
+    <a n:if="count($filters)" n:href="resetFilters!" class="btn btn-default mosaic-topbtn mosaic-topbtn-danger">
         <i class="far fa-times"></i> {_admin.filters.reset}
     </a>
 
@@ -10,18 +10,12 @@
 {block content}
 
     <div class="col-md-12">
-        <div class="panel panel-white">
+        <div class="panel mosaic-list-panel">
             <div class="panel-body">
                 {form filters-form}
 
-                    <div class="clearfix m-b-sm">
-                        <div class="pull-right">
-
-                        </div>
-                    </div>
-
-                    <div class="table-responsive dataTables_wrapper">
-                        <table class="table table-striped table-hover">
+                    <div class="mosaic-list-table-wrap dataTables_wrapper">
+                        <table class="table table-striped table-hover mosaic-table-compact">
                             <thead>
                             <tr>
                                 <th class="w-150">
@@ -70,10 +64,10 @@
                                     {$item->email_to}
                                 </td>
                                 <td class="actions-small text-center row-as-link-ignore">
-                                    <a n:href="mailingQueueDetail! $item->id" class="btn btn-default row-as-link-target ajax-modal" data-target="#modal-mailingQueueDetail">
+                                    <a n:href="mailingQueueDetail! $item->id" class="btn btn-default mosaic-row-actions-btn row-as-link-target ajax-modal" data-target="#modal-mailingQueueDetail">
                                         <i class="far fa-search"></i>
                                     </a>
-                                    <a n:href="mailingQueueReply! $item->id" n:class="'btn ajax-modal pull-right', $item->is_reply ? 'btn-success' : 'btn-default'" data-target="#modal-mailingQueueReply">
+                                    <a n:href="mailingQueueReply! $item->id" n:class="'btn mosaic-row-actions-btn ajax-modal m-l-xxs', $item->is_reply ? 'btn-success' : 'btn-default'" data-target="#modal-mailingQueueReply">
                                         <i class="far fa-reply"></i>
                                     </a>
                                 </td>

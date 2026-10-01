@@ -1,7 +1,7 @@
 {block content}
 
 <div class="col-md-6">
-	<div class="panel panel-white">
+	<div class="panel mosaic-list-panel">
 		{form editAccountForm}
 			<div class="panel-heading">
 				<h3 class="panel-title">{_admin.account.title}</h3>
@@ -18,7 +18,7 @@
 							{input email class => 'form-control'}
 						</div>
 						<div class="form-group-btns b-t p-v-sm clearfix">
-							<button n:name="submit" class="btn btn-success btn-addon m-r-xs">
+							<button n:name="submit" class="btn mosaic-topbtn mosaic-topbtn-primary m-r-xs">
 								<i class="far fa-check"></i> {_admin.account.button}
 							</button>
 						</div>
@@ -30,7 +30,7 @@
 </div>
 
 <div class="col-md-6">
-	<div class="panel panel-white">
+	<div class="panel mosaic-list-panel">
 		{form editPasswordForm}
 			<div class="panel-heading">
 				<h3 class="panel-title">{_admin.changePassword.title}</h3>
@@ -51,7 +51,7 @@
 							{input new_password_verify class => 'form-control'}
 						</div>
 						<div class="form-group-btns b-t p-v-sm clearfix">
-							<button n:name="submit" class="btn btn-success btn-addon m-r-xs">
+							<button n:name="submit" class="btn mosaic-topbtn mosaic-topbtn-primary m-r-xs">
 								<i class="far fa-check"></i> {_admin.changePassword.button}
 							</button>
 						</div>
