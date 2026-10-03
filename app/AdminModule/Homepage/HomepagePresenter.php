@@ -25,41 +25,45 @@ class HomepagePresenter extends BasePresenter
 		$activeProducts = 0;
 		$inactiveProducts = 0;
 		try {
-			$totalProducts = $this->database->table('products')->count();
+			// count('*') forces a real SQL COUNT(*); a bare count() makes
+			// Nette fetch every row (all columns) into memory just to count
+			// the resulting PHP array, which exhausts memory_limit on large
+			// tables.
+			$totalProducts = $this->database->table('products')->count('*');
 			// is_active is per-language (products_mld), not a column on products
 			// itself, hence the join + current-content-language filter here.
 			$activeProducts = $this->database->table('products_mld')
 				->where('languages_id', $GLOBALS['lang'])
 				->where('is_active', 1)
-				->count();
+				->count('*');
 			$inactiveProducts = $totalProducts - $activeProducts;
 		} catch (\Exception $e) {}
 
 		$totalCategories = 0;
 		try {
-			$totalCategories = $this->database->table('categories')->count();
+			$totalCategories = $this->database->table('categories')->count('*');
 		} catch (\Exception $e) {}
 
 		$totalLabels = 0;
 		try {
-			$totalLabels = $this->database->table('product_labels')->count();
+			$totalLabels = $this->database->table('product_labels')->count('*');
 		} catch (\Exception $e) {}
 
 		$totalBranches = 0;
 		try {
-			$totalBranches = $this->database->table('branches')->count();
+			$totalBranches = $this->database->table('branches')->count('*');
 		} catch (\Exception $e) {}
 
 		$totalMessages = 0;
 		try {
 			// The admin's "Messages" module (MessagesPresenter) is backed by
 			// MailingQueueRepository — there's no separate `messages` table.
-			$totalMessages = $this->database->table('mailing_queue')->count();
+			$totalMessages = $this->database->table('mailing_queue')->count('*');
 		} catch (\Exception $e) {}
 
 		$totalNewsletterEmails = 0;
 		try {
-			$totalNewsletterEmails = $this->database->table('newsletter_emails')->count();
+			$totalNewsletterEmails = $this->database->table('newsletter_emails')->count('*');
 		} catch (\Exception $e) {}
 
 		$this->template->stats = [
@@ -104,7 +108,7 @@ class HomepagePresenter extends BasePresenter
 				try {
 					$count = $this->database->table('products_categories_rel')
 						->where('categories_id', $cat->id)
-						->count();
+						->count('*');
 				} catch (\Exception $e) {}
 				$topCategories[] = [
 					'id' => $cat->id,

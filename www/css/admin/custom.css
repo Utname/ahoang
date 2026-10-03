@@ -4009,6 +4009,26 @@ main.page-content,
            at the toggle button when this was 0. */
         margin-left: 64px !important;
     }
+
+    /* The header's right-hand cluster (store-preview link, 2 language
+       dropdowns with full text labels, user menu) needs ~378px and never
+       shrank — confirmed via Playwright that it overflowed the viewport
+       by ~170px at 438px width, forcing the whole page to scroll
+       horizontally even though the sidebar toggle itself worked fine.
+       Hiding the least essential piece and shrinking the two language
+       dropdowns to icon-only brings the whole header under ~215px. */
+    .mosaic-search-box {
+        display: none !important;
+    }
+    .mosaic-nav-icon-btn {
+        display: none !important;
+    }
+    .mosaic-header-right .mosaic-lang-current {
+        display: none !important;
+    }
+    .mosaic-header-right .mosaic-lang-btn {
+        padding: 8px !important;
+    }
 }
 
 /* ============================================================
@@ -4176,7 +4196,17 @@ main.page-content,
     color: #475569 !important;
 }
 
-/* Per-row "..." actions dropdown button */
+/* Per-row "..." actions dropdown button.
+   float:none is required: the global ".btn { float: left }" rule
+   (top of this file) blockifies this inline-flex display per the CSS
+   spec (a floated box is always blockified), which made two adjacent
+   action buttons stack as vertical floats instead of sitting side by
+   side whenever the auto-layout table squeezed their column even a
+   few px below what both buttons need — confirmed via Playwright: the
+   two buttons measured at the same x, 26px apart in y. The sibling
+   rule below restores a visible gap between them independent of the
+   ".actions-small .btn { margin: 0 }" rule elsewhere in this file,
+   which zeroes out spacing from utility classes like m-l-xxs. */
 .mosaic-row-actions-btn {
     border-radius: 6px !important;
     width: 32px !important;
@@ -4188,6 +4218,20 @@ main.page-content,
     border: 1px solid #cbd5e1 !important;
     background: #fff !important;
     color: #475569 !important;
+    float: none !important;
+}
+
+.mosaic-row-actions-btn + .mosaic-row-actions-btn {
+    margin-left: 6px !important;
+}
+
+/* Prevents table-layout:auto from compressing the actions column
+   below what its buttons need when a sibling column (e.g. a long
+   email address) wants more room — the column's minimum content
+   width must include this cell's unbreakable content for the
+   browser's auto-layout algorithm to respect it. */
+.mosaic-table-compact td.actions-small {
+    white-space: nowrap !important;
 }
 
 /* Top-of-page action buttons (New / Reset filters / Back...) */
@@ -4319,10 +4363,37 @@ body.mosaic-sidebar-collapsed .sidebar {
     width: 64px !important;
 }
 
+/* .menu.accordion-menu has its own hardcoded "width: 225px !important"
+   (several places in this file, unrelated to collapse state) that the
+   rule above never touches — collapsing only the outer .sidebar/
+   .page-sidebar wrapper left the <ul> (and every <a> inside it, each
+   width:100% of that 225px) still 225px wide internally, just visually
+   clipped to 64px. Centering an icon inside a 225px-wide flex item
+   that's 64px visible centers it relative to the hidden 225px, not the
+   64px window into it — confirmed via Playwright: <a> width stayed 225
+   after collapsing, and the icon's center landed at different offsets
+   depending on which "width: 225px" rule happened to win for that
+   particular <li> (top-level vs plain). Forcing the inner width to
+   match is what actually makes every icon centered on the same column. */
+body.mosaic-sidebar-collapsed .menu.accordion-menu,
+body.mosaic-sidebar-collapsed .page-sidebar-inner {
+    width: 64px !important;
+}
+
 body.mosaic-sidebar-collapsed .navbar .logo-box,
 body.mosaic-sidebar-collapsed .navbar .mosaic-logo-box {
     width: 64px !important;
     padding: 0 !important;
+    justify-content: center !important;
+}
+
+/* Centering .logo-box itself does nothing visible: its only child,
+   .mosaic-logo-link, stretches to fill it and never centers its OWN
+   children — the badge just sits flush left inside that inner link
+   (justify-content: normal), unaffected by the parent's centering.
+   Confirmed via Playwright: logo-box centerX was 32 (correct) but the
+   badge's was 17, same flush-left offset as the un-fixed menu icons. */
+body.mosaic-sidebar-collapsed .mosaic-logo-link {
     justify-content: center !important;
 }
 
@@ -4342,19 +4413,295 @@ body.mosaic-sidebar-collapsed.page-sidebar-fixed.page-header-fixed .page-inner {
 }
 
 /* Hide the text label and expand-arrow, keep only the icon, and
-   center it now that there's no label next to it to align with. */
-body.mosaic-sidebar-collapsed .menu.accordion-menu li > a > p,
+   center it now that there's no label next to it to align with.
+   The extra ".compact-menu" on the body is required: modern.css has
+   ".compact-menu:not(.page-horizontal-bar) .menu.accordion-menu > li
+   > a > p { display: inline !important; }" at 4 classes of
+   specificity — our body selector alone was only 3 classes, so that
+   legacy rule won despite also using !important and us loading later.
+   Confirmed via Playwright: label's computed display stayed "block"
+   and it visually overflowed past the collapsed 64px sidebar into the
+   page content. body already always carries .compact-menu (see
+   @layout.latte), so this costs nothing semantically. */
+body.mosaic-sidebar-collapsed.compact-menu .menu.accordion-menu li > a > p,
 body.mosaic-sidebar-collapsed .menu.accordion-menu li > a > span.arrow {
     display: none !important;
 }
 
-body.mosaic-sidebar-collapsed .menu.accordion-menu > li.top-level > a {
+/* ".top-level" only gets added to an <li> that has a submenu
+   (MenuGenerator::generate() — $topLi->setAttribute('class',
+   'droplink top-level') only runs inside the "if (!empty($itemsLvl2))"
+   branch); a plain link with no submenu renders as a bare <li> with no
+   class at all. Scoping this to "li.top-level" left every item without
+   a submenu off-center relative to the ones with one — confirmed from
+   the user's screenshot showing icons not lining up vertically. */
+body.mosaic-sidebar-collapsed .menu.accordion-menu > li > a {
     justify-content: center !important;
     padding-left: 0 !important;
     padding-right: 0 !important;
+}
+
+/* A droplink item (one with a submenu, e.g. Obsah/Nastavení) has a
+   second, separate expand-chevron: this CSS-generated ::after (not the
+   <span class="arrow"> hidden above) with "margin-left: auto", which is
+   how it's pushed to the far right in expanded mode without needing
+   justify-content: space-between. Left alone, that auto margin keeps
+   claiming the sidebar's spare width even once the arrow's own span is
+   hidden, so justify-content: center above only ever centered the icon
+   relative to the *remaining* space next to this invisible flex item —
+   which is why droplink icons sat flush left while every plain link's
+   icon centered correctly. Confirmed via Playwright: icon x was 0 for
+   a .droplink item and 17 for a plain one in an identical 64px <a>. */
+body.mosaic-sidebar-collapsed .menu.accordion-menu > li.droplink > a::after {
+    display: none !important;
 }
 
 /* Collapsed + hover-menu together: the flyout already escapes via
    JS-positioned position:fixed (see modern.js), so collapsing the
    sidebar to icon width doesn't break it — it just makes every
    top-level item behave like the flyout-only items already did. */
+
+/* ============================================================
+   MOSAIC LOGIN PAGE (sign-in / forgot-password)
+   Markup lives in app/AdminModule/@login.latte, which already uses
+   these mosaic-login-* classes — but no CSS for them existed, so the
+   page rendered as plain unstyled Bootstrap (no card, no branding,
+   default green button) despite the template looking "done".
+   ============================================================ */
+body.mosaic-login-page {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #312e81 100%) !important;
+    min-height: 100vh !important;
+}
+
+/* Must beat the global ".content-wrap, main.page-content { background:
+   #f8fafc }" rule — matched via the extra body.mosaic-login-page
+   ancestor so the gradient above shows through instead of flat gray. */
+body.mosaic-login-page main.page-content {
+    background: transparent !important;
+    width: 100% !important;
+    min-height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    float: none !important;
+}
+
+.mosaic-login-lang {
+    position: fixed !important;
+    top: 20px !important;
+    right: 24px !important;
+    z-index: 20 !important;
+}
+
+.mosaic-login-lang-btn {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 8px 14px !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    border-radius: 8px !important;
+    color: #e2e8f0 !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+    backdrop-filter: blur(8px) !important;
+}
+.mosaic-login-lang-btn:hover {
+    background: rgba(255, 255, 255, 0.16) !important;
+    color: #ffffff !important;
+    text-decoration: none !important;
+}
+.mosaic-login-lang-btn .mosaic-arrow-icon {
+    font-size: 10px !important;
+    opacity: 0.7 !important;
+}
+
+.mosaic-dropdown-menu {
+    margin-top: 8px !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18) !important;
+    padding: 6px !important;
+    min-width: 170px !important;
+}
+.mosaic-dropdown-menu > li > a {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 8px 10px !important;
+    border-radius: 6px !important;
+    color: #334155 !important;
+    font-size: 13px !important;
+}
+.mosaic-dropdown-menu > li > a:hover,
+.mosaic-dropdown-menu > li > a.active {
+    background: #eef2ff !important;
+    color: #4338ca !important;
+}
+.mosaic-dropdown-menu > li > a.active {
+    font-weight: 600 !important;
+}
+.mosaic-lang-code {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 22px !important;
+    height: 22px !important;
+    border-radius: 4px !important;
+    background: #eef2ff !important;
+    color: #6366f1 !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+}
+.mosaic-active-check {
+    margin-left: auto !important;
+    color: #6366f1 !important;
+    font-size: 11px !important;
+}
+
+.mosaic-login-container {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 100vh !important;
+    padding: 40px 20px !important;
+}
+
+.mosaic-login-card {
+    width: 100% !important;
+    max-width: 420px !important;
+    background: #ffffff !important;
+    border-radius: 16px !important;
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.35) !important;
+    padding: 36px 34px 28px !important;
+}
+
+.mosaic-login-brand {
+    text-align: center !important;
+    margin-bottom: 26px !important;
+}
+
+.mosaic-login-logo-badge {
+    width: 56px !important;
+    height: 56px !important;
+    margin: 0 auto 14px !important;
+    border-radius: 14px !important;
+    background: linear-gradient(135deg, #6366f1, #3b82f6) !important;
+    color: #ffffff !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 22px !important;
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4) !important;
+}
+
+.mosaic-login-title {
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    margin: 0 0 4px 0 !important;
+}
+
+.mosaic-login-subtitle {
+    display: block !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.1em !important;
+    color: #94a3b8 !important;
+    text-transform: uppercase !important;
+}
+
+.mosaic-login-content p.text-center {
+    color: #64748b !important;
+    font-size: 13.5px !important;
+    margin-bottom: 20px !important;
+}
+
+.mosaic-login-content .form-group {
+    margin-bottom: 16px !important;
+}
+
+.mosaic-login-content .form-group label {
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    color: #334155 !important;
+    margin-bottom: 6px !important;
+}
+
+.mosaic-login-content .form-control {
+    height: 44px !important;
+    width: 100% !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    padding: 10px 14px !important;
+    font-size: 14px !important;
+    background: #f8fafc !important;
+    box-shadow: none !important;
+    transition: all 0.15s ease !important;
+}
+.mosaic-login-content .form-control:focus {
+    border-color: #6366f1 !important;
+    background: #ffffff !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
+    outline: none !important;
+}
+
+/* The submit input/button keeps Bootstrap's .btn-success class (see
+   in.latte / forgotPassword.latte) — restyled here rather than
+   renamed so the form's existing markup didn't need touching. Needs
+   float:none to beat the global ".btn { float: left }" rule. */
+.mosaic-login-content .btn-success {
+    width: 100% !important;
+    height: 46px !important;
+    margin: 6px 0 0 !important;
+    float: none !important;
+    background: linear-gradient(135deg, #6366f1, #4f46e5) !important;
+    border: none !important;
+    border-radius: 10px !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    letter-spacing: 0.01em !important;
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.35) !important;
+    transition: all 0.15s ease !important;
+}
+.mosaic-login-content .btn-success:hover {
+    background: linear-gradient(135deg, #4f46e5, #4338ca) !important;
+    color: #ffffff !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 10px 24px rgba(79, 70, 229, 0.4) !important;
+}
+
+.mosaic-login-content a.display-block {
+    display: block !important;
+    margin-top: 18px !important;
+    color: #6366f1 !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+}
+.mosaic-login-content a.display-block:hover {
+    color: #4338ca !important;
+    text-decoration: underline !important;
+}
+
+.mosaic-login-footer {
+    text-align: center !important;
+    margin-top: 22px !important;
+}
+.mosaic-login-footer p {
+    color: #94a3b8 !important;
+    font-size: 11.5px !important;
+    margin: 0 !important;
+}
+
+@media (max-width: 480px) {
+    .mosaic-login-card {
+        padding: 28px 22px 22px !important;
+    }
+    .mosaic-login-lang {
+        top: 14px !important;
+        right: 14px !important;
+    }
+}

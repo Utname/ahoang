@@ -1,6 +1,12 @@
 {extends none}
 
-{var $antiCache = date('YmdH').'-01'}
+{* See @layout.latte for why this is filemtime()-based, not hour-based. *}
+{var $antiCache = max(
+	@filemtime(WWW_DIR.'/css/admin/custom.css') ?: 0,
+	@filemtime(WWW_DIR.'/js/admin/custom.js') ?: 0,
+	@filemtime(WWW_DIR.'/css/admin/modern.css') ?: 0,
+	@filemtime(WWW_DIR.'/js/admin/modern.js') ?: 0
+) ?: date('YmdH')}
 
 <!DOCTYPE html>
 
@@ -36,7 +42,7 @@
 	<link href="/plugins/datatables/css/jquery.datatables.min.css" rel="stylesheet" type="text/css">
 	<link href="/plugins/fontawesome-iconpicker/css/fontawesome-iconpicker.min.css" rel="stylesheet" type="text/css"/>
 
-	<link href="/css/admin/modern.css" rel="stylesheet" type="text/css"/>
+	<link href="/css/admin/modern.css?v={$antiCache}" rel="stylesheet" type="text/css"/>
 	<link href="/css/admin/themes/white.css" class="theme-color" rel="stylesheet" type="text/css"/>
 	<link href="/css/admin/alertify.core.css" rel="stylesheet" type="text/css"/>
 	<link href="/css/admin/alertify.default.css" rel="stylesheet" type="text/css"/>
@@ -118,7 +124,7 @@
 <script src="/js/admin/alertify.js"></script>
 <script src="/js/admin/live-form-validation.js"></script>
 <script src="/plugins/fontawesome-iconpicker/js/fontawesome-iconpicker.min.js"></script>
-<script src="/js/admin/modern.js"></script>
+<script src="/js/admin/modern.js?v={$antiCache}"></script>
 <script src="/js/admin/custom.js?v={$antiCache}"></script>
 
 {if $GLOBALS['container']->isDevMode()}

@@ -14,43 +14,66 @@ $(document).ready(function () {
         $(this).closest(".panel").children('.panel-body').slideToggle('fast');
     });
 
-    // Push Menu (mobile off-canvas slide-in only — see breakpoint note below)
+    // Both handlers below must agree on the same breakpoint as the CSS
+    // that actually hides the sidebar off-canvas
+    // (www/css/admin/custom.css "@media (max-width: 991px)" — .page-sidebar
+    // { transform: translateX(-225px) }, revealed only via .visible). Using
+    // a different number here (767 was tried first, matching an old
+    // Bootstrap convention) opens a dead zone between the two breakpoints:
+    // confirmed via Playwright at 820-991px widths that clicking the
+    // toggle there silently did nothing, because JS ran the desktop
+    // collapse handler (adds mosaic-sidebar-collapsed, sets width:64px)
+    // while the CSS still forced the sidebar off-canvas at translateX(-225px)
+    // regardless — the collapse class has no visible effect there, and if
+    // the sidebar had been opened (.visible) at a wider window and then
+    // resized into this range, there was no way left to close it either.
+    var MOBILE_BREAKPOINT = 991;
+
+    // Push Menu (mobile off-canvas slide-in only — see breakpoint note above).
+    // Does NOT add/remove .page-inner's "sidebar-visible" class: that class
+    // is the base theme's own legacy off-canvas mechanism, which PUSHES the
+    // content area sideways via "transform: translate3d(160px, 0, 0)"
+    // (modern.css, @media max-width: 767px). Our Mosaic sidebar is an
+    // overlay (it sits on top of the content via z-index, the content never
+    // moves), so that push transform was pure extra width with nothing to
+    // show for it — confirmed via Playwright that opening the sidebar added
+    // exactly 160px of horizontal scroll (document scrollWidth 438 -> 598 at
+    // a 438px viewport) purely from this leftover class, even after the
+    // page itself had zero overflow with the sidebar closed.
     $('.push-sidebar').click(function () {
-        if (window.innerWidth > 767) {
+        if (window.innerWidth > MOBILE_BREAKPOINT) {
             return;
         }
         var hidden = $('.sidebar');
 
         if (hidden.hasClass('visible')) {
             hidden.removeClass('visible');
-            $('.page-inner').removeClass('sidebar-visible');
         }
         else {
             hidden.addClass('visible');
-            $('.page-inner').addClass('sidebar-visible');
         }
     });
 
     // Desktop collapse/expand ("Thu gọn / Mở rộng Menu" button). The
     // .push-sidebar handler above only toggles a `visible` class that CSS
-    // only reacts to below the 767px mobile breakpoint — on a normal
-    // desktop width it does nothing, which is why this button looked dead.
-    // This toggles a separate body class the Mosaic CSS reacts to, and
-    // remembers the choice across reloads.
+    // only reacts to at/below the breakpoint — above it, it does nothing,
+    // which is why this button looked dead. This toggles a separate body
+    // class the Mosaic CSS reacts to, and remembers the choice across
+    // reloads.
     //
     // The toggle <button> in @layout.latte carries BOTH the "push-sidebar"
     // and "mosaic-sidebar-toggle" classes on the same element, so jQuery
-    // binds and fires BOTH handlers on every click. Below 767px that used
-    // to also add `mosaic-sidebar-collapsed` (forcing the sidebar to a
-    // permanent 64px icon rail) at the same time as `visible` (the intended
-    // full-width overlay), producing an icon-only rail instead of the
-    // overlay. Each handler now only acts on its own side of the 767px
+    // binds and fires BOTH handlers on every click. At/below the breakpoint
+    // that used to also add `mosaic-sidebar-collapsed` (forcing the sidebar
+    // to a permanent 64px icon rail) at the same time as `visible` (the
+    // intended full-width overlay), producing an icon-only rail instead of
+    // the overlay. Each handler now only acts on its own side of the
     // breakpoint so only one behavior applies at a time.
-    if (window.innerWidth > 767 && localStorage.getItem('mosaicSidebarCollapsed') === '1') {
+    if (window.innerWidth > MOBILE_BREAKPOINT && localStorage.getItem('mosaicSidebarCollapsed') === '1') {
         $('body').addClass('mosaic-sidebar-collapsed');
     }
     $('.mosaic-sidebar-toggle').click(function () {
-        if (window.innerWidth <= 767) {
+        if (window.innerWidth <= MOBILE_BREAKPOINT) {
             return;
         }
         var collapsed = $('body').toggleClass('mosaic-sidebar-collapsed').hasClass('mosaic-sidebar-collapsed');
