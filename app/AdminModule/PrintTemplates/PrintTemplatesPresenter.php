@@ -106,8 +106,47 @@ class PrintTemplatesPresenter extends BaseModulePresenter
 		}
 		unset($values['import_html_file']);
 
+		if (!empty($values['is_default']) && !empty($values['product_label_type_id'])) {
+			$variant = $values['variant'] ?? \PrintTemplatesEntity::VARIANT_ALWAYS;
+			$this->ensureSingleDefault((int)$values['product_label_type_id'], (string)$variant);
+		}
+
 		return parent::processCreateForm($values);
 	}
+
+
+	/**
+	 * @param \BaseEntity $entity
+	 * @param array $values
+	 * @return \BaseEntity
+	 */
+	protected function processEditForm(\BaseEntity $entity, array $values): \BaseEntity
+	{
+		if (!empty($values['is_default']) && !empty($values['product_label_type_id'])) {
+			$variant = $values['variant'] ?? $entity->getValue('variant') ?? \PrintTemplatesEntity::VARIANT_ALWAYS;
+			$this->ensureSingleDefault((int)$values['product_label_type_id'], (string)$variant, (int)$entity->id);
+		}
+
+		return parent::processEditForm($entity, $values);
+	}
+
+
+	/**
+	 * Ensure only one template is set as default for a given label type and variant
+	 */
+	private function ensureSingleDefault(int $labelTypeId, string $variant, ?int $excludeId = NULL): void
+	{
+		$query = $this->repository->findAll()
+			->where('product_label_type_id', $labelTypeId)
+			->where('variant', $variant);
+
+		if ($excludeId !== NULL) {
+			$query->where('id != ?', $excludeId);
+		}
+
+		$query->update(['is_default' => FALSE]);
+	}
+
 
 
 	/**

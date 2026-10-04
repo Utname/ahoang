@@ -382,8 +382,17 @@ trait ProductLabelsTrait
 	 */
 	public function getNewA4ProductIds(): array
 	{
-		$ids = $this->session->newA4TemplateProducts;
-		return is_array($ids) ? array_map('intval', array_keys(array_filter($ids))) : [];
+		$dbIds = [];
+		if (in_array('use_new_template', $this->repository->getColumnNames(), TRUE)) {
+			$dbIds = array_map('intval', array_keys($this->repository->findAll()
+				->where('use_new_template', 1)
+				->fetchPairs('id', 'id')));
+		}
+
+		$sessionIds = $this->session->newA4TemplateProducts;
+		$sessionIds = is_array($sessionIds) ? array_map('intval', array_keys(array_filter($sessionIds))) : [];
+
+		return array_values(array_unique(array_merge($dbIds, $sessionIds)));
 	}
 
 
@@ -394,6 +403,12 @@ trait ProductLabelsTrait
 	 */
 	public function handleToggleNewA4Template(int $productsId, bool $enabled = FALSE): void
 	{
+		if (in_array('use_new_template', $this->repository->getColumnNames(), TRUE)) {
+			$this->repository->findAll()
+				->where('id', $productsId)
+				->update(['use_new_template' => $enabled ? 1 : 0]);
+		}
+
 		$ids = $this->session->newA4TemplateProducts;
 		$ids = is_array($ids) ? $ids : [];
 		if ($enabled) {

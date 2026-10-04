@@ -516,7 +516,7 @@ terms:
 	plDownloadAllTip: 'Tải xuống tất cả tem đã chọn của sản phẩm này'
 	plNoQtyAll: 'Chưa chọn số lượng tem nào cho sản phẩm này'
 	plNewTemplate: 'Mẫu mới'
-	plNewTemplateHint: 'Tick: in A4 bằng mẫu mới. Không tick: in A4 bằng mẫu cũ (TCPDF)'
+	plNewTemplateHint: 'Tick: in nhãn bằng mẫu mới (Dompdf HTML). Không tick: in nhãn bằng mẫu cũ (TCPDF)'
 	printTemplateWidthMm: 'Šířka (mm)'
 	printTemplateHeightMm: 'Výška (mm)'
 	printTemplateVariant: 'Varianta'

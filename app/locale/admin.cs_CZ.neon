@@ -516,7 +516,7 @@ terms:
 	plDownloadAllTip: 'Stáhnout všechny vybrané štítky tohoto produktu'
 	plNoQtyAll: 'Pro tento produkt není zvolen žádný počet štítků'
 	plNewTemplate: 'Nová šablona'
-	plNewTemplateHint: 'Zaškrtnuto: A4 se tiskne novou šablonou. Nezaškrtnuto: starou šablonou (TCPDF)'
+	plNewTemplateHint: 'Zaškrtnuto: tisk všemi novými šablonami (Dompdf HTML). Nezaškrtnuto: starými šablonami (TCPDF)'
 	printTemplateWidthMm: 'Šířka (mm)'
 	printTemplateHeightMm: 'Výška (mm)'
 	printTemplateVariant: 'Varianta'

@@ -137,8 +137,7 @@ class ProductLabelsService
 			foreach ($itemsBuffer[$templateTypeId]['items'] as $labelItems) {
 				$label = $labelItems[0] ?? NULL;
 				$product = $label?->getProduct();
-				$useTemplate = $label && $product
-					&& ($templateTypeId !== ProductLabelsEntity::TYPE_A4 || in_array((int)$product->id, $newA4ProductIds, TRUE));
+				$useTemplate = $label && $product && in_array((int)$product->id, $newA4ProductIds, TRUE);
 				$template = $useTemplate
 					? $this->printTemplatesService->findTemplateForProductLabel($label, $product, $branchesId)
 					: NULL;
