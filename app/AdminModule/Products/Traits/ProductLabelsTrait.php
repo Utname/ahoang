@@ -54,12 +54,17 @@ trait ProductLabelsTrait
 			->addCondition(Form::FILLED, TRUE)
 			->addRule(Form::INTEGER);
 		$form->addSelect('price_text', 'admin.terms.labelPriceText', $this->global['productLabelPriceTypes']);
+		$form->addCheckbox('hide_validity', NULL);
+		$form->addCheckbox('hide_ingredients', NULL);
 		$form->addText('note_1', 'admin.terms.note1');
 		$form->addText('note_2', 'admin.terms.note2');
 		$form->addText('note_3', 'admin.terms.note3');
 
 		$form->addSelect('default_units_id', NULL, \ProductsEntity::UNITS)->setTranslator(NULL)->setPrompt('-');
-		$form->addText('default_units_weight', 'admin.terms.defaultPriceWeight');
+		$form->addText('default_units_weight', 'admin.terms.defaultPriceWeight')
+			->setNullable()
+			->addCondition(Form::FILLED, TRUE)
+			->addRule(Form::FLOAT);
 
 		$form->addSubmit('submit', 'admin.buttons.save');
 
@@ -80,6 +85,15 @@ trait ProductLabelsTrait
 		$values = $this->getEditFormValues($form, $this->getAction());
 		$values['datetime_printed'] = NULL;
 		$values['admin_users_id'] = $this->adminUser->id;
+		if (isset($values['default_units_weight']) && $values['default_units_weight'] === '') {
+			$values['default_units_weight'] = NULL;
+		}
+		if (isset($values['default_units_id']) && $values['default_units_id'] === '') {
+			$values['default_units_id'] = NULL;
+		}
+		if (isset($values['origin_countries_id']) && $values['origin_countries_id'] === '') {
+			$values['origin_countries_id'] = NULL;
+		}
 		if ($entity = $this->productLabelsRepo->findEntityBy([
 			'products_id' => $values['products_id'],
 			'branches_id' => $values['branches_id'],
@@ -130,6 +144,8 @@ trait ProductLabelsTrait
 				'note_1' => $productLabel->label_note_1,
 				'note_2' => $productLabel->label_note_2,
 				'note_3' => $productLabel->label_note_3,
+				'hide_validity' => 0,
+				'hide_ingredients' => 0,
 				'default_units_id' => $productLabel->default_units_id,
 				'default_units_weight' => $productLabel->default_units_weight,
 			], TRUE);
@@ -176,12 +192,17 @@ trait ProductLabelsTrait
 			->addCondition(Form::FILLED, TRUE)
 			->addRule(Form::INTEGER);
 		$form->addSelect('price_text', 'admin.terms.labelPriceText', $this->global['productLabelPriceTypes']);
+		$form->addCheckbox('hide_validity', NULL);
+		$form->addCheckbox('hide_ingredients', NULL);
 		$form->addText('note_1', 'admin.terms.note1');
 		$form->addText('note_2', 'admin.terms.note2');
 		$form->addText('note_3', 'admin.terms.note3');
 
 		$form->addSelect('default_units_id', NULL, \ProductsEntity::UNITS)->setTranslator(NULL)->setPrompt('-');
-		$form->addText('default_units_weight', 'admin.terms.defaultPriceWeight');
+		$form->addText('default_units_weight', 'admin.terms.defaultPriceWeight')
+			->setNullable()
+			->addCondition(Form::FILLED, TRUE)
+			->addRule(Form::FLOAT);
 
 		foreach (\ProductLabelsEntity::TYPES_ARR as $productLabelTypeId => $productLabelType) {
 			$form->addText('label_type_count__'.$productLabelTypeId, $productLabelType['term'])
@@ -211,6 +232,15 @@ trait ProductLabelsTrait
 		$values['datetime_printed'] = NULL;
 		$values['count'] = 0;
 		$values['admin_users_id'] = $this->adminUser->id;
+		if (isset($values['default_units_weight']) && $values['default_units_weight'] === '') {
+			$values['default_units_weight'] = NULL;
+		}
+		if (isset($values['default_units_id']) && $values['default_units_id'] === '') {
+			$values['default_units_id'] = NULL;
+		}
+		if (isset($values['origin_countries_id']) && $values['origin_countries_id'] === '') {
+			$values['origin_countries_id'] = NULL;
+		}
 		if ($entity = $this->productLabelsRepo->findEntityBy([
 			'products_id' => $values['products_id'],
 			'branches_id' => $values['branches_id'],
@@ -345,6 +375,41 @@ trait ProductLabelsTrait
 
 
 	/**
+	 * Product IDs (ticked in the product list) whose A4 label is printed with the new HTML template.
+	 * Everything else keeps using the legacy TCPDF A4 layout.
+	 *
+	 * @return int[]
+	 */
+	public function getNewA4ProductIds(): array
+	{
+		$ids = $this->session->newA4TemplateProducts;
+		return is_array($ids) ? array_map('intval', array_keys(array_filter($ids))) : [];
+	}
+
+
+	/**
+	 * @param int $productsId
+	 * @param bool $enabled TRUE = print A4 with the new template, FALSE = legacy TCPDF
+	 * @return void
+	 */
+	public function handleToggleNewA4Template(int $productsId, bool $enabled = FALSE): void
+	{
+		$ids = $this->session->newA4TemplateProducts;
+		$ids = is_array($ids) ? $ids : [];
+		if ($enabled) {
+			$ids[$productsId] = TRUE;
+		}
+		else {
+			unset($ids[$productsId]);
+		}
+		$this->session->newA4TemplateProducts = $ids;
+
+		$this->payload->newA4Template = ['productsId' => $productsId, 'enabled' => $enabled];
+		$this->sendPayload();
+	}
+
+
+	/**
 	 * @return void
 	 * @throws AbortException
 	 */
@@ -395,7 +460,7 @@ trait ProductLabelsTrait
 
 		$isDownload = !in_array($printed, [FALSE, 0, '0', 'false', 'FALSE', ''], TRUE);
 
-		if ($file = $this->productLabelsService->generatePdf($this->session->filters[$this->getName()]['custom__branches'], (bool)$isDownload, $itemId ? [$itemId] : [], $priceOverride)) {
+		if ($file = $this->productLabelsService->generatePdf($this->session->filters[$this->getName()]['custom__branches'], (bool)$isDownload, $itemId ? [$itemId] : [], $priceOverride, $this->getNewA4ProductIds())) {
 			$this->session->labelsIsPrint = TRUE;
 			if ($file instanceof \TCPDF) {
 				$file->Output(date('Y_m_d').'-'.time().'.pdf', $isDownload ? 'D' : 'I');
@@ -565,7 +630,7 @@ trait ProductLabelsTrait
 			}
 		}
 
-		$file = $this->productLabelsService->generatePdf($branchesId, (bool)$isDownload, $labelIds, $priceOverride);
+		$file = $this->productLabelsService->generatePdf($branchesId, (bool)$isDownload, $labelIds, $priceOverride, $this->getNewA4ProductIds());
 		if ($file) {
 			$this->session->labelsIsPrint = TRUE;
 			$filename = \Nette\Utils\Strings::webalize($product->name) . '-labels-' . date('Y_m_d') . '-' . time() . '.pdf';
@@ -798,7 +863,7 @@ trait ProductLabelsTrait
 			$this->redirect('this');
 		}
 
-		$file = $this->productLabelsService->generatePdf($branchesId, (bool)$isDownload, array_values($labelIds));
+		$file = $this->productLabelsService->generatePdf($branchesId, (bool)$isDownload, array_values($labelIds), NULL, $this->getNewA4ProductIds());
 		if ($file) {
 			$this->session->labelsIsPrint = TRUE;
 			$typeName = $this->global['productLabelTypes'][$typeId] ?? ('group-'.$typeId);

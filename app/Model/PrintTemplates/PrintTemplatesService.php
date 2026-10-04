@@ -214,6 +214,7 @@ class PrintTemplatesService
 		// not have its content mangled by the A4-only barcode-stripping surgery below.
 		$isA4 = str_contains($template->html_source, 'fikko-a4');
 		$isSize2B = $this->isSize2BTemplate($template);
+		$isA5 = $this->isA5Template($template);
 		$price = $product->getPriceWithLog($branchesId);
 		if ($priceOverride && $price) {
 			$price = $this->applyPriceOverride($price, $priceOverride);
@@ -243,7 +244,13 @@ class PrintTemplatesService
 			$label?->default_units_weight ?: NULL,
 		) : NULL;
 		$currencySymbol = $price?->getCurrency()?->symbol ?: 'Kč';
-		$validityText = $label?->sale_text ?: $this->formatValidity($price);
+		$hideValidity = (bool)($label?->hide_validity ?? 0);
+		$hideIngredients = (bool)($label?->hide_ingredients ?? 0);
+		$validityText = $hideValidity ? NULL : ($label?->sale_text ?: $this->formatValidity($price));
+
+		$note1 = $label?->note_1 ?: $product->label_note_1;
+		$note2 = $label?->note_2 ?: $product->label_note_2;
+		$note3 = $label?->note_3 ?: $product->label_note_3;
 
 		$latte = new Engine();
 		$latte->setLoader(new StringLoader());
@@ -251,6 +258,11 @@ class PrintTemplatesService
 		$html = $latte->renderToString($template->html_source, [
 			'product' => $product,
 			'label' => $label,
+			'note1' => $note1,
+			'note2' => $note2,
+			'note3' => $note3,
+			'hideValidity' => $hideValidity,
+			'hideIngredients' => $hideIngredients,
 			'labelName' => $labelName,
 			'labelNameLength' => function_exists('mb_strlen') ? mb_strlen($labelName) : strlen($labelName),
 			'price' => $price,
@@ -274,11 +286,20 @@ class PrintTemplatesService
 			'eanText' => $ean !== '' ? EanBarcodeHelper::getDigits($ean) : '',
 			// Every size's design source carries the same barcode-generation script as shared
 			// design-tool boilerplate, but that alone doesn't mean the approved artwork prints
-			// a barcode — A4, A5, Vel.1 and Vel.3 all reserve the slot without ever using it
-			// (opening the design file without the tool's runtime confirms empty space, not
-			// bars), and only print the human-readable EAN. Only Velikost 2B's approved artwork
-			// actually shows barcode bars.
-			'bars' => (!$isSize2B || $ean === '') ? [] : EanBarcodeHelper::getBars($ean, 0.33),
+			// a barcode — A4 and Vel.1/Vel.3 reserve the slot without ever using it, printing
+			// only the human-readable EAN (size2b.latte makes the same choice for Velikost 2B
+			// in its own template, despite bars being computed here too). A5 is different: its
+			// reference file's <sc-for list="{{ bars }}"> (design_handoff_fikko/Fikko Cena -
+			// Tem gia A5 usetrite.dc.html:109) is live markup in the approved artwork's body,
+			// not unused component boilerplate, so a5-discount.latte does render it. A5's own
+			// renderVals() there uses 0.42mm per module — kept distinct from size2b's 0.33mm
+			// since each size's approved artwork calibrated its own module width.
+			'bars' => match (TRUE) {
+				$ean === '' => [],
+				$isSize2B => EanBarcodeHelper::getBars($ean, 0.33),
+				$isA5 => EanBarcodeHelper::getBars($ean, 0.42),
+				default => [],
+			},
 			'template' => $template,
 			'logoDataUri' => $this->imageAsDataUri(WWW_DIR . '/images/fikko-logo.jpg', 'image/jpeg'),
 			'brushDataUri' => $this->imageAsDataUri(WWW_DIR . '/images/brush-20.png', 'image/png'),
@@ -322,8 +343,9 @@ class PrintTemplatesService
 			'pigFaceIconDataUri' => $this->imageAsDataUri(WWW_DIR . '/images/pig-face-icon.png', 'image/png'),
 		]);
 
-		// The A4 artwork keeps the human-readable EAN only; its barcode bars are not
-		// required. Normalize both older saved layouts without recreating a template.
+		// Normalize older saved A4 layouts (which carried a differently-built barcode
+		// block) to a single human-readable EAN div; the barcode bars are injected
+		// again below for A4, Vel.1 and Vel.3 in one consistent way.
 		if ($isA4) {
 			$html = preg_replace(
 				'#\s*<div class="barcode">\s*<div class="barcode-bars">.*?</div>\s*<div class="ean">(.*?)</div>\s*</div>#s',
@@ -343,8 +365,17 @@ class PrintTemplatesService
 				.'</style>'.$html;
 		}
 
+		if ($ean !== '' && !$isA5) {
+			$html = $this->injectEanBarcode($html, $ean, $isA4, str_contains($template->html_source, 'fikko-vel1'), str_contains($template->html_source, 'fikko-vel3'), $isSize2B);
+		}
+
+		if ($isA5) {
+			$html = '<style>.fikko-a5 .product-meta{border-bottom:none!important}</style>' . $html;
+		}
+
 		return $html;
 	}
+
 
 
 	/**
@@ -381,6 +412,64 @@ class PrintTemplatesService
 		);
 
 		return $price;
+	}
+
+
+	/**
+	 * Adds EAN-13 barcode bars directly above the human-readable EAN of the A4,
+	 * Vel.1 and Vel.3 labels. Bars are floated boxes (Dompdf's flexbox fails with
+	 * ~60 adjacent elements, see a5-discount.latte). Values in the markup come only
+	 * from EanBarcodeHelper, never from user input.
+	 */
+	private function injectEanBarcode(string $html, string $ean, bool $isA4, bool $isVel1, bool $isVel3, bool $isSize2B = FALSE): string
+	{
+		// Heights must be absolute: Dompdf resolves `height:100%` of a floated bar against
+		// the page, which made the white bars blank out the whole A4 label.
+		if ($isA4) {
+			$unit = 0.38;
+			$barHeight = 12;
+			$css = '.ean-barcode{position:absolute;left:0;bottom:4.6mm;width:40mm;height:12mm;overflow:hidden}'
+				.'.fikko-a4 .ean{top:277mm!important;bottom:auto!important;height:3.6mm!important;background:none!important}';
+			$pattern = '#<div class="ean"#';
+		}
+		elseif ($isVel1) {
+			$unit = 0.28;
+			$barHeight = 8;
+			// The logo column is crowded: lift the "Fikko / Cena" wordmark to make room.
+			$css = '.ean-barcode{position:absolute;left:2.7mm;top:28.5mm;width:27mm;height:8mm;overflow:hidden}'
+				.'.fikko-vel1 .brand-fikko{top:8.6mm!important}.fikko-vel1 .brand-cena{top:16.5mm!important}'
+				.'.fikko-vel1 .ean-text{left:0!important;right:auto!important;top:37.6mm!important;width:32mm!important;text-align:center!important;font-size:2.4mm!important}';
+			$pattern = '#<div class="ean-text"#';
+		}
+		elseif ($isVel3) {
+			$unit = 0.30;
+			$barHeight = 9;
+			$css = '.ean-barcode{position:absolute;left:0;bottom:7.8mm;width:30mm;height:9mm;overflow:hidden}';
+			$pattern = '#<div class="ean-text"#';
+		}
+		elseif ($isSize2B) {
+			$unit = 0.30;
+			$barHeight = 5;
+			$css = '.size2b-barcode{position:absolute;left:2mm;bottom:4.2mm;width:32mm;height:5mm;overflow:hidden}'
+				.'.size2b-ean{left:2mm!important;bottom:1.2mm!important;top:auto!important}';
+			$pattern = '#<div class="size2b-ean"#';
+		}
+		else {
+			return $html;
+		}
+
+		$bars = '';
+		foreach (EanBarcodeHelper::getBars($ean, $unit) as $bar) {
+			$bars .= '<div style="float:left;height:'.$barHeight.'mm;background:'.$bar['color'].';width:'.$bar['width'].'"></div>';
+		}
+		$barcode = '<div class="'.($isSize2B ? 'size2b-barcode' : 'ean-barcode').'">'.$bars.'</div>';
+
+		$injected = preg_replace($pattern, $barcode.'$0', $html, 1, $count);
+		if (!$count || $injected === NULL) {
+			return $html;
+		}
+
+		return '<style>'.$css.'</style>'.$injected;
 	}
 
 

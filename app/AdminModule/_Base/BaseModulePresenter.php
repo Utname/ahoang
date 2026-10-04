@@ -630,6 +630,8 @@ abstract class BaseModulePresenter extends BasePresenter
                 }
             } elseif (Strings::startsWith($key, 'tags')) { //tokenizer multiselect sends value over httpData
                 $values[$key] = isset($httpData[$key]) ? implode(' ', $httpData[$key]) : '';
+            } elseif ($val === '' && ($key === 'default_units_weight' || $key === 'default_units_id' || Strings::endsWith($key, '_id'))) {
+                $values[$key] = NULL;
             }
         }
 

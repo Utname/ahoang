@@ -12,10 +12,10 @@
     .size2b-more { position: absolute; top: 5.3mm; left: 2mm; font-family: Nunito, sans-serif; font-size: 2.6mm; font-weight: 900; font-style: italic; line-height: 1.1; white-space: nowrap; }
     .size2b-country { position: absolute; top: 8.5mm; left: 2mm; height: 7.5mm; white-space: nowrap; font-family: Nunito, sans-serif; font-size: 2.2mm; font-weight: 900; font-style: italic; line-height: 7.5mm; }
     .size2b-country img { width: 7.5mm; height: auto; margin: 0 1mm; vertical-align: middle; border: .1mm solid #ccc; }
-    .size2b-base { position: absolute; top: 21mm; left: 3mm; width: 43mm; text-align: center; white-space: nowrap; }
+    .size2b-base { position: absolute; top: 17.0mm; left: 3mm; width: 43mm; text-align: center; white-space: nowrap; }
     .size2b-base-label, .size2b-our-label { font-size: 2.2mm; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
-    .size2b-base-value { margin-top: 1mm; font-family: Nunito, sans-serif; font-size: 5.5mm; font-weight: 900; font-style: italic; line-height: 1; }
-    .size2b-save { position: absolute; top: 34.5mm; left: 1mm; width: 49mm; height: 7.5mm; padding: 1.1mm 2.5mm; color: #fff; white-space: nowrap; transform: rotate(-1.2deg); }
+    .size2b-base-value { margin-top: .5mm; font-family: Nunito, sans-serif; font-size: 5mm; font-weight: 900; font-style: italic; line-height: 1; }
+    .size2b-save { position: absolute; top: 27.5mm; left: 1mm; width: 49mm; height: 7mm; padding: 1.1mm 2.5mm; color: #fff; white-space: nowrap; transform: rotate(-1.2deg); }
     .size2b-save-brush { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
     .size2b-save-copy { position: relative; z-index: 1; font-size: 2.4mm; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
     .size2b-save-value { position: relative; z-index: 1; margin-left: 1mm; font-family: Nunito, sans-serif; font-size: 4.5mm; font-weight: 900; font-style: italic; line-height: 1; }
@@ -48,7 +48,7 @@
     </div>
     <div class="size2b-content">
         <div class="size2b-name">{$labelName}</div>
-        <div n:if="$label && $label->note_1" class="size2b-note1">{$label->note_1}</div>
+        <div n:if="$note1" class="size2b-note1">{$note1}</div>
         <div n:if="$label && $label->is_more_species" class="size2b-more">Více druhů</div>
         <div class="size2b-country">Země původu:{$countryFlagMarkup|noescape}<span>{$country->name ?? '-'}</span></div>
 
@@ -66,6 +66,6 @@
         <div n:if="$unit" class="size2b-unit">cena za {$unit->unitWeight}{$unit->unitShort} = {$unit->price|number:2,',',''} {$currencySymbol}</div>
 
         <div n:if="$eanText" class="size2b-ean">EAN: {$eanText}</div>
-        <div n:if="$label && $label->note_3" class="size2b-note3">{$label->note_3}</div>
+        <div n:if="$note3" class="size2b-note3">{$note3}</div>
     </div>
 </div>

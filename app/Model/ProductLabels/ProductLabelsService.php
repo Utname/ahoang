@@ -29,9 +29,11 @@ class ProductLabelsService
 	 *        in the product list but haven't saved yet. Only meaningful (and only ever
 	 *        passed) when $ids targets a single label, since it applies to every job built
 	 *        in this call.
+	 * @param int[] $newA4ProductIds Product IDs whose A4 label should be rendered with the new HTML template.
+	 *        A4 labels of every other product are printed with the legacy TCPDF layout.
 	 * @return string|TCPDF|Dompdf|NULL
 	 */
-	public function generatePdf(int $branchesId, bool $printed = TRUE, array $ids = [], ?array $priceOverride = NULL): string|TCPDF|Dompdf|null
+	public function generatePdf(int $branchesId, bool $printed = TRUE, array $ids = [], ?array $priceOverride = NULL, array $newA4ProductIds = []): string|TCPDF|Dompdf|null
 	{
 		if (!isset($GLOBALS['adminUser']) || !$GLOBALS['adminUser']) {
 			return NULL;
@@ -135,7 +137,9 @@ class ProductLabelsService
 			foreach ($itemsBuffer[$templateTypeId]['items'] as $labelItems) {
 				$label = $labelItems[0] ?? NULL;
 				$product = $label?->getProduct();
-				$template = $label && $product
+				$useTemplate = $label && $product
+					&& ($templateTypeId !== ProductLabelsEntity::TYPE_A4 || in_array((int)$product->id, $newA4ProductIds, TRUE));
+				$template = $useTemplate
 					? $this->printTemplatesService->findTemplateForProductLabel($label, $product, $branchesId)
 					: NULL;
 
@@ -163,9 +167,9 @@ class ProductLabelsService
 			$pdf->setHeaderMargin(0);
 			$pdf->setFooterMargin(0);
 
-			$fontname1 = TCPDF_FONTS::addTTFfont('pdf/sriracha.ttf', 'TrueTypeUnicode');
-			$fontname2 = TCPDF_FONTS::addTTFfont('pdf/inter.ttf', 'TrueTypeUnicode');
-			$fontname3 = TCPDF_FONTS::addTTFfont('pdf/srirachablack.ttf', 'TrueTypeUnicode');
+			$fontname1 = TCPDF_FONTS::addTTFfont(WWW_DIR.'/pdf/sriracha.ttf', 'TrueTypeUnicode');
+			$fontname2 = TCPDF_FONTS::addTTFfont(WWW_DIR.'/pdf/inter.ttf', 'TrueTypeUnicode');
+			$fontname3 = TCPDF_FONTS::addTTFfont(WWW_DIR.'/pdf/srirachablack.ttf', 'TrueTypeUnicode');
 			$pdf->SetFont($fontname1, '', 14, '', TRUE);
 			$pdf->SetFont($fontname2, '', 14, '', TRUE);
 			$pdf->SetFont($fontname3, '', 14, '', TRUE);
@@ -200,7 +204,7 @@ class ProductLabelsService
 						$actionPricePars = explode('.', (string)number_format($labelTypeItems[0]->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g && $basePriceUnit && $actionPriceUnit ? $actionPriceUnit->price : ($productPrice->price_action ?: 0.0), 2, '.', ''));
 						$priceAddX = $labelTypeItems[0]->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g && $basePriceUnit && $actionPriceUnit ? 0 : 13;
 
-						$pdfFiles[$labelTypeId]->Image('pdf/logo.jpg', 90, 5, 30, 30);
+						$pdfFiles[$labelTypeId]->Image(WWW_DIR.'/pdf/logo.jpg', 90, 5, 30, 30);
 						$pdfFiles[$labelTypeId]->Rect(0, 40, 210, 35, 'F', '', [0, 0, 0]);
 						$this->cell($pdfFiles[$labelTypeId], 0, 45, 60, 'white', 210, $labelTypeItems[0]->getHeader()?->name ?: '', 'C');
 
@@ -290,8 +294,8 @@ class ProductLabelsService
 							$priceAddX = $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g && $basePriceUnit && $actionPriceUnit ? 0 : 11;
 
 							$pdfFiles[$labelTypeId]->Rect(0, $pdfY - 28, 210, 26, 'F', '', [0, 0, 0]);
-							$pdfFiles[$labelTypeId]->Image('pdf/logo.jpg', 1, $pdfY - 27, 24, 24);
-							$pdfFiles[$labelTypeId]->Image('pdf/logo.jpg', 185, $pdfY - 27, 24, 24);
+							$pdfFiles[$labelTypeId]->Image(WWW_DIR.'/pdf/logo.jpg', 1, $pdfY - 27, 24, 24);
+							$pdfFiles[$labelTypeId]->Image(WWW_DIR.'/pdf/logo.jpg', 185, $pdfY - 27, 24, 24);
 							$this->cell($pdfFiles[$labelTypeId], 0, $pdfY - 23, 45, 'white', 210, $labelTypeItem->getHeader()?->name ?: '', 'C');
 
 							$this->cell($pdfFiles[$labelTypeId], 0, $pdfY - 2, 20, 'default', 210, $labelTypeItem->name, 'C', 'inter');
@@ -523,8 +527,8 @@ class ProductLabelsService
 							$priceAddX = $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g && $basePriceUnit && $actionPriceUnit ? 0 : 5;
 
 							$pdfFiles[$labelTypeId]->Rect(1, $pdfYItem, 208, 14, 'F', '', [0, 0, 0]);
-							$pdfFiles[$labelTypeId]->Image('pdf/logo.jpg', 2, $pdfYItem + 1, 12, 12);
-							$pdfFiles[$labelTypeId]->Image('pdf/logo.jpg', 196, $pdfYItem + 1, 12, 12);
+							$pdfFiles[$labelTypeId]->Image(WWW_DIR.'/pdf/logo.jpg', 2, $pdfYItem + 1, 12, 12);
+							$pdfFiles[$labelTypeId]->Image(WWW_DIR.'/pdf/logo.jpg', 196, $pdfYItem + 1, 12, 12);
 							$this->cell($pdfFiles[$labelTypeId], 1, $pdfYItem + 0.5, 40, 'white', 208, $labelTypeItem->getHeader()?->name ?: '', 'C');
 
 							$this->cell($pdfFiles[$labelTypeId], 1, $pdfYItem + 14, 16, 'default', 208, $labelTypeItem->name, 'C', 'inter');

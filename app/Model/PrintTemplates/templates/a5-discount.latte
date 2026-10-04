@@ -30,7 +30,7 @@
     .fikko-a5 .logo-box .logo-cell { display: table-cell; text-align: center; vertical-align: middle; padding: 1mm; }
     .fikko-a5 .logo { max-width: 100%; max-height: 17mm; filter: grayscale(1) contrast(1.15); }
     .fikko-a5 .product-name { position: absolute; top: 22.5mm; left: 0; width: 200mm; text-align: center; font-size: 5.6mm; font-weight: 800; line-height: 1.15; }
-    .fikko-a5 .product-meta { position: absolute; top: 30.9mm; left: 0; width: 200mm; min-height: 6.6mm; border-bottom: .4mm solid #111; padding-bottom: 2mm; text-align: center; }
+    .fikko-a5 .product-meta { position: absolute; top: 30.9mm; left: 0; width: 200mm; min-height: 6.6mm; padding-bottom: 2mm; text-align: center; }
     .fikko-a5 .more-species { font-family: Nunito, sans-serif; font-size: 6mm; font-weight: 900; font-style: italic; line-height: 1.1; }
     .fikko-a5 .validity { position: absolute; right: 0; top: 1.5mm; font-size: 3.6mm; font-weight: 800; white-space: nowrap; }
     .fikko-a5 .validity-label { margin-right: 2mm; color: #555; font-size: 2.6mm; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
@@ -63,7 +63,23 @@
     .fikko-a5 .save-copy { padding-left: 2.5mm; font-size: 2.8mm; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
     .fikko-a5 .save-value { padding-left: 2mm; font-family: Nunito, sans-serif; font-size: 6mm; font-weight: 900; font-style: italic; line-height: 1; }
     .fikko-a5 .save-suffix { padding-left: 2mm; font-size: 2.4mm; font-weight: 600; }
-    .fikko-a5 .ean { position: absolute; left: 0; bottom: 0; font-size: 2.9mm; font-weight: 600; line-height: 1; letter-spacing: .14em; white-space: nowrap; }
+    /* Matches the approved design (design_handoff_fikko/Fikko Cena - Tem gia
+       A5 usetrite.dc.html:106-113): a flex column of bars-then-EAN, the
+       whole group bottom-left anchored — not .ean positioned on its own,
+       since the bars row needs to sit directly above it, not overlap it. */
+    /* Not flex: Dompdf's flexbox support silently fails with ~60 adjacent
+       bar elements (confirmed via rendered PDF — a real browser shows the
+       full alternating pattern from this exact markup, Dompdf shows only
+       the first bar). Floats render ~60 adjacent boxes reliably in Dompdf
+       elsewhere in this codebase (see the position:absolute/float house
+       style noted throughout this file for the same reason), so each bar
+       is float:left instead, and .barcode-bars needs its own explicit
+       height since floated children don't contribute to a parent's
+       height on their own. */
+    .fikko-a5 .barcode-group { position: absolute; left: 0; bottom: 0; }
+    .fikko-a5 .barcode-bars { height: 10mm; margin-bottom: .8mm; }
+    .fikko-a5 .barcode-bars > div { float: left; height: 100%; }
+    .fikko-a5 .ean { font-size: 2.9mm; font-weight: 600; line-height: 1; letter-spacing: .14em; white-space: nowrap; }
     .fikko-a5 .notes-bottom { position: absolute; left: 75.7mm; top: 128.2mm; width: 90mm; text-align: center; white-space: nowrap; font-family: Nunito, sans-serif; font-size: 6mm; font-weight: 900; font-style: italic; line-height: 1.1; }
     .fikko-a5 .unit { position: absolute; right: 0; bottom: 0; white-space: nowrap; font-size: 3.4mm; font-weight: 700; }
     .fikko-a5 .unit-value { margin-left: 2.5mm; font-family: Nunito, sans-serif; font-size: 4.2mm; font-weight: 900; font-style: italic; }
@@ -189,13 +205,13 @@
     <div class="product-name">{$labelName}</div>
     <div class="product-meta">
         <div n:if="$label && $label->is_more_species" class="more-species">Více druhů</div>
-        <div n:if="$validityText" class="validity"><span class="validity-label">Platnost</span>{$validityText}</div>
+        <div n:if="!$hideValidity && $validityText" class="validity"><span class="validity-label">Platnost</span>{$validityText}</div>
     </div>
 
     {if $hasSaleRibbon}
     <div>
         <div class="ribbon-badge">{$ribbonBadgeBrushMarkup|noescape}<div class="ribbon-badge-text"><span>-{$salePercent|number:0} %</span></div></div>
-        <div n:if="$label && $label->note_1" class="ribbon-note1">{$label->note_1}</div>
+        <div n:if="$note1" class="ribbon-note1">{$note1}</div>
         <div n:if="$saving > 0" class="ribbon-mini-badge">
             <div class="ribbon-mini-row"><span class="ribbon-mini-icon">{$pigMiniMarkup|noescape}</span><span class="ribbon-mini-copy">Ušetříte</span></div>
             <div class="ribbon-mini-value">{$savingText} {$currencySymbol}</div>
@@ -204,8 +220,8 @@
             <div class="origin-icon">{$flagMarkup|noescape}</div>
             <div class="origin-text"><div class="origin-label">Země původu</div><div class="origin-name">{$country->name}</div></div>
         </div>
-        <div n:if="$product->ingredients" class="ribbon-ingredients-label">Složení</div>
-        <div n:if="$product->ingredients" class="ribbon-ingredients">{$product->ingredients|truncate:220}</div>
+        <div n:if="!$hideIngredients && $product->ingredients" class="ribbon-ingredients-label">Složení</div>
+        <div n:if="!$hideIngredients && $product->ingredients" class="ribbon-ingredients">{$product->ingredients|truncate:220}</div>
         <div class="ribbon-refprice">Nejnižší cena<br>za 30 dní</div>
         <div class="ribbon-oldprice">{$basePriceText}<span class="ribbon-oldprice-line"></span></div>
         <div class="ribbon-price"><div class="ribbon-price-major">{$finalPriceMajor}</div><div class="ribbon-price-side"><div class="ribbon-price-minor">{$finalPriceMinor}</div><div class="ribbon-price-currency">{$currencySymbol} / 1 ks</div></div></div>
@@ -217,7 +233,7 @@
             <div class="origin-icon">{$flagMarkup|noescape}</div>
             <div class="origin-text"><div class="origin-label">Země původu</div><div class="origin-name">{$country->name}</div></div>
         </div>
-        <div n:if="$label && $label->note_1" class="note-1">{$label->note_1}</div>
+        <div n:if="$note1" class="note-1">{$note1}</div>
 
         <div class="price-block">
             <div class="base-price"><span class="base-label">Běžná cena</span><span class="base-value">{$basePriceText} {$currencySymbol}</span></div>
@@ -230,6 +246,18 @@
     </div>
     {/if}
 
-    <div class="ean">EAN {$eanText}</div>
-    <div class="notes-bottom"><div n:if="$label && $label->note_3">{$label->note_3}</div></div>
+    <div class="barcode-group">
+        {* |noescape is required here: Latte's CSS-context escaping turns
+           "#111"/"0.42mm" into "\#111"/"0\.42mm" when a raw value is
+           interpolated as a style="" token rather than a quoted string —
+           invalid CSS, so every bar rendered with no width and a
+           transparent background (confirmed in a real browser, not just
+           Dompdf: every .barcode-bars > div measured width:0px,
+           background:rgba(0,0,0,0)). Safe to bypass here: $bar['color']/
+           ['width'] only ever come from EanBarcodeHelper::getBars(), never
+           from user input. *}
+        <div n:if="$bars" class="barcode-bars"><div n:foreach="$bars as $bar" style="height:100%;background:{$bar['color']|noescape};width:{$bar['width']|noescape}"></div></div>
+        <div class="ean">EAN {$eanText}</div>
+    </div>
+    <div class="notes-bottom"><div n:if="$note2">{$note2}</div><div n:if="$note3">{$note3}</div></div>
 </section>

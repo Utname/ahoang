@@ -30,25 +30,39 @@
                 </div>
             {/foreach}
             
-            <div class="dropdown m-l-xxs" style="margin-top:-14px;">
-                <a class="dropdown-toggle btn btn-xs btn-default" data-toggle="dropdown" href="#" title="Tùy chọn in & sửa" style="padding:2px 6px;border-radius:5px;border:1px solid #d9e0e8;background:#fff;">
+            <div class="dropdown m-l-xxs" style="align-self:flex-start;position:relative;">
+                <a class="dropdown-toggle btn btn-xs btn-default" data-toggle="dropdown" href="#" title="{_admin.terms.plPrintOptions}" style="height:24px;display:inline-flex;align-items:center;justify-content:center;padding:0 7px;border-radius:6px;border:1px solid #d9e0e8;background:#fff;">
                     <i class="fa fa-ellipsis-v"></i>
                 </a>
-                <div class="dropdown-menu dropdown-menu-right" style="width:320px;padding:12px;border-radius:10px;box-shadow:0 10px 25px rgba(0,0,0,0.15);border:1px solid #e2e8f0;background:#fff;">
+                <div class="dropdown-menu dropdown-menu-right pl-print-menu" style="width:340px;min-width:340px;max-width:calc(100vw - 20px);padding:12px;border-radius:10px;box-shadow:0 10px 25px rgba(0,0,0,0.15);border:1px solid #e2e8f0;background:#fff;box-sizing:border-box;white-space:normal;z-index:1050 !important;top:100% !important;margin-top:4px !important;">
+                    <style>
+                        .pl-print-menu .pl-print-table { width:100% !important; max-width:100% !important; table-layout:fixed !important; border-collapse:collapse !important; margin:0 !important; font-size:11.5px !important; }
+                        .pl-print-menu .pl-print-table > thead > tr > th,
+                        .pl-print-menu .pl-print-table > tbody > tr > td { padding:5px 4px !important; height:auto !important; line-height:1.3 !important; vertical-align:middle !important; white-space:nowrap !important; overflow:hidden; text-overflow:ellipsis; letter-spacing:0 !important; }
+                        .pl-print-menu .pl-print-table > thead > tr > th { font-size:10px !important; font-weight:700 !important; color:#64748b !important; background:#f8fafc !important; border-bottom:1px solid #e2e8f0 !important; text-transform:uppercase; }
+                        .pl-print-menu .pl-print-table > tbody > tr > td { border-top:0 !important; border-bottom:1px solid #f1f5f9 !important; }
+                        .pl-print-menu .pl-print-table .btn { margin:0 !important; line-height:1.4 !important; }
+                    </style>
                     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #eef2f6;">
-                        <span style="font-weight:700;font-size:12px;color:#0f172a;">Tùy chọn in & sửa</span>
+                        <span style="font-weight:700;font-size:12px;color:#0f172a;">{_admin.terms.plPrintOptions}</span>
                         <a href="{plink multiLabel! $item->id}" class="ajax-modal btn btn-xs btn-primary" data-target="#modal-multiLabelsForm" style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:5px;">
                             <i class="fa fa-sliders-h m-r-xxs"></i> {_'admin.terms.editMultipleLabels'}
                         </a>
                     </div>
                     
-                    <table class="table table-condensed m-b-no" style="font-size:11.5px;margin-bottom:0;">
+                    <table class="pl-print-table">
+                        <colgroup>
+                            <col style="width:22%;">
+                            <col style="width:16%;">
+                            <col style="width:30%;">
+                            <col style="width:32%;">
+                        </colgroup>
                         <thead>
-                            <tr style="color:#64748b;font-size:10.5px;text-transform:uppercase;background:#f8fafc;">
-                                <th style="padding:5px 6px;border-bottom:1px solid #e2e8f0;">Khổ tem</th>
-                                <th style="padding:5px 4px;text-align:center;border-bottom:1px solid #e2e8f0;">Sửa</th>
-                                <th style="padding:5px 4px;text-align:center;border-bottom:1px solid #e2e8f0;">Xem trước</th>
-                                <th style="padding:5px 4px;text-align:center;border-bottom:1px solid #e2e8f0;">Tải PDF</th>
+                            <tr>
+                                <th style="text-align:left;">{_admin.terms.plLabelSize}</th>
+                                <th style="text-align:center;">{_admin.terms.plEdit}</th>
+                                <th style="text-align:center;">{_admin.terms.plPreview}</th>
+                                <th style="text-align:center;">{_admin.terms.plDownloadPdf}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -62,23 +76,23 @@
                                         {$term}
                                     </td>
                                     <td style="padding:4px;text-align:center;vertical-align:middle;">
-                                        <a href="{plink label! $item->id, $labelTypeId}" class="ajax-modal btn btn-xs btn-default" data-target="#modal-labelsForm" title="Sửa chi tiết {$term}" style="padding:3px 7px;font-size:11px;border-radius:5px;">
+                                        <a href="{plink label! $item->id, $labelTypeId}" class="ajax-modal btn btn-xs btn-default" data-target="#modal-labelsForm"                                          <a href="{plink label! $item->id, $labelTypeId}" class="ajax-modal btn btn-xs btn-default" data-target="#modal-labelsForm" title="{_admin.terms.plEditDetail} {$term}" style="padding:3px 7px;font-size:11px;border-radius:5px;">
                                             <i class="fas fa-pencil text-muted"></i>
                                         </a>
                                     </td>
                                     <td style="padding:4px;text-align:center;vertical-align:middle;">
-                                        <a href="{plink downloadSingleProductLabelPdf! $item->id, $labelTypeId, 0}" target="_blank" class="btn btn-xs btn-default" title="Xem trước mẫu tem {$term} trong tab mới" style="padding:3px 7px;font-size:11px;border-radius:5px;color:#0284c7;background:#f0f9ff;border:1px solid #bae6fd;">
-                                            <i class="far fa-eye"></i> Xem
+                                        <a href="{plink downloadSingleProductLabelPdf! $item->id, $labelTypeId, 0}" target="_blank" class="btn btn-xs btn-default"                                          <a href="{plink downloadSingleProductLabelPdf! $item->id, $labelTypeId, 0}" target="_blank" class="btn btn-xs btn-default" title="{_admin.terms.plPreviewTip} ({$term})" style="padding:3px 7px;font-size:11px;border-radius:5px;color:#0284c7;background:#f0f9ff;border:1px solid #bae6fd;">
+                                            <i class="far fa-eye"></i> {_admin.terms.plView}
                                         </a>
                                     </td>
                                     <td style="padding:4px;text-align:center;vertical-align:middle;">
                                         {if $lblCount > 0}
-                                            <a href="{plink downloadSingleProductLabelPdf! $item->id, $labelTypeId, 1}" target="_blank" class="btn btn-xs btn-default" title="Tải xuống {$lblCount} tem {$term}" style="padding:3px 8px;font-size:11px;border-radius:5px;color:#042f2e;background:#ccfbf1;border:1px solid #5eead4;font-weight:700;">
-                                                <i class="fa fa-download text-success"></i> Tải ({$lblCount})
+                                            <a href="{plink downloadSingleProductLabelPdf! $item->id, $labelTypeId, 1}" target="_blank" class="btn btn-xs btn-default"                                             <a href="{plink downloadSingleProductLabelPdf! $item->id, $labelTypeId, 1}" target="_blank" class="btn btn-xs btn-default" title="{_admin.terms.plDownloadTip} {$term} ({$lblCount})" style="padding:3px 8px;font-size:11px;border-radius:5px;color:#042f2e;background:#ccfbf1;border:1px solid #5eead4;font-weight:700;">
+                                                <i class="fa fa-download text-success"></i> {_admin.terms.plDownload} ({$lblCount})
                                             </a>
                                         {else}
-                                            <span class="btn btn-xs btn-default disabled" title="Bạn chưa chọn số lượng (SL = 0)" style="padding:3px 8px;font-size:11px;border-radius:5px;color:#94a3b8;background:#f8fafc;border:1px solid #e2e8f0;cursor:not-allowed;opacity:0.6;">
-                                                <i class="fa fa-download"></i> Tải (0)
+                                            <span class="btn btn-xs btn-default disabled"                                             <span class="btn btn-xs btn-default disabled" title="{_admin.terms.plNoQty}" style="padding:3px 8px;font-size:11px;border-radius:5px;color:#94a3b8;background:#f8fafc;border:1px solid #e2e8f0;cursor:not-allowed;opacity:0.6;">
+                                                <i class="fa fa-download"></i> {_admin.terms.plDownload} (0)
                                             </span>
                                         {/if}
                                     </td>
@@ -88,16 +102,16 @@
                     </table>
 
                     <div style="margin-top:10px;padding-top:8px;border-top:1px solid #eef2f6;display:flex;align-items:center;justify-content:space-between;gap:6px;">
-                        <a href="{plink downloadProductAllLabelsPdf! $item->id, 0}" target="_blank" class="btn btn-xs btn-default" style="flex:1;text-align:center;padding:5px 6px;font-size:11px;font-weight:600;color:#0369a1;background:#f0f9ff;border:1px solid #bae6fd;border-radius:6px;" title="Xem trước tất cả các khổ tem của sản phẩm này">
-                            <i class="far fa-eye m-r-xxs"></i> Xem trước tất cả
+                        <a href="{plink downloadProductAllLabelsPdf! $item->id, 0}" target="_blank" class="btn btn-xs btn-default" style="flex:1;text-align:center;padding:5px 6px;font-size:11px;font-weight:600;color:#0369a1;background:#f0f9ff;border:1px solid #bae6fd;border-radius:6px;"                         <a href="{plink downloadProductAllLabelsPdf! $item->id, 0}" target="_blank" class="btn btn-xs btn-default" style="flex:1;text-align:center;padding:5px 6px;font-size:11px;font-weight:600;color:#0369a1;background:#f0f9ff;border:1px solid #bae6fd;border-radius:6px;" title="{_admin.terms.plPreviewAllTip}">
+                            <i class="far fa-eye m-r-xxs"></i> {_admin.terms.plPreviewAll}
                         </a>
                         {if $totalRowLabels > 0}
-                            <a href="{plink downloadProductAllLabelsPdf! $item->id, 1}" target="_blank" class="btn btn-xs btn-default" style="flex:1;text-align:center;padding:5px 6px;font-size:11px;font-weight:700;color:#042f2e;background:#ccfbf1;border:1px solid #5eead4;border-radius:6px;" title="Tải xuống tất cả {$totalRowLabels} tem đã chọn của sản phẩm này">
-                                <i class="fa fa-download m-r-xxs text-success"></i> Tải tất cả ({$totalRowLabels})
+                            <a href="{plink downloadProductAllLabelsPdf! $item->id, 1}" target="_blank" class="btn btn-xs btn-default" style="flex:1;text-align:center;padding:5px 6px;font-size:11px;font-weight:700;color:#042f2e;background:#ccfbf1;border:1px solid #5eead4;border-radius:6px;"                             <a href="{plink downloadProductAllLabelsPdf! $item->id, 1}" target="_blank" class="btn btn-xs btn-default" style="flex:1;text-align:center;padding:5px 6px;font-size:11px;font-weight:700;color:#042f2e;background:#ccfbf1;border:1px solid #5eead4;border-radius:6px;" title="{_admin.terms.plDownloadAllTip} ({$totalRowLabels})">
+                                <i class="fa fa-download m-r-xxs text-success"></i> {_admin.terms.plDownloadAll} ({$totalRowLabels})
                             </a>
                         {else}
-                            <span class="btn btn-xs btn-default disabled" style="flex:1;text-align:center;padding:5px 6px;font-size:11px;color:#94a3b8;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;cursor:not-allowed;opacity:0.6;" title="Chưa chọn số lượng tem nào cho sản phẩm này">
-                                <i class="fa fa-download m-r-xxs"></i> Tải tất cả (0)
+                            <span class="btn btn-xs btn-default disabled" style="flex:1;text-align:center;padding:5px 6px;font-size:11px;color:#94a3b8;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;cursor:not-allowed;opacity:0.6;"                             <span class="btn btn-xs btn-default disabled" style="flex:1;text-align:center;padding:5px 6px;font-size:11px;color:#94a3b8;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;cursor:not-allowed;opacity:0.6;" title="{_admin.terms.plNoQtyAll}">
+                                <i class="fa fa-download m-r-xxs"></i> {_admin.terms.plDownloadAll} (0)
                             </span>
                         {/if}
                     </div>

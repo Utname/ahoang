@@ -8,15 +8,13 @@
     .fikko-vel1 .brand-cena { top: 22mm; }
     .fikko-vel1 .name { position: absolute; left: 34.76mm; top: 1.76mm; width: 72.48mm; font-size: 3.6mm; font-weight: 700; line-height: 1.15; }
     .fikko-vel1 .more-species { position: absolute; left: 34.76mm; top: 10mm; font-family: Nunito, sans-serif; font-weight: 900; font-style: italic; font-size: 3.6mm; line-height: 1.1; white-space: nowrap; }
-    .fikko-vel1 .note1, .fikko-vel1 .note2 { position: absolute; left: 34.76mm; font-size: 2.4mm; white-space: nowrap; }
+    .fikko-vel1 .note1, .fikko-vel1 .note2 { position: absolute; left: 34.76mm; font-size: 2.4mm; white-space: nowrap; max-width: 25mm; overflow: hidden; text-overflow: ellipsis; font-weight: 700; }
     .fikko-vel1 .note1 { top: 22.15mm; }
     .fikko-vel1 .note2 { top: 25.79mm; }
-    .fikko-vel1 .note-lbl { letter-spacing: .06em; text-transform: uppercase; font-weight: 700; opacity: .6; }
-    .fikko-vel1 .note-val { margin-left: 1.5mm; font-weight: 700; }
     .fikko-vel1 .price-major { position: absolute; top: 15.38mm; left: 60.54mm; font-family: Nunito, sans-serif; font-weight: 900; font-style: italic; font-size: 19mm; line-height: .85; white-space: nowrap; }
-    .fikko-vel1 .price-minor { position: absolute; top: 15.96mm; left: 84.84mm; font-family: Nunito, sans-serif; font-weight: 900; font-style: italic; font-size: 9.5mm; line-height: 1; white-space: nowrap; }
-    .fikko-vel1 .price-currency { position: absolute; top: 26.5mm; left: 84.84mm; font-family: Nunito, sans-serif; font-weight: 900; font-style: italic; font-size: 5.5mm; line-height: 1; white-space: nowrap; }
-    .fikko-vel1 .unit { position: absolute; left: 77.96mm; top: 33.8mm; font-family: Nunito, sans-serif; font-weight: 900; font-style: italic; font-size: 2.4mm; white-space: nowrap; }
+    .fikko-vel1 .price-minor { position: absolute; top: 15.5mm; left: 84.84mm; font-family: Nunito, sans-serif; font-weight: 900; font-style: italic; font-size: 9mm; line-height: 1; white-space: nowrap; }
+    .fikko-vel1 .price-currency { position: absolute; top: 26.0mm; left: 84.84mm; font-family: Nunito, sans-serif; font-weight: 900; font-style: italic; font-size: 4.2mm; line-height: 1; white-space: nowrap; }
+    .fikko-vel1 .unit { position: absolute; left: 84.84mm; top: 31.2mm; font-family: Nunito, sans-serif; font-weight: 900; font-style: italic; font-size: 2mm; line-height: 1; white-space: nowrap; max-width: 26mm; overflow: hidden; text-overflow: ellipsis; }
     .fikko-vel1 .origin-label { position: absolute; left: 34.76mm; top: 37.34mm; font-family: Nunito, sans-serif; font-weight: 900; font-style: italic; font-size: 2mm; white-space: nowrap; }
     .fikko-vel1 .origin-flag { position: absolute; left: 49.75mm; top: 37.04mm; width: 5.03mm; height: 3.53mm; border: .2mm solid #111; box-sizing: border-box; }
     .fikko-vel1 .origin-name { position: absolute; left: 56.27mm; top: 37.34mm; font-family: Nunito, sans-serif; font-weight: 900; font-style: italic; font-size: 2mm; white-space: nowrap; }
@@ -31,9 +29,11 @@
     .fikko-vel1.long-name .more-species { top: 14mm; }
     .fikko-vel1.long-name .note1 { top: 24.5mm; }
     .fikko-vel1.long-name .note2 { top: 28.1mm; }
+    .fikko-vel1.price-digits-3 .note1, .fikko-vel1.price-digits-3 .note2 { max-width: 16mm; }
     .fikko-vel1.price-digits-3 .price-major { left: 52mm; font-size: 15mm; }
-    .fikko-vel1.price-digits-3 .price-minor { font-size: 7.5mm; }
-    .fikko-vel1.price-digits-3 .price-currency { font-size: 4.5mm; }
+    .fikko-vel1.price-digits-3 .price-minor { left: 76mm; font-size: 7.5mm; }
+    .fikko-vel1.price-digits-3 .price-currency { left: 76mm; top: 26.0mm; font-size: 4mm; }
+    .fikko-vel1.price-digits-3 .unit { left: 76mm; top: 31.2mm; max-width: 34mm; }
 </style>
 
 {var $vel1Classes = 'fikko-vel1' . ($priceDigits >= 3 ? ' price-digits-3' : '') . ($labelNameLength > 40 ? ' long-name' : '')}
@@ -47,8 +47,8 @@
     <div class="name">{$labelName}</div>
     <div n:if="$label && $label->is_more_species" class="more-species">Více druhů</div>
 
-    <div n:if="$label && $label->note_1" class="note1"><span class="note-lbl">Poznámka 1</span><span class="note-val">{$label->note_1}</span></div>
-    <div n:if="$label && $label->note_2" class="note2"><span class="note-lbl">Poznámka 2</span><span class="note-val">{$label->note_2}</span></div>
+    <div n:if="$note1" class="note1">{$note1}</div>
+    <div n:if="$note2" class="note2">{$note2}</div>
 
     <div class="price-major">{$finalPriceMajor}</div>
     <div class="price-minor">{$finalPriceMinor}</div>
@@ -59,7 +59,7 @@
     <div n:if="$country" class="origin-flag">{$flagMarkup|noescape}</div>
     <div n:if="$country" class="origin-name">{$country->name}</div>
 
-    <div n:if="$label && $label->note_3" class="thawed">
+    <div n:if="$note3" class="thawed">
         <span class="thawed-icon"><svg viewBox="0 0 24 24"><g stroke="#111" stroke-width="1.8" stroke-linecap="round" fill="none"><line x1="12" y1="2" x2="12" y2="22"></line><line x1="3.3" y1="7" x2="20.7" y2="17"></line><line x1="3.3" y1="17" x2="20.7" y2="7"></line><line x1="12" y1="2" x2="9.5" y2="4.5"></line><line x1="12" y1="2" x2="14.5" y2="4.5"></line><line x1="12" y1="22" x2="9.5" y2="19.5"></line><line x1="12" y1="22" x2="14.5" y2="19.5"></line></g></svg></span>
         <span class="thawed-text">Rozmrazeno</span>
     </div>
@@ -67,6 +67,6 @@
     <div class="ean-text">{$eanText}</div>
 
     <div class="ingredients-col"></div>
-    <div n:if="$product->ingredients" class="ingredients-label">Složení</div>
-    <div n:if="$product->ingredients" class="ingredients-text">{$product->ingredients|truncate:110}</div>
+    <div n:if="!$hideIngredients && $product->ingredients" class="ingredients-label">Složení</div>
+    <div n:if="!$hideIngredients && $product->ingredients" class="ingredients-text">{$product->ingredients|truncate:110}</div>
 </section>

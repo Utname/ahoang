@@ -110,7 +110,7 @@
 						<div n:if="count($locales) > 1" class="dropdown mosaic-dropdown">
 							<a href="#" class="dropdown-toggle mosaic-lang-btn" data-toggle="dropdown">
 								<i class="fas fa-globe text-slate"></i>
-								<span class="mosaic-lang-current">{if $locale == 'vi_VN'}Tiếng Việt{elseif $locale == 'cs_CZ'}Čeština{else}{$locale}{/if}</span>
+								<span class="mosaic-lang-current">{if $locale == 'vi_VN'}Tiếng Việt{elseif $locale == 'cs_CZ'}Čeština{elseif $locale == 'en_US'}English{else}{$locale}{/if}</span>
 								<i class="fas fa-chevron-down mosaic-arrow-icon"></i>
 							</a>
 							<ul class="dropdown-menu dropdown-menu-right mosaic-dropdown-menu" role="menu">
@@ -119,23 +119,6 @@
 										<span class="mosaic-lang-code">{$l|upper|substr:0,2}</span>
 										<span>{_'admin.locales.'.$l}</span>
 										<i n:if="$locale == $l" class="fas fa-check mosaic-active-check"></i>
-									</a>
-								</li>
-							</ul>
-						</div>
-
-						<!-- Content Language Switcher -->
-						<div n:if="count($languages) > 1" class="dropdown mosaic-dropdown">
-							<a href="#" class="dropdown-toggle mosaic-lang-btn" data-toggle="dropdown">
-								<i class="fas fa-language text-slate"></i>
-								<span class="mosaic-lang-current">{$language->name}</span>
-								<i class="fas fa-chevron-down mosaic-arrow-icon"></i>
-							</a>
-							<ul class="dropdown-menu dropdown-menu-right mosaic-dropdown-menu" role="menu">
-								<li n:foreach="$languages as $l" role="presentation">
-									<a n:href="switchLanguage! $l->id" n:class="$language->id == $l->id ? 'active'">
-										<span>{$l->name}</span>
-										<i n:if="$language->id == $l->id" class="fas fa-check mosaic-active-check"></i>
 									</a>
 								</li>
 							</ul>
@@ -278,12 +261,6 @@ document.addEventListener('DOMContentLoaded', function() {
 	}
 });
 </script>
-
-<div style="position:fixed;bottom:8px;right:8px;z-index:9999;background:#fff;border:1px solid #cbd5e1;border-radius:6px;padding:4px 8px;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.15);display:flex;align-items:center;gap:6px;">
-	<a n:href="switchLocale! 'vi_VN'" style="font-weight:{if $locale == 'vi_VN'}700{else}400{/if};color:{if $locale == 'vi_VN'}#0284c7{else}#64748b{/if};text-decoration:none;padding:2px 4px;border-radius:3px;background:{if $locale == 'vi_VN'}#e0f2fe{else}transparent{/if};">VI</a>
-	<span style="color:#cbd5e1;">|</span>
-	<a n:href="switchLocale! 'cs_CZ'" style="font-weight:{if $locale == 'cs_CZ'}700{else}400{/if};color:{if $locale == 'cs_CZ'}#0284c7{else}#64748b{/if};text-decoration:none;padding:2px 4px;border-radius:3px;background:{if $locale == 'cs_CZ'}#e0f2fe{else}transparent{/if};">CS</a>
-</div>
 
 </body>
 

@@ -68,10 +68,10 @@
     <div class="product-name">{$labelName}</div>
     <div class="product-meta">
         <div n:if="$label && $label->is_more_species" class="more-species">Více druhů</div>
-        <div n:if="$validityText" class="validity"><span class="validity-label">Platnost</span>{$validityText}</div>
+        <div n:if="!$hideValidity && $validityText" class="validity"><span class="validity-label">Platnost</span>{$validityText}</div>
     </div>
 
-    <div n:if="$label && $label->note_1" class="note-1">{$label->note_1}</div>
+    <div n:if="$note1" class="note-1">{$note1}</div>
 
     <div n:if="$country" class="origin">
         <div class="origin-icon">{$flagMarkup|noescape}</div>
@@ -85,5 +85,5 @@
     <div n:if="$saving > 0" class="save">{$brushMarkup|noescape}<div class="save-content"><span class="save-pig-cell">{$pigMarkup|noescape}</span><span class="save-copy">Ušetříte</span><span class="save-value">{$savingText} {$currencySymbol}</span><span class="save-suffix">oproti běžné ceně</span></div></div>
     <div n:if="$unit" class="unit">Cena za {$unit->unitWeight} {$unit->unitShort}<span class="unit-value">{$unit->price|number:2,',',''} {$currencySymbol}</span></div>
     <div class="ean">EAN {$eanText}</div>
-    <div class="notes-bottom"><div n:if="$label && $label->note_2">{$label->note_2}</div><div n:if="$label && $label->note_3">{$label->note_3}</div></div>
+    <div class="notes-bottom"><div n:if="$note2">{$note2}</div><div n:if="$note3">{$note3}</div></div>
 </section>

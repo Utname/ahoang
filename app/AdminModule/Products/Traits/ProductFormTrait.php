@@ -34,7 +34,10 @@ trait ProductFormTrait
 		$form->addSelect('units_id', NULL, \ProductsEntity::UNITS)->setTranslator(NULL);
 		$form->addText('weight', 'admin.terms.weight');
 		$form->addSelect('default_units_id', NULL, \ProductsEntity::UNITS)->setTranslator(NULL)->setPrompt('-');
-		$form->addText('default_units_weight', 'admin.terms.defaultPriceWeight');
+		$form->addText('default_units_weight', 'admin.terms.defaultPriceWeight')
+			->setNullable()
+			->addCondition(Form::FILLED, TRUE)
+			->addRule(Form::FLOAT);
 
 		$form->addText('label_note_1', 'admin.terms.note1');
 		$form->addText('label_note_2', 'admin.terms.note2');

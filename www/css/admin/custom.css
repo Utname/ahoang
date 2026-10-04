@@ -4136,7 +4136,34 @@ main.page-content,
     border-radius: 10px !important;
     background: #fff !important;
     padding-bottom: 5px !important;
-    overflow-x: auto !important;
+    overflow: visible !important;
+}
+
+.mosaic-table-compact tr.open,
+.mosaic-table-compact tr.open-dropdown,
+.mosaic-table-compact tr:hover,
+.mosaic-table-compact td.open,
+.mosaic-table-compact td:has(.open) {
+    position: relative !important;
+    z-index: 9999 !important;
+}
+
+.dropdown {
+    position: relative;
+    z-index: auto;
+}
+
+.dropdown.open {
+    position: relative !important;
+    z-index: 99999 !important;
+}
+
+.dropdown.open > .dropdown-menu,
+.pl-print-menu {
+    position: absolute !important;
+    z-index: 100000 !important;
+    background: #ffffff !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
 }
 
 .mosaic-table-compact > thead > tr > th {
@@ -4704,4 +4731,10 @@ body.mosaic-login-page main.page-content {
         top: 14px !important;
         right: 14px !important;
     }
+}
+
+/* Ensure Select2 dropdowns always render above Bootstrap Modals */
+.select2-container--open,
+.select2-dropdown {
+    z-index: 12000 !important;
 }

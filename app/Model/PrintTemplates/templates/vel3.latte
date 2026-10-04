@@ -122,14 +122,14 @@
 
     <div class="name">{$labelName}</div>
     <div n:if="$label && $label->is_more_species" class="more-species">Více druhů</div>
-    <div n:if="$label && $label->note_1" class="note1">{$label->note_1}</div>
+    <div n:if="$note1" class="note1">{$note1}</div>
 
     <div n:if="$country" class="origin">
         <div class="origin-label">Země původu:</div>
         <div class="origin-flag">{$flagMarkup|noescape}</div>
         <div class="origin-name">{$country->name}</div>
     </div>
-    <div n:if="$label && $label->note_2" class="note2">{$label->note_2}</div>
+    <div n:if="$note2" class="note2">{$note2}</div>
 
     <div class="base-label">Běžná cena</div>
     <div class="base-value">{$basePriceText} {$currencySymbol}</div>
@@ -141,6 +141,6 @@
     <div class="price-currency">{$currencySymbol} / 1 ks</div>
 
     <div class="ean-text">EAN {$eanText}</div>
-    <div n:if="$label && $label->note_3" class="notes-bottom">{$label->note_3}</div>
+    <div n:if="$note3" class="notes-bottom">{$note3}</div>
     <div n:if="$unit" class="unit">cena za {$unit->unitWeight}{$unit->unitShort} = {$unit->price|number:2,',',''} {$currencySymbol}</div>
 </section>

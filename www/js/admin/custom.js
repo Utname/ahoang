@@ -1,4 +1,10 @@
 $(function () {
+    $(document).on('show.bs.dropdown', '.dropdown', function () {
+        $(this).closest('tr').addClass('open-dropdown').css({'position': 'relative', 'z-index': 9999});
+    }).on('hide.bs.dropdown', '.dropdown', function () {
+        $(this).closest('tr').removeClass('open-dropdown').css({'position': '', 'z-index': ''});
+    });
+
     $("body").on('click', "a.ajax", function (event) {
         event.preventDefault();
 
@@ -123,6 +129,7 @@ $(function () {
             }
         })
         $(this).css('z-index', zIndex);
+        initSelect2();
         $(window).trigger('resize');
     })
 
@@ -216,6 +223,12 @@ $(function () {
                 setTimeout(function(){ btn.addClass('hidden').removeClass('btn-success'); }, 800);
             }
         });
+    });
+
+    // Products list: tick = print A4 label with the new template, untick = legacy TCPDF template
+    $("body").on('change', ".new-a4-template-checkbox", function(){
+        var url = String($(this).data('url')).replace(/enabled=1/, 'enabled=' + (this.checked ? 1 : 0));
+        ajaxGet(url);
     });
 
     // Product label preview/download: use whatever is currently typed in this row's
@@ -682,19 +695,28 @@ var initSelect2 = function () {
             minimumResultsForSearch: 10,
             width: '100%'
         };
+        var modal = $(this).closest('.modal');
+        if (modal.length) {
+            options.dropdownParent = modal;
+        }
 
         var placeholder = $(this).attr('placeholder');
         if(placeholder){
             options['placeholder'] = placeholder;
         }
 
-        $(this).select2(options)
-    })
+        $(this).select2(options);
+    });
+
     $("select.no-search:not(.select-default)").each(function(e){
         var options = {
             minimumResultsForSearch: 99999,
             width: '100%'
         };
+        var modal = $(this).closest('.modal');
+        if (modal.length) {
+            options.dropdownParent = modal;
+        }
 
         var placeholder = $(this).attr('placeholder');
         if(placeholder){
@@ -702,11 +724,16 @@ var initSelect2 = function () {
         }
 
         $(this).select2(options);
-    })
+    });
+
     $("select.with-search:not(.select-default)").each(function(e){
         var options = {
             width: '100%',
         };
+        var modal = $(this).closest('.modal');
+        if (modal.length) {
+            options.dropdownParent = modal;
+        }
 
         var placeholder = $(this).attr('placeholder');
         if(placeholder){
@@ -714,12 +741,20 @@ var initSelect2 = function () {
         }
 
         $(this).select2(options);
-    })
+    });
 
-    $("select.tokenizer:not(.select-default)").select2({
-        width: '100%',
-        tags: true,
-        tokenSeparators: [',', ' ', ';']
+    $("select.tokenizer:not(.select-default)").each(function(e){
+        var options = {
+            width: '100%',
+            tags: true,
+            tokenSeparators: [',', ' ', ';']
+        };
+        var modal = $(this).closest('.modal');
+        if (modal.length) {
+            options.dropdownParent = modal;
+        }
+
+        $(this).select2(options);
     });
 }
 
