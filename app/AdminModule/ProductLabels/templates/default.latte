@@ -15,11 +15,64 @@
                         </div>
                     {/form}
                     <div role="tabpanel">
+                        <script>
+                        window.showAdminTab = function(link, tabId) {
+                            if (!tabId) return;
+                            try { localStorage.setItem('activeProductLabelTab', tabId); } catch(e){}
+
+                            var pane = document.getElementById(tabId);
+                            if (!pane) return;
+
+                            var tabList = link ? link.closest('.nav-tabs') : document.querySelector('.nav-tabs');
+                            if (tabList) {
+                                var items = tabList.querySelectorAll('li');
+                                for (var i = 0; i < items.length; i++) {
+                                    items[i].classList.remove('active');
+                                }
+                                var targetLi = link ? link.closest('li') : tabList.querySelector('a[href="#' + tabId + '"]');
+                                if (targetLi && targetLi.closest('li')) {
+                                    targetLi.closest('li').classList.add('active');
+                                }
+                            }
+
+                            var tabContent = pane.closest('.tab-content');
+                            if (tabContent) {
+                                var panes = tabContent.children;
+                                for (var j = 0; j < panes.length; j++) {
+                                    if (panes[j].classList && panes[j].classList.contains('tab-pane')) {
+                                        panes[j].classList.remove('active', 'in');
+                                        panes[j].style.display = 'none';
+                                    }
+                                }
+                            }
+                            pane.classList.add('active', 'in');
+                            pane.style.display = 'block';
+
+                            if (window.history && window.history.pushState) {
+                                window.history.pushState(null, null, '#' + tabId);
+                            } else {
+                                window.location.hash = '#' + tabId;
+                            }
+                        };
+
+                        function restoreActiveAdminTab() {
+                            var hash = location.hash ? location.hash.replace('#', '') : (localStorage.getItem('activeProductLabelTab') || 'tab1');
+                            if (hash && document.getElementById(hash)) {
+                                var link = document.querySelector('.nav-tabs a[href="#' + hash + '"]');
+                                window.showAdminTab(link, hash);
+                            }
+                        }
+
+                        document.addEventListener('DOMContentLoaded', restoreActiveAdminTab);
+                        window.addEventListener('hashchange', restoreActiveAdminTab);
+                        </script>
+
                         <!-- Nav tabs -->
                         <ul class="nav nav-tabs" role="tablist">
-                            <li role="presentation" class="active"><a href="#tab1" role="tab" data-toggle="tab">Cenové štítky</a></li>
-                            <li role="presentation"><a href="#tab2" role="tab" data-toggle="tab">Popisné štítky</a></li>
-                            <li role="presentation"><a href="#tab3" role="tab" data-toggle="tab">Cenové štítky ručně</a></li>
+                            <li role="presentation" class="active"><a href="#tab1" onclick="window.showAdminTab(this, 'tab1'); return false;">Cenové štítky</a></li>
+                            <li role="presentation"><a href="#tab2" onclick="window.showAdminTab(this, 'tab2'); return false;">Popisné štítky</a></li>
+                            <li role="presentation"><a href="#tab3" onclick="window.showAdminTab(this, 'tab3'); return false;">Cenové štítky ručně</a></li>
+                            <li role="presentation"><a href="#tab4" onclick="window.showAdminTab(this, 'tab4'); return false;">Štítky na ovoce</a></li>
                         </ul>
                         <!-- Tab panes -->
                         <div class="tab-content">
@@ -501,6 +554,114 @@
                                 </div>
 
                             </div>
+                            <div role="tabpanel" class="tab-pane" id="tab4">
+                                {form barcodeFruitForm class => 'ajax'}
+                                    <div class="row">
+                                        <div class="col-sm-5">
+                                            <div class="form-group">
+                                                {label products_id /}
+                                                {input products_id class => 'form-control select2'}
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <div class="form-group">
+                                                {label weight /}
+                                                {input weight class => 'form-control', placeholder => 'g'}
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                {label origin_countries_id /}
+                                                {input origin_countries_id class => 'form-control'}
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <div class="form-group">
+                                                {label count /}
+                                                {input count class => 'form-control'}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row m-b-md">
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                {label note_1 /}
+                                                {input note_1 class => 'form-control', placeholder => 'Např. 0,486 kg'}
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                {label note_2 /}
+                                                {input note_2 class => 'form-control', placeholder => 'Např. 2–6 °C'}
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                {label note_3 /}
+                                                {input note_3 class => 'form-control', placeholder => 'Fikko Market · adresa provozovny'}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button n:name="submit" class="btn mosaic-topbtn mosaic-topbtn-primary">
+                                        <i class="far fa-check"></i> {_admin.buttons.submit}
+                                    </button>
+                                {/form}
+
+                                <div n:snippet="barcodeFruitList" class="row">
+                                    {var $barcodeFruitListItems = $presenter->getBarcodeFruitList()}
+                                    <div class="col-xs-12">
+                                        <div n:if="count($barcodeFruitListItems)" class="table-responsive dataTables_wrapper m-t-lg">
+                                            <table class="table table-striped table-hover mosaic-table-compact js-filters">
+                                                <thead>
+                                                <tr>
+                                                    <th class="w-40 text-center">
+                                                        <div class="bulk-head-checkbox">
+                                                            <input type="checkbox" class="bulk-check-all ignore mr-0">
+                                                        </div>
+                                                    </th>
+                                                    <th colspan="2">
+                                                        <div class="w-300">{_admin.terms.name}</div>
+                                                    </th>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <a n:href="deleteBarcodes!" class="btn btn-xs btn-danger m-t-xxs delete-barcodes mr-0" data-message="{_admin.bulkActions.form.deleteConfirm}">
+                                                            <i class="fa fa-trash"></i>
+                                                        </a>
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" class="form-control js-filters-field">
+                                                    </td>
+                                                    <td class="w-100">
+                                                        <a n:href="barcodeFruit" target="_blank" class="btn btn-xs btn-primary m-t-xxs mr-0">
+                                                            {_admin.actions.printAll}
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                <tr n:foreach="$barcodeFruitListItems as $item" data-id="{$item->id}" class="js-filters-item">
+                                                    {var $itemData = $item->getData()}
+                                                    <td class="row-as-link-ignore text-center">
+                                                        <input type="checkbox" class="bulk-checkbox mr-0">
+                                                    </td>
+                                                    <td colspan="2">
+                                                        <strong>{$itemData->productName ?? ''}</strong>
+                                                        {if !empty($itemData->weight)} - {$itemData->weight} g{/if}
+                                                        {if !empty($itemData->totalPrice)} - {$itemData->totalPrice|number:2,',',''} Kč{/if}
+                                                        {if !empty($itemData->productCountry)} - Země: {$itemData->productCountry}{/if}
+                                                        {if !empty($itemData->expiryDate)} - Do: {$itemData->expiryDate}{/if}
+                                                        {if !empty($itemData->count)} ({$itemData->count}x){/if}
+                                                    </td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -510,7 +671,74 @@
 </div>
 
 <script>
+    function showAdminTab(link, tabId) {
+        var $link = $(link);
+        if (!$link.length) {
+            $link = $('.nav-tabs a[href="#' + tabId + '"]');
+        }
+        var $li = $link.closest('li');
+        $li.siblings().removeClass('active');
+        $li.addClass('active');
+
+        var $pane = $('#' + tabId);
+        if ($pane.length) {
+            $pane.siblings('.tab-pane').removeClass('active').removeClass('in').hide();
+            $pane.addClass('active').addClass('in').css('display', 'block');
+        }
+
+        if (window.history && window.history.pushState) {
+            window.history.pushState(null, null, '#' + tabId);
+        } else {
+            window.location.hash = '#' + tabId;
+        }
+    }
+
     $(function() {
+        var initialHash = location.hash ? location.hash.replace('#', '') : '';
+        if (initialHash && $('#' + initialHash).length) {
+            var $initialLink = $('.nav-tabs a[href="#' + initialHash + '"]');
+            if ($initialLink.length) {
+                showAdminTab($initialLink[0], initialHash);
+            }
+        }
+
+        $(window).on('hashchange', function() {
+            var h = location.hash ? location.hash.replace('#', '') : '';
+            if (h && $('#' + h).length) {
+                var $l = $('.nav-tabs a[href="#' + h + '"]');
+                if ($l.length) {
+                    showAdminTab($l[0], h);
+                }
+            }
+        });
+
+        $(document).on('change', 'select[name="products_id"]', function() {
+            var productId = $(this).val();
+            if (!productId) return;
+
+            var url = {link getFruitProductInfo!} + '&productId=' + productId;
+            $.getJSON(url, function(data) {
+                if (data && data.success) {
+                    var $tab = $('#tab4');
+                    if (data.weight) {
+                        $tab.find('input[name="weight"]').val(data.weight);
+                    }
+                    if (data.countryId) {
+                        $tab.find('select[name="origin_countries_id"]').val(data.countryId).trigger('change');
+                    }
+                    if (data.note1) {
+                        $tab.find('input[name="note_1"]').val(data.note1);
+                    }
+                    if (data.note2) {
+                        $tab.find('input[name="note_2"]').val(data.note2);
+                    }
+                    if (data.note3) {
+                        $tab.find('input[name="note_3"]').val(data.note3);
+                    }
+                }
+            });
+        });
+
 		setInterval(function() {
             if ($(".tab-pane.active input[name=barcode]").length) {
 				var input = $(".tab-pane.active input[name=barcode]");
@@ -521,7 +749,11 @@
         }, 1000);
 
 	    $(window).on('focus', function() {
-		    ajaxGet('?do=reload');
+		    ajaxGet('?do=reload', function() {
+                if (typeof restoreActiveAdminTab === 'function') {
+                    restoreActiveAdminTab();
+                }
+            });
 	    });
-    })
+    });
 </script>

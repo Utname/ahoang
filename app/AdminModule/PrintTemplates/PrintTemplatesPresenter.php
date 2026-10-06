@@ -216,6 +216,17 @@ class PrintTemplatesPresenter extends BaseModulePresenter
 	}
 
 
+	/** Install the fruit shelf label design as an editable mapped template. */
+	public function handleInstallFruitPreset(): void
+	{
+		$this->checkPermission('create');
+
+		$template = $this->service->installPreset(\PrintTemplatesService::PRESET_FRUIT);
+		$this->flashMessage($this->trans('admin.messages.successSave'), 'success');
+		$this->redirect('edit', $template->id);
+	}
+
+
 	/**
 	 * Render the template with a real product's data — used as the live preview <iframe> src on the edit page.
 	 * @param int $id

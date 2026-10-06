@@ -469,6 +469,7 @@ terms:
 	printTemplateInstallA5: 'Install Fikko Cena A5 preset'
 	printTemplateInstallVel1: 'Install Fikko Cena Vel.1 preset'
 	printTemplateInstallVel3: 'Install Fikko Cena Vel.3 preset'
+	printTemplateInstallFruit: 'Install Fikko Cena Ovoce preset'
 	printTemplateTokenLabel: 'label data (editable when adding to the print queue)'
 	id: 'ID'
 	variantGeneratorText: 'Select the parameter template and then select the values from the combination of which you wish to create variants.'

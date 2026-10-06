@@ -13,3 +13,4 @@
 /www/media/*
 /www/xml/*
 .DS_Store
+scratch/

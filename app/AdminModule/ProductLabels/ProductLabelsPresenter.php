@@ -40,6 +40,9 @@ class ProductLabelsPresenter extends BaseModulePresenter
 	/** @var \ProductNutritionValuesRepository @inject */
 	public $productNutritionValuesRepo;
 
+	/** @var \CountriesRepository @inject */
+	public $countriesRepo;
+
 	/** @var array */
 	protected $descriptionDefaultCount = [
 		self::TYPE_DESCRIPTION_1 => 18,
@@ -486,6 +489,195 @@ class ProductLabelsPresenter extends BaseModulePresenter
 		$this->redrawControl('barcodeDescriptionsSheet2ListHeader');
 		$this->redrawControl('barcodeDescriptionsPriceListHeader');
 		$this->redrawControl('barcodePricesManualList');
+		$this->redrawControl('barcodeFruitList');
+	}
+
+
+	/**
+	 * @param $id
+	 * @return void
+	 */
+	public function actionBarcodeFruit($id = NULL)
+	{
+		$this->template->type = $id;
+	}
+
+
+	/**
+	 * @param int|null $productId
+	 * @return void
+	 */
+	public function handleGetFruitProductInfo($productId = NULL)
+	{
+		if (!$productId) {
+			$this->sendJson(['success' => FALSE]);
+		}
+
+		$product = $this->repository->findEntity($productId);
+		if (!$product) {
+			$this->sendJson(['success' => FALSE]);
+		}
+
+		$branch = $this->branchesRepo->findEntity($this->session->filters[$this->getName()]['custom__branches']);
+		$country = $product->getCountry();
+
+		$itemPrice = $product->getPrice($branch ? $branch->id : 0);
+
+		$weightVal = '';
+		if ($product->default_units_weight) {
+			$weightVal = (string)intval($product->default_units_weight);
+		}
+
+		$note1Val = '';
+		if ($product->default_units_weight) {
+			$kg = number_format(($product->default_units_weight / 1000), 3, ',', '');
+			$note1Val = $kg . ' kg';
+		}
+
+		$this->sendJson([
+			'success' => TRUE,
+			'productId' => $product->id,
+			'productName' => $product->name,
+			'weight' => $weightVal,
+			'countryId' => $country ? $country->id : '',
+			'countryName' => $country ? $country->name : '',
+			'note1' => $note1Val,
+			'note2' => '2–6 °C',
+			'note3' => 'Fikko Market · adresa provozovny',
+		]);
+	}
+
+
+	/**
+	 * @return Form
+	 */
+	protected function createComponentBarcodeFruitForm(): Form
+	{
+		$form = new Form();
+		$form->setTranslator($this->translator);
+
+		$productsPairs = $this->repository->findAll()
+			->where('is_active', TRUE)
+			->order('name')
+			->limit(1000)
+			->fetchPairs('id', 'name');
+
+		$form->addSelect('products_id', 'admin.terms.product', $productsPairs)
+			->setPrompt('-- Vyberte produkt --')
+			->setRequired();
+
+		$countriesPairs = $this->countriesRepo ? $this->countriesRepo->findAll()->order('pos_order')->fetchPairs('id', 'name') : [];
+		$form->addSelect('origin_countries_id', 'admin.terms.countryOrigin', $countriesPairs)
+			->setTranslator(NULL)
+			->setPrompt('-');
+
+		$form->addText('weight', 'admin.terms.weight_2')
+			->setNullable();
+
+		$form->addText('expiry_date', 'admin.terms.date')
+			->setDefaultValue(date('d.m.Y', strtotime('+2 days')));
+
+		$form->addText('note_1', 'admin.terms.note1');
+		$form->addText('note_2', 'admin.terms.note2');
+		$form->addText('note_3', 'admin.terms.note3');
+
+		$form->addText('count', 'admin.terms.count')
+			->addRule(Form::INTEGER)
+			->setDefaultValue(1);
+
+		$form->addSubmit('submit', 'admin.formButtons.save');
+		$form->onSuccess[] = [$this, 'barcodeFruitFormSubmitted'];
+
+		return $form;
+	}
+
+
+	/**
+	 * @param Form $form
+	 * @return void
+	 */
+	public function barcodeFruitFormSubmitted(Form $form)
+	{
+		$values = $form->getValues();
+
+		$product = NULL;
+		if (!empty($values->barcode)) {
+			$ean = trim($values->barcode);
+			$product = $this->repository->findAll()
+				->where('code_ean = ? OR id = ? OR id IN (SELECT products_id FROM product_codes WHERE value = ?)', $ean, is_numeric($ean) ? intval($ean) : 0, $ean)
+				->limit(1)
+				->fetch();
+			if ($product) {
+				$product = \ProductsRepository::getEntity($product);
+			}
+		}
+
+		if (!$product && !empty($values->products_id)) {
+			$product = $this->repository->findEntity($values->products_id);
+		}
+
+		$printed = FALSE;
+		if ($product) {
+			$branch = $this->branchesRepo->findEntity($this->session->filters[$this->getName()]['custom__branches']);
+			$itemPrice = $product->getPrice($branch ? $branch->id : 0);
+
+			$weightGram = $values->weight ? intval($values->weight) : NULL;
+			$unitPrice = $itemPrice ? $product->getUnitValue($itemPrice->price_action ?: $itemPrice->price, \ProductsEntity::UNITS_TYPE_KILOGRAMS, 1) : NULL;
+			$totalPrice = $itemPrice ? ($weightGram ? $product->getUnitValue($itemPrice->price_action ?: $itemPrice->price, \ProductsEntity::UNITS_TYPE_GRAMS, $weightGram) : $itemPrice) : NULL;
+
+			$countryObj = $values->origin_countries_id ? $this->countriesRepo->findEntity($values->origin_countries_id) : $product->getCountry();
+
+			if ($this->printLabelsRepo->insert([
+				'type_id' => \PrintLabelsEntity::TYPE_FRUIT,
+				'admin_users_id' => $this->adminUser->id,
+				'data' => json_encode((object)[
+					'code' => $product->getDefaultCode() ?: '',
+					'productId' => $product->id,
+					'productName' => $product->name,
+					'productEan' => $product->getDefaultCode() ?: '',
+					'productCountry' => $countryObj ? $countryObj->name : '',
+					'weight' => $weightGram ?: ($product->default_units_weight ? intval($product->default_units_weight) : 0),
+					'unitPrice' => $unitPrice ? $unitPrice->price : ($itemPrice ? $itemPrice->price : 0),
+					'totalPrice' => $totalPrice ? $totalPrice->price : ($itemPrice ? $itemPrice->price : 0),
+					'currencySymbol' => 'Kč',
+					'expiryDate' => $values->expiry_date ?: date('d.m.Y', strtotime('+2 days')),
+					'note1' => $values->note_1 ?: '',
+					'note2' => $values->note_2 ?: '',
+					'note3' => $values->note_3 ?: '',
+					'count' => intval($values->count) ?: 1,
+				])
+			])) {
+				$printed = TRUE;
+			}
+		}
+
+		if (!$printed) {
+			$this->flashMessage('Zkontrolujte zadaný čárový kód nebo chọn sản phẩm', 'danger');
+		}
+
+		$this->redrawControl('flashMessages');
+		$this->redrawControl('barcodeFruitList');
+	}
+
+
+	/**
+	 * @param bool $delete
+	 * @return array
+	 */
+	public function getBarcodeFruitList(bool $delete = FALSE): array
+	{
+		$return = \PrintLabelsRepository::getEntities($this->printLabelsRepo->findAll()
+			->where('admin_users_id', $this->adminUser->id)
+			->where('type_id', \PrintLabelsEntity::TYPE_FRUIT)
+			->order('datetime'));
+
+		if ($delete) {
+			foreach ($return as $item) {
+				$this->printLabelsRepo->findAll()->where('id', $item->id)->delete();
+			}
+		}
+
+		return $return;
 	}
 
 

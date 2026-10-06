@@ -15,6 +15,7 @@ class PrintTemplatesService
 	public const PRESET_A5_DISCOUNT = 'a5-discount';
 	public const PRESET_VEL1 = 'vel1';
 	public const PRESET_VEL3 = 'vel3';
+	public const PRESET_FRUIT = 'fruit';
 
 
 	public function __construct(
@@ -152,6 +153,13 @@ class PrintTemplatesService
 				'heightMm' => 56,
 				'sourceFile' => 'vel3.latte',
 			],
+			self::PRESET_FRUIT => [
+				'name' => 'Fikko Cena Ovoce',
+				'labelTypeId' => ProductLabelsEntity::TYPE_SIZE_3,
+				'widthMm' => 100,
+				'heightMm' => 65,
+				'sourceFile' => 'fruit.latte',
+			],
 			default => throw new \InvalidArgumentException('Unknown print template preset.'),
 		};
 
@@ -213,6 +221,7 @@ class PrintTemplatesService
 		// older 210 × 297 mm template (a different design, pre-dating this preset) must
 		// not have its content mangled by the A4-only barcode-stripping surgery below.
 		$isA4 = str_contains($template->html_source, 'fikko-a4');
+		$isFruit = str_contains($template->html_source, 'fikko-fruit');
 		$isSize2B = $this->isSize2BTemplate($template);
 		$isA5 = $this->isA5Template($template);
 		$price = $product->getPriceWithLog($branchesId);
@@ -298,6 +307,7 @@ class PrintTemplatesService
 				$ean === '' => [],
 				$isSize2B => EanBarcodeHelper::getBars($ean, 0.33),
 				$isA5 => EanBarcodeHelper::getBars($ean, 0.42),
+				$isFruit => EanBarcodeHelper::getBars($ean, 0.30),
 				default => [],
 			},
 			'template' => $template,

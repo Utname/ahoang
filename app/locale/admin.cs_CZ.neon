@@ -543,6 +543,7 @@ terms:
 	printTemplateInstallA5: 'Vložit vzor Fikko Cena A5'
 	printTemplateInstallVel1: 'Vložit vzor Fikko Cena Vel.1'
 	printTemplateInstallVel3: 'Vložit vzor Fikko Cena Vel.3'
+	printTemplateInstallFruit: 'Vložit vzor Fikko Cena Ovoce'
 	printTemplateTokenLabel: 'data štítku (upravitelná při zařazení do tisku)'
 	id: 'ID'
 	variantGeneratorText: 'Zvolte šablonu parametrů a následně vyberte hodnoty, z jejichž kombinací si přejete vytvořit varianty.'

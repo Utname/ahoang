@@ -1,0 +1,256 @@
+<html>
+<head>
+    <script n:if="!empty($windowClose)">
+        window.close();
+    </script>
+    <style>
+        @page { size: 100mm 65mm; margin: 0; }
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: #ffffff;
+            color: #000000;
+            font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+        }
+        * { box-sizing: border-box; }
+
+        .fikko-fruit {
+            position: relative;
+            width: 100mm;
+            height: 65mm;
+            padding: 4mm 5mm;
+            background: #ffffff;
+            color: #000000;
+            overflow: hidden;
+            border: .2mm solid #dddddd;
+            page-break-after: always;
+        }
+
+        .fikko-fruit .product-title {
+            font-size: 4.2mm;
+            font-weight: 700;
+            line-height: 1.15;
+            color: #000000;
+            padding-bottom: 1mm;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 90mm;
+        }
+        .fikko-fruit .title-divider {
+            width: 100%;
+            border-top: .4mm solid #111111;
+            margin-bottom: 1.5mm;
+        }
+
+        /* Middle section: Weight/Unit price (Left) vs Main Price (Right) */
+        .fikko-fruit .middle-section {
+            position: absolute;
+            top: 13mm;
+            left: 5mm;
+            right: 5mm;
+            height: 24mm;
+        }
+
+        .fikko-fruit .weight-col {
+            float: left;
+            width: 48mm;
+            padding-top: 0.5mm;
+        }
+
+        .fikko-fruit .meta-label {
+            font-size: 2.3mm;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .02em;
+            color: #111111;
+            line-height: 1.1;
+        }
+
+        .fikko-fruit .meta-val {
+            font-size: 3.8mm;
+            font-weight: 800;
+            color: #000000;
+            line-height: 1.15;
+            margin-top: 0.4mm;
+            margin-bottom: 1.8mm;
+        }
+
+        .fikko-fruit .price-col {
+            float: right;
+            width: 40mm;
+            text-align: right;
+        }
+
+        .fikko-fruit .price-header-label {
+            font-size: 2.3mm;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            color: #111111;
+            text-align: right;
+            margin-bottom: 0.5mm;
+        }
+
+        .fikko-fruit .price-wrap {
+            display: inline-block;
+            white-space: nowrap;
+            text-align: right;
+        }
+
+        .fikko-fruit .price-major {
+            display: inline-block;
+            font-family: Arial, "Helvetica Neue", sans-serif;
+            font-size: 13.5mm;
+            font-weight: 900;
+            line-height: 0.85;
+            letter-spacing: -.03em;
+            vertical-align: top;
+        }
+
+        .fikko-fruit .price-side {
+            display: inline-block;
+            vertical-align: top;
+            text-align: left;
+            margin-left: 0.5mm;
+        }
+
+        .fikko-fruit .price-minor {
+            display: inline-block;
+            font-family: Arial, "Helvetica Neue", sans-serif;
+            font-size: 6.2mm;
+            font-weight: 900;
+            line-height: 0.85;
+        }
+
+        .fikko-fruit .price-currency {
+            font-family: Arial, "Helvetica Neue", sans-serif;
+            font-size: 3.5mm;
+            font-weight: 800;
+            line-height: 1;
+            margin-top: 0.6mm;
+        }
+
+        /* Bottom section: Details list (Left) vs Barcode (Right) */
+        .fikko-fruit .bottom-section {
+            position: absolute;
+            bottom: 2.5mm;
+            left: 5mm;
+            right: 5mm;
+            height: 22.5mm;
+        }
+
+        .fikko-fruit .details-col {
+            float: left;
+            width: 54mm;
+            font-size: 2.1mm;
+            line-height: 1.35;
+            color: #111111;
+        }
+
+        .fikko-fruit .detail-row {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .fikko-fruit .detail-label {
+            font-weight: 400;
+        }
+
+        .fikko-fruit .detail-bold {
+            font-weight: 700;
+        }
+
+        .fikko-fruit .barcode-col {
+            float: right;
+            width: 33mm;
+            text-align: center;
+            padding-top: 0.5mm;
+        }
+
+        .fikko-fruit .barcode-bars {
+            width: 33mm;
+            height: 12mm;
+            overflow: hidden;
+            margin: 0 auto;
+            clear: both;
+        }
+
+        .fikko-fruit .barcode-ean {
+            font-size: 2.1mm;
+            font-weight: 600;
+            letter-spacing: .06em;
+            text-align: center;
+            margin-top: 0.8mm;
+        }
+    </style>
+</head>
+<body>
+{foreach $presenter->getBarcodeFruitList(TRUE) as $item}
+    {var $itemData = $item->getData()}
+    {var $count = max(1, intval($itemData->count ?? 1))}
+    {for $c = 0; $c < $count; $c++}
+        {var $totalPrice = (float)($itemData->totalPrice ?? 0)}
+        {var $priceFormatted = number_format($totalPrice, 2, ',', ' ')}
+        {var $priceParts = explode(',', $priceFormatted)}
+        {var $finalPriceMajor = $priceParts[0] ?? '0'}
+        {var $finalPriceMinor = $priceParts[1] ?? '00'}
+        {var $ean = !empty($itemData->productEan) ? $itemData->productEan : '2810001063137'}
+        {var $bars = \EanBarcodeHelper::getBars($ean, 0.34)}
+        {var $packedDate = date('d.m.Y')}
+        {var $expiryDate = !empty($itemData->expiryDate) ? $itemData->expiryDate : date('d.m.Y', strtotime('+2 days'))}
+        {var $countryName = !empty($itemData->productCountry) ? $itemData->productCountry : 'Thajsko'}
+        {var $weightVal = !empty($itemData->note1) ? $itemData->note1 : ((!empty($itemData->weight) && $itemData->weight > 0) ? (number_format(($itemData->weight / 1000), 3, ',', '') . ' kg') : '0,486 kg')}
+        {var $unitPriceVal = (!empty($itemData->unitPrice) && $itemData->unitPrice > 0) ? (number_format($itemData->unitPrice, 2, ',', ' ') . ' Kč') : '129,90 Kč'}
+
+        <section class="fikko-fruit">
+            <div class="product-title">{$itemData->productName ?? ''}</div>
+            <div class="title-divider"></div>
+
+            <div class="middle-section">
+                <div class="weight-col">
+                    <div class="meta-label">HMOTNOST NETTO</div>
+                    <div class="meta-val">{$weightVal}</div>
+
+                    <div class="meta-label">CENA ZA 1 KG</div>
+                    <div class="meta-val">{$unitPriceVal}</div>
+                </div>
+
+                <div class="price-col">
+                    <div class="price-header-label">CENA</div>
+                    <div class="price-wrap">
+                        <div class="price-major">{$finalPriceMajor}</div>
+                        <div class="price-side">
+                            <div class="price-minor">,{$finalPriceMinor}</div>
+                            <div class="price-currency">Kč</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bottom-section">
+                <div class="details-col">
+                    <div class="detail-row"><span class="detail-label">Baleno dne:</span> <span class="detail-bold">{$packedDate}</span></div>
+                    <div class="detail-row"><span class="detail-label">Spotřebujte do:</span> <span class="detail-bold">{$expiryDate}</span></div>
+                    <div class="detail-row"><span class="detail-label">Skladujte při</span> <span class="detail-bold">{!empty($itemData->note2) ? $itemData->note2 : '2–6 °C'}</span></div>
+                    <div class="detail-row"><span class="detail-label">Země původu:</span> <span class="detail-bold">{$countryName}</span></div>
+                    <div class="detail-row"><span class="detail-label">Balil:</span> <span class="detail-bold">{!empty($itemData->note3) ? $itemData->note3 : 'Fikko Market · adresa provozovny'}</span></div>
+                </div>
+
+                <div class="barcode-col">
+                    <div n:if="$bars" class="barcode-bars">
+                        <div n:foreach="$bars as $bar" style="float:left;height:100%;background:{$bar['color']|noescape};width:{$bar['width']|noescape}"></div>
+                    </div>
+                    <div class="barcode-ean">{$ean}</div>
+                </div>
+            </div>
+        </section>
+    {/for}
+{/foreach}
+</body>
+<script type="text/javascript">
+    window.print();
+    window.onfocus=function(){ window.close();}
+</script>
+</html>
