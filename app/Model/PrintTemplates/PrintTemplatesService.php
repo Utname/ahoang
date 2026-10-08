@@ -461,7 +461,7 @@ class PrintTemplatesService
 		elseif ($isVel3) {
 			$unit = 0.30;
 			$barHeight = 9;
-			$css = '.ean-barcode{position:absolute;left:0;bottom:7.8mm;width:30mm;height:9mm;overflow:hidden}';
+			$css = '.ean-barcode{position:absolute;left:2.5mm;bottom:6.8mm;width:30mm;height:9mm;overflow:hidden}';
 			$pattern = '#<div class="ean-text"#';
 		}
 		elseif ($isSize2B) {

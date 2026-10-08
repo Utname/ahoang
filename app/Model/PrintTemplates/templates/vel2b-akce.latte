@@ -54,10 +54,10 @@
     .vel2b-content-col {
         position: absolute;
         top: 0;
-        left: 28.5mm;
-        width: 102.5mm;
+        left: 27.5mm;
+        width: 103mm;
         height: 52mm;
-        padding: 0.8mm 2mm 0.6mm 2mm;
+        padding: 0.8mm 1mm 0.6mm 1mm;
     }
 
     /* 1. Product Name */
@@ -151,11 +151,6 @@
         vertical-align: middle;
         text-align: right;
         padding-right: 2.5mm;
-    }
-    .vel2b-price-divider {
-        width: 0.3mm;
-        background: #111;
-        padding: 0;
     }
     .vel2b-price-right {
         vertical-align: middle;
@@ -319,6 +314,13 @@
     }
 
     /* 5. Bottom row (Barcode, Note 3) */
+    .vel2b-bottom-box {
+        position: absolute;
+        left: 28mm;
+        right: 2.5mm;
+        bottom: 2.2mm;
+        width: 102.5mm;
+    }
     .vel2b-bottom-table {
         width: 100%;
         border-collapse: collapse;
@@ -329,7 +331,7 @@
         text-align: left;
     }
     .vel2b-barcode-bars {
-        height: 5.5mm;
+        height: 5.2mm;
         white-space: nowrap;
         margin-bottom: 0.2mm;
     }
@@ -426,8 +428,6 @@
                     </div>
                 </td>
 
-                <td class="vel2b-price-divider"></td>
-
                 <td class="vel2b-price-right">
                     <div class="vel2b-our-label">Naše cena</div>
                     <div class="vel2b-main-price-box">
@@ -444,7 +444,9 @@
         <div n:if="$unit" class="vel2b-unit-price">
             cena za {$unit->unitWeight}{$unit->unitShort} = {$unit->price|number:2,',',' '} {$currencySymbol}
         </div>
+    </div>
 
+    <div class="vel2b-bottom-box">
         <table class="vel2b-bottom-table" cellpadding="0" cellspacing="0">
             <tr>
                 <td class="vel2b-barcode-cell">

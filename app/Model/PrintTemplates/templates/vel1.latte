@@ -53,10 +53,10 @@
     .vel1-content-col {
         position: absolute;
         top: 0;
-        left: 28.5mm;
-        width: 132.5mm;
+        left: 27.5mm;
+        width: 134mm;
         height: 41mm;
-        padding: 0.6mm 2mm 0.4mm 2mm;
+        padding: 0.8mm 1mm 0.6mm 1mm;
     }
 
     /* 1. Product Name */
@@ -154,11 +154,6 @@
         vertical-align: middle;
         text-align: right;
         padding-right: 2.5mm;
-    }
-    .vel1-price-divider {
-        width: 0.3mm;
-        background: #111;
-        padding: 0;
     }
     .vel1-price-right {
         vertical-align: middle;
@@ -318,6 +313,13 @@
     }
 
     /* 5. Bottom row (Barcode, Note 3) */
+    .vel1-bottom-box {
+        position: absolute;
+        left: 28mm;
+        right: 2.5mm;
+        bottom: 1.8mm;
+        width: 133.5mm;
+    }
     .vel1-bottom-table {
         width: 100%;
         border-collapse: collapse;
@@ -328,9 +330,9 @@
         text-align: left;
     }
     .vel1-barcode-bars {
-        height: 3.2mm;
+        height: 3.5mm;
         white-space: nowrap;
-        margin-bottom: 0.1mm;
+        margin-bottom: 0.2mm;
     }
     .vel1-barcode-bars > div {
         float: left;
@@ -423,8 +425,6 @@
                     </div>
                 </td>
 
-                <td class="vel1-price-divider"></td>
-
                 <td class="vel1-price-right">
                     <div class="vel1-our-row">
                         <span class="vel1-our-label">Naše<br>cena</span>
@@ -443,7 +443,9 @@
         <div n:if="$unit" class="vel1-unit-price">
             cena za {$unit->unitWeight}{$unit->unitShort} = {$unit->price|number:2,',',' '} {$currencySymbol}
         </div>
+    </div>
 
+    <div class="vel1-bottom-box">
         <table class="vel1-bottom-table" cellpadding="0" cellspacing="0">
             <tr>
                 <td class="vel1-barcode-cell">
