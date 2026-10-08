@@ -321,6 +321,7 @@ globals:
 		3: Vel. 1
 		4: Vel. 2
 		5: Vel. 3
+		6: 'Vel. 2B Akce'
 	productLabelHeaderTypes:
 		1: 'Super cena !!!'
 		2: 'Akce !!!'

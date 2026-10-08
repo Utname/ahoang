@@ -16,6 +16,7 @@ class PrintTemplatesService
 	public const PRESET_VEL1 = 'vel1';
 	public const PRESET_VEL3 = 'vel3';
 	public const PRESET_FRUIT = 'fruit';
+	public const PRESET_VEL2B_AKCE = 'vel2b-akce';
 
 
 	public function __construct(
@@ -111,6 +112,7 @@ class PrintTemplatesService
 			// The reviewed "Velikost 2B" design is stored as one 133 × 52 mm
 			// label. It is placed twice on an A4 sheet by renderSize2BPage().
 			ProductLabelsEntity::TYPE_SIZE_2 => ['width_mm' => 133, 'height_mm' => 52],
+			ProductLabelsEntity::TYPE_SIZE_2B => ['width_mm' => 133, 'height_mm' => 52],
 			ProductLabelsEntity::TYPE_A5 => ['width_mm' => 200, 'height_mm' => 138.5],
 			default => NULL,
 		};
@@ -159,6 +161,13 @@ class PrintTemplatesService
 				'widthMm' => 50,
 				'heightMm' => 35,
 				'sourceFile' => 'fruit.latte',
+			],
+			self::PRESET_VEL2B_AKCE => [
+				'name' => 'Fikko Cena Vel. 2B Akce',
+				'labelTypeId' => ProductLabelsEntity::TYPE_SIZE_2B,
+				'widthMm' => 133,
+				'heightMm' => 52,
+				'sourceFile' => 'vel2b-akce.latte',
 			],
 			default => throw new \InvalidArgumentException('Unknown print template preset.'),
 		};
@@ -222,6 +231,7 @@ class PrintTemplatesService
 		// not have its content mangled by the A4-only barcode-stripping surgery below.
 		$isA4 = str_contains($template->html_source, 'fikko-a4') || str_contains($template->html_source, 'A4 Akce') || (float)$template->width_mm === 210.0;
 		$isFruit = str_contains($template->html_source, 'fikko-fruit');
+		$isSize2BAkce = str_contains($template->html_source, 'fikko-vel2b-akce') || ((float)$template->width_mm === 133.0 && (float)$template->height_mm === 52.0);
 		$isSize2 = (float)$template->width_mm === 133.0;
 		$isVel1 = (float)$template->width_mm === 164.0 || (float)$template->width_mm === 150.0;
 		$isSize2B = $this->isSize2Template($template);
@@ -301,6 +311,7 @@ class PrintTemplatesService
 			'bars' => match (TRUE) {
 				$ean === '' => [],
 				$isA4 => EanBarcodeHelper::getBars($ean, 0.38),
+				$isSize2BAkce => EanBarcodeHelper::getBars($ean, 0.33),
 				$isSize2 => EanBarcodeHelper::getBars($ean, 0.28),
 				$isVel1 => EanBarcodeHelper::getBars($ean, 0.28),
 				$isA5 => EanBarcodeHelper::getBars($ean, 0.42),

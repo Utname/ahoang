@@ -116,6 +116,18 @@ class ProductLabelsService
 					}
 
 					break;
+				case ProductLabelsEntity::TYPE_SIZE_2B:
+					$itemsBuffer[$item->type_id]['pageParams'] = ['P', 'A4'];
+					for ($i = 1; $i <= max(1, $item->count); $i++) {
+						if (!isset($itemsBuffer[$item->type_id]['items']) || count($itemsBuffer[$item->type_id]['items'][array_key_last($itemsBuffer[$item->type_id]['items'])]) >= 2) {
+							$itemsBuffer[$item->type_id]['items'][][] = $item;
+						}
+						else {
+							$itemsBuffer[$item->type_id]['items'][array_key_last($itemsBuffer[$item->type_id]['items'])][] = $item;
+						}
+					}
+
+					break;
 			}
 		}
 

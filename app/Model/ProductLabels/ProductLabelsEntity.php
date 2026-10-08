@@ -10,6 +10,7 @@ class ProductLabelsEntity extends BaseEntity
 	const TYPE_SIZE_1 = 3;
 	const TYPE_SIZE_2 = 4;
 	const TYPE_SIZE_3 = 5;
+	const TYPE_SIZE_2B = 6;
 	const TYPES_ARR = [
 		self::TYPE_A4 => [
 			'term' => 'admin.globals.productLabelTypes.'.self::TYPE_A4,
@@ -29,6 +30,10 @@ class ProductLabelsEntity extends BaseEntity
 		],
 		self::TYPE_SIZE_3 => [
 			'term' => 'admin.globals.productLabelTypes.'.self::TYPE_SIZE_3,
+			'img' => ''
+		],
+		self::TYPE_SIZE_2B => [
+			'term' => 'admin.globals.productLabelTypes.'.self::TYPE_SIZE_2B,
 			'img' => ''
 		],
 	];
