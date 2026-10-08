@@ -204,9 +204,9 @@
     }
     .vel2b-strike-img {
         position: absolute;
-        left: -1.5mm;
-        top: 0.8mm;
-        height: 4.5mm;
+        left: -1mm;
+        top: 0.6mm;
+        height: 5.0mm;
     }
 
     /* Ušetříte brush badge */
@@ -372,7 +372,8 @@
 {var $logoMarkup = '<img class="vel2b-logo-img" src="' . $logoDataUri . '" alt="Fikko market">'}
 {var $flagMarkup = $flagIconDataUri ? '<img class="vel2b-origin-flag-img" src="' . $flagIconDataUri . '" alt="">' : ''}
 {var $brushMarkup = '<img class="vel2b-save-brush" src="' . $brushDataUri . '" alt="">'}
-{var $strikeMarkup = '<img class="vel2b-strike-img" src="' . $strikeSlashDataUri . '" alt="">'}
+{var $strikeWidth = (strlen($basePriceText) <= 4 ? '20mm' : (strlen($basePriceText) <= 5 ? '25mm' : (strlen($basePriceText) <= 6 ? '30mm' : '36mm')))}
+{var $strikeMarkup = '<img class="vel2b-strike-img" src="' . $strikeSlashDataUri . '" style="width:' . $strikeWidth . '" alt="">'}
 
 <div class="fikko-vel2b-akce {$vel2bClasses}">
     <div class="vel2b-logo-col">
