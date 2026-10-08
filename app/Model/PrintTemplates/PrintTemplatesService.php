@@ -222,7 +222,8 @@ class PrintTemplatesService
 		// not have its content mangled by the A4-only barcode-stripping surgery below.
 		$isA4 = str_contains($template->html_source, 'fikko-a4') || str_contains($template->html_source, 'A4 Akce') || (float)$template->width_mm === 210.0;
 		$isFruit = str_contains($template->html_source, 'fikko-fruit');
-		$isSize2B = $this->isSize2BTemplate($template);
+		$isSize2 = (float)$template->width_mm === 133.0;
+		$isSize2B = $this->isSize2Template($template);
 		$isA5 = $this->isA5Template($template);
 		$price = $product->getPriceWithLog($branchesId);
 		if ($priceOverride && $price) {
@@ -296,20 +297,10 @@ class PrintTemplatesService
 			'validityText' => $validityText,
 			'ean' => $ean,
 			'eanText' => $ean !== '' ? EanBarcodeHelper::getDigits($ean) : '',
-			// Every size's design source carries the same barcode-generation script as shared
-			// design-tool boilerplate, but that alone doesn't mean the approved artwork prints
-			// a barcode — A4 and Vel.1/Vel.3 reserve the slot without ever using it, printing
-			// only the human-readable EAN (size2b.latte makes the same choice for Velikost 2B
-			// in its own template, despite bars being computed here too). A5 is different: its
-			// reference file's <sc-for list="{{ bars }}"> (design_handoff_fikko/Fikko Cena -
-			// Tem gia A5 usetrite.dc.html:109) is live markup in the approved artwork's body,
-			// not unused component boilerplate, so a5-discount.latte does render it. A5's own
-			// renderVals() there uses 0.42mm per module — kept distinct from size2b's 0.33mm
-			// since each size's approved artwork calibrated its own module width.
 			'bars' => match (TRUE) {
 				$ean === '' => [],
 				$isA4 => EanBarcodeHelper::getBars($ean, 0.38),
-				$isSize2B => EanBarcodeHelper::getBars($ean, 0.33),
+				$isSize2 => EanBarcodeHelper::getBars($ean, 0.28),
 				$isA5 => EanBarcodeHelper::getBars($ean, 0.42),
 				$isFruit => EanBarcodeHelper::getBars($ean, 0.20),
 				default => [],
@@ -596,8 +587,8 @@ class PrintTemplatesService
 	public function renderPdf(PrintTemplatesEntity $template, ProductsEntity $product, int $branchesId, ?ProductLabelsEntity $label = NULL, ?array $priceOverride = NULL): string
 	{
 		$html = $this->renderHtml($template, $product, $branchesId, $label, $priceOverride);
-		if ($this->isSize2BTemplate($template)) {
-			return $this->renderDompdf($this->renderSize2BPage($html), 210, 297)->output();
+		if ($this->isSize2Template($template)) {
+			return $this->renderDompdf($this->renderSize2Page($html, $template), 210, 297)->output();
 		}
 		if ($this->isA5Template($template)) {
 			return $this->renderDompdf($this->renderA5Page($html), 210, 297)->output();
@@ -636,7 +627,7 @@ class PrintTemplatesService
 			}
 			$html = $this->renderHtml($job['template'], $product, $branchesId, $job['label'], $job['priceOverride'] ?? NULL);
 			$pages[] = match (TRUE) {
-				$this->isSize2BTemplate($job['template']) => $this->renderSize2BPage($html),
+				$this->isSize2Template($job['template']) => $this->renderSize2Page($html, $job['template']),
 				$this->isA5Template($job['template']) => $this->renderA5Page($html),
 				$this->isVel1Template($job['template']) => $this->renderVel1Page($html),
 				$this->isVel3Template($job['template']) => $this->renderVel3Page($html),
@@ -660,9 +651,9 @@ class PrintTemplatesService
 	}
 
 
-	private function isSize2BTemplate(PrintTemplatesEntity $template): bool
+	private function isSize2Template(PrintTemplatesEntity $template): bool
 	{
-		return (float)$template->width_mm === 133.0 && (float)$template->height_mm === 52.0;
+		return (float)$template->width_mm === 133.0;
 	}
 
 
@@ -673,29 +664,29 @@ class PrintTemplatesService
 
 
 	/**
-	 * Velikost 2B is a two-up A4 stock. Its stored source is one label; this
+	 * Velikost 2 / 2B is a two-up A4 stock. Its stored source is one label; this
 	 * method reuses that exact label twice, at the coordinates from the design.
 	 */
-	private function renderSize2BPage(string $html): string
+	private function renderSize2Page(string $html, PrintTemplatesEntity $template): string
 	{
 		preg_match_all('#<style\b[^>]*>.*?</style>#is', $html, $styleMatches);
 		preg_match('#<body\b[^>]*>(.*)</body>#is', $html, $bodyMatch);
 		$labelHtml = $bodyMatch[1] ?? (preg_replace('#<style\b[^>]*>.*?</style>#is', '', $html) ?? $html);
 		$styles = implode('', $styleMatches[0] ?? []);
+		$height = (float)$template->height_mm > 0 ? (float)$template->height_mm : 41.0;
+		$secondTop = 8.0 + $height;
 
 		return '<style>'
 			.'@page{margin:0}body{margin:0!important;padding:0!important;width:210mm!important}'
-			.'.size2b-sheet{position:relative;width:210mm;height:297mm;overflow:hidden}'
-			// Dompdf clips the outside half of a border at a fixed-size overflow box.
-			// Keep the label's design dimensions, but allow its dashed outer stroke to paint fully.
-			.'.size2b-label{position:absolute;left:8mm;width:133mm;height:52mm;overflow:visible}'
-			.'.size2b-label.first{top:8mm}.size2b-label.second{top:60mm}'
-			.'.size2b-label.second .size2b-label-root{border-top:0}'
-			.'.size2b-divider{position:absolute;top:60mm;left:8mm;width:133mm;border-top:.4mm dashed #111;z-index:5}'
-			.'.size2b-label table.wrap{height:52mm!important}'
+			.'.size2-sheet{position:relative;width:210mm;height:297mm;overflow:hidden}'
+			.'.size2-label{position:absolute;left:8mm;width:133mm;height:'.$height.'mm;overflow:visible}'
+			.'.size2-label.first{top:8mm}.size2-label.second{top:'.$secondTop.'mm}'
+			.'.size2-label.second .size2b-label-root,.size2-label.second .fikko-vel2{border-top:0}'
+			.'.size2-divider{position:absolute;top:'.$secondTop.'mm;left:8mm;width:133mm;border-top:.4mm dashed #111;z-index:5}'
+			.'.size2-label table.wrap{height:'.$height.'mm!important}'
 			.'</style>'.$styles
-			.'<div class="size2b-sheet"><div class="size2b-label first">'.$labelHtml.'</div><div class="size2b-divider"></div>'
-			.'<div class="size2b-label second">'.$labelHtml.'</div></div>';
+			.'<div class="size2-sheet"><div class="size2-label first">'.$labelHtml.'</div><div class="size2-divider"></div>'
+			.'<div class="size2-label second">'.$labelHtml.'</div></div>';
 	}
 
 
