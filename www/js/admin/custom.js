@@ -18,7 +18,7 @@ $(function () {
                 'left': left + 'px',
                 'right': 'auto',
                 'bottom': 'auto',
-                'z-index': 9999999,
+                'z-index': 1030,
                 'margin': 0
             });
         }
@@ -35,8 +35,23 @@ $(function () {
         });
     });
 
-    $(window).on('scroll', function () {
+    $(document).on('show.bs.modal', function () {
         $('.table .dropdown.open').removeClass('open');
+        $('.table .dropdown-menu').css({
+            'position': '',
+            'top': '',
+            'left': '',
+            'right': '',
+            'bottom': '',
+            'z-index': '',
+            'margin': ''
+        });
+    });
+
+    $(window).on('scroll', function () {
+        if (!$('body').hasClass('modal-open')) {
+            $('.table .dropdown.open').removeClass('open');
+        }
     });
     $(document).on('scroll', '.mosaic-list-table-wrap', function () {
         $('.table .dropdown.open').removeClass('open');
@@ -52,6 +67,17 @@ $(function () {
 
     $("body").on('click', "a.ajax-modal", function (event) {
         event.preventDefault();
+
+        $('.table .dropdown.open').removeClass('open');
+        $('.table .dropdown-menu').css({
+            'position': '',
+            'top': '',
+            'left': '',
+            'right': '',
+            'bottom': '',
+            'z-index': '',
+            'margin': ''
+        });
 
         if (!$(this).hasClass('with-confirm')) {
             ajaxGet(this.href, false);
