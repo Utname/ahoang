@@ -162,11 +162,11 @@
     .lowest-val span {
         font-size: 6.5mm;
     }
+    .a4-strike-wrap { position: absolute; left: 0; top: 0; width: 0; height: 0; overflow: visible; display: inline-block; }
     .lowest-strike-img {
         position: absolute;
-        left: -1mm;
-        top: 4.8mm;
-        width: 26mm;
+        left: -2mm;
+        top: 6.0mm;
         height: 7mm;
     }
 
@@ -347,7 +347,7 @@
     .price-digits-3 .price-major { font-size: 50mm; }
     .price-digits-3 .price-minor { font-size: 20mm; }
     .price-digits-3 .price-currency { margin-top: 10mm; font-size: 6mm; }
-    .price-digits-3 .lowest-strike-img { width: 32mm; }
+    
 </style>
 
 {var $pageClasses = 'page' . ($priceDigits >= 3 ? ' price-digits-3' : '')}
@@ -355,7 +355,8 @@
 {var $flagMarkup = $flagIconDataUri ? '<img class="flag-img" src="' . $flagIconDataUri . '" alt="">' : ''}
 {var $brushMarkup = '<img class="save-brush" src="' . $brushDataUri . '" alt="">'}
 {var $pigMarkup = '<img class="save-pig" src="' . $pigIconDataUri . '" alt="">'}
-{var $strikeMarkup = '<img class="lowest-strike-img" src="' . $strikeSlashDataUri . '" alt="">'}
+{var $strikeWidth = (strlen($basePriceText) <= 4 ? '38mm' : (strlen($basePriceText) <= 5 ? '44mm' : (strlen($basePriceText) <= 6 ? '54mm' : '64mm')))}
+{var $strikeMarkup = '<img class="lowest-strike-img" src="' . $strikeSlashDataUri . '" style="width:' . $strikeWidth . '" alt="">'}
 
 <section class="{$pageClasses}" data-document-role="page" data-label="Fikko Cena – tem A4 Akce" data-screen-label="A4 – 1 tem">
 
@@ -390,8 +391,7 @@
                 <div class="lowest-box">
                     <div class="lowest-label">Nejnižší cena<br>za 30 dní</div>
                     <div class="lowest-val-box">
-                        <div class="lowest-val">{$basePriceText} <span>{$currencySymbol}</span></div>
-                        {$strikeMarkup|noescape}
+                        <span class="lowest-val">{$basePriceText} <span>{$currencySymbol}</span></span><span class="a4-strike-wrap">{$strikeMarkup|noescape}</span>
                     </div>
                 </div>
 

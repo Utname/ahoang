@@ -589,11 +589,13 @@ class PrintTemplatesService
 	 * @param PrintTemplatesEntity $template
 	 * @param ProductsEntity $product
 	 * @param int $branchesId
+	 * @param ProductLabelsEntity|null $label
+	 * @param array{price?: ?float, price_action?: ?float, action_from?: ?string, action_to?: ?string}|null $priceOverride
 	 * @return string binary PDF content
 	 */
-	public function renderPdf(PrintTemplatesEntity $template, ProductsEntity $product, int $branchesId, ?ProductLabelsEntity $label = NULL): string
+	public function renderPdf(PrintTemplatesEntity $template, ProductsEntity $product, int $branchesId, ?ProductLabelsEntity $label = NULL, ?array $priceOverride = NULL): string
 	{
-		$html = $this->renderHtml($template, $product, $branchesId, $label);
+		$html = $this->renderHtml($template, $product, $branchesId, $label, $priceOverride);
 		if ($this->isSize2BTemplate($template)) {
 			return $this->renderDompdf($this->renderSize2BPage($html), 210, 297)->output();
 		}
@@ -714,9 +716,12 @@ class PrintTemplatesService
 			.'.a5-sheet{position:relative;width:210mm;height:297mm;overflow:hidden}'
 			.'.a5-label{position:absolute;left:0;width:210mm;height:148.5mm;overflow:visible}'
 			.'.a5-label.first{top:0}.a5-label.second{top:148.5mm}'
-			.'.a5-divider{position:absolute;top:148.5mm;left:0;width:210mm;border-top:.3mm dashed #9a9a9a;z-index:5}'
+			.'.a5-divider{position:absolute;top:147mm;left:8mm;width:194mm;height:3mm;line-height:3mm;z-index:5;color:#777;font-size:2.6mm;white-space:nowrap}'
+			.'.a5-divider-icon{display:inline-block;vertical-align:middle;font-family:"DejaVu Sans",sans-serif;font-size:4.5mm;line-height:1;margin-right:2mm;color:#555}'
+			.'.a5-divider-line{display:inline-block;vertical-align:middle;width:186mm;border-top:0.3mm dashed #555}'
 			.'</style>'.$styles
-			.'<div class="a5-sheet"><div class="a5-label first">'.$labelHtml.'</div><div class="a5-divider"></div>'
+			.'<div class="a5-sheet"><div class="a5-label first">'.$labelHtml.'</div>'
+			.'<div class="a5-divider"><span class="a5-divider-icon">&#9986;</span><span class="a5-divider-line"></span></div>'
 			.'<div class="a5-label second">'.$labelHtml.'</div></div>';
 	}
 

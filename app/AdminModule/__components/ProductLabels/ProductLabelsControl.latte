@@ -34,16 +34,19 @@
                 <a class="dropdown-toggle btn btn-xs btn-default" data-toggle="dropdown" href="#" title="{_admin.terms.plPrintOptions}" style="height:24px;display:inline-flex;align-items:center;justify-content:center;padding:0 7px;border-radius:6px;border:1px solid #d9e0e8;background:#fff;">
                     <i class="fa fa-ellipsis-v"></i>
                 </a>
-                <div class="dropdown-menu dropdown-menu-right pl-print-menu" style="width:340px;min-width:340px;max-width:calc(100vw - 20px);padding:12px;border-radius:10px;box-shadow:0 10px 25px rgba(0,0,0,0.15);border:1px solid #e2e8f0;background:#fff;box-sizing:border-box;white-space:normal;z-index:1050 !important;top:100% !important;margin-top:4px !important;">
+                <div class="dropdown-menu dropdown-menu-right pl-print-menu" style="width:340px;min-width:340px;max-width:calc(100vw - 20px);padding:12px;border-radius:10px;box-shadow:0 10px 25px rgba(0,0,0,0.18);border:1px solid #cbd5e1;background:#ffffff !important;background-color:#ffffff !important;box-sizing:border-box;white-space:normal;z-index:1000000 !important;top:100% !important;margin-top:4px !important;">
                     <style>
-                        .pl-print-menu .pl-print-table { width:100% !important; max-width:100% !important; table-layout:fixed !important; border-collapse:collapse !important; margin:0 !important; font-size:11.5px !important; }
+                        .pl-print-menu { background:#ffffff !important; background-color:#ffffff !important; z-index:1000000 !important; }
+                        .pl-print-menu .pl-print-table { width:100% !important; max-width:100% !important; table-layout:fixed !important; border-collapse:collapse !important; margin:0 !important; font-size:11.5px !important; background:#ffffff !important; background-color:#ffffff !important; }
+                        .pl-print-menu .pl-print-table > thead > tr { background:#f8fafc !important; background-color:#f8fafc !important; }
+                        .pl-print-menu .pl-print-table > tbody > tr { background:#ffffff !important; background-color:#ffffff !important; }
                         .pl-print-menu .pl-print-table > thead > tr > th,
                         .pl-print-menu .pl-print-table > tbody > tr > td { padding:5px 4px !important; height:auto !important; line-height:1.3 !important; vertical-align:middle !important; white-space:nowrap !important; overflow:hidden; text-overflow:ellipsis; letter-spacing:0 !important; }
-                        .pl-print-menu .pl-print-table > thead > tr > th { font-size:10px !important; font-weight:700 !important; color:#64748b !important; background:#f8fafc !important; border-bottom:1px solid #e2e8f0 !important; text-transform:uppercase; }
-                        .pl-print-menu .pl-print-table > tbody > tr > td { border-top:0 !important; border-bottom:1px solid #f1f5f9 !important; }
+                        .pl-print-menu .pl-print-table > thead > tr > th { font-size:10px !important; font-weight:700 !important; color:#64748b !important; background:#f8fafc !important; background-color:#f8fafc !important; border-bottom:1px solid #e2e8f0 !important; text-transform:uppercase; }
+                        .pl-print-menu .pl-print-table > tbody > tr > td { border-top:0 !important; border-bottom:1px solid #f1f5f9 !important; background:#ffffff !important; background-color:#ffffff !important; }
                         .pl-print-menu .pl-print-table .btn { margin:0 !important; line-height:1.4 !important; }
                     </style>
-                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #eef2f6;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #eef2f6;background:#ffffff;">
                         <span style="font-weight:700;font-size:12px;color:#0f172a;">{_admin.terms.plPrintOptions}</span>
                         <a href="{plink multiLabel! $item->id}" class="ajax-modal btn btn-xs btn-primary" data-target="#modal-multiLabelsForm" style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:5px;">
                             <i class="fa fa-sliders-h m-r-xxs"></i> {_'admin.terms.editMultipleLabels'}
@@ -71,27 +74,27 @@
                                 {var $lbl = $labels[$labelTypeId] ?? NULL}
                                 {var $lblCount = ($lbl && $lbl->isToPrint()) ? (int)$lbl->count : 0}
                                 {var $totalRowLabels += $lblCount}
-                                <tr style="border-bottom:1px solid #f1f5f9;">
-                                    <td style="padding:6px 6px;font-weight:700;color:#1e293b;vertical-align:middle;">
+                                <tr style="border-bottom:1px solid #f1f5f9;background:#ffffff;">
+                                    <td style="padding:6px 6px;font-weight:700;color:#1e293b;vertical-align:middle;background:#ffffff;">
                                         {$term}
                                     </td>
-                                    <td style="padding:4px;text-align:center;vertical-align:middle;">
-                                        <a href="{plink label! $item->id, $labelTypeId}" class="ajax-modal btn btn-xs btn-default" data-target="#modal-labelsForm"                                          <a href="{plink label! $item->id, $labelTypeId}" class="ajax-modal btn btn-xs btn-default" data-target="#modal-labelsForm" title="{_admin.terms.plEditDetail} {$term}" style="padding:3px 7px;font-size:11px;border-radius:5px;">
+                                    <td style="padding:4px;text-align:center;vertical-align:middle;background:#ffffff;">
+                                        <a href="{plink label! $item->id, $labelTypeId}" class="ajax-modal btn btn-xs btn-default" data-target="#modal-labelsForm" title="{_admin.terms.plEditDetail} {$term}" style="padding:3px 7px;font-size:11px;border-radius:5px;">
                                             <i class="fas fa-pencil text-muted"></i>
                                         </a>
                                     </td>
-                                    <td style="padding:4px;text-align:center;vertical-align:middle;">
-                                        <a href="{plink downloadSingleProductLabelPdf! $item->id, $labelTypeId, 0}" target="_blank" class="btn btn-xs btn-default"                                          <a href="{plink downloadSingleProductLabelPdf! $item->id, $labelTypeId, 0}" target="_blank" class="btn btn-xs btn-default" title="{_admin.terms.plPreviewTip} ({$term})" style="padding:3px 7px;font-size:11px;border-radius:5px;color:#0284c7;background:#f0f9ff;border:1px solid #bae6fd;">
+                                    <td style="padding:4px;text-align:center;vertical-align:middle;background:#ffffff;">
+                                        <a href="{plink downloadSingleProductLabelPdf! $item->id, $labelTypeId, 0}" target="_blank" class="btn btn-xs btn-default" title="{_admin.terms.plPreviewTip} ({$term})" style="padding:3px 7px;font-size:11px;border-radius:5px;color:#0284c7;background:#f0f9ff;border:1px solid #bae6fd;">
                                             <i class="far fa-eye"></i> {_admin.terms.plView}
                                         </a>
                                     </td>
-                                    <td style="padding:4px;text-align:center;vertical-align:middle;">
+                                    <td style="padding:4px;text-align:center;vertical-align:middle;background:#ffffff;">
                                         {if $lblCount > 0}
-                                            <a href="{plink downloadSingleProductLabelPdf! $item->id, $labelTypeId, 1}" target="_blank" class="btn btn-xs btn-default"                                             <a href="{plink downloadSingleProductLabelPdf! $item->id, $labelTypeId, 1}" target="_blank" class="btn btn-xs btn-default" title="{_admin.terms.plDownloadTip} {$term} ({$lblCount})" style="padding:3px 8px;font-size:11px;border-radius:5px;color:#042f2e;background:#ccfbf1;border:1px solid #5eead4;font-weight:700;">
+                                            <a href="{plink downloadSingleProductLabelPdf! $item->id, $labelTypeId, 1}" target="_blank" class="btn btn-xs btn-default" title="{_admin.terms.plDownloadTip} {$term} ({$lblCount})" style="padding:3px 8px;font-size:11px;border-radius:5px;color:#042f2e;background:#ccfbf1;border:1px solid #5eead4;font-weight:700;">
                                                 <i class="fa fa-download text-success"></i> {_admin.terms.plDownload} ({$lblCount})
                                             </a>
                                         {else}
-                                            <span class="btn btn-xs btn-default disabled"                                             <span class="btn btn-xs btn-default disabled" title="{_admin.terms.plNoQty}" style="padding:3px 8px;font-size:11px;border-radius:5px;color:#94a3b8;background:#f8fafc;border:1px solid #e2e8f0;cursor:not-allowed;opacity:0.6;">
+                                            <span class="btn btn-xs btn-default disabled" title="{_admin.terms.plNoQty}" style="padding:3px 8px;font-size:11px;border-radius:5px;color:#94a3b8;background:#f8fafc;border:1px solid #e2e8f0;cursor:not-allowed;opacity:0.6;">
                                                 <i class="fa fa-download"></i> {_admin.terms.plDownload} (0)
                                             </span>
                                         {/if}
@@ -101,16 +104,16 @@
                         </tbody>
                     </table>
 
-                    <div style="margin-top:10px;padding-top:8px;border-top:1px solid #eef2f6;display:flex;align-items:center;justify-content:space-between;gap:6px;">
-                        <a href="{plink downloadProductAllLabelsPdf! $item->id, 0}" target="_blank" class="btn btn-xs btn-default" style="flex:1;text-align:center;padding:5px 6px;font-size:11px;font-weight:600;color:#0369a1;background:#f0f9ff;border:1px solid #bae6fd;border-radius:6px;"                         <a href="{plink downloadProductAllLabelsPdf! $item->id, 0}" target="_blank" class="btn btn-xs btn-default" style="flex:1;text-align:center;padding:5px 6px;font-size:11px;font-weight:600;color:#0369a1;background:#f0f9ff;border:1px solid #bae6fd;border-radius:6px;" title="{_admin.terms.plPreviewAllTip}">
+                    <div style="margin-top:10px;padding-top:8px;border-top:1px solid #eef2f6;display:flex;align-items:center;justify-content:space-between;gap:6px;background:#ffffff;">
+                        <a href="{plink downloadProductAllLabelsPdf! $item->id, 0}" target="_blank" class="btn btn-xs btn-default" style="flex:1;text-align:center;padding:5px 6px;font-size:11px;font-weight:600;color:#0369a1;background:#f0f9ff;border:1px solid #bae6fd;border-radius:6px;" title="{_admin.terms.plPreviewAllTip}">
                             <i class="far fa-eye m-r-xxs"></i> {_admin.terms.plPreviewAll}
                         </a>
                         {if $totalRowLabels > 0}
-                            <a href="{plink downloadProductAllLabelsPdf! $item->id, 1}" target="_blank" class="btn btn-xs btn-default" style="flex:1;text-align:center;padding:5px 6px;font-size:11px;font-weight:700;color:#042f2e;background:#ccfbf1;border:1px solid #5eead4;border-radius:6px;"                             <a href="{plink downloadProductAllLabelsPdf! $item->id, 1}" target="_blank" class="btn btn-xs btn-default" style="flex:1;text-align:center;padding:5px 6px;font-size:11px;font-weight:700;color:#042f2e;background:#ccfbf1;border:1px solid #5eead4;border-radius:6px;" title="{_admin.terms.plDownloadAllTip} ({$totalRowLabels})">
+                            <a href="{plink downloadProductAllLabelsPdf! $item->id, 1}" target="_blank" class="btn btn-xs btn-default" style="flex:1;text-align:center;padding:5px 6px;font-size:11px;font-weight:700;color:#042f2e;background:#ccfbf1;border:1px solid #5eead4;border-radius:6px;" title="{_admin.terms.plDownloadAllTip} ({$totalRowLabels})">
                                 <i class="fa fa-download m-r-xxs text-success"></i> {_admin.terms.plDownloadAll} ({$totalRowLabels})
                             </a>
                         {else}
-                            <span class="btn btn-xs btn-default disabled" style="flex:1;text-align:center;padding:5px 6px;font-size:11px;color:#94a3b8;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;cursor:not-allowed;opacity:0.6;"                             <span class="btn btn-xs btn-default disabled" style="flex:1;text-align:center;padding:5px 6px;font-size:11px;color:#94a3b8;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;cursor:not-allowed;opacity:0.6;" title="{_admin.terms.plNoQtyAll}">
+                            <span class="btn btn-xs btn-default disabled" style="flex:1;text-align:center;padding:5px 6px;font-size:11px;color:#94a3b8;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;cursor:not-allowed;opacity:0.6;" title="{_admin.terms.plNoQtyAll}">
                                 <i class="fa fa-download m-r-xxs"></i> {_admin.terms.plDownloadAll} (0)
                             </span>
                         {/if}

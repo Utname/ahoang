@@ -1,8 +1,10 @@
 $(function () {
     $(document).on('show.bs.dropdown', '.dropdown', function () {
-        $(this).closest('tr').addClass('open-dropdown').css({'position': 'relative', 'z-index': 9999});
-    }).on('hide.bs.dropdown', '.dropdown', function () {
-        $(this).closest('tr').removeClass('open-dropdown').css({'position': '', 'z-index': ''});
+        $(this).closest('tr').addClass('open-dropdown has-open-dropdown').css({'position': 'relative', 'z-index': 99999});
+        $(this).closest('td').addClass('has-open-dropdown').css({'position': 'relative', 'z-index': 99999});
+    }).on('hide.bs.dropdown hidden.bs.dropdown', '.dropdown', function () {
+        $(this).closest('tr').removeClass('open-dropdown has-open-dropdown').css({'position': '', 'z-index': ''});
+        $(this).closest('td').removeClass('has-open-dropdown').css({'position': '', 'z-index': ''});
     });
 
     $("body").on('click', "a.ajax", function (event) {
