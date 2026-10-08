@@ -7,7 +7,7 @@
         box-sizing: border-box;
         position: relative;
         width: 133mm;
-        height: 41mm;
+        height: 38mm;
         border: 0.4mm dashed #111;
         background: #fff;
         color: #111;
@@ -15,13 +15,13 @@
         font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     }
 
-    /* Left logo / brand column (24mm x 41mm) */
+    /* Left logo / brand column (24mm x 38mm) */
     .vel2-logo-col {
         position: absolute;
         top: 0;
         left: 0;
         width: 24mm;
-        height: 41mm;
+        height: 38mm;
         border-right: 0.4mm dashed #111;
         text-align: center;
         padding: 1.2mm 1mm;
@@ -36,7 +36,7 @@
     }
     .vel2-logo-divider {
         width: 21mm;
-        margin: 1.2mm auto 1.2mm auto;
+        margin: 1mm auto 1mm auto;
         border-top: 0.3mm dashed #111;
     }
     .vel2-brand-text {
@@ -44,18 +44,18 @@
         font-family: Nunito, sans-serif;
         font-weight: 900;
         font-style: italic;
-        font-size: 5.8mm;
+        font-size: 4.4mm;
         line-height: 1.05;
         color: #111;
     }
 
-    /* Right main content column (109mm x 41mm) */
+    /* Right main content column (109mm x 38mm) */
     .vel2-content-col {
         position: absolute;
         top: 0;
         left: 28.5mm;
         width: 102.5mm;
-        height: 41mm;
+        height: 38mm;
         padding: 0.6mm 1.5mm 0.4mm 1.5mm;
     }
 
@@ -67,17 +67,18 @@
         line-height: 1.1;
         overflow: hidden;
         white-space: nowrap;
-        height: 3.5mm;
+        height: 3.6mm;
+        padding-top: 0.2mm;
     }
 
     /* 2. Meta row (Origin, Note1, More species) */
     .vel2-meta-table {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 0.1mm;
+        margin-top: 0.2mm;
     }
     .vel2-meta-left {
-        width: 44mm;
+        width: 50mm;
         vertical-align: middle;
         text-align: left;
     }
@@ -85,75 +86,70 @@
         vertical-align: middle;
         text-align: center;
         font-family: Nunito, sans-serif;
+        font-weight: 900;
         font-style: italic;
-        font-size: 2.2mm;
-        font-weight: 400;
+        font-size: 2.6mm;
         line-height: 1.1;
         white-space: nowrap;
     }
     .vel2-meta-right {
-        width: 25mm;
-        vertical-align: middle;
-        text-align: right;
-        font-family: Nunito, sans-serif;
-        font-style: italic;
-        font-size: 2.2mm;
-        font-weight: 400;
-        line-height: 1.1;
-        white-space: nowrap;
+        width: 10mm;
     }
 
-    /* Origin box inside meta-left */
-    .vel2-origin-box {
+    .vel2-more-species {
+        font-family: Nunito, sans-serif;
+        font-weight: 900;
+        font-style: italic;
+        font-size: 2.6mm;
+        line-height: 1.1;
+        margin-bottom: 0.2mm;
+    }
+    .vel2-origin-row {
         display: table;
         white-space: nowrap;
     }
+    .vel2-origin-label-cell {
+        display: table-cell;
+        vertical-align: middle;
+        font-family: Nunito, sans-serif;
+        font-weight: 900;
+        font-style: italic;
+        font-size: 2.2mm;
+        padding-right: 1mm;
+    }
     .vel2-origin-flag-cell {
         display: table-cell;
-        width: 5.5mm;
         vertical-align: middle;
+        width: 5.5mm;
     }
     .vel2-origin-flag-img {
         width: 4.5mm;
         height: 4.5mm;
         display: block;
-        border: 0.25mm solid #111;
+        border: 0.2mm solid #111;
         border-radius: 50%;
     }
-    .vel2-origin-text-cell {
+    .vel2-origin-name-cell {
         display: table-cell;
         vertical-align: middle;
-        padding-left: 1.2mm;
-        white-space: nowrap;
-    }
-    .vel2-origin-label {
-        font-size: 1.7mm;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        font-weight: 700;
-        color: #111;
-        display: block;
-        line-height: 1;
-    }
-    .vel2-origin-name {
-        font-size: 2.6mm;
-        font-weight: 800;
-        line-height: 1.05;
-        display: block;
-        white-space: nowrap;
+        font-family: Nunito, sans-serif;
+        font-weight: 900;
+        font-style: italic;
+        font-size: 2.2mm;
+        padding-left: 1mm;
     }
 
-    /* 3. Main Price Comparison Section */
+    /* 3. Main Price & Discount Table */
     .vel2-price-table {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 0.1mm;
+        margin-top: 0.4mm;
     }
     .vel2-price-left {
-        width: 47mm;
+        width: 48mm;
         vertical-align: middle;
         text-align: right;
-        padding-right: 2mm;
+        padding-right: 2.5mm;
     }
     .vel2-price-divider {
         width: 0.3mm;
@@ -166,41 +162,58 @@
         padding-left: 2.5mm;
     }
 
-    /* Běžná cena */
-    .vel2-base-row {
+    /* Nejnižší cena za 30 dní */
+    .vel2-lowest-row {
         white-space: nowrap;
         text-align: right;
     }
-    .vel2-base-label {
+    .vel2-lowest-label {
         display: inline-block;
         vertical-align: middle;
-        font-size: 2mm;
-        line-height: 1.15;
-        letter-spacing: 0.06em;
+        font-size: 2.2mm;
+        line-height: 1.2;
+        letter-spacing: 0.04em;
         text-transform: uppercase;
         font-weight: 700;
+        color: #111;
         text-align: right;
         margin-right: 1.5mm;
     }
-    .vel2-base-val {
+    .vel2-lowest-val-box {
+        position: relative;
         display: inline-block;
         vertical-align: middle;
+    }
+    .vel2-lowest-val {
         font-family: Nunito, sans-serif;
         font-weight: 900;
         font-style: italic;
-        font-size: 5.6mm;
+        font-size: 5.5mm;
         line-height: 1;
+        color: #111;
     }
-    .vel2-base-currency {
-        font-size: 3.5mm;
+    .vel2-strike-wrap {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 0;
+        height: 0;
+        overflow: visible;
+        display: inline-block;
+    }
+    .vel2-strike-img {
+        position: absolute;
+        left: -1mm;
+        top: 3.0mm;
+        height: 2.8mm;
     }
 
     /* Ušetříte brush badge */
     .vel2-save-box {
         position: relative;
-        width: 44mm;
+        width: 40mm;
         height: 4.4mm;
-        margin-top: 0.3mm;
+        margin-top: 0.5mm;
         margin-left: auto;
         transform: rotate(-1.2deg);
         color: #fff;
@@ -209,14 +222,14 @@
         position: absolute;
         top: 0;
         left: 0;
-        width: 44mm;
+        width: 40mm;
         height: 4.4mm;
         z-index: 0;
     }
     .vel2-save-table {
         position: relative;
         z-index: 1;
-        width: 44mm;
+        width: 40mm;
         height: 4.4mm;
         border-collapse: collapse;
         margin: 0 auto;
@@ -224,12 +237,12 @@
     .vel2-save-copy-cell {
         vertical-align: middle;
         text-align: right;
-        font-size: 1.7mm;
-        letter-spacing: 0.06em;
+        font-size: 2.2mm;
+        letter-spacing: 0.08em;
         text-transform: uppercase;
         font-weight: 700;
         white-space: nowrap;
-        padding-left: 1.5mm;
+        padding-left: 2mm;
     }
     .vel2-save-val-cell {
         vertical-align: middle;
@@ -237,38 +250,22 @@
         font-family: Nunito, sans-serif;
         font-weight: 900;
         font-style: italic;
-        font-size: 3.6mm;
+        font-size: 4.2mm;
         line-height: 1;
         white-space: nowrap;
-        padding: 0 0.6mm;
-    }
-    .vel2-save-suffix-cell {
-        vertical-align: middle;
-        text-align: left;
-        font-size: 1.5mm;
-        font-weight: 600;
-        white-space: nowrap;
-        padding-right: 1.5mm;
+        padding: 0 1.2mm;
     }
 
     /* Naše cena */
-    .vel2-our-row {
-        white-space: nowrap;
-    }
     .vel2-our-label {
-        display: inline-block;
-        vertical-align: middle;
         font-size: 2mm;
-        line-height: 1.15;
-        letter-spacing: 0.06em;
+        letter-spacing: 0.08em;
         text-transform: uppercase;
         font-weight: 700;
-        text-align: right;
-        margin-right: 1.5mm;
+        margin-bottom: 0.2mm;
+        margin-left: 3mm;
     }
     .vel2-main-price-box {
-        display: inline-block;
-        vertical-align: middle;
         white-space: nowrap;
     }
     .vel2-price-major {
@@ -277,7 +274,7 @@
         font-family: Nunito, sans-serif;
         font-weight: 900;
         font-style: italic;
-        font-size: 16mm;
+        font-size: 17.5mm;
         line-height: 0.82;
     }
     .vel2-price-minor-col {
@@ -285,98 +282,82 @@
         vertical-align: top;
         text-align: left;
         padding-top: 0.2mm;
-        margin-left: 0.5mm;
+        margin-left: 0.6mm;
     }
     .vel2-price-minor {
         font-family: Nunito, sans-serif;
         font-weight: 900;
         font-style: italic;
-        font-size: 7.2mm;
+        font-size: 8.5mm;
         line-height: 0.9;
     }
     .vel2-price-currency {
         font-family: Nunito, sans-serif;
         font-weight: 900;
         font-style: italic;
-        font-size: 3.1mm;
+        font-size: 3.4mm;
         line-height: 0.9;
         white-space: nowrap;
-        margin-top: 0.3mm;
+        margin-top: 0.2mm;
     }
 
-    /* 4. Unit price row */
-    .vel2-unit-price {
-        text-align: right;
-        font-family: Nunito, sans-serif;
-        font-style: italic;
-        font-size: 2mm;
-        white-space: nowrap;
-        padding-right: 1mm;
-        line-height: 1.1;
-        margin-top: 0.1mm;
-        margin-bottom: 0.1mm;
-    }
-
-    /* 5. Bottom row (Barcode, Note 3) */
+    /* 4. Bottom row (EAN, Note 3, Unit price) */
     .vel2-bottom-table {
         width: 100%;
         border-collapse: collapse;
+        margin-top: 0.2mm;
     }
-    .vel2-barcode-cell {
-        width: 42mm;
+    .vel2-bottom-ean {
         vertical-align: bottom;
         text-align: left;
-    }
-    .vel2-barcode-bars {
-        height: 3.2mm;
-        white-space: nowrap;
-        margin-bottom: 0.1mm;
-    }
-    .vel2-barcode-bars > div {
-        float: left;
-        height: 100%;
-    }
-    .vel2-barcode-ean {
-        font-size: 1.7mm;
+        font-size: 2.2mm;
         font-weight: 600;
         white-space: nowrap;
         letter-spacing: 0.04em;
-        line-height: 1;
-        clear: both;
     }
-    .vel2-note3-cell {
+    .vel2-bottom-note3 {
         vertical-align: bottom;
         text-align: center;
         font-family: Nunito, sans-serif;
+        font-weight: 900;
         font-style: italic;
-        font-size: 2mm;
-        line-height: 1.15;
-        max-height: 4mm;
-        overflow: hidden;
+        font-size: 2.2mm;
+        line-height: 1.1;
+        white-space: nowrap;
     }
-    .vel2-bottom-spacer {
-        width: 20mm;
+    .vel2-bottom-unit {
+        vertical-align: bottom;
+        text-align: right;
+        font-family: Nunito, sans-serif;
+        font-weight: 900;
+        font-style: italic;
+        font-size: 2.2mm;
+        white-space: nowrap;
+        padding-right: 1mm;
     }
 
-    /* 3-digit price scaling (e.g. 139,90) */
+    /* 3-digit price scaling */
     .price-digits-3 .vel2-price-major { font-size: 14mm; }
-    .price-digits-3 .vel2-price-minor { font-size: 6.2mm; }
-    .price-digits-3 .vel2-price-currency { font-size: 2.8mm; margin-top: 0.2mm; }
-    .price-digits-3 .vel2-base-val { font-size: 4.8mm; }
-    .price-digits-3 .vel2-price-left { width: 42mm; }
+    .price-digits-3 .vel2-price-minor { font-size: 6.8mm; }
+    .price-digits-3 .vel2-price-currency { font-size: 2.9mm; margin-top: 0.2mm; }
+    .price-digits-3 .vel2-lowest-val { font-size: 4.8mm; }
+    .price-digits-3 .vel2-price-left { width: 44mm; }
 </style>
 
 {var $vel2Classes = ($priceDigits >= 3 ? 'price-digits-3' : '')}
 {var $logoMarkup = '<img class="vel2-logo-img" src="' . $logoDataUri . '" alt="Fikko market">'}
 {var $flagMarkup = $flagIconDataUri ? '<img class="vel2-origin-flag-img" src="' . $flagIconDataUri . '" alt="">' : ''}
 {var $brushMarkup = '<img class="vel2-save-brush" src="' . $brushDataUri . '" alt="">'}
+{var $strikeWidth = (strlen($basePriceText) <= 4 ? '18mm' : (strlen($basePriceText) <= 5 ? '23mm' : (strlen($basePriceText) <= 6 ? '28mm' : '34mm')))}
+{var $strikeMarkup = '<img class="vel2-strike-img" src="' . $strikeSlashDataUri . '" style="width:' . $strikeWidth . '" alt="">'}
 
 <div class="fikko-vel2 {$vel2Classes}">
     <div class="vel2-logo-col">
         {$logoMarkup|noescape}
         <div class="vel2-logo-divider"></div>
         <div class="vel2-brand-text">
-            <div>Fikko</div>
+            <div>Mega</div>
+            <div>Super</div>
             <div>Cena</div>
         </div>
     </div>
@@ -387,29 +368,29 @@
         <table class="vel2-meta-table" cellpadding="0" cellspacing="0">
             <tr>
                 <td class="vel2-meta-left">
-                    <div n:if="$country" class="vel2-origin-box">
-                        <div class="vel2-origin-flag-cell">{$flagMarkup|noescape}</div>
-                        <div class="vel2-origin-text-cell">
-                            <span class="vel2-origin-label">Země původu</span>
-                            <span class="vel2-origin-name">{$country->name}</span>
-                        </div>
+                    <div n:if="$label && $label->is_more_species" class="vel2-more-species">Více druhů</div>
+                    <div n:if="$country" class="vel2-origin-row">
+                        <span class="vel2-origin-label-cell">Země původu:</span>
+                        <span class="vel2-origin-flag-cell">{$flagMarkup|noescape}</span>
+                        <span class="vel2-origin-name-cell">{$country->name}</span>
                     </div>
                 </td>
                 <td class="vel2-meta-center">
                     <div n:if="$note1">{$note1}</div>
                 </td>
-                <td class="vel2-meta-right">
-                    <div n:if="$label && $label->is_more_species">Více druhů</div>
-                </td>
+                <td class="vel2-meta-right"></td>
             </tr>
         </table>
 
         <table class="vel2-price-table" cellpadding="0" cellspacing="0">
             <tr>
                 <td class="vel2-price-left">
-                    <div n:if="$isDiscounted && $basePrice > $finalPrice" class="vel2-base-row">
-                        <span class="vel2-base-label">Běžná<br>cena</span>
-                        <span class="vel2-base-val">{$basePriceText} <span class="vel2-base-currency">{$currencySymbol}</span></span>
+                    <div n:if="$isDiscounted && $basePrice > $finalPrice" class="vel2-lowest-row">
+                        <span class="vel2-lowest-label">Nejnižší cena<br>za 30 dní</span>
+                        <div class="vel2-lowest-val-box">
+                            <span class="vel2-lowest-val">{$basePriceText} {$currencySymbol}</span>
+                            <span class="vel2-strike-wrap">{$strikeMarkup|noescape}</span>
+                        </div>
                     </div>
                     <div n:if="$isDiscounted && $saving > 0" class="vel2-save-box">
                         {$brushMarkup|noescape}
@@ -417,7 +398,6 @@
                             <tr>
                                 <td class="vel2-save-copy-cell">UŠETŘÍTE</td>
                                 <td class="vel2-save-val-cell">{$savingText}&nbsp;{$currencySymbol}</td>
-                                <td class="vel2-save-suffix-cell">oproti běžné ceně</td>
                             </tr>
                         </table>
                     </div>
@@ -426,36 +406,27 @@
                 <td class="vel2-price-divider"></td>
 
                 <td class="vel2-price-right">
-                    <div class="vel2-our-row">
-                        <span class="vel2-our-label">Naše<br>cena</span>
-                        <div class="vel2-main-price-box">
-                            <span class="vel2-price-major">{$finalPriceMajor}</span>
-                            <div class="vel2-price-minor-col">
-                                <div class="vel2-price-minor">{$finalPriceMinor}</div>
-                                <div class="vel2-price-currency">{$currencySymbol} / 1 ks</div>
-                            </div>
+                    <div class="vel2-our-label">Naše cena</div>
+                    <div class="vel2-main-price-box">
+                        <span class="vel2-price-major">{$finalPriceMajor}</span>
+                        <div class="vel2-price-minor-col">
+                            <div class="vel2-price-minor">{$finalPriceMinor}</div>
+                            <div class="vel2-price-currency">{$currencySymbol} / 1 ks</div>
                         </div>
                     </div>
                 </td>
             </tr>
         </table>
 
-        <div n:if="$unit" class="vel2-unit-price">
-            cena za {$unit->unitWeight}{$unit->unitShort} = {$unit->price|number:2,',',' '} {$currencySymbol}
-        </div>
-
         <table class="vel2-bottom-table" cellpadding="0" cellspacing="0">
             <tr>
-                <td class="vel2-barcode-cell">
-                    <div n:if="$bars" class="vel2-barcode-bars">
-                        <div n:foreach="$bars as $bar" style="height:100%;background:{$bar['color']|noescape};width:{$bar['width']|noescape}"></div>
-                    </div>
-                    <div class="vel2-barcode-ean">EAN: {$eanText}</div>
+                <td class="vel2-bottom-ean">EAN: {$eanText}</td>
+                <td class="vel2-bottom-note3">
+                    <span n:if="$note3 || $note2">{$note3 ?: $note2}</span>
                 </td>
-                <td class="vel2-note3-cell">
-                    <div n:if="$note3 || $note2">{$note3 ?: $note2}</div>
+                <td class="vel2-bottom-unit">
+                    <span n:if="$unit">cena za {$unit->unitWeight}{$unit->unitShort} = {$unit->price|number:2,',',' '} {$currencySymbol}</span>
                 </td>
-                <td class="vel2-bottom-spacer"></td>
             </tr>
         </table>
     </div>

@@ -14,6 +14,7 @@ class PrintTemplatesService
 	public const PRESET_A4_DISCOUNT = 'a4-discount';
 	public const PRESET_A5_DISCOUNT = 'a5-discount';
 	public const PRESET_VEL1 = 'vel1';
+	public const PRESET_VEL2 = 'vel2';
 	public const PRESET_VEL3 = 'vel3';
 	public const PRESET_FRUIT = 'fruit';
 	public const PRESET_VEL2B_AKCE = 'vel2b-akce';
@@ -147,6 +148,13 @@ class PrintTemplatesService
 				'widthMm' => 150,
 				'heightMm' => 44,
 				'sourceFile' => 'vel1.latte',
+			],
+			self::PRESET_VEL2 => [
+				'name' => 'Fikko Cena Vel.2',
+				'labelTypeId' => ProductLabelsEntity::TYPE_SIZE_2,
+				'widthMm' => 133,
+				'heightMm' => 38,
+				'sourceFile' => 'vel2.latte',
 			],
 			self::PRESET_VEL3 => [
 				'name' => 'Fikko Cena Vel.3',
@@ -710,8 +718,7 @@ class PrintTemplatesService
 
 
 	/**
-	 * Velikost 2 / 2B is a two-up A4 stock. Its stored source is one label; this
-	 * method reuses that exact label twice, at the coordinates from the design.
+	 * Velikost 2 is a single label on A4 sheet (133 × 38 mm) at top-left padding (8mm 8mm).
 	 */
 	private function renderSize2Page(string $html, PrintTemplatesEntity $template): string
 	{
@@ -719,20 +726,17 @@ class PrintTemplatesService
 		preg_match('#<body\b[^>]*>(.*)</body>#is', $html, $bodyMatch);
 		$labelHtml = $bodyMatch[1] ?? (preg_replace('#<style\b[^>]*>.*?</style>#is', '', $html) ?? $html);
 		$styles = implode('', $styleMatches[0] ?? []);
-		$height = (float)$template->height_mm > 0 ? (float)$template->height_mm : 41.0;
-		$secondTop = 8.0 + $height;
+		$height = (float)$template->height_mm > 0 ? (float)$template->height_mm : 38.0;
+		$width = (float)$template->width_mm > 0 ? (float)$template->width_mm : 133.0;
 
 		return '<style>'
 			.'@page{margin:0}body{margin:0!important;padding:0!important;width:210mm!important}'
 			.'.size2-sheet{position:relative;width:210mm;height:297mm;overflow:hidden}'
-			.'.size2-label{position:absolute;left:8mm;width:133mm;height:'.$height.'mm;overflow:visible}'
-			.'.size2-label.first{top:8mm}.size2-label.second{top:'.$secondTop.'mm}'
-			.'.size2-label.second .size2b-label-root,.size2-label.second .fikko-vel2{border-top:0}'
-			.'.size2-divider{position:absolute;top:'.$secondTop.'mm;left:8mm;width:133mm;border-top:.4mm dashed #111;z-index:5}'
-			.'.size2-label table.wrap{height:'.$height.'mm!important}'
+			.'.size2-label{position:absolute;left:8mm;top:8mm;width:'.$width.'mm;height:'.$height.'mm;overflow:visible}'
 			.'</style>'.$styles
-			.'<div class="size2-sheet"><div class="size2-label first">'.$labelHtml.'</div><div class="size2-divider"></div>'
-			.'<div class="size2-label second">'.$labelHtml.'</div></div>';
+			.'<div class="size2-sheet">'
+			.'<div class="size2-label">'.$labelHtml.'</div>'
+			.'</div>';
 	}
 
 
