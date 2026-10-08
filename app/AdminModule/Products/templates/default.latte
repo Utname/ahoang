@@ -146,46 +146,46 @@
             {/snippet}
 
 
-                <div class="mosaic-list-table-wrap dataTables_wrapper m-t-md">
+                <div class="mosaic-list-table-wrap dataTables_wrapper m-t-md" style="overflow-x:auto;overflow-y:visible;padding-bottom:15px;">
                         <table class="table table-striped table-hover mosaic-table-compact" style="margin-bottom:0;width:100%;">
                             <thead>
                             <tr>
-                                <th class="w-40 text-center" style="width:40px;min-width:40px;"></th>
-                                <th class="w-50 text-center" style="width:50px;min-width:50px;"></th>
-                                <th style="min-width:240px;">
+                                <th class="w-40 text-center" style="width:36px;min-width:36px;"></th>
+                                <th class="w-50 text-center" style="width:48px;min-width:48px;"></th>
+                                <th style="min-width:200px;">
                                     <div>
                                         <strong>{_admin.terms.name} {control sorting 'name'} / {_admin.terms.code} {control sorting 'code'} / {_admin.terms.createdAt} {control sorting 'created_at'}</strong>
                                     </div>
                                 </th>
-                                <th class="visible-xxl w-200" style="min-width:180px;">
+                                <th class="visible-xxl w-200" style="min-width:160px;">
                                     <div class="w-200"><strong>{_admin.terms.category}</strong></div>
                                 </th>
-                                <th class="w-450 text-center" colspan="4" style="min-width:380px;">
+                                <th class="text-center" colspan="4" style="min-width:340px;">
                                     <div><strong>{_admin.terms.action}</strong></div>
                                 </th>
-                                <th class="w-380 text-center" style="min-width:370px;">
-                                    <div class="w-380"><strong>{_admin.terms.labels}</strong> (A4 · A5 · Vel. 1 · Vel. 2 · Vel. 3)</div>
+                                <th class="text-center" style="width:235px;min-width:235px;">
+                                    <div><strong>{_admin.terms.labels}</strong></div>
                                 </th>
-                                <th class="text-center" style="width:55px;min-width:55px;">
+                                <th class="text-center" style="width:48px;min-width:48px;">
                                     <i class="far fa-eye" data-toggle="tooltip" title="{_admin.terms.isActive}"></i>
                                 </th>
-                                <th class="text-center" style="width:70px;min-width:70px;padding-right:12px;">
+                                <th class="text-center" style="width:65px;min-width:65px;padding-right:8px;">
                                     <i class="fa fa-ellipsis-v text-muted" title="Thao tác"></i>
                                 </th>
                             </tr>
                             <tr>
                                 <th colspan="3"></th>
                                 <th class="visible-xxl"></th>
-                                <th class="w-180 text-center" style="width:140px;min-width:140px;">
+                                <th class="text-center" style="width:130px;min-width:130px;">
                                     <div style="font-weight:700;">{_admin.terms.price}</div>
                                 </th>
-                                <th class="w-210 text-center" style="width:170px;min-width:170px;">
+                                <th class="text-center" style="width:150px;min-width:150px;">
                                     <div style="font-weight:700;">{_admin.terms.date}</div>
                                 </th>
-                                <th class="w-40 text-center" style="width:40px;min-width:40px;">
+                                <th class="w-40 text-center" style="width:35px;min-width:35px;">
                                     <div><i class="fa fa-save"></i></div>
                                 </th>
-                                <th class="w-40 text-center" style="width:40px;min-width:40px;">
+                                <th class="w-40 text-center" style="width:35px;min-width:35px;">
                                     <div><i class="far fa-percent"></i></div>
                                 </th>
                                 <th></th>
@@ -218,7 +218,7 @@
                                             <span>{$i->name}</span>{sep}<br>{/sep}
                                         {/foreach}
                                     </td>
-                                    <td class="row-as-link-ignore product-price-fields" style="width:140px;min-width:140px;vertical-align:middle;">
+                                    <td class="row-as-link-ignore product-price-fields" style="width:130px;min-width:130px;vertical-align:middle;">
                                         <div style="margin-bottom:6px;">
                                             <label>{_admin.terms.basePrice}:</label>
                                             <div style="display:flex;align-items:center;gap:6px;">
@@ -248,7 +248,7 @@
                                             </div>
                                         {/if}
                                     </td>
-                                    <td class="row-as-link-ignore product-date-fields" style="width:170px;min-width:170px;vertical-align:middle;">
+                                    <td class="row-as-link-ignore product-date-fields" style="width:150px;min-width:150px;vertical-align:middle;">
                                         <div class="calendar-today-overlay" style="margin-bottom:6px;">
                                             <label>{_admin.terms.actionFrom}:</label>
                                             <div style="display:flex;align-items:center;gap:5px;">
@@ -287,13 +287,13 @@
                                     <td class="row-as-link-ignore text-center">
                                         {control "productActions-$item->id"}
                                     </td>
-                                    <td class="row-as-link-ignore text-center">
+                                    <td class="row-as-link-ignore text-center" style="width:235px;min-width:235px;vertical-align:middle;">
                                         {control "productLabels-$item->id"}
                                     </td>
-                                    <td class="text-center row-as-link-ignore" style="width:55px;min-width:55px;vertical-align:middle;">
+                                    <td class="text-center row-as-link-ignore" style="width:48px;min-width:48px;vertical-align:middle;">
                                         {include APP_DIR.'/AdminModule/__inc/boolSwitch.latte', 'item' => $item, 'param' => 'is_active', 'isEye' => TRUE}
                                     </td>
-                                    <td class="actions row-as-link-ignore text-center" style="width:70px;min-width:70px;padding-right:12px;vertical-align:middle;">
+                                    <td class="actions row-as-link-ignore text-center" style="width:65px;min-width:65px;padding-right:8px;vertical-align:middle;">
                                         <div class="dropdown" style="display:inline-block;">
                                             <a class="dropdown-toggle btn btn-default mosaic-row-actions-btn" data-toggle="dropdown" href="#" title="Thao tác">
                                                 <i class="fa fa-bars"></i>
