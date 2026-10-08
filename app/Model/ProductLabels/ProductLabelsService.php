@@ -125,8 +125,8 @@ class ProductLabelsService
 
 		$printedIds = [];
 
-		// Every label type now has an HTML/Dompdf template; a type only falls back
-		// to the legacy TCPDF buffer below when no active template row matches it.
+		// Non-A4 label types (A5, Vel.1, Vel.3, etc.) use new HTML/Dompdf templates by default when available;
+		// A4 labels only use the new template when specifically ticked for the product ($newA4ProductIds).
 		$templateJobs = [];
 		foreach (array_keys(ProductLabelsEntity::TYPES_ARR) as $templateTypeId) {
 			if (!isset($itemsBuffer[$templateTypeId]['items'])) {
@@ -137,7 +137,10 @@ class ProductLabelsService
 			foreach ($itemsBuffer[$templateTypeId]['items'] as $labelItems) {
 				$label = $labelItems[0] ?? NULL;
 				$product = $label?->getProduct();
-				$useTemplate = $label && $product && in_array((int)$product->id, $newA4ProductIds, TRUE);
+				$isA4 = ($templateTypeId === ProductLabelsEntity::TYPE_A4);
+				$useTemplate = $label && $product && (
+					(!$isA4) || in_array((int)$product->id, $newA4ProductIds, TRUE)
+				);
 				$template = $useTemplate
 					? $this->printTemplatesService->findTemplateForProductLabel($label, $product, $branchesId)
 					: NULL;

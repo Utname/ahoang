@@ -87,6 +87,15 @@ abstract class BaseRepository
 
 
 	/**
+	 * @return \Nette\Database\Explorer
+	 */
+	public function getDatabase(): \Nette\Database\Explorer
+	{
+		return $this->db;
+	}
+
+
+	/**
 	 * @param Selection $selection
 	 * @param string $keyColumn
 	 * @return array

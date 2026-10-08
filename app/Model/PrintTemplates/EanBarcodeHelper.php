@@ -71,4 +71,31 @@ class EanBarcodeHelper
 
 		return $bars;
 	}
+
+
+	/**
+	 * Formats or generates a 13-digit scale barcode EAN-13 from PLU and price (if PLU/short code provided)
+	 * or standardizes an existing EAN-13.
+	 *
+	 * @param string $codeOrPlu
+	 * @param float $price
+	 * @return string
+	 */
+	public static function formatFruitEan(string $codeOrPlu, float $price): string
+	{
+		$digits = preg_replace('/\D/', '', $codeOrPlu) ?? '';
+		if (strlen($digits) === 13) {
+			return $digits;
+		}
+		$plu = str_pad(substr($digits ?: '10001', -5), 5, '0', STR_PAD_LEFT);
+		$priceHalere = str_pad(substr((string)round($price * 100), -5), 5, '0', STR_PAD_LEFT);
+		$body = '28' . $plu . $priceHalere;
+		$d = array_map('intval', str_split($body));
+		$sum = 0;
+		foreach ($d as $i => $v) {
+			$sum += $v * ($i % 2 ? 3 : 1);
+		}
+		$check = (10 - ($sum % 10)) % 10;
+		return $body . $check;
+	}
 }

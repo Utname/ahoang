@@ -156,8 +156,8 @@ class PrintTemplatesService
 			self::PRESET_FRUIT => [
 				'name' => 'Fikko Cena Ovoce',
 				'labelTypeId' => ProductLabelsEntity::TYPE_SIZE_3,
-				'widthMm' => 100,
-				'heightMm' => 65,
+				'widthMm' => 50,
+				'heightMm' => 35,
 				'sourceFile' => 'fruit.latte',
 			],
 			default => throw new \InvalidArgumentException('Unknown print template preset.'),
@@ -220,7 +220,7 @@ class PrintTemplatesService
 		// Match the specific "fikko-a4" preset markup, not just its physical size — an
 		// older 210 × 297 mm template (a different design, pre-dating this preset) must
 		// not have its content mangled by the A4-only barcode-stripping surgery below.
-		$isA4 = str_contains($template->html_source, 'fikko-a4');
+		$isA4 = str_contains($template->html_source, 'fikko-a4') || str_contains($template->html_source, 'A4 Akce') || (float)$template->width_mm === 210.0;
 		$isFruit = str_contains($template->html_source, 'fikko-fruit');
 		$isSize2B = $this->isSize2BTemplate($template);
 		$isA5 = $this->isA5Template($template);
@@ -261,6 +261,7 @@ class PrintTemplatesService
 		$note2 = $label?->note_2 ?: $product->label_note_2;
 		$note3 = $label?->note_3 ?: $product->label_note_3;
 
+		$saving = round(max(0, $basePrice - $finalPrice), 2);
 		$latte = new Engine();
 		$latte->setLoader(new StringLoader());
 
@@ -283,8 +284,10 @@ class PrintTemplatesService
 			'priceDigits' => $priceDigits,
 			'salePercent' => $salePercent,
 			'hasSaleRibbon' => $hasSaleRibbon,
-			'saving' => max(0, $basePrice - $finalPrice),
-			'savingText' => number_format(max(0, $basePrice - $finalPrice), 2, ',', ' '),
+			'saving' => $saving,
+			'savingText' => (floor($saving) == $saving)
+				? number_format($saving, 0, ',', ' ')
+				: number_format($saving, 2, ',', ' '),
 			'isDiscounted' => $isDiscounted,
 			'currencySymbol' => $currencySymbol,
 			'unit' => $unit,
@@ -305,13 +308,14 @@ class PrintTemplatesService
 			// since each size's approved artwork calibrated its own module width.
 			'bars' => match (TRUE) {
 				$ean === '' => [],
+				$isA4 => EanBarcodeHelper::getBars($ean, 0.38),
 				$isSize2B => EanBarcodeHelper::getBars($ean, 0.33),
 				$isA5 => EanBarcodeHelper::getBars($ean, 0.42),
-				$isFruit => EanBarcodeHelper::getBars($ean, 0.30),
+				$isFruit => EanBarcodeHelper::getBars($ean, 0.20),
 				default => [],
 			},
 			'template' => $template,
-			'logoDataUri' => $this->imageAsDataUri(WWW_DIR . '/images/fikko-logo.jpg', 'image/jpeg'),
+			'logoDataUri' => $this->imageAsDataUri(WWW_DIR . '/images/fikko-logo-mono.png', 'image/png'),
 			'brushDataUri' => $this->imageAsDataUri(WWW_DIR . '/images/brush-20.png', 'image/png'),
 			// Dompdf mis-renders brush-20.png at roughly half its declared height when
 			// the box is large enough (confirmed on the A5 ribbon "-X %" badge, 58.5×24.2mm) —
@@ -351,32 +355,14 @@ class PrintTemplatesService
 			// A5's save-badge uses a flat piggy-bank silhouette (Material Symbols "savings"
 			// glyph), a different icon from A4's mascot — also rasterized, same reason as above.
 			'pigFaceIconDataUri' => $this->imageAsDataUri(WWW_DIR . '/images/pig-face-icon.png', 'image/png'),
+			'strikeSlashDataUri' => $this->imageAsDataUri(WWW_DIR . '/images/strike-slash.png', 'image/png'),
 		]);
 
-		// Normalize older saved A4 layouts (which carried a differently-built barcode
-		// block) to a single human-readable EAN div; the barcode bars are injected
-		// again below for A4, Vel.1 and Vel.3 in one consistent way.
-		if ($isA4) {
-			$html = preg_replace(
-				'#\s*<div class="barcode">\s*<div class="barcode-bars">.*?</div>\s*<div class="ean">(.*?)</div>\s*</div>#s',
-				'<div class="ean">$1</div>',
-				$html,
-			) ?? $html;
-			$html = preg_replace(
-				'#\s*<div class="barcode">\s*<div class="barcode-bars">.*?</div>\s*</div>#s',
-				'',
-				$html,
-			) ?? $html;
-			$html = $this->stripInlineA4Barcode($html);
+		$isVel1 = str_contains($template->html_source, 'fikko-vel1');
+		$isVel3 = str_contains($template->html_source, 'fikko-vel3');
 
-			$html = '<style>'
-				.'.barcode,.barcode-bars,.barcode-bar{display:none!important}'
-				.'.ean{display:block!important;position:absolute!important;top:auto!important;bottom:0!important;left:0!important;width:42mm!important;margin:0!important;padding-top:.5mm!important;background:#fff!important;font-size:2.9mm!important;font-weight:600!important;line-height:1!important;letter-spacing:.14em!important;white-space:nowrap!important}'
-				.'</style>'.$html;
-		}
-
-		if ($ean !== '' && !$isA5) {
-			$html = $this->injectEanBarcode($html, $ean, $isA4, str_contains($template->html_source, 'fikko-vel1'), str_contains($template->html_source, 'fikko-vel3'), $isSize2B);
+		if ($ean !== '' && ($isVel1 || $isVel3 || $isSize2B)) {
+			$html = $this->injectEanBarcode($html, $ean, FALSE, $isVel1, $isVel3, $isSize2B);
 		}
 
 		if ($isA5) {

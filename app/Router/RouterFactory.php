@@ -33,42 +33,42 @@ final class RouterFactory
 		$router = new RouteList();
 
 		// media
-		$router->addRoute('//%host%/media/<folder>/<subfolder>/<filename>', [
+		$router->addRoute('media/<folder>/<subfolder>/<filename>', [
 			'module' => 'Front',
 			'presenter' => 'Image',
 			'action' => 'default'
 		]);
 
 		// admin
-		$router->addRoute('//%host%/admin/<presenter>/<action>[/<id>]', [
+		$router->addRoute('admin/<presenter>/<action>[/<id>]', [
 			'module' => 'Admin',
 			'presenter' => 'Homepage',
 			'action' => 'default'
 		]);
 
 		// sitemap
-		$router->addRoute('//%host%/sitemap.xml', [
+		$router->addRoute('sitemap.xml', [
 			'module' => 'System',
 			'presenter' => 'Sitemap',
 			'action' => 'default'
 		]);
 
 		// robots
-		$router->addRoute('//%host%/robots.txt', [
+		$router->addRoute('robots.txt', [
 			'module' => 'System',
 			'presenter' => 'Robots',
 			'action' => 'default'
 		]);
 
 		// system
-		$router->addRoute('//%host%/system/<presenter>/<action>[/<slug .*>]', [
+		$router->addRoute('system/<presenter>/<action>[/<slug .*>]', [
 			'module' => 'System',
 			'presenter' => 'Homepage',
 			'action' => 'default'
 		]);
 
 		// cron
-		$router->addRoute('//%host%/cron/<action>', [
+		$router->addRoute('cron/<action>', [
 			'module' => 'System',
 			'presenter' => 'Cron',
 			'action' => 'default'
@@ -108,7 +108,7 @@ final class RouterFactory
 			$page = \PagesRepository::getEntity($pageRow);
 
             if($pageBlock && $pageBlock->slug && Nette\Utils\Strings::endsWith($urlParam, $pageBlock->slug) && $page->system == 'home'){
-                $router->addRoute('//%host%' . $urlParam . '[/<slug .*>]', [
+                $router->addRoute($urlParam . '[/<slug .*>]', [
                     'module' => 'Front',
                     'lang' => $page->languages_id,
                     'presenter' => $page->presenter,
@@ -131,7 +131,7 @@ final class RouterFactory
 					continue;
 				}
 
-				$router->addRoute('//%host%'.$page->full_url.'[/<slug .*>]', [
+				$router->addRoute(ltrim($page->full_url, '/').'[/<slug .*>]', [
 					'module' => 'Front',
 					'lang' => $page->languages_id,
 					'presenter' => $page->presenter,
@@ -160,7 +160,7 @@ final class RouterFactory
 				}
 
 				if ($category = $selection->limit(1)->fetch()) {
-					$router->addRoute('//%host%'.$page->full_url.'/'.$slug.'[/<slug .*>]', [
+					$router->addRoute(ltrim($page->full_url, '/').'/'.$slug.'[/<slug .*>]', [
 						'module' => 'Front',
 						'lang' => $category->languages_id,
 						'presenter' => $page->presenter,
@@ -173,7 +173,7 @@ final class RouterFactory
 				}
 			}
 
-			$router->addRoute('//%host%'.$page->full_url.'[/<slug .*>]', [
+			$router->addRoute(ltrim($page->full_url, '/').'[/<slug .*>]', [
 				'module' => 'Front',
 				'lang' => $page->languages_id,
 				'presenter' => $page->presenter,
@@ -187,7 +187,7 @@ final class RouterFactory
 
 		// branches page
 		if ($page = $branchesPage) {
-			$router->addRoute('//%host%'.$page->full_url.'[/<slug .*>]', [
+			$router->addRoute(ltrim($page->full_url, '/').'[/<slug .*>]', [
 				'module' => 'Front',
 				'lang' => $page->languages_id,
 				'presenter' => $page->presenter,

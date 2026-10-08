@@ -1,89 +1,453 @@
 <style>
-    @page { margin: 0; }
-    html, body { margin: 0; padding: 0; background: #fff; color: #111; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
-    .fikko-a4 { box-sizing: border-box; position: relative; width: 194mm; height: 281mm; margin: 8mm; overflow: hidden; }
-    .fikko-a4 .logo { position: absolute; top: 13mm; left: 76mm; width: 42mm; height: 30mm; object-fit: contain; filter: grayscale(1) contrast(1.15); }
-    .fikko-a4 .heading { position: absolute; top: 49mm; left: 0; width: 194mm; height: 22mm; display: table; background: #111; color: #fff; text-align: center; }
-    .fikko-a4 .heading span { display: table-cell; vertical-align: middle; font-family: Nunito, sans-serif; font-size: 14mm; font-weight: 900; font-style: italic; line-height: 1; letter-spacing: .02em; }
-    .fikko-a4 .product-name { position: absolute; top: 76mm; left: 0; width: 194mm; text-align: center; font-size: 8mm; font-weight: 400; line-height: 1.15; }
-    .fikko-a4 .product-meta { position: absolute; top: 94mm; left: 0; width: 194mm; min-height: 13mm; border-bottom: .5mm solid #111; text-align: center; }
-    .fikko-a4 .more-species { font-family: Nunito, sans-serif; font-size: 8.5mm; font-weight: 400; font-style: italic; line-height: 1.1; }
-    .fikko-a4 .validity { position: absolute; right: 0; top: -8mm; font-size: 5mm; font-weight: 800; white-space: nowrap; }
-    .fikko-a4 .validity-label { margin-right: 3mm; color: #555; font-size: 3.6mm; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
-    .fikko-a4 .note-1 { position: absolute; top: 116mm; left: 60mm; white-space: nowrap; font-family: Nunito, sans-serif; font-size: 6mm; font-weight: 900; font-style: italic; }
-    .fikko-a4 .origin { position: absolute; top: 128mm; left: 0; display: table; }
-    .fikko-a4 .origin-icon { display: table-cell; width: 15mm; vertical-align: middle; }
-    .fikko-a4 .origin-icon img { display: block; width: 15mm; height: auto; border: .15mm solid #ccc; }
-    .fikko-a4 .origin-text { display: table-cell; padding-left: 3.5mm; vertical-align: middle; }
-    .fikko-a4 .origin-label { color: #555; font-size: 3.5mm; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
-    .fikko-a4 .origin-name { font-size: 5.3mm; font-weight: 800; line-height: 1.1; }
-    .fikko-a4 .base-price { position: absolute; top: 116mm; right: 12mm; white-space: nowrap; }
-    .fikko-a4 .base-label { font-size: 4mm; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
-    .fikko-a4 .base-value { margin-left: 3mm; font-family: Nunito, sans-serif; font-size: 11mm; font-weight: 900; font-style: italic; }
-    .fikko-a4 .our-price-label { position: absolute; top: 149mm; left: 70mm; font-size: 4mm; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
-    .fikko-a4 .price { position: absolute; top: 149mm; left: 57mm; display: table; white-space: nowrap; }
-    .fikko-a4 .price-major { display: table-cell; font-family: Nunito, sans-serif; font-size: 72mm; font-weight: 900; font-style: italic; line-height: .82; letter-spacing: -.03em; }
-    .fikko-a4 .price-side { display: table-cell; vertical-align: top; padding-left: 3mm; font-family: Nunito, sans-serif; font-weight: 900; font-style: italic; }
-    .fikko-a4 .price-minor { font-size: 28mm; line-height: .9; }
-    .fikko-a4 .price-currency { margin-top: 15mm; font-size: 11mm; line-height: .9; }
-    .fikko-a4 .save { position: absolute; top: 235mm; left: 22mm; width: 150mm; height: 19mm; color: #fff; white-space: nowrap; transform: rotate(-1.2deg); }
-    .fikko-a4 .save-brush { position: absolute; inset: 0; width: 150mm; height: 19mm; }
-    .fikko-a4 .save-content { position: absolute; top: 3.2mm; left: 7mm; display: table; height: 11mm; }
-    .fikko-a4 .save-pig-cell { display: table-cell; width: 11mm; vertical-align: middle; }
-    .fikko-a4 .save-pig { display: block; width: 11mm; height: 11mm; }
-    .fikko-a4 .save-copy, .fikko-a4 .save-value, .fikko-a4 .save-suffix { display: table-cell; vertical-align: middle; }
-    .fikko-a4 .save-copy { padding-left: 4mm; font-size: 5mm; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
-    .fikko-a4 .save-value { padding-left: 2mm; font-family: Nunito, sans-serif; font-size: 10.5mm; font-weight: 900; font-style: italic; line-height: 1; }
-    .fikko-a4 .save-suffix { padding-left: 2mm; font-size: 3.2mm; font-weight: 600; }
-    .fikko-a4 .unit { position: absolute; top: 258mm; left: 64mm; white-space: nowrap; font-size: 4.8mm; font-weight: 700; }
-    .fikko-a4 .unit-value { margin-left: 3.5mm; font-family: Nunito, sans-serif; font-size: 6mm; font-weight: 900; font-style: italic; }
-    .fikko-a4 .ean { position: absolute; left: 0; bottom: 0; width: 42mm; margin: 0; padding-top: .5mm; background: #fff; font-size: 2.9mm; font-weight: 600; line-height: 1; letter-spacing: .14em; white-space: nowrap; }
-    .fikko-a4 .notes-bottom { position: absolute; right: 42mm; bottom: 5mm; width: 110mm; text-align: center; white-space: nowrap; font-family: Nunito, sans-serif; font-size: 6mm; font-weight: 900; font-style: italic; line-height: 1.1; }
-    .fikko-a4 .notes-bottom div + div { margin-top: 1mm; }
-    .fikko-a4.long-name .product-meta { top: 105mm; }
-    .fikko-a4.long-name .note-1, .fikko-a4.long-name .base-price { top: 127mm; }
-    .fikko-a4.long-name .origin { top: 139mm; }
-    .fikko-a4.long-name .our-price-label { top: 160mm; }
-    .fikko-a4.long-name .price { top: 157mm; }
-    .fikko-a4.long-name .save { top: 240mm; }
-    .fikko-a4.long-name .unit { top: 264mm; }
-    .fikko-a4.price-digits-3 .our-price-label { left: 60mm; }
-    .fikko-a4 .price { top: 146mm; }
-    .fikko-a4.price-digits-3 .price { left: 43mm; }
-    .fikko-a4.price-digits-3 .price-major { font-size: 56mm; }
-    .fikko-a4.price-digits-3 .price-side { padding-left: 2mm; }
-    .fikko-a4.price-digits-3 .price-minor { font-size: 22mm; }
-    .fikko-a4.price-digits-3 .price-currency { margin-top: 11mm; font-size: 9mm; }
+    @page { size: A4; margin: 0; }
+    html, body { margin: 0; padding: 0; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; background: #fff; color: #111; -webkit-font-smoothing: antialiased; }
+    * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+    .page {
+        box-sizing: border-box;
+        width: 100%;
+        height: 269mm;
+        padding: 14mm;
+        background: #fff;
+        color: #111;
+        overflow: hidden;
+        page-break-inside: avoid;
+        page-break-after: avoid;
+    }
+
+    .logo-box {
+        width: 210mm;
+        margin: 6mm -14mm 6mm -14mm;
+        text-align: center;
+    }
+    .logo-box img {
+        width: 36mm;
+        height: 25mm;
+        display: inline-block;
+    }
+
+    .header-box {
+        display: table;
+        width: 210mm;
+        height: 23mm;
+        background: #111;
+        color: #fff;
+        text-align: center;
+        margin: 0 -14mm;
+    }
+    .header-box .title {
+        display: table-cell;
+        vertical-align: middle;
+        font-family: Nunito, sans-serif;
+        font-weight: 900;
+        font-style: italic;
+        font-size: 18mm;
+        line-height: 1;
+        letter-spacing: 0.04em;
+    }
+
+    .content-box {
+        margin-top: 3mm;
+    }
+    .prod-name {
+        font-size: 8mm;
+        line-height: 1.15;
+        font-weight: 400;
+        text-align: center;
+        padding-bottom: 2mm;
+    }
+
+    .subtitle-box {
+        text-align: center;
+        padding-bottom: 1.5mm;
+    }
+    .subtitle-box .sub-text {
+        font-family: Nunito, sans-serif;
+        font-style: italic;
+        font-weight: 400;
+        font-size: 6mm;
+        line-height: 1.1;
+    }
+
+    .main-row {
+        position: relative;
+        padding-top: 2mm;
+    }
+    .left-col {
+        position: absolute;
+        top: 0;
+        left: 0;
+        white-space: nowrap;
+    }
+    .note1-text {
+        font-family: Nunito, sans-serif;
+        font-weight: 900;
+        font-style: italic;
+        font-size: 6mm;
+        line-height: 1.1;
+        margin-bottom: 4mm;
+        white-space: nowrap;
+    }
+    .origin-box {
+        display: table;
+        white-space: nowrap;
+    }
+    .origin-box .flag-cell {
+        display: table-cell;
+        width: 15mm;
+        vertical-align: middle;
+    }
+    .origin-box .flag-img {
+        width: 15mm;
+        height: 15mm;
+        display: block;
+        border: 0.4mm solid #111;
+        border-radius: 50%;
+    }
+    .origin-box .flag-text {
+        display: table-cell;
+        padding-left: 3.5mm;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+    .origin-box .flag-label {
+        font-size: 3.5mm;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-weight: 700;
+        opacity: 0.65;
+        white-space: nowrap;
+    }
+    .origin-box .flag-name {
+        font-size: 5.3mm;
+        font-weight: 800;
+        line-height: 1.1;
+        white-space: nowrap;
+    }
+
+    .price-col {
+        text-align: center;
+        margin-left: 45mm;
+    }
+    .lowest-box {
+        position: relative;
+        text-align: right;
+        padding-right: 15mm;
+        margin-bottom: 1.5mm;
+    }
+    .lowest-label {
+        display: inline-block;
+        vertical-align: middle;
+        font-size: 3.6mm;
+        line-height: 1.2;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        font-weight: 700;
+        text-align: right;
+        margin-right: 3mm;
+    }
+    .lowest-val-box {
+        position: relative;
+        display: inline-block;
+        vertical-align: middle;
+    }
+    .lowest-val {
+        font-family: Nunito, sans-serif;
+        font-weight: 900;
+        font-style: italic;
+        font-size: 11mm;
+        line-height: 1;
+        color: #111;
+    }
+    .lowest-val span {
+        font-size: 6.5mm;
+    }
+    .lowest-strike-img {
+        position: absolute;
+        left: -1mm;
+        top: 4.8mm;
+        width: 26mm;
+        height: 7mm;
+    }
+
+    .our-label {
+        font-size: 4mm;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        font-weight: 700;
+        margin-bottom: 2mm;
+    }
+
+    .main-price {
+        display: table;
+        margin: 0 auto;
+        white-space: nowrap;
+    }
+    .price-major {
+        display: table-cell;
+        vertical-align: top;
+        font-family: Nunito, sans-serif;
+        font-weight: 900;
+        font-style: italic;
+        font-size: 61mm;
+        line-height: 0.82;
+        letter-spacing: -0.03em;
+    }
+    .price-minor-col {
+        display: table-cell;
+        vertical-align: top;
+        padding-left: 2mm;
+        text-align: left;
+    }
+    .price-minor {
+        font-family: Nunito, sans-serif;
+        font-weight: 900;
+        font-style: italic;
+        font-size: 23.5mm;
+        line-height: 0.9;
+    }
+    .price-currency {
+        font-family: Nunito, sans-serif;
+        font-weight: 900;
+        font-style: italic;
+        font-size: 6.5mm;
+        line-height: 0.9;
+        white-space: nowrap;
+        margin-top: 13mm;
+    }
+
+    .save-box {
+        position: relative;
+        width: 112mm;
+        height: 19mm;
+        margin: 3.5mm auto 0 auto;
+        color: #fff;
+    }
+    .save-brush {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+    }
+    .save-inner {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        height: 19mm;
+        text-align: center;
+    }
+    .save-table {
+        height: 19mm;
+        border-collapse: collapse;
+        margin: 0 auto;
+    }
+    .save-pig-cell {
+        vertical-align: middle;
+        text-align: right;
+        padding-right: 3.5mm;
+    }
+    .save-pig {
+        display: block;
+        width: 11.5mm;
+        height: 11.5mm;
+    }
+    .save-copy-cell {
+        vertical-align: middle;
+        text-align: left;
+        white-space: nowrap;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 6.8mm;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #fff;
+        line-height: 1;
+        padding-right: 3.5mm;
+    }
+    .save-val-cell {
+        vertical-align: middle;
+        text-align: left;
+        white-space: nowrap;
+        font-family: Nunito, sans-serif;
+        font-weight: 900;
+        font-style: italic;
+        font-size: 13.5mm;
+        line-height: 1;
+        color: #fff;
+    }
+
+    .unit-box {
+        margin-top: 2mm;
+        font-size: 4.8mm;
+        font-weight: 700;
+    }
+    .unit-val {
+        font-family: Nunito, sans-serif;
+        font-weight: 900;
+        font-style: italic;
+        font-size: 6mm;
+        margin-left: 2mm;
+    }
+
+    .note3-box {
+        text-align: center;
+        margin-top: 6mm;
+        clear: both;
+    }
+    .note3-text {
+        font-family: Nunito, sans-serif;
+        font-weight: 900;
+        font-style: italic;
+        font-size: 6mm;
+        line-height: 1.15;
+        text-align: center;
+        max-width: 150mm;
+        margin: 0 auto;
+    }
+
+    .bottom-box {
+        display: table;
+        width: 100%;
+        margin-top: 6mm;
+        clear: both;
+    }
+    .barcode-col {
+        display: table-cell;
+        vertical-align: bottom;
+        width: 50mm;
+        text-align: left;
+    }
+    .barcode-bars {
+        display: block;
+        height: 8.5mm;
+        white-space: nowrap;
+    }
+    .barcode-ean {
+        font-size: 2.9mm;
+        letter-spacing: 0.14em;
+        font-weight: 600;
+        margin-top: 1mm;
+    }
+
+    .validity-box {
+        display: table-cell;
+        vertical-align: bottom;
+        text-align: center;
+        padding-bottom: 1mm;
+    }
+    .validity-text {
+        font-size: 3.6mm;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        white-space: nowrap;
+    }
+
+    .price-digits-3 .price-major { font-size: 50mm; }
+    .price-digits-3 .price-minor { font-size: 20mm; }
+    .price-digits-3 .price-currency { margin-top: 10mm; font-size: 6mm; }
+    .price-digits-3 .lowest-strike-img { width: 32mm; }
 </style>
 
-{var $a4Classes = 'fikko-a4' . ($priceDigits >= 3 ? ' price-digits-3' : '') . ($labelNameLength > 48 ? ' long-name' : '')}
-{var $logoMarkup = '<img class="logo" src="' . $logoDataUri . '" alt="Fikko market">'}
-{var $flagMarkup = $flagIconDataUri ? '<img src="' . $flagIconDataUri . '" alt="">' : ''}
+{var $pageClasses = 'page' . ($priceDigits >= 3 ? ' price-digits-3' : '')}
+{var $logoMarkup = '<img src="' . $logoDataUri . '" alt="Fikko market">'}
+{var $flagMarkup = $flagIconDataUri ? '<img class="flag-img" src="' . $flagIconDataUri . '" alt="">' : ''}
 {var $brushMarkup = '<img class="save-brush" src="' . $brushDataUri . '" alt="">'}
 {var $pigMarkup = '<img class="save-pig" src="' . $pigIconDataUri . '" alt="">'}
-<section class="{$a4Classes}">
-    {$logoMarkup|noescape}
-    <div class="heading"><span>FIKKO CENA</span></div>
+{var $strikeMarkup = '<img class="lowest-strike-img" src="' . $strikeSlashDataUri . '" alt="">'}
 
-    <div class="product-name">{$labelName}</div>
-    <div class="product-meta">
-        <div n:if="$label && $label->is_more_species" class="more-species">Více druhů</div>
-        <div n:if="!$hideValidity && $validityText" class="validity"><span class="validity-label">Platnost</span>{$validityText}</div>
+<section class="{$pageClasses}" data-document-role="page" data-label="Fikko Cena – tem A4 Akce" data-screen-label="A4 – 1 tem">
+
+    <div class="logo-box">
+        {$logoMarkup|noescape}
     </div>
 
-    <div n:if="$note1" class="note-1">{$note1}</div>
+    <header class="header-box">
+        <div class="title">FIKKO CENA</div>
+    </header>
 
-    <div n:if="$country" class="origin">
-        <div class="origin-icon">{$flagMarkup|noescape}</div>
-        <div class="origin-text"><div class="origin-label">Země původu</div><div class="origin-name">{$country->name}</div></div>
+    <div class="content-box">
+        <div class="prod-name">{$labelName}</div>
+
+        <div n:if="$label && $label->is_more_species" class="subtitle-box">
+            <div class="sub-text">Více druhů</div>
+        </div>
+
+        <div class="main-row">
+            <div class="left-col">
+                <div n:if="$note1" class="note1-text">{$note1}</div>
+                <div n:if="$country" class="origin-box">
+                    <div class="flag-cell">{$flagMarkup|noescape}</div>
+                    <div class="flag-text">
+                        <div class="flag-label">Země původu</div>
+                        <div class="flag-name">{$country->name}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="price-col">
+                <div class="lowest-box">
+                    <div class="lowest-label">Nejnižší cena<br>za 30 dní</div>
+                    <div class="lowest-val-box">
+                        <div class="lowest-val">{$basePriceText} <span>{$currencySymbol}</span></div>
+                        {$strikeMarkup|noescape}
+                    </div>
+                </div>
+
+                <div class="our-label">Naše cena</div>
+
+                <div class="main-price">
+                    <div class="price-major">{$finalPriceMajor}</div>
+                    <div class="price-minor-col">
+                        <div class="price-minor">{$finalPriceMinor}</div>
+                        <div class="price-currency">{$currencySymbol} / ks</div>
+                    </div>
+                </div>
+
+                <div n:if="$saving > 0" class="save-box">
+                    {$brushMarkup|noescape}
+                    <div class="save-inner">
+                        <table class="save-table" cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                                <td class="save-pig-cell">
+                                    {$pigMarkup|noescape}
+                                </td>
+                                <td class="save-copy-cell">
+                                    UŠETŘÍTE
+                                </td>
+                                <td class="save-val-cell">
+                                    {$savingText}&nbsp;{$currencySymbol}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div n:if="$unit" class="unit-box">
+                    <span>Cena za {$unit->unitWeight} {$unit->unitShort}</span>
+                    <span class="unit-val">{$unit->price|number:2,',',' '} {$currencySymbol}</span>
+                </div>
+            </div>
+        </div>
+
+        <div n:if="$note3 || $note2" class="note3-box">
+            <div class="note3-text">{$note3 ?: $note2}</div>
+        </div>
+
+        <div class="bottom-box">
+            <div class="barcode-col">
+                <div n:if="$bars" class="barcode-bars">
+                    <div n:foreach="$bars as $bar" style="float:left;height:8.5mm;background:{$bar['color']|noescape};width:{$bar['width']|noescape}"></div>
+                    <div style="clear:both"></div>
+                </div>
+                <div n:if="$eanText" class="barcode-ean">EAN {$eanText}</div>
+            </div>
+
+            <div n:if="!$hideValidity && $validityText" class="validity-box">
+                <div class="validity-text">Akce platí do <b>{$validityText}</b> nebo do vyprodání zásob</div>
+            </div>
+        </div>
     </div>
 
-    <div class="base-price"><span class="base-label">Běžná cena</span><span class="base-value">{$basePriceText} {$currencySymbol}</span></div>
-    <div class="our-price-label">Naše cena</div>
-    <div class="price"><div class="price-major">{$finalPriceMajor}</div><div class="price-side"><div class="price-minor">{$finalPriceMinor}</div><div class="price-currency">{$currencySymbol} / 1 ks</div></div></div>
-
-    <div n:if="$saving > 0" class="save">{$brushMarkup|noescape}<div class="save-content"><span class="save-pig-cell">{$pigMarkup|noescape}</span><span class="save-copy">Ušetříte</span><span class="save-value">{$savingText} {$currencySymbol}</span><span class="save-suffix">oproti běžné ceně</span></div></div>
-    <div n:if="$unit" class="unit">Cena za {$unit->unitWeight} {$unit->unitShort}<span class="unit-value">{$unit->price|number:2,',',''} {$currencySymbol}</span></div>
-    <div class="ean">EAN {$eanText}</div>
-    <div class="notes-bottom"><div n:if="$note2">{$note2}</div><div n:if="$note3">{$note3}</div></div>
 </section>

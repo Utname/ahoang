@@ -383,10 +383,13 @@ trait ProductLabelsTrait
 	public function getNewA4ProductIds(): array
 	{
 		$dbIds = [];
-		if (in_array('use_new_template', $this->repository->getColumnNames(), TRUE)) {
-			$dbIds = array_map('intval', array_keys($this->repository->findAll()
-				->where('use_new_template', 1)
-				->fetchPairs('id', 'id')));
+		try {
+			if (in_array('use_new_template', $this->repository->getTableColumnNames('products'), TRUE)) {
+				$dbIds = array_map('intval', array_keys($this->repository->getDatabase()->table('products')
+					->where('use_new_template', 1)
+					->fetchPairs('id', 'id')));
+			}
+		} catch (\Throwable $e) {
 		}
 
 		$sessionIds = $this->session->newA4TemplateProducts;
@@ -403,10 +406,13 @@ trait ProductLabelsTrait
 	 */
 	public function handleToggleNewA4Template(int $productsId, bool $enabled = FALSE): void
 	{
-		if (in_array('use_new_template', $this->repository->getColumnNames(), TRUE)) {
-			$this->repository->findAll()
-				->where('id', $productsId)
-				->update(['use_new_template' => $enabled ? 1 : 0]);
+		try {
+			if (in_array('use_new_template', $this->repository->getTableColumnNames('products'), TRUE)) {
+				$this->repository->getDatabase()->table('products')
+					->where('id', $productsId)
+					->update(['use_new_template' => $enabled ? 1 : 0]);
+			}
+		} catch (\Throwable $e) {
 		}
 
 		$ids = $this->session->newA4TemplateProducts;

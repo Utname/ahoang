@@ -557,7 +557,7 @@
                             <div role="tabpanel" class="tab-pane" id="tab4">
                                 {form barcodeFruitForm class => 'ajax'}
                                     <div class="row">
-                                        <div class="col-sm-5">
+                                        <div class="col-sm-4">
                                             <div class="form-group">
                                                 {label products_id /}
                                                 {input products_id class => 'form-control select2'}
@@ -565,37 +565,57 @@
                                         </div>
                                         <div class="col-sm-2">
                                             <div class="form-group">
-                                                {label weight /}
-                                                {input weight class => 'form-control', placeholder => 'g'}
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-3">
-                                            <div class="form-group">
                                                 {label origin_countries_id /}
                                                 {input origin_countries_id class => 'form-control'}
                                             </div>
                                         </div>
-                                        <div class="col-sm-2">
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                {label expiry_date /}
+                                                {input expiry_date class => 'form-control', placeholder => 'd.m.Y'}
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
                                             <div class="form-group">
                                                 {label count /}
                                                 {input count class => 'form-control'}
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="row m-b-md">
-                                        <div class="col-sm-4">
+                                    <div class="row">
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                {label weight /}
+                                                {input weight class => 'form-control', placeholder => 'g'}
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                {label unit_price /}
+                                                {input unit_price class => 'form-control', placeholder => 'Např. 129,90'}
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                {label total_price /}
+                                                {input total_price class => 'form-control', placeholder => 'Např. 63,13'}
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
                                             <div class="form-group">
                                                 {label note_1 /}
                                                 {input note_1 class => 'form-control', placeholder => 'Např. 0,486 kg'}
                                             </div>
                                         </div>
-                                        <div class="col-sm-4">
+                                    </div>
+                                    <div class="row m-b-md">
+                                        <div class="col-sm-6">
                                             <div class="form-group">
                                                 {label note_2 /}
                                                 {input note_2 class => 'form-control', placeholder => 'Např. 2–6 °C'}
                                             </div>
                                         </div>
-                                        <div class="col-sm-4">
+                                        <div class="col-sm-6">
                                             <div class="form-group">
                                                 {label note_3 /}
                                                 {input note_3 class => 'form-control', placeholder => 'Fikko Market · adresa provozovny'}
@@ -620,9 +640,10 @@
                                                             <input type="checkbox" class="bulk-check-all ignore mr-0">
                                                         </div>
                                                     </th>
-                                                    <th colspan="2">
+                                                    <th>
                                                         <div class="w-300">{_admin.terms.name}</div>
                                                     </th>
+                                                    <th class="w-80 text-right"></th>
                                                 </tr>
                                                 <tr>
                                                     <td>
@@ -633,8 +654,8 @@
                                                     <td>
                                                         <input type="text" class="form-control js-filters-field">
                                                     </td>
-                                                    <td class="w-100">
-                                                        <a n:href="barcodeFruit" target="_blank" class="btn btn-xs btn-primary m-t-xxs mr-0">
+                                                    <td class="w-80 text-right">
+                                                        <a n:href="barcodeFruit" target="_blank" class="btn btn-xs btn-primary m-t-xxs mr-0 js-print-barcodes" title="{_admin.actions.printAll}" data-print-all="{_admin.actions.printAll}" data-print-selected="{_admin.actions.printSelected}">
                                                             {_admin.actions.printAll}
                                                         </a>
                                                     </td>
@@ -646,13 +667,19 @@
                                                     <td class="row-as-link-ignore text-center">
                                                         <input type="checkbox" class="bulk-checkbox mr-0">
                                                     </td>
-                                                    <td colspan="2">
+                                                    <td>
                                                         <strong>{$itemData->productName ?? ''}</strong>
                                                         {if !empty($itemData->weight)} - {$itemData->weight} g{/if}
-                                                        {if !empty($itemData->totalPrice)} - {$itemData->totalPrice|number:2,',',''} Kč{/if}
+                                                        {if !empty($itemData->unitPrice)} - 1kg: {$itemData->unitPrice|number:2,',',''} Kč{/if}
+                                                        {if !empty($itemData->totalPrice)} - <b>{$itemData->totalPrice|number:2,',',''} Kč</b>{/if}
                                                         {if !empty($itemData->productCountry)} - Země: {$itemData->productCountry}{/if}
                                                         {if !empty($itemData->expiryDate)} - Do: {$itemData->expiryDate}{/if}
                                                         {if !empty($itemData->count)} ({$itemData->count}x){/if}
+                                                    </td>
+                                                    <td class="text-right w-80">
+                                                        <a n:href="barcodeFruit id => $item->id" target="_blank" class="btn btn-xs btn-primary m-t-xxs mr-0" title="{_admin.actions.print}">
+                                                            <i class="fa fa-print"></i> {_admin.actions.print}
+                                                        </a>
                                                     </td>
                                                 </tr>
                                                 </tbody>
@@ -723,6 +750,12 @@
                     if (data.weight) {
                         $tab.find('input[name="weight"]').val(data.weight);
                     }
+                    if (data.unitPrice) {
+                        $tab.find('input[name="unit_price"]').val(data.unitPrice);
+                    }
+                    if (data.totalPrice) {
+                        $tab.find('input[name="total_price"]').val(data.totalPrice);
+                    }
                     if (data.countryId) {
                         $tab.find('select[name="origin_countries_id"]').val(data.countryId).trigger('change');
                     }
@@ -737,6 +770,71 @@
                     }
                 }
             });
+        });
+
+        function recalculateFruitPrices() {
+            var $tab = $('#tab4');
+            var rawWeight = $tab.find('input[name="weight"]').val() || '';
+            var g = parseFloat(rawWeight.replace(/\s/g, '').replace(',', '.'));
+            var rawUnitPrice = $tab.find('input[name="unit_price"]').val() || '';
+            var unitPrice = parseFloat(rawUnitPrice.replace(/\s/g, '').replace(',', '.'));
+
+            if (!isNaN(g) && g > 0) {
+                var kg = (g / 1000).toFixed(3).replace('.', ',');
+                $tab.find('input[name="note_1"]').val(kg + ' kg');
+
+                if (!isNaN(unitPrice) && unitPrice > 0) {
+                    var total = (g / 1000) * unitPrice;
+                    $tab.find('input[name="total_price"]').val(total.toFixed(2).replace('.', ','));
+                }
+            }
+        }
+
+        $(document).on('input change', '#tab4 input[name="weight"], #tab4 input[name="unit_price"]', function() {
+            recalculateFruitPrices();
+        });
+
+        function updatePrintButtons($table) {
+            var checkedCount = $table.find('.bulk-checkbox:checked').length;
+            var $printBtn = $table.find('.js-print-barcodes');
+            if ($printBtn.length) {
+                var printAllText = $printBtn.data('print-all') || 'In tất cả';
+                var printSelectedText = $printBtn.data('print-selected') || 'In đã chọn';
+                if (checkedCount > 0) {
+                    $printBtn.html('<i class="fa fa-print"></i> ' + printSelectedText + ' (' + checkedCount + ')');
+                    $printBtn.removeClass('btn-primary').addClass('btn-success');
+                } else {
+                    $printBtn.html(printAllText);
+                    $printBtn.removeClass('btn-success').addClass('btn-primary');
+                }
+            }
+        }
+
+        $(document).on('change', '.bulk-checkbox, .bulk-check-all', function() {
+            var $table = $(this).closest('table');
+            setTimeout(function() {
+                updatePrintButtons($table);
+            }, 50);
+        });
+
+        $(document).on('click', '.js-print-barcodes', function(e) {
+            var $table = $(this).closest('table');
+            var ids = [];
+            $table.find('.bulk-checkbox:checked').each(function() {
+                var rowId = $(this).closest('tr').data('id');
+                if (rowId) {
+                    ids.push(rowId);
+                }
+            });
+
+            if (ids.length > 0) {
+                e.preventDefault();
+                var baseHref = $(this).attr('href');
+                var cleanHref = baseHref.replace(/([?&])id=[^&]+(&|$)/, '$1').replace(/[?&]$/, '');
+                var separator = cleanHref.indexOf('?') !== -1 ? '&' : '?';
+                var targetUrl = cleanHref + separator + 'id=' + encodeURIComponent(ids.join(','));
+                window.open(targetUrl, '_blank');
+            }
         });
 
 		setInterval(function() {

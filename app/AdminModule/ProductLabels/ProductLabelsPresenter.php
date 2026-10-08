@@ -518,14 +518,17 @@ class ProductLabelsPresenter extends BaseModulePresenter
 			$this->sendJson(['success' => FALSE]);
 		}
 
-		$branch = $this->branchesRepo->findEntity($this->session->filters[$this->getName()]['custom__branches']);
+		$branch = $this->branchesRepo->findEntity($this->session->filters[$this->getName()]['custom__branches'] ?? NULL);
 		$country = $product->getCountry();
 
 		$itemPrice = $product->getPrice($branch ? $branch->id : 0);
+		$activePrice = $itemPrice ? ($itemPrice->price_action ?: $itemPrice->price) : 0;
 
 		$weightVal = '';
+		$weightGram = 0;
 		if ($product->default_units_weight) {
-			$weightVal = (string)intval($product->default_units_weight);
+			$weightGram = intval($product->default_units_weight);
+			$weightVal = (string)$weightGram;
 		}
 
 		$note1Val = '';
@@ -534,11 +537,19 @@ class ProductLabelsPresenter extends BaseModulePresenter
 			$note1Val = $kg . ' kg';
 		}
 
+		$unitPriceObj = $itemPrice ? $product->getUnitValue($activePrice, \ProductsEntity::UNITS_TYPE_KILOGRAMS, 1) : NULL;
+		$unitPriceNum = $unitPriceObj ? $unitPriceObj->price : ($activePrice ?: 0);
+
+		$totalPriceObj = $itemPrice ? ($weightGram ? $product->getUnitValue($activePrice, \ProductsEntity::UNITS_TYPE_GRAMS, $weightGram) : $itemPrice) : NULL;
+		$totalPriceNum = $totalPriceObj ? ($totalPriceObj->price_action ?: $totalPriceObj->price) : $unitPriceNum;
+
 		$this->sendJson([
 			'success' => TRUE,
 			'productId' => $product->id,
 			'productName' => $product->name,
 			'weight' => $weightVal,
+			'unitPrice' => number_format((float)$unitPriceNum, 2, ',', ''),
+			'totalPrice' => number_format((float)$totalPriceNum, 2, ',', ''),
 			'countryId' => $country ? $country->id : '',
 			'countryName' => $country ? $country->name : '',
 			'note1' => $note1Val,
@@ -571,15 +582,24 @@ class ProductLabelsPresenter extends BaseModulePresenter
 			->setTranslator(NULL)
 			->setPrompt('-');
 
-		$form->addText('weight', 'admin.terms.weight_2')
+		$form->addText('weight', 'admin.terms.fruitWeightGram')
 			->setNullable();
 
-		$form->addText('expiry_date', 'admin.terms.date')
+		$form->addText('unit_price', 'admin.terms.fruitUnitPrice')
+			->setNullable();
+
+		$form->addText('total_price', 'admin.terms.fruitTotalPrice')
+			->setNullable();
+
+		$form->addText('expiry_date', 'admin.terms.fruitExpiryDate')
 			->setDefaultValue(date('d.m.Y', strtotime('+2 days')));
 
-		$form->addText('note_1', 'admin.terms.note1');
-		$form->addText('note_2', 'admin.terms.note2');
-		$form->addText('note_3', 'admin.terms.note3');
+		$form->addText('note_1', 'admin.terms.fruitLabelWeight')
+			->setNullable();
+		$form->addText('note_2', 'admin.terms.fruitStorage')
+			->setDefaultValue('2–6 °C');
+		$form->addText('note_3', 'admin.terms.fruitPacker')
+			->setDefaultValue('Fikko Market · adresa provozovny');
 
 		$form->addText('count', 'admin.terms.count')
 			->addRule(Form::INTEGER)
@@ -618,12 +638,19 @@ class ProductLabelsPresenter extends BaseModulePresenter
 
 		$printed = FALSE;
 		if ($product) {
-			$branch = $this->branchesRepo->findEntity($this->session->filters[$this->getName()]['custom__branches']);
+			$branch = $this->branchesRepo->findEntity($this->session->filters[$this->getName()]['custom__branches'] ?? NULL);
 			$itemPrice = $product->getPrice($branch ? $branch->id : 0);
+			$activePrice = $itemPrice ? ($itemPrice->price_action ?: $itemPrice->price) : 0;
 
 			$weightGram = $values->weight ? intval($values->weight) : NULL;
-			$unitPrice = $itemPrice ? $product->getUnitValue($itemPrice->price_action ?: $itemPrice->price, \ProductsEntity::UNITS_TYPE_KILOGRAMS, 1) : NULL;
-			$totalPrice = $itemPrice ? ($weightGram ? $product->getUnitValue($itemPrice->price_action ?: $itemPrice->price, \ProductsEntity::UNITS_TYPE_GRAMS, $weightGram) : $itemPrice) : NULL;
+
+			$unitPriceNum = !empty($values->unit_price)
+				? floatval(str_replace([' ', ','], ['', '.'], $values->unit_price))
+				: ($itemPrice ? ($product->getUnitValue($activePrice, \ProductsEntity::UNITS_TYPE_KILOGRAMS, 1)?->price ?: $activePrice) : 0);
+
+			$totalPriceNum = !empty($values->total_price)
+				? floatval(str_replace([' ', ','], ['', '.'], $values->total_price))
+				: ($itemPrice ? ($weightGram ? ($product->getUnitValue($activePrice, \ProductsEntity::UNITS_TYPE_GRAMS, $weightGram)?->price ?: $activePrice) : $activePrice) : 0);
 
 			$countryObj = $values->origin_countries_id ? $this->countriesRepo->findEntity($values->origin_countries_id) : $product->getCountry();
 
@@ -637,8 +664,8 @@ class ProductLabelsPresenter extends BaseModulePresenter
 					'productEan' => $product->getDefaultCode() ?: '',
 					'productCountry' => $countryObj ? $countryObj->name : '',
 					'weight' => $weightGram ?: ($product->default_units_weight ? intval($product->default_units_weight) : 0),
-					'unitPrice' => $unitPrice ? $unitPrice->price : ($itemPrice ? $itemPrice->price : 0),
-					'totalPrice' => $totalPrice ? $totalPrice->price : ($itemPrice ? $itemPrice->price : 0),
+					'unitPrice' => $unitPriceNum,
+					'totalPrice' => $totalPriceNum,
 					'currencySymbol' => 'Kč',
 					'expiryDate' => $values->expiry_date ?: date('d.m.Y', strtotime('+2 days')),
 					'note1' => $values->note_1 ?: '',
@@ -661,15 +688,30 @@ class ProductLabelsPresenter extends BaseModulePresenter
 
 
 	/**
+	 * @param int|array|null $id
 	 * @param bool $delete
 	 * @return array
 	 */
-	public function getBarcodeFruitList(bool $delete = FALSE): array
+	public function getBarcodeFruitList($id = NULL, bool $delete = FALSE): array
 	{
-		$return = \PrintLabelsRepository::getEntities($this->printLabelsRepo->findAll()
+		$query = $this->printLabelsRepo->findAll()
 			->where('admin_users_id', $this->adminUser->id)
-			->where('type_id', \PrintLabelsEntity::TYPE_FRUIT)
-			->order('datetime'));
+			->where('type_id', \PrintLabelsEntity::TYPE_FRUIT);
+
+		if ($id !== NULL && $id !== '') {
+			if (is_array($id)) {
+				$query->where('id', $id);
+			} elseif (is_string($id) && str_contains($id, ',')) {
+				$ids = array_filter(array_map('intval', explode(',', $id)));
+				if (!empty($ids)) {
+					$query->where('id', $ids);
+				}
+			} elseif (is_numeric($id) && (int)$id > 0) {
+				$query->where('id', (int)$id);
+			}
+		}
+
+		$return = \PrintLabelsRepository::getEntities($query->order('datetime'));
 
 		if ($delete) {
 			foreach ($return as $item) {
