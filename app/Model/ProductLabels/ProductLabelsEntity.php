@@ -30,10 +30,6 @@ class ProductLabelsEntity extends BaseEntity
 			'term' => 'admin.globals.productLabelTypes.'.self::TYPE_SIZE_2,
 			'img' => ''
 		],
-		self::TYPE_SIZE_3 => [
-			'term' => 'admin.globals.productLabelTypes.'.self::TYPE_SIZE_3,
-			'img' => ''
-		],
 		self::TYPE_SIZE_2B => [
 			'term' => 'admin.globals.productLabelTypes.'.self::TYPE_SIZE_2B,
 			'img' => ''
