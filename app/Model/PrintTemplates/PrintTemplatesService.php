@@ -18,6 +18,7 @@ class PrintTemplatesService
 	public const PRESET_VEL3 = 'vel3';
 	public const PRESET_FRUIT = 'fruit';
 	public const PRESET_VEL2B_AKCE = 'vel2b-akce';
+	public const PRESET_VEL2_AKCE = 'vel2-akce';
 
 
 	public function __construct(
@@ -112,8 +113,9 @@ class PrintTemplatesService
 			ProductLabelsEntity::TYPE_A4 => ['width_mm' => 210, 'height_mm' => 297],
 			// The reviewed "Velikost 2B" design is stored as one 133 × 52 mm
 			// label. It is placed twice on an A4 sheet by renderSize2BPage().
-			ProductLabelsEntity::TYPE_SIZE_2 => ['width_mm' => 133, 'height_mm' => 52],
+			ProductLabelsEntity::TYPE_SIZE_2 => ['width_mm' => 133, 'height_mm' => 38],
 			ProductLabelsEntity::TYPE_SIZE_2B => ['width_mm' => 133, 'height_mm' => 52],
+			ProductLabelsEntity::TYPE_SIZE_2_AKCE => ['width_mm' => 133, 'height_mm' => 38],
 			ProductLabelsEntity::TYPE_A5 => ['width_mm' => 200, 'height_mm' => 138.5],
 			default => NULL,
 		};
@@ -176,6 +178,13 @@ class PrintTemplatesService
 				'widthMm' => 133,
 				'heightMm' => 52,
 				'sourceFile' => 'vel2b-akce.latte',
+			],
+			self::PRESET_VEL2_AKCE => [
+				'name' => 'Fikko Cena Vel. 2 Akce',
+				'labelTypeId' => ProductLabelsEntity::TYPE_SIZE_2_AKCE,
+				'widthMm' => 133,
+				'heightMm' => 38,
+				'sourceFile' => 'vel2-akce.latte',
 			],
 			default => throw new \InvalidArgumentException('Unknown print template preset.'),
 		};

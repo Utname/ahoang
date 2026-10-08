@@ -112,6 +112,7 @@ class ProductLabelsService
 
 					break;
 				case ProductLabelsEntity::TYPE_SIZE_2B:
+				case ProductLabelsEntity::TYPE_SIZE_2_AKCE:
 					$itemsBuffer[$item->type_id]['pageParams'] = ['P', 'A4'];
 					for ($i = 1; $i <= max(1, $item->count); $i++) {
 						$itemsBuffer[$item->type_id]['items'][][] = $item;
