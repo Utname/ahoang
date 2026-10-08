@@ -223,6 +223,7 @@ class PrintTemplatesService
 		$isA4 = str_contains($template->html_source, 'fikko-a4') || str_contains($template->html_source, 'A4 Akce') || (float)$template->width_mm === 210.0;
 		$isFruit = str_contains($template->html_source, 'fikko-fruit');
 		$isSize2 = (float)$template->width_mm === 133.0;
+		$isVel1 = (float)$template->width_mm === 164.0 || (float)$template->width_mm === 150.0;
 		$isSize2B = $this->isSize2Template($template);
 		$isA5 = $this->isA5Template($template);
 		$price = $product->getPriceWithLog($branchesId);
@@ -301,6 +302,7 @@ class PrintTemplatesService
 				$ean === '' => [],
 				$isA4 => EanBarcodeHelper::getBars($ean, 0.38),
 				$isSize2 => EanBarcodeHelper::getBars($ean, 0.28),
+				$isVel1 => EanBarcodeHelper::getBars($ean, 0.28),
 				$isA5 => EanBarcodeHelper::getBars($ean, 0.42),
 				$isFruit => EanBarcodeHelper::getBars($ean, 0.20),
 				default => [],
@@ -594,7 +596,7 @@ class PrintTemplatesService
 			return $this->renderDompdf($this->renderA5Page($html), 210, 297)->output();
 		}
 		if ($this->isVel1Template($template)) {
-			return $this->renderDompdf($this->renderVel1Page($html), 210, 297)->output();
+			return $this->renderDompdf($this->renderVel1Page($html, $template), 210, 297)->output();
 		}
 		if ($this->isVel3Template($template)) {
 			return $this->renderDompdf($this->renderVel3Page($html), 210, 297)->output();
@@ -629,7 +631,7 @@ class PrintTemplatesService
 			$pages[] = match (TRUE) {
 				$this->isSize2Template($job['template']) => $this->renderSize2Page($html, $job['template']),
 				$this->isA5Template($job['template']) => $this->renderA5Page($html),
-				$this->isVel1Template($job['template']) => $this->renderVel1Page($html),
+				$this->isVel1Template($job['template']) => $this->renderVel1Page($html, $job['template']),
 				$this->isVel3Template($job['template']) => $this->renderVel3Page($html),
 				default => $html,
 			};
@@ -719,7 +721,7 @@ class PrintTemplatesService
 
 	private function isVel1Template(PrintTemplatesEntity $template): bool
 	{
-		return (float)$template->width_mm === 150.0 && (float)$template->height_mm === 44.0;
+		return (float)$template->width_mm === 164.0 || ((float)$template->width_mm === 150.0 && (float)$template->height_mm === 44.0);
 	}
 
 
@@ -731,30 +733,34 @@ class PrintTemplatesService
 
 	/**
 	 * Vel.1 is a three-up A4 stock: the original design stacks three identical
-	 * 150 × 44 mm strips, left-aligned inside a 6 mm page margin, with no gap
-	 * between them (their own dashed borders double up at the shared edge,
-	 * matching the design mockup exactly).
+	 * 164 × 41 mm strips inside an 8 mm page margin.
 	 */
-	private function renderVel1Page(string $html): string
+	private function renderVel1Page(string $html, PrintTemplatesEntity $template): string
 	{
 		preg_match_all('#<style\b[^>]*>.*?</style>#is', $html, $styleMatches);
 		preg_match('#<body\b[^>]*>(.*)</body>#is', $html, $bodyMatch);
 		$labelHtml = $bodyMatch[1] ?? (preg_replace('#<style\b[^>]*>.*?</style>#is', '', $html) ?? $html);
 		$styles = implode('', $styleMatches[0] ?? []);
+		$height = (float)$template->height_mm > 0 ? (float)$template->height_mm : 41.0;
+		$width = (float)$template->width_mm > 0 ? (float)$template->width_mm : 164.0;
+		$top1 = 8.0;
+		$top2 = $top1 + $height;
+		$top3 = $top2 + $height;
 
 		return '<style>'
 			.'@page{margin:0}body{margin:0!important;padding:0!important;width:210mm!important}'
 			.'.vel1-sheet{position:relative;width:210mm;height:297mm;overflow:hidden}'
-			.'.vel1-label{position:absolute;left:6mm;width:150mm;height:44mm;overflow:visible}'
-			.'.vel1-label.n1{top:6mm}.vel1-label.n2{top:50mm}.vel1-label.n3{top:94mm}'
-			// Each label carries its own full dashed border; stacked with no gap, the
-			// bottom border of one and the top border of the next would double up into
-			// two visible lines at the seam. Only the first label keeps its top border.
+			.'.vel1-label{position:absolute;left:8mm;width:'.$width.'mm;height:'.$height.'mm;overflow:visible}'
+			.'.vel1-label.n1{top:'.$top1.'mm}.vel1-label.n2{top:'.$top2.'mm}.vel1-label.n3{top:'.$top3.'mm}'
 			.'.vel1-label.n2 .fikko-vel1,.vel1-label.n3 .fikko-vel1{border-top:0}'
+			.'.vel1-divider-1{position:absolute;top:'.$top2.'mm;left:8mm;width:'.$width.'mm;border-top:.4mm dashed #111;z-index:5}'
+			.'.vel1-divider-2{position:absolute;top:'.$top3.'mm;left:8mm;width:'.$width.'mm;border-top:.4mm dashed #111;z-index:5}'
 			.'</style>'.$styles
 			.'<div class="vel1-sheet">'
 			.'<div class="vel1-label n1">'.$labelHtml.'</div>'
+			.'<div class="vel1-divider-1"></div>'
 			.'<div class="vel1-label n2">'.$labelHtml.'</div>'
+			.'<div class="vel1-divider-2"></div>'
 			.'<div class="vel1-label n3">'.$labelHtml.'</div>'
 			.'</div>';
 	}
