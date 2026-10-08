@@ -600,6 +600,9 @@ class PrintTemplatesService
 	public function renderPdf(PrintTemplatesEntity $template, ProductsEntity $product, int $branchesId, ?ProductLabelsEntity $label = NULL, ?array $priceOverride = NULL): string
 	{
 		$html = $this->renderHtml($template, $product, $branchesId, $label, $priceOverride);
+		if ($this->isSize2BTemplate($template)) {
+			return $this->renderDompdf($this->renderVel2BPage($html, $template), 210, 297)->output();
+		}
 		if ($this->isSize2Template($template)) {
 			return $this->renderDompdf($this->renderSize2Page($html, $template), 210, 297)->output();
 		}
@@ -640,6 +643,7 @@ class PrintTemplatesService
 			}
 			$html = $this->renderHtml($job['template'], $product, $branchesId, $job['label'], $job['priceOverride'] ?? NULL);
 			$pages[] = match (TRUE) {
+				$this->isSize2BTemplate($job['template']) => $this->renderVel2BPage($html, $job['template']),
 				$this->isSize2Template($job['template']) => $this->renderSize2Page($html, $job['template']),
 				$this->isA5Template($job['template']) => $this->renderA5Page($html),
 				$this->isVel1Template($job['template']) => $this->renderVel1Page($html, $job['template']),
@@ -664,15 +668,44 @@ class PrintTemplatesService
 	}
 
 
+	private function isSize2BTemplate(PrintTemplatesEntity $template): bool
+	{
+		return (float)$template->width_mm === 133.0 && ((float)$template->height_mm === 52.0 || str_contains($template->html_source, 'fikko-vel2b') || (int)($template->product_label_type_id ?? 0) === ProductLabelsEntity::TYPE_SIZE_2B);
+	}
+
+
 	private function isSize2Template(PrintTemplatesEntity $template): bool
 	{
-		return (float)$template->width_mm === 133.0;
+		return (float)$template->width_mm === 133.0 && !$this->isSize2BTemplate($template);
 	}
 
 
 	private function isA5Template(PrintTemplatesEntity $template): bool
 	{
 		return (float)$template->width_mm === 200.0 && (float)$template->height_mm === 138.5;
+	}
+
+
+	/**
+	 * Vel. 2B Akce is a single label on A4 sheet (133 × 52 mm) at top-left padding (8mm 8mm).
+	 */
+	private function renderVel2BPage(string $html, PrintTemplatesEntity $template): string
+	{
+		preg_match_all('#<style\b[^>]*>.*?</style>#is', $html, $styleMatches);
+		preg_match('#<body\b[^>]*>(.*)</body>#is', $html, $bodyMatch);
+		$labelHtml = $bodyMatch[1] ?? (preg_replace('#<style\b[^>]*>.*?</style>#is', '', $html) ?? $html);
+		$styles = implode('', $styleMatches[0] ?? []);
+		$height = (float)$template->height_mm > 0 ? (float)$template->height_mm : 52.0;
+		$width = (float)$template->width_mm > 0 ? (float)$template->width_mm : 133.0;
+
+		return '<style>'
+			.'@page{margin:0}body{margin:0!important;padding:0!important;width:210mm!important}'
+			.'.vel2b-sheet{position:relative;width:210mm;height:297mm;overflow:hidden}'
+			.'.vel2b-label{position:absolute;left:8mm;top:8mm;width:'.$width.'mm;height:'.$height.'mm;overflow:visible}'
+			.'</style>'.$styles
+			.'<div class="vel2b-sheet">'
+			.'<div class="vel2b-label">'.$labelHtml.'</div>'
+			.'</div>';
 	}
 
 

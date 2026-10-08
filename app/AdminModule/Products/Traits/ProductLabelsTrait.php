@@ -734,7 +734,7 @@ trait ProductLabelsTrait
 			\ProductLabelsEntity::TYPE_SIZE_1 => ['key' => 'v1', 'typeId' => 3, 'name' => 'Vel. 1', 'dims' => '164 × 41 mm', 'perPage' => 1, 'w' => '160px', 'h' => '48px', 'items' => [], 'count' => 0],
 			\ProductLabelsEntity::TYPE_SIZE_2 => ['key' => 'v2', 'typeId' => 4, 'name' => 'Vel. 2', 'dims' => '133 × 41 mm', 'perPage' => 2, 'w' => '150px', 'h' => '58px', 'items' => [], 'count' => 0],
 			\ProductLabelsEntity::TYPE_SIZE_3 => ['key' => 'v3', 'typeId' => 5, 'name' => 'Vel. 3', 'dims' => '182 × 56 mm', 'perPage' => 2, 'w' => '170px', 'h' => '56px', 'items' => [], 'count' => 0],
-			\ProductLabelsEntity::TYPE_SIZE_2B => ['key' => 'v2b', 'typeId' => 6, 'name' => 'Vel. 2B Akce', 'dims' => '133 × 52 mm', 'perPage' => 2, 'w' => '150px', 'h' => '58px', 'items' => [], 'count' => 0],
+			\ProductLabelsEntity::TYPE_SIZE_2B => ['key' => 'v2b', 'typeId' => 6, 'name' => 'Vel. 2B Akce', 'dims' => '133 × 52 mm', 'perPage' => 1, 'w' => '150px', 'h' => '58px', 'items' => [], 'count' => 0],
 		];
 
 		foreach ($labels as $row) {
