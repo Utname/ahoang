@@ -1,0 +1,431 @@
+<style>
+    @page { margin: 0; }
+    html, body { margin: 0; padding: 0; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; background: #fff; color: #111; -webkit-font-smoothing: antialiased; }
+    * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+    .fikko-pecivo {
+        box-sizing: border-box;
+        position: relative;
+        width: 150mm;
+        height: 41mm;
+        border: 0.4mm dashed #111;
+        background: #fff;
+        color: #111;
+        overflow: hidden;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    /* 1. Left Brand Column (32mm x 41mm) */
+    .pecivo-brand-col {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 32mm;
+        height: 40.2mm;
+        border-right: 0.4mm dashed #111;
+        text-align: center;
+        padding: 0;
+    }
+    .pecivo-brand-table {
+        width: 100%;
+        height: 40.2mm;
+        border-collapse: collapse;
+    }
+    .pecivo-brand-cell {
+        vertical-align: middle;
+        text-align: center;
+    }
+    .pecivo-brand-text {
+        font-family: Nunito, sans-serif;
+        font-weight: 900;
+        font-style: italic;
+        font-size: 7.5mm;
+        line-height: 1.05;
+        color: #111;
+    }
+
+    /* 2. Center Content Column (78mm x 41mm) */
+    .pecivo-center-col {
+        position: absolute;
+        top: 0;
+        left: 32mm;
+        width: 78mm;
+        height: 40.2mm;
+        padding: 0.6mm 2.5mm 0.6mm 2.5mm;
+    }
+
+    /* Top Box: Product Name and Subtitle */
+    .pecivo-top-box {
+        width: 73mm;
+        max-width: 73mm;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+    .pecivo-prod-name {
+        font-size: 3.4mm;
+        font-weight: 700;
+        line-height: 1.15;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+    .pecivo-prod-sub {
+        font-family: Nunito, sans-serif;
+        font-weight: 900;
+        font-style: italic;
+        font-size: 3.2mm;
+        line-height: 1.15;
+        overflow: hidden;
+        white-space: nowrap;
+        margin-top: 0.1mm;
+    }
+
+    /* Middle Row: Notes (left) + Price (right) */
+    .pecivo-mid-table {
+        width: 73mm;
+        border-collapse: collapse;
+        margin-top: 0;
+    }
+    .pecivo-notes-cell {
+        width: 31mm;
+        vertical-align: middle;
+        text-align: left;
+        padding-right: 1mm;
+    }
+    .pecivo-note-row {
+        margin-bottom: 0.6mm;
+        white-space: nowrap;
+        line-height: 1.15;
+    }
+    .pecivo-note-tag {
+        font-size: 2.3mm;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        font-weight: 700;
+        color: #111;
+        display: inline-block;
+        margin-right: 1.2mm;
+    }
+    .pecivo-note-val {
+        font-size: 2.7mm;
+        font-weight: 700;
+        color: #111;
+        display: inline-block;
+    }
+
+    .pecivo-price-cell {
+        width: 42mm;
+        vertical-align: middle;
+        text-align: right;
+        white-space: nowrap;
+    }
+    .pecivo-price-wrap {
+        display: inline-block;
+        white-space: nowrap;
+    }
+    .pecivo-price-major {
+        display: inline-block;
+        vertical-align: top;
+        font-family: Nunito, sans-serif;
+        font-weight: 900;
+        font-style: italic;
+        font-size: 15mm;
+        line-height: 0.82;
+    }
+    .pecivo-price-minor-col {
+        display: inline-block;
+        vertical-align: top;
+        text-align: left;
+        margin-left: 0.8mm;
+    }
+    .pecivo-price-minor {
+        font-family: Nunito, sans-serif;
+        font-weight: 900;
+        font-style: italic;
+        font-size: 8.5mm;
+        line-height: 0.9;
+    }
+    .pecivo-price-currency {
+        font-family: Nunito, sans-serif;
+        font-weight: 900;
+        font-style: italic;
+        font-size: 4.8mm;
+        line-height: 0.9;
+        white-space: nowrap;
+        margin-top: 0.2mm;
+    }
+    .pecivo-unit-price {
+        font-family: Nunito, sans-serif;
+        font-weight: 900;
+        font-style: italic;
+        font-size: 2.3mm;
+        line-height: 1;
+        text-align: right;
+        margin-top: 0.2mm;
+        margin-bottom: 0.4mm;
+        white-space: nowrap;
+    }
+
+    /* Bottom Info Row (Origin, Snowflake badge, Barcode) */
+    .pecivo-bottom-box {
+        position: absolute;
+        left: 34.5mm;
+        bottom: 0.8mm;
+        width: 73mm;
+    }
+    .pecivo-bottom-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .pecivo-bottom-origin-cell {
+        vertical-align: middle;
+        text-align: left;
+        white-space: nowrap;
+        width: 25mm;
+    }
+    .pecivo-origin-flag {
+        width: 4.5mm;
+        height: 3mm;
+        display: inline-block;
+        vertical-align: middle;
+        border: 0.2mm solid #111;
+    }
+    .pecivo-origin-name {
+        font-family: Nunito, sans-serif;
+        font-weight: 900;
+        font-style: italic;
+        font-size: 2mm;
+        display: inline-block;
+        vertical-align: middle;
+        margin-left: 1mm;
+    }
+
+    .pecivo-bottom-badge-cell {
+        vertical-align: middle;
+        text-align: center;
+        white-space: nowrap;
+        width: 24mm;
+    }
+    .pecivo-defrost-badge {
+        display: inline-block;
+        vertical-align: middle;
+        border: 0.3mm solid #111;
+        border-radius: 1mm;
+        padding: 0.3mm 1mm;
+        white-space: nowrap;
+    }
+    .pecivo-snowflake-img {
+        width: 3.4mm;
+        height: 3.4mm;
+        display: inline-block;
+        vertical-align: middle;
+    }
+    .pecivo-defrost-text {
+        font-family: Nunito, sans-serif;
+        font-weight: 900;
+        font-style: italic;
+        font-size: 2mm;
+        display: inline-block;
+        vertical-align: middle;
+        margin-left: 0.8mm;
+    }
+
+    .pecivo-bottom-barcode-cell {
+        vertical-align: bottom;
+        text-align: right;
+        white-space: nowrap;
+        width: 24mm;
+    }
+    .pecivo-barcode-container {
+        display: inline-block;
+        text-align: center;
+        vertical-align: bottom;
+    }
+    .pecivo-barcode-bars {
+        height: 3.8mm;
+        margin-bottom: 0.2mm;
+        display: block;
+        overflow: hidden;
+    }
+    .pecivo-barcode-bars > div {
+        float: left;
+        height: 100%;
+    }
+    .pecivo-barcode-ean {
+        clear: both;
+        font-size: 1.6mm;
+        letter-spacing: 0.02em;
+        text-align: center;
+        line-height: 1.1;
+    }
+
+    /* 3. Right Column: Složení & Výrobce (40mm x 41mm) */
+    .pecivo-right-col {
+        position: absolute;
+        top: 0;
+        left: 110mm;
+        width: 40mm;
+        height: 40.2mm;
+        border-left: 0.4mm dashed #111;
+        padding: 0.8mm 2mm 0.6mm 2mm;
+        overflow: hidden;
+    }
+    .pecivo-ingredients-title {
+        font-size: 2.4mm;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-weight: 700;
+        color: #111;
+        margin-bottom: 0.3mm;
+    }
+    .pecivo-ingredients-text {
+        font-size: 2.0mm;
+        line-height: 1.15;
+        font-weight: 400;
+        height: 22mm;
+        overflow: hidden;
+    }
+    .pecivo-manufacturer-box {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 39.6mm;
+        height: 11.5mm;
+        border-top: 0.25mm dashed #111;
+        padding: 0.5mm 2mm 0.4mm 2mm;
+        background: #fff;
+    }
+    .pecivo-manufacturer-title {
+        font-size: 1.8mm;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-weight: 700;
+        line-height: 1.1;
+    }
+    .pecivo-manufacturer-name {
+        font-size: 1.9mm;
+        line-height: 1.15;
+        font-weight: 700;
+    }
+    .pecivo-manufacturer-addr {
+        font-size: 1.8mm;
+        line-height: 1.15;
+        font-weight: 400;
+    }
+
+    /* Price scaling for 3+ digits */
+    .price-digits-3 .pecivo-price-major { font-size: 13mm; }
+    .price-digits-3 .pecivo-price-minor { font-size: 7.5mm; }
+    .price-digits-3 .pecivo-price-currency { font-size: 4.2mm; margin-top: 0.2mm; }
+    .price-digits-4 .pecivo-price-major { font-size: 10.5mm; }
+    .price-digits-4 .pecivo-price-minor { font-size: 6.2mm; }
+    .price-digits-4 .pecivo-price-currency { font-size: 3.5mm; margin-top: 0.1mm; }
+</style>
+
+{var $pecivoClasses = ($priceDigits >= 4 ? 'price-digits-4' : ($priceDigits >= 3 ? 'price-digits-3' : ''))}
+{var $flagMarkup = $flagIconDataUri ? '<img class="pecivo-origin-flag" src="' . $flagIconDataUri . '" alt="">' : ''}
+{var $snowflakeMarkup = $snowflakeIconDataUri ? '<img class="pecivo-snowflake-img" src="' . $snowflakeIconDataUri . '" alt="">' : ''}
+
+<div class="fikko-pecivo {$pecivoClasses}">
+    <!-- 1. Left Brand Column -->
+    <div class="pecivo-brand-col">
+        <table class="pecivo-brand-table" cellpadding="0" cellspacing="0">
+            <tr>
+                <td class="pecivo-brand-cell">
+                    <div class="pecivo-brand-text">
+                        <div>Fikko</div>
+                        <div>Cena</div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- 2. Center Content Column -->
+    <div class="pecivo-center-col">
+        <div class="pecivo-top-box">
+            <div class="pecivo-prod-name">{$labelName}</div>
+            <div n:if="($label && $label->is_more_species) || ($label && $label->sale_text) || $note3" class="pecivo-prod-sub">
+                {if $label && $label->is_more_species}
+                    Více druhů
+                {elseif $label && $label->sale_text}
+                    {$label->sale_text}
+                {elseif $note3}
+                    {$note3}
+                {/if}
+            </div>
+        </div>
+
+        <table class="pecivo-mid-table" cellpadding="0" cellspacing="0">
+            <tr>
+                <td class="pecivo-notes-cell">
+                    <div class="pecivo-note-row">
+                        <span class="pecivo-note-tag">Poznámka 1</span>
+                        <span class="pecivo-note-val">{$note1 ?: ''}</span>
+                    </div>
+                    <div class="pecivo-note-row">
+                        <span class="pecivo-note-tag">Poznámka 2</span>
+                        <span class="pecivo-note-val">{$note2 ?: ''}</span>
+                    </div>
+                </td>
+                <td class="pecivo-price-cell">
+                    <div class="pecivo-price-wrap">
+                        <span class="pecivo-price-major">{$finalPriceMajor}</span>
+                        <div class="pecivo-price-minor-col">
+                            <div class="pecivo-price-minor">{$finalPriceMinor}</div>
+                            <div class="pecivo-price-currency">{$currencySymbol} / 1 ks</div>
+                        </div>
+                    </div>
+                    <div n:if="$unit" class="pecivo-unit-price">
+                        cena za {$unit->unitWeight}{$unit->unitShort} = {$unit->price|number:2,',',' '} {$currencySymbol}
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Bottom Bar (Center) -->
+    <div class="pecivo-bottom-box">
+        <table class="pecivo-bottom-table" cellpadding="0" cellspacing="0">
+            <tr>
+                <td class="pecivo-bottom-origin-cell">
+                    <div n:if="$country">
+                        {$flagMarkup|noescape}
+                        <span class="pecivo-origin-name">{$country->name}</span>
+                    </div>
+                </td>
+                <td class="pecivo-bottom-badge-cell">
+                    <div class="pecivo-defrost-badge">
+                        {$snowflakeMarkup|noescape}
+                        <span class="pecivo-defrost-text">Rozmrazeno</span>
+                    </div>
+                </td>
+                <td class="pecivo-bottom-barcode-cell">
+                    <div class="pecivo-barcode-container">
+                        <div n:if="$bars" class="pecivo-barcode-bars">
+                            <div n:foreach="$bars as $bar" style="background:{$bar['color']|noescape};width:{$bar['width']|noescape}"></div>
+                        </div>
+                        <div class="pecivo-barcode-ean">{$eanText}</div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- 3. Right Column: Složení & Výrobce -->
+    <div class="pecivo-right-col">
+        <div class="pecivo-ingredients-title">Složení</div>
+        <div class="pecivo-ingredients-text">
+            {if !$hideIngredients && $product && $product->ingredients}
+                {$product->ingredients|truncate:130}
+            {elseif !$hideIngredients}
+                Aqua, Sodium Laureth Sulfate, Cocamidopropyl Betaine, Sodium Chloride, Parfum.
+            {/if}
+        </div>
+
+        <div class="pecivo-manufacturer-box">
+            <div class="pecivo-manufacturer-title">Výrobce</div>
+            <div class="pecivo-manufacturer-name">Fikko market s.r.o.</div>
+            <div class="pecivo-manufacturer-addr">Hermanická 163/7, Praha 9</div>
+        </div>
+    </div>
+</div>

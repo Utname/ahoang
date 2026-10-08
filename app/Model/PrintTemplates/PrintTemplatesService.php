@@ -19,6 +19,7 @@ class PrintTemplatesService
 	public const PRESET_FRUIT = 'fruit';
 	public const PRESET_VEL2B_AKCE = 'vel2b-akce';
 	public const PRESET_VEL2_AKCE = 'vel2-akce';
+	public const PRESET_PECIVO = 'pecivo';
 
 
 	public function __construct(
@@ -116,6 +117,7 @@ class PrintTemplatesService
 			ProductLabelsEntity::TYPE_SIZE_2 => ['width_mm' => 133, 'height_mm' => 38],
 			ProductLabelsEntity::TYPE_SIZE_2B => ['width_mm' => 133, 'height_mm' => 52],
 			ProductLabelsEntity::TYPE_SIZE_2_AKCE => ['width_mm' => 133, 'height_mm' => 38],
+			ProductLabelsEntity::TYPE_PECIVO => ['width_mm' => 150, 'height_mm' => 41],
 			ProductLabelsEntity::TYPE_A5 => ['width_mm' => 200, 'height_mm' => 138.5],
 			default => NULL,
 		};
@@ -186,6 +188,13 @@ class PrintTemplatesService
 				'heightMm' => 38,
 				'sourceFile' => 'vel2-akce.latte',
 			],
+			self::PRESET_PECIVO => [
+				'name' => 'Fikko Cena – tem dải',
+				'labelTypeId' => ProductLabelsEntity::TYPE_PECIVO,
+				'widthMm' => 150,
+				'heightMm' => 41,
+				'sourceFile' => 'pecivo.latte',
+			],
 			default => throw new \InvalidArgumentException('Unknown print template preset.'),
 		};
 
@@ -249,8 +258,9 @@ class PrintTemplatesService
 		$isA4 = str_contains($template->html_source, 'fikko-a4') || str_contains($template->html_source, 'A4 Akce') || (float)$template->width_mm === 210.0;
 		$isFruit = str_contains($template->html_source, 'fikko-fruit');
 		$isSize2BAkce = str_contains($template->html_source, 'fikko-vel2b-akce') || ((float)$template->width_mm === 133.0 && (float)$template->height_mm === 52.0);
+		$isPecivo = str_contains($template->html_source, 'fikko-pecivo') || ((float)$template->width_mm === 150.0 && (float)$template->height_mm === 41.0) || (int)($template->product_label_type_id ?? 0) === ProductLabelsEntity::TYPE_PECIVO;
 		$isSize2 = (float)$template->width_mm === 133.0;
-		$isVel1 = (float)$template->width_mm === 164.0 || (float)$template->width_mm === 150.0;
+		$isVel1 = (float)$template->width_mm === 164.0 || ((float)$template->width_mm === 150.0 && !$isPecivo);
 		$isSize2B = $this->isSize2Template($template);
 		$isA5 = $this->isA5Template($template);
 		$price = $product->getPriceWithLog($branchesId);
@@ -329,6 +339,7 @@ class PrintTemplatesService
 				$ean === '' => [],
 				$isA4 => EanBarcodeHelper::getBars($ean, 0.38),
 				$isSize2BAkce => EanBarcodeHelper::getBars($ean, 0.33),
+				$isPecivo => EanBarcodeHelper::getBars($ean, 0.24),
 				$isSize2 => EanBarcodeHelper::getBars($ean, 0.28),
 				$isVel1 => EanBarcodeHelper::getBars($ean, 0.28),
 				$isA5 => EanBarcodeHelper::getBars($ean, 0.42),
@@ -372,6 +383,7 @@ class PrintTemplatesService
 			// getImageDir() lookup the old TCPDF renderer used, not a static placeholder — so it
 			// actually matches the product's real origin country instead of always showing Czech.
 			'flagIconDataUri' => $this->countryFlagDataUri($country),
+			'snowflakeIconDataUri' => $this->imageAsDataUri(WWW_DIR . '/images/snowflake-icon.png', 'image/png'),
 			'pigIconDataUri' => $this->imageAsDataUri(WWW_DIR . '/images/pig-icon.png', 'image/png'),
 			// A5's save-badge uses a flat piggy-bank silhouette (Material Symbols "savings"
 			// glyph), a different icon from A4's mascot — also rasterized, same reason as above.
@@ -626,6 +638,9 @@ class PrintTemplatesService
 		if ($this->isA5Template($template)) {
 			return $this->renderDompdf($this->renderA5Page($html), 210, 297)->output();
 		}
+		if ($this->isPecivoTemplate($template)) {
+			return $this->renderDompdf($this->renderPecivoPage($html, $template), 210, 297)->output();
+		}
 		if ($this->isVel1Template($template)) {
 			return $this->renderDompdf($this->renderVel1Page($html, $template), 210, 297)->output();
 		}
@@ -662,6 +677,7 @@ class PrintTemplatesService
 			$pages[] = match (TRUE) {
 				$this->isSize2BTemplate($job['template']) => $this->renderVel2BPage($html, $job['template']),
 				$this->isSize2Template($job['template']) => $this->renderSize2Page($html, $job['template']),
+				$this->isPecivoTemplate($job['template']) => $this->renderPecivoPage($html, $job['template']),
 				$this->isA5Template($job['template']) => $this->renderA5Page($html),
 				$this->isVel1Template($job['template']) => $this->renderVel1Page($html, $job['template']),
 				$this->isVel3Template($job['template']) => $this->renderVel3Page($html),
@@ -778,7 +794,36 @@ class PrintTemplatesService
 
 	private function isVel1Template(PrintTemplatesEntity $template): bool
 	{
-		return (float)$template->width_mm === 164.0 || ((float)$template->width_mm === 150.0 && (float)$template->height_mm === 44.0);
+		return ((float)$template->width_mm === 164.0 || ((float)$template->width_mm === 150.0 && (float)$template->height_mm === 44.0)) && !$this->isPecivoTemplate($template);
+	}
+
+
+	private function isPecivoTemplate(PrintTemplatesEntity $template): bool
+	{
+		return (float)$template->width_mm === 150.0 && ((float)$template->height_mm === 41.0 || str_contains($template->html_source, 'fikko-pecivo') || (int)($template->product_label_type_id ?? 0) === ProductLabelsEntity::TYPE_PECIVO);
+	}
+
+
+	/**
+	 * Pečivo / Tem dải is a single label on A4 sheet (150 × 41 mm) at top-left padding (8mm 8mm).
+	 */
+	private function renderPecivoPage(string $html, PrintTemplatesEntity $template): string
+	{
+		preg_match_all('#<style\b[^>]*>.*?</style>#is', $html, $styleMatches);
+		preg_match('#<body\b[^>]*>(.*)</body>#is', $html, $bodyMatch);
+		$labelHtml = $bodyMatch[1] ?? (preg_replace('#<style\b[^>]*>.*?</style>#is', '', $html) ?? $html);
+		$styles = implode('', $styleMatches[0] ?? []);
+		$height = (float)$template->height_mm > 0 ? (float)$template->height_mm : 41.0;
+		$width = (float)$template->width_mm > 0 ? (float)$template->width_mm : 150.0;
+
+		return '<style>'
+			.'@page{margin:0}body{margin:0!important;padding:0!important;width:210mm!important}'
+			.'.pecivo-sheet{position:relative;width:210mm;height:297mm;overflow:hidden}'
+			.'.pecivo-label{position:absolute;left:8mm;top:8mm;width:'.$width.'mm;height:'.$height.'mm;overflow:visible}'
+			.'</style>'.$styles
+			.'<div class="pecivo-sheet">'
+			.'<div class="pecivo-label">'.$labelHtml.'</div>'
+			.'</div>';
 	}
 
 
