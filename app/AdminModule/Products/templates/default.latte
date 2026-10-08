@@ -146,7 +146,14 @@
             {/snippet}
 
 
-                <div class="mosaic-list-table-wrap dataTables_wrapper m-t-md" style="overflow-x:auto;overflow-y:visible;padding-bottom:15px;">
+                <style>
+                    .mosaic-list-table-wrap { overflow-x: auto; overflow-y: visible; padding-bottom: 25px; }
+                    .mosaic-list-table-wrap .table tr.has-open-dropdown,
+                    .mosaic-list-table-wrap .table tr:has(.open) { position: relative !important; z-index: 1050 !important; }
+                    .mosaic-list-table-wrap .table td.has-open-dropdown,
+                    .mosaic-list-table-wrap .table td:has(.open) { position: relative !important; z-index: 1050 !important; }
+                </style>
+                <div class="mosaic-list-table-wrap dataTables_wrapper m-t-md">
                         <table class="table table-striped table-hover mosaic-table-compact" style="margin-bottom:0;width:100%;">
                             <thead>
                             <tr>
