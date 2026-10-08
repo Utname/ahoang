@@ -1,10 +1,45 @@
 $(function () {
-    $(document).on('show.bs.dropdown', '.dropdown', function () {
-        $(this).closest('tr').addClass('open-dropdown has-open-dropdown').css({'position': 'relative', 'z-index': 99999});
-        $(this).closest('td').addClass('has-open-dropdown').css({'position': 'relative', 'z-index': 99999});
-    }).on('hide.bs.dropdown hidden.bs.dropdown', '.dropdown', function () {
-        $(this).closest('tr').removeClass('open-dropdown has-open-dropdown').css({'position': '', 'z-index': ''});
-        $(this).closest('td').removeClass('has-open-dropdown').css({'position': '', 'z-index': ''});
+    $(document).on('shown.bs.dropdown', '.table .dropdown', function () {
+        var $btn = $(this).find('.dropdown-toggle');
+        var $menu = $(this).find('.dropdown-menu');
+        if ($btn.length && $menu.length) {
+            var rect = $btn[0].getBoundingClientRect();
+            var menuWidth = $menu.outerWidth();
+            var top = rect.bottom + 2;
+            var left = rect.right - menuWidth;
+            if (left < 10) left = 10;
+            var menuHeight = $menu.outerHeight();
+            if (top + menuHeight > $(window).height() - 10 && rect.top - menuHeight > 10) {
+                top = rect.top - menuHeight - 2;
+            }
+            $menu.css({
+                'position': 'fixed',
+                'top': top + 'px',
+                'left': left + 'px',
+                'right': 'auto',
+                'bottom': 'auto',
+                'z-index': 9999999,
+                'margin': 0
+            });
+        }
+    }).on('hide.bs.dropdown hidden.bs.dropdown', '.table .dropdown', function () {
+        var $menu = $(this).find('.dropdown-menu');
+        $menu.css({
+            'position': '',
+            'top': '',
+            'left': '',
+            'right': '',
+            'bottom': '',
+            'z-index': '',
+            'margin': ''
+        });
+    });
+
+    $(window).on('scroll', function () {
+        $('.table .dropdown.open').removeClass('open');
+    });
+    $(document).on('scroll', '.mosaic-list-table-wrap', function () {
+        $('.table .dropdown.open').removeClass('open');
     });
 
     $("body").on('click', "a.ajax", function (event) {
