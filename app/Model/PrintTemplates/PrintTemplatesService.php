@@ -732,8 +732,7 @@ class PrintTemplatesService
 
 
 	/**
-	 * Vel.1 is a three-up A4 stock: the original design stacks three identical
-	 * 164 × 41 mm strips inside an 8 mm page margin.
+	 * Vel.1 is a single label on A4 sheet (164 × 41 mm) at top-left padding (8mm 8mm).
 	 */
 	private function renderVel1Page(string $html, PrintTemplatesEntity $template): string
 	{
@@ -743,25 +742,14 @@ class PrintTemplatesService
 		$styles = implode('', $styleMatches[0] ?? []);
 		$height = (float)$template->height_mm > 0 ? (float)$template->height_mm : 41.0;
 		$width = (float)$template->width_mm > 0 ? (float)$template->width_mm : 164.0;
-		$top1 = 8.0;
-		$top2 = $top1 + $height;
-		$top3 = $top2 + $height;
 
 		return '<style>'
 			.'@page{margin:0}body{margin:0!important;padding:0!important;width:210mm!important}'
 			.'.vel1-sheet{position:relative;width:210mm;height:297mm;overflow:hidden}'
-			.'.vel1-label{position:absolute;left:8mm;width:'.$width.'mm;height:'.$height.'mm;overflow:visible}'
-			.'.vel1-label.n1{top:'.$top1.'mm}.vel1-label.n2{top:'.$top2.'mm}.vel1-label.n3{top:'.$top3.'mm}'
-			.'.vel1-label.n2 .fikko-vel1,.vel1-label.n3 .fikko-vel1{border-top:0}'
-			.'.vel1-divider-1{position:absolute;top:'.$top2.'mm;left:8mm;width:'.$width.'mm;border-top:.4mm dashed #111;z-index:5}'
-			.'.vel1-divider-2{position:absolute;top:'.$top3.'mm;left:8mm;width:'.$width.'mm;border-top:.4mm dashed #111;z-index:5}'
+			.'.vel1-label{position:absolute;left:8mm;top:8mm;width:'.$width.'mm;height:'.$height.'mm;overflow:visible}'
 			.'</style>'.$styles
 			.'<div class="vel1-sheet">'
-			.'<div class="vel1-label n1">'.$labelHtml.'</div>'
-			.'<div class="vel1-divider-1"></div>'
-			.'<div class="vel1-label n2">'.$labelHtml.'</div>'
-			.'<div class="vel1-divider-2"></div>'
-			.'<div class="vel1-label n3">'.$labelHtml.'</div>'
+			.'<div class="vel1-label">'.$labelHtml.'</div>'
 			.'</div>';
 	}
 
