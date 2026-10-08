@@ -5,30 +5,32 @@
 
     <span n:if="!$price" class="text-danger" style="font-size:11px;">{_admin.terms.noBasicPrice}</span>
     {if $price}
-        <div class="product-labels-steppers-container" style="display:inline-flex;align-items:center;gap:5px;flex-wrap:nowrap;">
-            {foreach $GLOBALS['global']['productLabelTypes'] as $labelTypeId => $term}
-                {var $label = $labels[$labelTypeId] ?? NULL}
-                {var $count = ($label && $label->isToPrint()) ? (int)$label->count : 0}
-                {var $hasCount = $count > 0}
-                <div class="label-stepper-item" style="display:inline-flex;flex-direction:column;align-items:center;min-width:62px;">
-                    <div class="label-stepper-box" style="display:inline-flex;align-items:stretch;border:1px solid {$hasCount ? '#14b8a6' : '#d9e0e8'|noescape};border-radius:7px;overflow:hidden;background:#fff;height:24px;box-shadow:{$hasCount ? '0 0 0 1px #14b8a6' : 'none'|noescape};">
-                        <a href="{link decrement! $labelTypeId, $label ? $label->id : NULL}" 
-                           class="ajax label-stepper-btn label-stepper-dec" 
-                           style="width:19px;display:flex;align-items:center;justify-content:center;background:#fff;color:#5d6a7d;text-decoration:none;font-size:12px;font-weight:700;line-height:1;border-right:1px solid #eef1f5;cursor:pointer;" 
-                           title="−">−</a>
-                        
-                        <div class="label-stepper-val" style="min-width:22px;padding:0 3px;height:100%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:{$hasCount ? '800' : '500'};color:{$hasCount ? '#042f2e' : '#8794a5'};background:{$hasCount ? '#ccfbf1' : '#fff'};">
-                            {$count}
-                        </div>
+        <div class="product-labels-steppers-container" style="display:inline-flex;align-items:flex-start;gap:6px;">
+            <div class="product-labels-steppers-grid" style="display:inline-grid;grid-template-columns:repeat(3, minmax(62px, auto));gap:6px 6px;align-items:start;">
+                {foreach $GLOBALS['global']['productLabelTypes'] as $labelTypeId => $term}
+                    {var $label = $labels[$labelTypeId] ?? NULL}
+                    {var $count = ($label && $label->isToPrint()) ? (int)$label->count : 0}
+                    {var $hasCount = $count > 0}
+                    <div class="label-stepper-item" style="display:inline-flex;flex-direction:column;align-items:center;min-width:62px;">
+                        <div class="label-stepper-box" style="display:inline-flex;align-items:stretch;border:1px solid {$hasCount ? '#14b8a6' : '#d9e0e8'|noescape};border-radius:7px;overflow:hidden;background:#fff;height:24px;box-shadow:{$hasCount ? '0 0 0 1px #14b8a6' : 'none'|noescape};">
+                            <a href="{link decrement! $labelTypeId, $label ? $label->id : NULL}" 
+                               class="ajax label-stepper-btn label-stepper-dec" 
+                               style="width:19px;display:flex;align-items:center;justify-content:center;background:#fff;color:#5d6a7d;text-decoration:none;font-size:12px;font-weight:700;line-height:1;border-right:1px solid #eef1f5;cursor:pointer;" 
+                               title="−">−</a>
+                            
+                            <div class="label-stepper-val" style="min-width:22px;padding:0 3px;height:100%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:{$hasCount ? '800' : '500'};color:{$hasCount ? '#042f2e' : '#8794a5'};background:{$hasCount ? '#ccfbf1' : '#fff'};">
+                                {$count}
+                            </div>
 
-                        <a href="{link increment! $labelTypeId, $label ? $label->id : NULL}" 
-                           class="ajax label-stepper-btn label-stepper-inc" 
-                           style="width:19px;display:flex;align-items:center;justify-content:center;background:#fff;color:#5d6a7d;text-decoration:none;font-size:12px;font-weight:700;line-height:1;border-left:1px solid #eef1f5;cursor:pointer;" 
-                           title="+">+</a>
+                            <a href="{link increment! $labelTypeId, $label ? $label->id : NULL}" 
+                               class="ajax label-stepper-btn label-stepper-inc" 
+                               style="width:19px;display:flex;align-items:center;justify-content:center;background:#fff;color:#5d6a7d;text-decoration:none;font-size:12px;font-weight:700;line-height:1;border-left:1px solid #eef1f5;cursor:pointer;" 
+                               title="+">+</a>
+                        </div>
+                        <span style="font-size:10px;color:#8794a5;margin-top:2px;font-weight:600;letter-spacing:0.02em;text-align:center;line-height:1.2;">{$term}</span>
                     </div>
-                    <span style="font-size:10px;color:#8794a5;margin-top:2px;font-weight:600;letter-spacing:0.02em;">{$term}</span>
-                </div>
-            {/foreach}
+                {/foreach}
+            </div>
             
             <div class="dropdown m-l-xxs" style="align-self:flex-start;position:relative;">
                 <a class="dropdown-toggle btn btn-xs btn-default" data-toggle="dropdown" href="#" title="{_admin.terms.plPrintOptions}" style="height:24px;display:inline-flex;align-items:center;justify-content:center;padding:0 7px;border-radius:6px;border:1px solid #d9e0e8;background:#fff;">
