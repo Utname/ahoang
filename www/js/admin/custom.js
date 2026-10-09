@@ -1,10 +1,10 @@
 $(function () {
     $(document).on('show.bs.dropdown', '.table .dropdown', function () {
-        $(this).closest('tr').addClass('has-open-dropdown').css({'position': 'relative', 'z-index': 100});
-        $(this).closest('td').addClass('has-open-dropdown').css({'position': 'relative', 'z-index': 100});
+        $(this).closest('tr').addClass('has-open-dropdown');
+        $(this).closest('td').addClass('has-open-dropdown');
     }).on('hide.bs.dropdown hidden.bs.dropdown', '.table .dropdown', function () {
-        $(this).closest('tr').removeClass('has-open-dropdown').css({'position': '', 'z-index': ''});
-        $(this).closest('td').removeClass('has-open-dropdown').css({'position': '', 'z-index': ''});
+        $(this).closest('tr').removeClass('has-open-dropdown');
+        $(this).closest('td').removeClass('has-open-dropdown');
     });
 
     $("body").on('click', "a.ajax", function (event) {
@@ -18,12 +18,19 @@ $(function () {
     $("body").on('click', "a.ajax-modal", function (event) {
         event.preventDefault();
 
-        if (!$(this).hasClass('with-confirm')) {
-            ajaxGet(this.href, false);
+        var target = $(this).data('target') || $(this).attr('data-target');
+        var href = this.href || $(this).attr('href');
+
+        $('.table .dropdown.open').removeClass('open');
+        $('.table tr.has-open-dropdown').removeClass('has-open-dropdown');
+        $('.table td.has-open-dropdown').removeClass('has-open-dropdown');
+
+        if (!$(this).hasClass('with-confirm') && href) {
+            ajaxGet(href, false);
         }
 
-        if ($(this).data('target') && $($(this).data('target')).length) {
-            $($(this).data('target')).modal('show');
+        if (target && $(target).length) {
+            $(target).modal('show');
         }
 
         $('.tooltip.fade').remove();

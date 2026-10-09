@@ -4137,44 +4137,49 @@ main.page-content,
     background: #fff !important;
     padding-bottom: 5px !important;
     overflow: visible !important;
+.mosaic-table-compact tr {
+    position: relative;
+}
+
+.mosaic-table-compact tr:hover {
+    position: relative;
+    z-index: 10;
 }
 
 .mosaic-table-compact tr.open,
 .mosaic-table-compact tr.open-dropdown,
 .mosaic-table-compact tr.has-open-dropdown,
 .mosaic-table-compact tr:has(.dropdown.open),
-.mosaic-table-compact tr:has(.open) {
+.mosaic-table-compact tr:has(.open),
+.mosaic-table-compact tr.has-open-dropdown:hover,
+.mosaic-table-compact tr:has(.dropdown.open):hover {
     position: relative !important;
-    z-index: 99999 !important;
+    z-index: 1000 !important;
 }
 
 .mosaic-table-compact td.open,
 .mosaic-table-compact td.has-open-dropdown,
 .mosaic-table-compact td:has(.dropdown.open),
-.mosaic-table-compact td:has(.open) {
+.mosaic-table-compact td:has(.open),
+.mosaic-table-compact tr.has-open-dropdown > td,
+.mosaic-table-compact tr:has(.dropdown.open) > td {
     position: relative !important;
-    z-index: 99999 !important;
+    z-index: 1000 !important;
 }
 
-.mosaic-table-compact tr:hover {
-    position: static;
-    z-index: 1;
-}
-
-.dropdown {
+.mosaic-table-compact .dropdown {
     position: relative;
-    z-index: auto;
 }
 
-.dropdown.open {
+.mosaic-table-compact .dropdown.open {
     position: relative !important;
-    z-index: 999999 !important;
+    z-index: 1001 !important;
 }
 
-.dropdown.open > .dropdown-menu,
-.pl-print-menu {
+.mosaic-table-compact .dropdown.open > .dropdown-menu,
+.mosaic-table-compact .pl-print-menu {
     position: absolute !important;
-    z-index: 1000000 !important;
+    z-index: 1002 !important;
     background: #ffffff !important;
     background-color: #ffffff !important;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
