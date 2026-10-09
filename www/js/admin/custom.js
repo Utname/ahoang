@@ -63,29 +63,36 @@ $(function () {
 
     $("body").on('click', "a.ajax-modal", function (event) {
         event.preventDefault();
+        event.stopPropagation();
 
-        var target = $(this).data('target') || $(this).attr('data-target');
-        var href = this.href || $(this).attr('href');
+        var $this = $(this);
+        var target = $this.data('target') || $this.attr('data-target');
+        var href = this.href || $this.attr('href');
 
-        $('.table .dropdown.open').removeClass('open');
-        $('.table tr.has-open-dropdown').removeClass('has-open-dropdown');
-        $('.table td.has-open-dropdown').removeClass('has-open-dropdown');
-        $('.table .dropdown-menu').css({
-            'position': '',
-            'top': '',
-            'left': '',
-            'right': '',
-            'bottom': '',
-            'z-index': '',
-            'margin': ''
-        });
+        var $dropdown = $this.closest('.dropdown');
+        if ($dropdown.length) {
+            $dropdown.removeClass('open');
+            $dropdown.closest('tr').removeClass('has-open-dropdown');
+            $dropdown.closest('td').removeClass('has-open-dropdown');
+            $dropdown.find('.dropdown-menu').css({
+                'position': '',
+                'top': '',
+                'left': '',
+                'right': '',
+                'bottom': '',
+                'z-index': '',
+                'margin': ''
+            });
+        }
 
-        if (!$(this).hasClass('with-confirm') && href) {
+        if (!$this.hasClass('with-confirm') && href) {
             ajaxGet(href, false);
         }
 
         if (target && $(target).length) {
-            $(target).modal('show');
+            setTimeout(function () {
+                $(target).modal('show');
+            }, 10);
         }
 
         $('.tooltip.fade').remove();
