@@ -5,7 +5,7 @@
 
     <span n:if="!$price" class="text-danger" style="font-size:11px;">{_admin.terms.noBasicPrice}</span>
     {if $price}
-        <div class="product-labels-steppers-container" style="display:inline-flex;align-items:flex-start;gap:4px;">
+        <div class="product-labels-steppers-container" style="display:inline-flex;align-items:center;gap:4px;">
             <div class="product-labels-steppers-grid" style="display:inline-grid;grid-template-columns:repeat(3, 62px);gap:5px 4px;align-items:start;">
                 {foreach $GLOBALS['global']['productLabelTypes'] as $labelTypeId => $term}
                     {var $label = $labels[$labelTypeId] ?? NULL}
@@ -27,12 +27,40 @@
                                style="width:19px;display:flex;align-items:center;justify-content:center;background:#fff;color:#5d6a7d;text-decoration:none;font-size:12px;font-weight:700;line-height:1;border-left:1px solid #eef1f5;cursor:pointer;" 
                                title="+">+</a>
                         </div>
-                        <span style="font-size:10px;color:#8794a5;margin-top:2px;font-weight:600;letter-spacing:0.02em;text-align:center;line-height:1.2;">{$term}</span>
+                        <div class="dropdown label-type-dropdown" style="position:relative;margin-top:2px;display:inline-block;">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" style="font-size:10px;color:#64748b;font-weight:600;letter-spacing:0.02em;text-align:center;line-height:1.2;text-decoration:none;display:inline-flex;align-items:center;gap:2px;padding:1px 3px;border-radius:4px;cursor:pointer;" title="{$term}">
+                                <span>{$term}</span>
+                                <i class="fa fa-caret-down" style="font-size:8px;opacity:0.6;"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-left" style="min-width:145px;padding:4px 0;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.18);border:1px solid #cbd5e1;background:#ffffff;z-index:999999;font-size:11.5px;">
+                                <li>
+                                    <a href="{plink label! $item->id, $labelTypeId}" class="ajax-modal" data-target="#modal-labelsForm" data-toggle="modal" style="display:flex;align-items:center;gap:7px;padding:5px 12px;color:#1e293b;font-weight:500;">
+                                        <i class="fas fa-pencil text-muted" style="width:13px;"></i> {_admin.terms.plEditDetail}
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{plink downloadSingleProductLabelPdf! $item->id, $labelTypeId, 0}" target="_blank" style="display:flex;align-items:center;gap:7px;padding:5px 12px;color:#0284c7;font-weight:500;">
+                                        <i class="far fa-eye" style="width:13px;"></i> {_admin.terms.plView}
+                                    </a>
+                                </li>
+                                <li>
+                                    {if $count > 0}
+                                        <a href="{plink downloadSingleProductLabelPdf! $item->id, $labelTypeId, 1}" target="_blank" style="display:flex;align-items:center;gap:7px;padding:5px 12px;color:#042f2e;font-weight:700;background:#f0fdf4;">
+                                            <i class="fa fa-download text-success" style="width:13px;"></i> {_admin.terms.plDownload} ({$count})
+                                        </a>
+                                    {else}
+                                        <span style="display:flex;align-items:center;gap:7px;padding:5px 12px;color:#94a3b8;cursor:not-allowed;opacity:0.6;">
+                                            <i class="fa fa-download" style="width:13px;"></i> {_admin.terms.plDownload} (0)
+                                        </span>
+                                    {/if}
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 {/foreach}
             </div>
             
-            <div class="dropdown m-l-xxs pl-dropdown-wrapper" style="align-self:flex-start;position:relative;">
+            <div class="dropdown m-l-xxs pl-dropdown-wrapper" style="align-self:center;position:relative;">
                 <a class="dropdown-toggle btn btn-xs btn-default" data-toggle="dropdown" href="#" title="{_admin.terms.plPrintOptions}" style="height:24px;display:inline-flex;align-items:center;justify-content:center;padding:0 7px;border-radius:6px;border:1px solid #d9e0e8;background:#fff;">
                     <i class="fa fa-ellipsis-v"></i>
                 </a>

@@ -630,22 +630,22 @@ class PrintTemplatesService
 	{
 		$html = $this->renderHtml($template, $product, $branchesId, $label, $priceOverride);
 		if ($this->isSize2BTemplate($template)) {
-			return $this->renderDompdf($this->renderVel2BPage($html, $template), 210, 297)->output();
+			return $this->renderDompdf($this->renderStackedSheet([$html], 133, 52, 8.0, 8.0, 4.0), 210, 297)->output();
 		}
 		if ($this->isSize2Template($template)) {
-			return $this->renderDompdf($this->renderSize2Page($html, $template), 210, 297)->output();
+			return $this->renderDompdf($this->renderStackedSheet([$html], 133, 38, 8.0, 8.0, 3.0), 210, 297)->output();
 		}
 		if ($this->isA5Template($template)) {
 			return $this->renderDompdf($this->renderA5Page($html), 210, 297)->output();
 		}
 		if ($this->isPecivoTemplate($template)) {
-			return $this->renderDompdf($this->renderPecivoPage($html, $template), 210, 297)->output();
+			return $this->renderDompdf($this->renderStackedSheet([$html], 150, 41, 8.0, 8.0, 4.0), 210, 297)->output();
 		}
 		if ($this->isVel1Template($template)) {
-			return $this->renderDompdf($this->renderVel1Page($html, $template), 210, 297)->output();
+			return $this->renderDompdf($this->renderStackedSheet([$html], 164, 41, 8.0, 8.0, 4.0), 210, 297)->output();
 		}
 		if ($this->isVel3Template($template)) {
-			return $this->renderDompdf($this->renderVel3Page($html), 210, 297)->output();
+			return $this->renderDompdf($this->renderStackedSheet([$html], 182, 56, 8.0, 8.0, 6.0), 210, 297)->output();
 		}
 
 		$dompdf = $this->renderDompdf(
@@ -668,22 +668,102 @@ class PrintTemplatesService
 		}
 
 		$pages = [];
+		$queueType = null;
+		$queueJobs = [];
+
+		$flushQueue = function () use (&$pages, &$queueType, &$queueJobs, $branchesId) {
+			if (!$queueJobs || !$queueType) {
+				$queueJobs = [];
+				$queueType = null;
+				return;
+			}
+
+			$template = $queueJobs[0]['template'];
+
+			if ($queueType === 'a5') {
+				foreach (array_chunk($queueJobs, 2) as $pair) {
+					$h1 = $this->renderHtml($pair[0]['template'], $pair[0]['label']->getProduct(), $branchesId, $pair[0]['label'], $pair[0]['priceOverride'] ?? NULL);
+					$h2 = isset($pair[1])
+						? $this->renderHtml($pair[1]['template'], $pair[1]['label']->getProduct(), $branchesId, $pair[1]['label'], $pair[1]['priceOverride'] ?? NULL)
+						: NULL;
+					$pages[] = $this->renderA5Page($h1, $h2);
+				}
+			}
+			elseif ($queueType === 'vel2b') {
+				$w = (float)$template->width_mm > 0 ? (float)$template->width_mm : 133.0;
+				$h = (float)$template->height_mm > 0 ? (float)$template->height_mm : 52.0;
+				foreach (array_chunk($queueJobs, 5) as $chunk) {
+					$htmls = array_map(fn($j) => $this->renderHtml($j['template'], $j['label']->getProduct(), $branchesId, $j['label'], $j['priceOverride'] ?? NULL), $chunk);
+					$pages[] = $this->renderStackedSheet($htmls, $w, $h, 8.0, 8.0, 4.0);
+				}
+			}
+			elseif ($queueType === 'size2') {
+				$w = (float)$template->width_mm > 0 ? (float)$template->width_mm : 133.0;
+				$h = (float)$template->height_mm > 0 ? (float)$template->height_mm : 38.0;
+				foreach (array_chunk($queueJobs, 7) as $chunk) {
+					$htmls = array_map(fn($j) => $this->renderHtml($j['template'], $j['label']->getProduct(), $branchesId, $j['label'], $j['priceOverride'] ?? NULL), $chunk);
+					$pages[] = $this->renderStackedSheet($htmls, $w, $h, 8.0, 8.0, 3.0);
+				}
+			}
+			elseif ($queueType === 'pecivo') {
+				$w = (float)$template->width_mm > 0 ? (float)$template->width_mm : 150.0;
+				$h = (float)$template->height_mm > 0 ? (float)$template->height_mm : 41.0;
+				foreach (array_chunk($queueJobs, 6) as $chunk) {
+					$htmls = array_map(fn($j) => $this->renderHtml($j['template'], $j['label']->getProduct(), $branchesId, $j['label'], $j['priceOverride'] ?? NULL), $chunk);
+					$pages[] = $this->renderStackedSheet($htmls, $w, $h, 8.0, 8.0, 4.0);
+				}
+			}
+			elseif ($queueType === 'vel1') {
+				$w = (float)$template->width_mm > 0 ? (float)$template->width_mm : 164.0;
+				$h = (float)$template->height_mm > 0 ? (float)$template->height_mm : 41.0;
+				foreach (array_chunk($queueJobs, 6) as $chunk) {
+					$htmls = array_map(fn($j) => $this->renderHtml($j['template'], $j['label']->getProduct(), $branchesId, $j['label'], $j['priceOverride'] ?? NULL), $chunk);
+					$pages[] = $this->renderStackedSheet($htmls, $w, $h, 8.0, 8.0, 4.0);
+				}
+			}
+			elseif ($queueType === 'vel3') {
+				$w = (float)$template->width_mm > 0 ? (float)$template->width_mm : 182.0;
+				$h = (float)$template->height_mm > 0 ? (float)$template->height_mm : 56.0;
+				foreach (array_chunk($queueJobs, 4) as $chunk) {
+					$htmls = array_map(fn($j) => $this->renderHtml($j['template'], $j['label']->getProduct(), $branchesId, $j['label'], $j['priceOverride'] ?? NULL), $chunk);
+					$pages[] = $this->renderStackedSheet($htmls, $w, $h, 8.0, 8.0, 6.0);
+				}
+			}
+			else {
+				foreach ($queueJobs as $j) {
+					$pages[] = $this->renderHtml($j['template'], $j['label']->getProduct(), $branchesId, $j['label'], $j['priceOverride'] ?? NULL);
+				}
+			}
+
+			$queueJobs = [];
+			$queueType = null;
+		};
+
 		foreach ($jobs as $job) {
 			$product = $job['label']->getProduct();
 			if (!$product) {
 				continue;
 			}
-			$html = $this->renderHtml($job['template'], $product, $branchesId, $job['label'], $job['priceOverride'] ?? NULL);
-			$pages[] = match (TRUE) {
-				$this->isSize2BTemplate($job['template']) => $this->renderVel2BPage($html, $job['template']),
-				$this->isSize2Template($job['template']) => $this->renderSize2Page($html, $job['template']),
-				$this->isPecivoTemplate($job['template']) => $this->renderPecivoPage($html, $job['template']),
-				$this->isA5Template($job['template']) => $this->renderA5Page($html),
-				$this->isVel1Template($job['template']) => $this->renderVel1Page($html, $job['template']),
-				$this->isVel3Template($job['template']) => $this->renderVel3Page($html),
-				default => $html,
+
+			$type = match (TRUE) {
+				$this->isA5Template($job['template']) => 'a5',
+				$this->isSize2BTemplate($job['template']) => 'vel2b',
+				$this->isSize2Template($job['template']) => 'size2',
+				$this->isPecivoTemplate($job['template']) => 'pecivo',
+				$this->isVel1Template($job['template']) => 'vel1',
+				$this->isVel3Template($job['template']) => 'vel3',
+				default => 'other',
 			};
+
+			if ($queueType !== null && $queueType !== $type) {
+				$flushQueue();
+			}
+
+			$queueType = $type;
+			$queueJobs[] = $job;
 		}
+
+		$flushQueue();
 
 		if (!$pages) {
 			throw new \RuntimeException('No printable products were found.');
@@ -720,75 +800,106 @@ class PrintTemplatesService
 
 
 	/**
-	 * Vel. 2B Akce is a single label on A4 sheet (133 × 52 mm) at top-left padding (8mm 8mm).
+	 * A5 is a two-up A4 stock: up to two 210 × 148.5 mm labels stacked on one A4 portrait sheet,
+	 * separated by a thin dashed cut line with breathing room.
 	 */
-	private function renderVel2BPage(string $html, PrintTemplatesEntity $template): string
+	private function renderA5Page(string $html1, ?string $html2 = NULL): string
 	{
-		preg_match_all('#<style\b[^>]*>.*?</style>#is', $html, $styleMatches);
-		preg_match('#<body\b[^>]*>(.*)</body>#is', $html, $bodyMatch);
-		$labelHtml = $bodyMatch[1] ?? (preg_replace('#<style\b[^>]*>.*?</style>#is', '', $html) ?? $html);
-		$styles = implode('', $styleMatches[0] ?? []);
-		$height = (float)$template->height_mm > 0 ? (float)$template->height_mm : 52.0;
-		$width = (float)$template->width_mm > 0 ? (float)$template->width_mm : 133.0;
+		preg_match_all('#<style\b[^>]*>.*?</style>#is', $html1, $styleMatches1);
+		preg_match('#<body\b[^>]*>(.*)</body>#is', $html1, $bodyMatch1);
+		$labelHtml1 = $bodyMatch1[1] ?? (preg_replace('#<style\b[^>]*>.*?</style>#is', '', $html1) ?? $html1);
+		$styles1 = implode('', $styleMatches1[0] ?? []);
+
+		$secondHtml = '';
+		$styles2 = '';
+		if ($html2 !== NULL) {
+			preg_match_all('#<style\b[^>]*>.*?</style>#is', $html2, $styleMatches2);
+			preg_match('#<body\b[^>]*>(.*)</body>#is', $html2, $bodyMatch2);
+			$labelHtml2 = $bodyMatch2[1] ?? (preg_replace('#<style\b[^>]*>.*?</style>#is', '', $html2) ?? $html2);
+			$styles2 = implode('', $styleMatches2[0] ?? []);
+			$secondHtml = '<div class="a5-divider"><span class="a5-divider-line"></span></div>'
+				. '<div class="a5-label second">' . $labelHtml2 . '</div>';
+		}
 
 		return '<style>'
-			.'@page{margin:0}body{margin:0!important;padding:0!important;width:210mm!important}'
-			.'.vel2b-sheet{position:relative;width:210mm;height:297mm;overflow:hidden}'
-			.'.vel2b-label{position:absolute;left:8mm;top:8mm;width:'.$width.'mm;height:'.$height.'mm;overflow:visible}'
-			.'</style>'.$styles
-			.'<div class="vel2b-sheet">'
-			.'<div class="vel2b-label">'.$labelHtml.'</div>'
-			.'</div>';
+			. '@page{margin:0}body{margin:0!important;padding:0!important;width:210mm!important}'
+			. '.a5-sheet{position:relative;width:210mm;height:297mm;overflow:hidden}'
+			. '.a5-label{position:absolute;left:0;width:210mm;height:142mm;overflow:visible}'
+			. '.a5-label.first{top:3mm}.a5-label.second{top:151mm}'
+			. '.a5-divider{position:absolute;top:147mm;left:8mm;width:194mm;z-index:5}'
+			. '.a5-divider-line{display:block;width:100%;border-top:0.3mm dashed #555}'
+			. '</style>' . $styles1 . $styles2
+			. '<div class="a5-sheet">'
+			. '<div class="a5-label first">' . $labelHtml1 . '</div>'
+			. $secondHtml
+			. '</div>';
 	}
 
 
 	/**
-	 * Velikost 2 is a single label on A4 sheet (133 × 38 mm) at top-left padding (8mm 8mm).
+	 * Universal stacked multi-label sheet renderer for A4 page.
+	 *
+	 * @param list<string> $labelHtmls Array of rendered HTML for each label on this sheet
+	 * @param float $widthMm Label width in mm
+	 * @param float $heightMm Label height in mm
+	 * @param float $leftMm Left offset in mm
+	 * @param float $topStartMm Top offset for 1st item in mm
+	 * @param float $gapMm Gap between consecutive items in mm
+	 * @return string Complete HTML page string
 	 */
-	private function renderSize2Page(string $html, PrintTemplatesEntity $template): string
-	{
-		preg_match_all('#<style\b[^>]*>.*?</style>#is', $html, $styleMatches);
-		preg_match('#<body\b[^>]*>(.*)</body>#is', $html, $bodyMatch);
-		$labelHtml = $bodyMatch[1] ?? (preg_replace('#<style\b[^>]*>.*?</style>#is', '', $html) ?? $html);
-		$styles = implode('', $styleMatches[0] ?? []);
-		$height = (float)$template->height_mm > 0 ? (float)$template->height_mm : 38.0;
-		$width = (float)$template->width_mm > 0 ? (float)$template->width_mm : 133.0;
+	private function renderStackedSheet(
+		array $labelHtmls,
+		float $widthMm,
+		float $heightMm,
+		float $leftMm = 8.0,
+		float $topStartMm = 8.0,
+		float $gapMm = 4.0
+	): string {
+		$allStyles = [];
+		$labelItemsHtml = '';
+		$step = $heightMm + $gapMm;
+
+		foreach ($labelHtmls as $index => $html) {
+			preg_match_all('#<style\b[^>]*>.*?</style>#is', $html, $styleMatches);
+			preg_match('#<body\b[^>]*>(.*)</body>#is', $html, $bodyMatch);
+			$labelBody = $bodyMatch[1] ?? (preg_replace('#<style\b[^>]*>.*?</style>#is', '', $html) ?? $html);
+			foreach ($styleMatches[0] ?? [] as $st) {
+				$allStyles[$st] = TRUE;
+			}
+
+			$currentTop = $topStartMm + ($index * $step);
+
+			if ($index > 0) {
+				$cutTop = $currentTop - ($gapMm / 2);
+				$labelItemsHtml .= sprintf(
+					'<div class="stacked-divider" style="top:%.2fmm;left:%.2fmm;width:%.2fmm;"><span class="stacked-divider-line"></span></div>',
+					$cutTop,
+					$leftMm,
+					$widthMm
+				);
+			}
+
+			$labelItemsHtml .= sprintf(
+				'<div class="stacked-label" style="top:%.2fmm;left:%.2fmm;width:%.2fmm;height:%.2fmm;">%s</div>',
+				$currentTop,
+				$leftMm,
+				$widthMm,
+				$heightMm,
+				$labelBody
+			);
+		}
 
 		return '<style>'
-			.'@page{margin:0}body{margin:0!important;padding:0!important;width:210mm!important}'
-			.'.size2-sheet{position:relative;width:210mm;height:297mm;overflow:hidden}'
-			.'.size2-label{position:absolute;left:8mm;top:8mm;width:'.$width.'mm;height:'.$height.'mm;overflow:visible}'
-			.'</style>'.$styles
-			.'<div class="size2-sheet">'
-			.'<div class="size2-label">'.$labelHtml.'</div>'
-			.'</div>';
-	}
-
-
-	/**
-	 * A5 is a two-up A4 stock, same as Velikost 2B: the original design places two
-	 * identical 210 × 148.5 mm labels stacked on one A4 portrait sheet, separated
-	 * by a thin dashed line — the stored source is only one label.
-	 */
-	private function renderA5Page(string $html): string
-	{
-		preg_match_all('#<style\b[^>]*>.*?</style>#is', $html, $styleMatches);
-		preg_match('#<body\b[^>]*>(.*)</body>#is', $html, $bodyMatch);
-		$labelHtml = $bodyMatch[1] ?? (preg_replace('#<style\b[^>]*>.*?</style>#is', '', $html) ?? $html);
-		$styles = implode('', $styleMatches[0] ?? []);
-
-		return '<style>'
-			.'@page{margin:0}body{margin:0!important;padding:0!important;width:210mm!important}'
-			.'.a5-sheet{position:relative;width:210mm;height:297mm;overflow:hidden}'
-			.'.a5-label{position:absolute;left:0;width:210mm;height:148.5mm;overflow:visible}'
-			.'.a5-label.first{top:0}.a5-label.second{top:148.5mm}'
-			.'.a5-divider{position:absolute;top:147mm;left:8mm;width:194mm;height:3mm;line-height:3mm;z-index:5;color:#777;font-size:2.6mm;white-space:nowrap}'
-			.'.a5-divider-icon{display:inline-block;vertical-align:middle;font-family:"DejaVu Sans",sans-serif;font-size:4.5mm;line-height:1;margin-right:2mm;color:#555}'
-			.'.a5-divider-line{display:inline-block;vertical-align:middle;width:186mm;border-top:0.3mm dashed #555}'
-			.'</style>'.$styles
-			.'<div class="a5-sheet"><div class="a5-label first">'.$labelHtml.'</div>'
-			.'<div class="a5-divider"><span class="a5-divider-icon">&#9986;</span><span class="a5-divider-line"></span></div>'
-			.'<div class="a5-label second">'.$labelHtml.'</div></div>';
+			. '@page{margin:0}body{margin:0!important;padding:0!important;width:210mm!important}'
+			. '.stacked-sheet{position:relative;width:210mm;height:297mm;overflow:hidden}'
+			. '.stacked-label{position:absolute;overflow:visible}'
+			. '.stacked-divider{position:absolute;z-index:5}'
+			. '.stacked-divider-line{display:block;width:100%;border-top:0.3mm dashed #777}'
+			. '</style>'
+			. implode('', array_keys($allStyles))
+			. '<div class="stacked-sheet">'
+			. $labelItemsHtml
+			. '</div>';
 	}
 
 
@@ -804,82 +915,9 @@ class PrintTemplatesService
 	}
 
 
-	/**
-	 * Pečivo / Tem dải is a single label on A4 sheet (150 × 41 mm) at top-left padding (8mm 8mm).
-	 */
-	private function renderPecivoPage(string $html, PrintTemplatesEntity $template): string
-	{
-		preg_match_all('#<style\b[^>]*>.*?</style>#is', $html, $styleMatches);
-		preg_match('#<body\b[^>]*>(.*)</body>#is', $html, $bodyMatch);
-		$labelHtml = $bodyMatch[1] ?? (preg_replace('#<style\b[^>]*>.*?</style>#is', '', $html) ?? $html);
-		$styles = implode('', $styleMatches[0] ?? []);
-		$height = (float)$template->height_mm > 0 ? (float)$template->height_mm : 41.0;
-		$width = (float)$template->width_mm > 0 ? (float)$template->width_mm : 150.0;
-
-		return '<style>'
-			.'@page{margin:0}body{margin:0!important;padding:0!important;width:210mm!important}'
-			.'.pecivo-sheet{position:relative;width:210mm;height:297mm;overflow:hidden}'
-			.'.pecivo-label{position:absolute;left:8mm;top:8mm;width:'.$width.'mm;height:'.$height.'mm;overflow:visible}'
-			.'</style>'.$styles
-			.'<div class="pecivo-sheet">'
-			.'<div class="pecivo-label">'.$labelHtml.'</div>'
-			.'</div>';
-	}
-
-
 	private function isVel3Template(PrintTemplatesEntity $template): bool
 	{
 		return (float)$template->width_mm === 182.0 && (float)$template->height_mm === 56.0;
-	}
-
-
-	/**
-	 * Vel.1 is a single label on A4 sheet (164 × 41 mm) at top-left padding (8mm 8mm).
-	 */
-	private function renderVel1Page(string $html, PrintTemplatesEntity $template): string
-	{
-		preg_match_all('#<style\b[^>]*>.*?</style>#is', $html, $styleMatches);
-		preg_match('#<body\b[^>]*>(.*)</body>#is', $html, $bodyMatch);
-		$labelHtml = $bodyMatch[1] ?? (preg_replace('#<style\b[^>]*>.*?</style>#is', '', $html) ?? $html);
-		$styles = implode('', $styleMatches[0] ?? []);
-		$height = (float)$template->height_mm > 0 ? (float)$template->height_mm : 41.0;
-		$width = (float)$template->width_mm > 0 ? (float)$template->width_mm : 164.0;
-
-		return '<style>'
-			.'@page{margin:0}body{margin:0!important;padding:0!important;width:210mm!important}'
-			.'.vel1-sheet{position:relative;width:210mm;height:297mm;overflow:hidden}'
-			.'.vel1-label{position:absolute;left:8mm;top:8mm;width:'.$width.'mm;height:'.$height.'mm;overflow:visible}'
-			.'</style>'.$styles
-			.'<div class="vel1-sheet">'
-			.'<div class="vel1-label">'.$labelHtml.'</div>'
-			.'</div>';
-	}
-
-
-	/**
-	 * Vel.3 is a two-up A4 stock: two identical 182 × 56 mm strips inside an
-	 * 8 mm page margin, with a 2 mm gap between them, exactly as stacked in
-	 * the original design mockup.
-	 */
-	private function renderVel3Page(string $html): string
-	{
-		preg_match_all('#<style\b[^>]*>.*?</style>#is', $html, $styleMatches);
-		preg_match('#<body\b[^>]*>(.*)</body>#is', $html, $bodyMatch);
-		$labelHtml = $bodyMatch[1] ?? (preg_replace('#<style\b[^>]*>.*?</style>#is', '', $html) ?? $html);
-		$styles = implode('', $styleMatches[0] ?? []);
-
-		return '<style>'
-			.'@page{margin:0}body{margin:0!important;padding:0!important;width:210mm!important}'
-			.'.vel3-sheet{position:relative;width:210mm;height:297mm;overflow:hidden}'
-			.'.vel3-label{position:absolute;left:8mm;width:182mm;height:56mm;overflow:visible}'
-			.'.vel3-label.n1{top:8mm}.vel3-label.n2{top:72mm}'
-			.'.vel3-divider{position:absolute;top:68mm;left:8mm;width:182mm;border-top:.3mm dashed #999;z-index:5}'
-			.'</style>'.$styles
-			.'<div class="vel3-sheet">'
-			.'<div class="vel3-label n1">'.$labelHtml.'</div>'
-			.'<div class="vel3-divider"></div>'
-			.'<div class="vel3-label n2">'.$labelHtml.'</div>'
-			.'</div>';
 	}
 
 

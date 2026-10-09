@@ -21,7 +21,8 @@ trait ProductLabelsTrait
 		return new Multiplier(function($itemId) {
 			$control = new  ProductLabelsControl($this->repository, $this->productLabelsRepo, $this->productLabelHeadersRepo);
 			$control->setItemId($itemId);
-			$control->setBranchesId($this->session->filters[$this->getName()]['custom__branches']);
+			$branchesId = $this->session->filters[$this->getName()]['custom__branches'] ?? $this->adminUser->default_branches_id ?: ($this->settings->default_branch ?? 1);
+			$control->setBranchesId($branchesId);
 
 			return $control;
 		});
@@ -123,7 +124,7 @@ trait ProductLabelsTrait
 	{
 		/** @var \ProductsEntity $productLabel */
 		$productLabel = $this->repository->findEntity($productsId);
-		$branchesId = $this->session->filters[$this->getName()]['custom__branches'];
+		$branchesId = $this->session->filters[$this->getName()]['custom__branches'] ?? $this->adminUser->default_branches_id ?: ($this->settings->default_branch ?? 1);
 
 		if ($productLabel && ($productPrice = $productLabel->getPrice($branchesId))) {
 			if (!$productLabel->getUnitValue($productPrice->price)) {
@@ -152,7 +153,7 @@ trait ProductLabelsTrait
 
 			if ($entity = $this->productLabelsRepo->findEntityBy([
 				'products_id' => $productsId,
-				'branches_id' => $this->session->filters[$this->getName()]['custom__branches'],
+				'branches_id' => $branchesId,
 				'type_id' => $typeId,
 				'admin_users_id' => $this->adminUser->id
 			])) {
@@ -290,11 +291,11 @@ trait ProductLabelsTrait
 	{
 		/** @var \ProductsEntity $productLabel */
 		$productLabel = $this->repository->findEntity($productsId);
-		$branchesId = $this->session->filters[$this->getName()]['custom__branches'];
+		$branchesId = $this->session->filters[$this->getName()]['custom__branches'] ?? $this->adminUser->default_branches_id ?: ($this->settings->default_branch ?? 1);
 
 		if ($productLabel && ($productPrice = $productLabel->getPrice($branchesId))) {
 			if (!$productLabel->getUnitValue($productPrice->price)) {
-				$this['labelsForm']['price_text']->setItems(array_intersect_key($this->global['productLabelPriceTypes'], [\ProductLabelsEntity::PRICE_TYPE_CZK => '']));
+				$this['multiLabelsForm']['price_text']->setItems(array_intersect_key($this->global['productLabelPriceTypes'], [\ProductLabelsEntity::PRICE_TYPE_CZK => '']));
 			}
 
 			$this['multiLabelsForm']->setDefaults([
@@ -319,13 +320,13 @@ trait ProductLabelsTrait
 
 			if ($entity = $this->productLabelsRepo->findEntityBy([
 				'products_id' => $productsId,
-				'branches_id' => $this->session->filters[$this->getName()]['custom__branches'],
+				'branches_id' => $branchesId,
 				'type_id' => 0,
 				'admin_users_id' => $this->adminUser->id
 			])) {
 				if (!$entity->datetime_printed && $this->productLabelsRepo->findAll()->where([
 						'products_id' => $productsId,
-						'branches_id' => $this->session->filters[$this->getName()]['custom__branches'],
+						'branches_id' => $branchesId,
 						'type_id > ?' => 0,
 						'admin_users_id' => $this->adminUser->id,
 						'count > ?' => 0

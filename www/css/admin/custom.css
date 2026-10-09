@@ -4137,6 +4137,8 @@ main.page-content,
     background: #fff !important;
     padding-bottom: 5px !important;
     overflow: visible !important;
+}
+
 .mosaic-table-compact tr {
     position: relative;
 }

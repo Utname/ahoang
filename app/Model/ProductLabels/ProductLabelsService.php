@@ -93,11 +93,16 @@ class ProductLabelsService
 
 					break;
 				case ProductLabelsEntity::TYPE_SIZE_2:
+				case ProductLabelsEntity::TYPE_SIZE_2_AKCE:
 					$itemsBuffer[$item->type_id]['pageParams'] = ['P', 'A4'];
 					for ($i = 1; $i <= max(1, $item->count); $i++) {
-						$itemsBuffer[$item->type_id]['items'][][] = $item;
+						if (!isset($itemsBuffer[$item->type_id]['items']) || count($itemsBuffer[$item->type_id]['items'][array_key_last($itemsBuffer[$item->type_id]['items'])]) >= 7) {
+							$itemsBuffer[$item->type_id]['items'][][] = $item;
+						}
+						else {
+							$itemsBuffer[$item->type_id]['items'][array_key_last($itemsBuffer[$item->type_id]['items'])][] = $item;
+						}
 					}
-
 					break;
 				case ProductLabelsEntity::TYPE_SIZE_3:
 					$itemsBuffer[$item->type_id]['pageParams'] = ['P', 'A4'];
@@ -109,16 +114,28 @@ class ProductLabelsService
 							$itemsBuffer[$item->type_id]['items'][array_key_last($itemsBuffer[$item->type_id]['items'])][] = $item;
 						}
 					}
-
 					break;
 				case ProductLabelsEntity::TYPE_SIZE_2B:
-				case ProductLabelsEntity::TYPE_SIZE_2_AKCE:
+					$itemsBuffer[$item->type_id]['pageParams'] = ['P', 'A4'];
+					for ($i = 1; $i <= max(1, $item->count); $i++) {
+						if (!isset($itemsBuffer[$item->type_id]['items']) || count($itemsBuffer[$item->type_id]['items'][array_key_last($itemsBuffer[$item->type_id]['items'])]) >= 5) {
+							$itemsBuffer[$item->type_id]['items'][][] = $item;
+						}
+						else {
+							$itemsBuffer[$item->type_id]['items'][array_key_last($itemsBuffer[$item->type_id]['items'])][] = $item;
+						}
+					}
+					break;
 				case ProductLabelsEntity::TYPE_PECIVO:
 					$itemsBuffer[$item->type_id]['pageParams'] = ['P', 'A4'];
 					for ($i = 1; $i <= max(1, $item->count); $i++) {
-						$itemsBuffer[$item->type_id]['items'][][] = $item;
+						if (!isset($itemsBuffer[$item->type_id]['items']) || count($itemsBuffer[$item->type_id]['items'][array_key_last($itemsBuffer[$item->type_id]['items'])]) >= 6) {
+							$itemsBuffer[$item->type_id]['items'][][] = $item;
+						}
+						else {
+							$itemsBuffer[$item->type_id]['items'][array_key_last($itemsBuffer[$item->type_id]['items'])][] = $item;
+						}
 					}
-
 					break;
 			}
 		}
@@ -139,18 +156,30 @@ class ProductLabelsService
 
 			$legacyItems = [];
 			foreach ($itemsBuffer[$templateTypeId]['items'] as $labelItems) {
-				$label = $labelItems[0] ?? NULL;
-				$product = $label?->getProduct();
-				$isA4 = ($templateTypeId === ProductLabelsEntity::TYPE_A4);
-				$useTemplate = $label && $product && (
-					(!$isA4) || in_array((int)$product->id, $newA4ProductIds, TRUE)
-				);
-				$template = $useTemplate
-					? $this->printTemplatesService->findTemplateForProductLabel($label, $product, $branchesId)
-					: NULL;
+				$allUseTemplate = TRUE;
+				$pageJobs = [];
+				foreach ($labelItems as $label) {
+					$product = $label?->getProduct();
+					$isA4 = ($templateTypeId === ProductLabelsEntity::TYPE_A4);
+					$useTemplate = $label && $product && (
+						(!$isA4) || in_array((int)$product->id, $newA4ProductIds, TRUE)
+					);
+					$template = $useTemplate
+						? $this->printTemplatesService->findTemplateForProductLabel($label, $product, $branchesId)
+						: NULL;
 
-				if ($template) {
-					$templateJobs[] = ['template' => $template, 'label' => $label, 'priceOverride' => $priceOverride];
+					if ($template) {
+						$pageJobs[] = ['template' => $template, 'label' => $label, 'priceOverride' => $priceOverride];
+					}
+					else {
+						$allUseTemplate = FALSE;
+					}
+				}
+
+				if ($allUseTemplate && count($pageJobs) === count($labelItems)) {
+					foreach ($pageJobs as $job) {
+						$templateJobs[] = $job;
+					}
 				}
 				else {
 					$legacyItems[] = $labelItems;
