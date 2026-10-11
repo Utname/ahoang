@@ -11,7 +11,7 @@
         </a>
         <div class="dropdown" style="display:inline-block;">
             <button class="btn btn-default mosaic-topbtn dropdown-toggle" type="button" data-toggle="dropdown">
-                <i class="fa fa-bolt m-r-xxs text-warning"></i> Thao tác giá <i class="fa fa-angle-down m-l-xxs"></i>
+                <i class="fa fa-bolt m-r-xxs text-warning"></i> {_admin.ui.priceActions} <i class="fa fa-angle-down m-l-xxs"></i>
             </button>
             <ul class="dropdown-menu dropdown-menu-right dropdown-list" style="border-radius:10px;box-shadow:0 10px 25px rgba(0,0,0,0.1);padding:6px 0;min-width:210px;">
                 <li>
@@ -83,15 +83,15 @@
                         <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px;">
                             <div class="mosaic-list-search-box">
                                 <i class="fa fa-search search-icon"></i>
-                                {input custom__name class => 'form-control autocomplete change-to-submit', 'data-url' => $presenter->link('productsAutocomplete!'), placeholder => 'Tìm theo tên hoặc mã EAN...'}
+                                {input custom__name class => 'form-control autocomplete change-to-submit', 'data-url' => $presenter->link('productsAutocomplete!'), placeholder => ('admin.ui.searchNameEan'|translate)}
                             </div>
 
                             <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:auto;">
-                                <a n:href="toPrint!" class="btn btn-default" style="border-radius:8px;height:38px;padding:7px 14px;font-weight:600;font-size:12.5px;border:1px solid #cbd5e1;background:#fff;color:#334155;display:inline-flex;align-items:center;gap:6px;box-shadow:0 1px 2px rgba(0,0,0,0.03);" title="Chỉ lọc các sản phẩm đang có tem chờ in">
+                                <a n:href="toPrint!" class="btn btn-default" style="border-radius:8px;height:38px;padding:7px 14px;font-weight:600;font-size:12.5px;border:1px solid #cbd5e1;background:#fff;color:#334155;display:inline-flex;align-items:center;gap:6px;box-shadow:0 1px 2px rgba(0,0,0,0.03);" title="{_admin.ui.filterToPrint}">
                                     <i class="fa fa-filter text-info"></i> {_'admin.terms.toPrint'}
                                 </a>
 
-                                <a n:href="clearAllPrintCounts!" class="btn btn-default ajax with-confirm" data-message="{_'admin.terms.reallyRemoveLabels'}" style="border-radius:8px;height:38px;padding:7px 12px;font-weight:600;font-size:12.5px;border:1px solid #fee2e2;background:#fff;color:#e11d48;display:inline-flex;align-items:center;gap:6px;box-shadow:0 1px 2px rgba(0,0,0,0.03);" title="Xóa toàn bộ hàng đợi in tem">
+                                <a n:href="clearAllPrintCounts!" class="btn btn-default ajax with-confirm" data-message="{_'admin.terms.reallyRemoveLabels'}" style="border-radius:8px;height:38px;padding:7px 12px;font-weight:600;font-size:12.5px;border:1px solid #fee2e2;background:#fff;color:#e11d48;display:inline-flex;align-items:center;gap:6px;box-shadow:0 1px 2px rgba(0,0,0,0.03);" title="{_admin.ui.clearQueue}">
                                     <i class="fa fa-trash-alt"></i> {_'admin.terms.removeLabels'}
                                 </a>
 
@@ -173,7 +173,7 @@
                                     <i class="far fa-eye" data-toggle="tooltip" title="{_admin.terms.isActive}"></i>
                                 </th>
                                 <th class="text-center" style="width:65px;min-width:65px;padding-right:8px;">
-                                    <i class="fa fa-ellipsis-v text-muted" title="Thao tác"></i>
+                                    <i class="fa fa-ellipsis-v text-muted" title="{_admin.ui.actions}"></i>
                                 </th>
                             </tr>
                             <tr>
@@ -226,7 +226,7 @@
                                             <label>{_admin.terms.basePrice}:</label>
                                             <div style="display:flex;align-items:center;gap:6px;">
                                                 <input type="number" data-item-id="{$price->id ?? NULL}" step="0.01" class="form-control form-control-sm text-right" name="price__{$item->id}" value="{$price && $price->price? $price->price : 0}" style="flex:1;font-weight:600;color:#1e293b;">
-                                                <a n:href="showPricesLog! $item->id, $presenter->session->filters[$presenter->getName()]['custom__branches']" class="ajax-modal" data-target="#modal-pricesLog" title="Lịch sử giá" style="color:#94a3b8;font-size:13px;display:flex;align-items:center;justify-content:center;width:18px;flex-shrink:0;">
+                                                <a n:href="showPricesLog! $item->id, $presenter->session->filters[$presenter->getName()]['custom__branches']" class="ajax-modal" data-target="#modal-pricesLog" title="{_admin.ui.priceHistory}" style="color:#94a3b8;font-size:13px;display:flex;align-items:center;justify-content:center;width:18px;flex-shrink:0;">
                                                     <i class="far fa-clock"></i>
                                                 </a>
                                             </div>
@@ -256,7 +256,7 @@
                                             <label>{_admin.terms.actionFrom}:</label>
                                             <div style="display:flex;align-items:center;gap:5px;">
                                                 <input type="text" data-item-id="{$price->id ?? NULL}" class="form-control form-control-sm text-center date-picker" name="action_from__{$item->id}" value="{$price && $price->action_from ? $price->action_from->format('d.m.Y') : ''}" placeholder="dd.mm.yyyy" style="flex:1;font-weight:500;">
-                                                <a href="#" class="calendar-today-btn btn btn-default btn-xs" title="Hôm nay" style="height:28px;width:28px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;border:1px solid #cbd5e1;background:#f8fafc;color:#475569;flex-shrink:0;padding:0;">
+                                                <a href="#" class="calendar-today-btn btn btn-default btn-xs" title="{_admin.ui.today}" style="height:28px;width:28px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;border:1px solid #cbd5e1;background:#f8fafc;color:#475569;flex-shrink:0;padding:0;">
                                                     <i class="fa fa-calendar-day" style="font-size:11px;"></i>
                                                 </a>
                                                 <span style="display:flex;align-items:center;justify-content:center;width:18px;flex-shrink:0;">
@@ -269,7 +269,7 @@
                                             <label>{_admin.terms.actionTo}:</label>
                                             <div style="display:flex;align-items:center;gap:5px;">
                                                 <input type="text" data-item-id="{$price->id ?? NULL}" class="form-control form-control-sm text-center date-picker" name="action_to__{$item->id}" value="{$price && $price->action_to ? $price->action_to->format('d.m.Y') : ''}" placeholder="dd.mm.yyyy" style="flex:1;font-weight:500;">
-                                                <a href="#" class="calendar-today-btn btn btn-default btn-xs" title="Hôm nay" style="height:28px;width:28px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;border:1px solid #cbd5e1;background:#f8fafc;color:#475569;flex-shrink:0;padding:0;">
+                                                <a href="#" class="calendar-today-btn btn btn-default btn-xs" title="{_admin.ui.today}" style="height:28px;width:28px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;border:1px solid #cbd5e1;background:#f8fafc;color:#475569;flex-shrink:0;padding:0;">
                                                     <i class="fa fa-calendar-day" style="font-size:11px;"></i>
                                                 </a>
                                                 <span style="display:flex;align-items:center;justify-content:center;width:18px;flex-shrink:0;">
@@ -298,7 +298,7 @@
                                     </td>
                                     <td class="actions row-as-link-ignore text-center" style="width:65px;min-width:65px;padding-right:8px;vertical-align:middle;">
                                         <div class="dropdown" style="display:inline-block;">
-                                            <a class="dropdown-toggle btn btn-default mosaic-row-actions-btn" data-toggle="dropdown" href="#" title="Thao tác">
+                                            <a class="dropdown-toggle btn btn-default mosaic-row-actions-btn" data-toggle="dropdown" href="#" title="{_admin.ui.actions}">
                                                 <i class="fa fa-bars"></i>
                                             </a>
                                             <ul class="dropdown-menu dropdown-menu-right dropdown-list" style="border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.12);padding:6px 0;min-width:180px;">
@@ -595,14 +595,14 @@
                         <div class="col-lg-3">
                             <div class="form-group" style="margin-top:24px;">
                                 <label class="checkbox-inline" style="font-weight:600;">
-                                    {input hide_validity} Ẩn Platnost (Hạn KM)
+                                    {input hide_validity} {_admin.terms.hideValidity}
                                 </label>
                             </div>
                         </div>
                         <div class="col-lg-3">
                             <div class="form-group" style="margin-top:24px;">
                                 <label class="checkbox-inline" style="font-weight:600;">
-                                    {input hide_ingredients} Ẩn Složení (Thành phần)
+                                    {input hide_ingredients} {_admin.terms.hideIngredients}
                                 </label>
                             </div>
                         </div>
@@ -726,14 +726,14 @@
                                 <div class="col-lg-3">
                                     <div class="form-group" style="margin-top:24px;">
                                         <label class="checkbox-inline" style="font-weight:600;">
-                                            {input hide_validity} Ẩn Platnost (Hạn KM)
+                                            {input hide_validity} {_admin.terms.hideValidity}
                                         </label>
                                     </div>
                                 </div>
                                 <div class="col-lg-3">
                                     <div class="form-group" style="margin-top:24px;">
                                         <label class="checkbox-inline" style="font-weight:600;">
-                                            {input hide_ingredients} Ẩn Složení (Thành phần)
+                                            {input hide_ingredients} {_admin.terms.hideIngredients}
                                         </label>
                                     </div>
                                 </div>
@@ -974,10 +974,10 @@
                         <i class="fa fa-trash-alt m-r-xxs"></i> {_admin.terms.clearAll}
                     </a>
                     <a n:href="downloadPdf! NULL, FALSE" target="_blank" class="btn btn-default" style="border:1px solid #0284c7;border-radius:8px;background:#f0f9ff;color:#0369a1;padding:7px 14px;font-size:13px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
-                        <i class="fa fa-eye"></i> Xem trước tất cả
+                        <i class="fa fa-eye"></i> {_admin.ui.previewAll}
                     </a>
                     <a n:href="downloadPdf! NULL, TRUE" target="_blank" class="btn" style="border:none;border-radius:8px;background:#14b8a6;color:#042f2e;padding:7px 16px;font-size:13px;font-weight:800;box-shadow:0 2px 6px rgba(20,184,166,0.3);text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
-                        <i class="fa fa-download"></i> Tải xuống tất cả
+                        <i class="fa fa-download"></i> {_admin.ui.downloadAll}
                     </a>
                 </div>
             </div>
@@ -1002,10 +1002,10 @@
                                         </div>
                                         <div style="display:flex;align-items:center;gap:6px;">
                                             <a n:href="downloadPdfGroup! $group['typeId'], FALSE" target="_blank" class="btn btn-sm btn-default" style="border:1px solid #cbd5e1;border-radius:7px;padding:5px 11px;font-size:12px;font-weight:600;color:#0369a1;background:#f8fafc;" title="Xem trước trong tab mới">
-                                                <i class="far fa-eye m-r-xxs"></i> Xem trước
+                                                <i class="far fa-eye m-r-xxs"></i> {_admin.ui.preview}
                                             </a>
-                                            <a n:href="downloadPdfGroup! $group['typeId'], TRUE" target="_blank" class="btn btn-sm btn-default" style="border:1px solid #14b8a6;border-radius:7px;padding:5px 12px;font-size:12px;font-weight:700;color:#042f2e;background:#ccfbf1;" title="Tải file PDF">
-                                                <i class="fa fa-download m-r-xxs text-primary"></i> Tải PDF {$group['name']}
+                                            <a n:href="downloadPdfGroup! $group['typeId'], TRUE" target="_blank" class="btn btn-sm btn-default" style="border:1px solid #14b8a6;border-radius:7px;padding:5px 12px;font-size:12px;font-weight:700;color:#042f2e;background:#ccfbf1;" title="{_admin.ui.downloadPdf}">
+                                                <i class="fa fa-download m-r-xxs text-primary"></i> {_admin.ui.downloadPdfOf} {$group['name']}
                                             </a>
                                         </div>
                                     </div>
@@ -1035,14 +1035,14 @@
                                                 <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #f1f5f9;padding-top:8px;margin-top:2px;gap:6px;">
                                                     <span style="font-size:9px;color:#94a3b8;font-weight:600;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="{if $it['product']->code_ean}EAN: {$it['product']->code_ean}{else}{$group['name']}{/if}">{if $it['product']->code_ean}EAN: {$it['product']->code_ean}{else}{$group['name']}{/if}</span>
                                                     <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
-                                                        <a n:href="label! $it['product']->id, $group['typeId']" class="ajax-modal btn btn-xs btn-default" data-target="#modal-labelsForm" title="Sửa chi tiết tem" style="padding:2px 6px;font-size:10px;border-radius:4px;">
-                                                            <i class="fas fa-pencil text-muted"></i> Sửa
+                                                        <a n:href="label! $it['product']->id, $group['typeId']" class="ajax-modal btn btn-xs btn-default" data-target="#modal-labelsForm" title="{_admin.ui.editLabel}" style="padding:2px 6px;font-size:10px;border-radius:4px;">
+                                                            <i class="fas fa-pencil text-muted"></i> {_admin.ui.edit}
                                                         </a>
-                                                        <a n:href="downloadSingleProductLabelPdf! $it['product']->id, $group['typeId'], FALSE" target="_blank" class="btn btn-xs btn-default" title="Xem trước PDF trong tab mới" style="padding:2px 6px;font-size:10px;border-radius:4px;color:#0369a1;">
+                                                        <a n:href="downloadSingleProductLabelPdf! $it['product']->id, $group['typeId'], FALSE" target="_blank" class="btn btn-xs btn-default" title="{_admin.ui.previewPdfNewTab}" style="padding:2px 6px;font-size:10px;border-radius:4px;color:#0369a1;">
                                                             <i class="far fa-eye"></i> Xem
                                                         </a>
-                                                        <a n:href="downloadSingleProductLabelPdf! $it['product']->id, $group['typeId'], TRUE" target="_blank" class="btn btn-xs btn-default" title="Tải file PDF" style="padding:2px 6px;font-size:10px;border-radius:4px;color:#0d9488;">
-                                                            <i class="fa fa-download"></i> Tải
+                                                        <a n:href="downloadSingleProductLabelPdf! $it['product']->id, $group['typeId'], TRUE" target="_blank" class="btn btn-xs btn-default" title="{_admin.ui.downloadPdf}" style="padding:2px 6px;font-size:10px;border-radius:4px;color:#0d9488;">
+                                                            <i class="fa fa-download"></i> {_admin.ui.download}
                                                         </a>
                                                     </div>
                                                 </div>
@@ -1061,10 +1061,10 @@
                 </button>
                 <div style="display:flex;align-items:center;gap:8px;">
                     <a n:href="downloadPdf! NULL, FALSE" target="_blank" class="btn btn-default" style="border:1px solid #0284c7;border-radius:8px;background:#f0f9ff;color:#0369a1;padding:7px 14px;font-size:13px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
-                        <i class="fa fa-eye"></i> Xem trước tất cả
+                        <i class="fa fa-eye"></i> {_admin.ui.previewAll}
                     </a>
                     <a n:href="downloadPdf! NULL, TRUE" target="_blank" class="btn" style="border:none;border-radius:8px;background:#14b8a6;color:#042f2e;padding:7px 16px;font-size:13px;font-weight:800;box-shadow:0 2px 6px rgba(20,184,166,0.3);text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
-                        <i class="fa fa-download"></i> Tải xuống tất cả
+                        <i class="fa fa-download"></i> {_admin.ui.downloadAll}
                     </a>
                 </div>
             </div>

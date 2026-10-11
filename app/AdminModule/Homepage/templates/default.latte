@@ -6,17 +6,17 @@
 	<div class="mosaic-banner">
 		<div class="mosaic-banner-content">
 			<div class="mosaic-banner-text">
-				<h2>Xin chào, {$adminUser->name}! 👋</h2>
-				<p>Chào mừng bạn trở lại hệ thống quản trị Fikko Market. Dưới đây là tổng quan tình trạng dữ liệu và hoạt động của cửa hàng.</p>
+				<h2>{_admin.dashboard.hello} {$adminUser->name}! 👋</h2>
+				<p>{_admin.dashboard.welcome}</p>
 			</div>
 			<div class="mosaic-banner-actions">
 				<a n:href="Products:edit" class="mosaic-btn mosaic-btn-primary">
 					<i class="fas fa-plus"></i>
-					<span>Thêm sản phẩm</span>
+					<span>{_admin.dashboard.addProduct}</span>
 				</a>
 				<a n:href="ProductLabels:" class="mosaic-btn mosaic-btn-secondary">
 					<i class="fas fa-print"></i>
-					<span>In tem nhãn</span>
+					<span>{_admin.dashboard.printLabels}</span>
 				</a>
 			</div>
 		</div>
@@ -31,16 +31,16 @@
 					<i class="fas fa-box-open"></i>
 				</div>
 				<span class="mosaic-badge badge-emerald">
-					<i class="fas fa-check-circle"></i> {$stats['activeProducts']} đang bán
+					<i class="fas fa-check-circle"></i> {$stats['activeProducts']} {_admin.dashboard.onSale}
 				</span>
 			</div>
 			<div class="mosaic-card-body-clean">
-				<div class="mosaic-metric-title">Tổng số sản phẩm</div>
+				<div class="mosaic-metric-title">{_admin.dashboard.totalProducts}</div>
 				<div class="mosaic-metric-value">{$stats['totalProducts']|number:0,',','.'}</div>
 			</div>
 			<div class="mosaic-card-footer-clean">
 				<a n:href="Products:" class="mosaic-card-link">
-					<span>Quản lý sản phẩm</span>
+					<span>{_admin.dashboard.manageProducts}</span>
 					<i class="fas fa-arrow-right"></i>
 				</a>
 			</div>
@@ -53,16 +53,16 @@
 					<i class="fas fa-tags"></i>
 				</div>
 				<span class="mosaic-badge badge-sky">
-					<i class="fas fa-file-invoice"></i> Mẫu A4/A5
+					<i class="fas fa-file-invoice"></i> {_admin.dashboard.templatesA4A5}
 				</span>
 			</div>
 			<div class="mosaic-card-body-clean">
-				<div class="mosaic-metric-title">Tem nhãn in ấn</div>
+				<div class="mosaic-metric-title">{_admin.dashboard.labels}</div>
 				<div class="mosaic-metric-value">{$stats['totalLabels']|number:0,',','.'}</div>
 			</div>
 			<div class="mosaic-card-footer-clean">
 				<a n:href="ProductLabels:" class="mosaic-card-link">
-					<span>Xem danh sách nhãn</span>
+					<span>{_admin.dashboard.viewLabels}</span>
 					<i class="fas fa-arrow-right"></i>
 				</a>
 			</div>
@@ -75,16 +75,16 @@
 					<i class="fas fa-folder-tree"></i>
 				</div>
 				<span class="mosaic-badge badge-slate">
-					<i class="fas fa-layer-group"></i> Ngành hàng
+					<i class="fas fa-layer-group"></i> {_admin.dashboard.categoriesBadge}
 				</span>
 			</div>
 			<div class="mosaic-card-body-clean">
-				<div class="mosaic-metric-title">Danh mục sản phẩm</div>
+				<div class="mosaic-metric-title">{_admin.dashboard.categories}</div>
 				<div class="mosaic-metric-value">{$stats['totalCategories']|number:0,',','.'}</div>
 			</div>
 			<div class="mosaic-card-footer-clean">
 				<a n:href="Categories:" class="mosaic-card-link">
-					<span>Cấu trúc danh mục</span>
+					<span>{_admin.dashboard.categoryStructure}</span>
 					<i class="fas fa-arrow-right"></i>
 				</a>
 			</div>
@@ -97,16 +97,16 @@
 					<i class="fas fa-store"></i>
 				</div>
 				<span class="mosaic-badge badge-amber">
-					<i class="fas fa-envelope"></i> {$stats['totalMessages']} tin nhắn
+					<i class="fas fa-envelope"></i> {$stats['totalMessages']} {_admin.dashboard.messages}
 				</span>
 			</div>
 			<div class="mosaic-card-body-clean">
-				<div class="mosaic-metric-title">Chi nhánh cửa hàng</div>
+				<div class="mosaic-metric-title">{_admin.dashboard.branches}</div>
 				<div class="mosaic-metric-value">{$stats['totalBranches']|number:0,',','.'}</div>
 			</div>
 			<div class="mosaic-card-footer-clean">
 				<a n:href="Branches:" class="mosaic-card-link">
-					<span>Xem các chi nhánh</span>
+					<span>{_admin.dashboard.viewBranches}</span>
 					<i class="fas fa-arrow-right"></i>
 				</a>
 			</div>
@@ -120,9 +120,9 @@
 			<div class="mosaic-card-title-row">
 				<div class="mosaic-card-heading">
 					<i class="fas fa-chart-pie text-indigo"></i>
-					<span>Phân bổ sản phẩm theo Danh mục</span>
+					<span>{_admin.dashboard.productsByCategory}</span>
 				</div>
-				<span class="text-xs text-muted">Top 6 danh mục</span>
+				<span class="text-xs text-muted">{_admin.dashboard.top6Categories}</span>
 			</div>
 			<div class="mosaic-card-content">
 				<div class="mosaic-chart-container">
@@ -132,7 +132,7 @@
 					<div n:foreach="$topCategories as $cat" class="mosaic-cat-item">
 						<div class="mosaic-cat-info">
 							<span class="mosaic-cat-name">{$cat['name']}</span>
-							<span class="mosaic-cat-count">{$cat['count']} SP</span>
+							<span class="mosaic-cat-count">{$cat['count']} {_admin.dashboard.productsShort}</span>
 						</div>
 						<div class="mosaic-progress-bar">
 							{var $pct = ($stats['totalProducts'] > 0) ? round(($cat['count'] / $stats['totalProducts']) * 100) : 0}
@@ -148,9 +148,9 @@
 			<div class="mosaic-card-title-row">
 				<div class="mosaic-card-heading">
 					<i class="fas fa-bolt text-amber"></i>
-					<span>Phím tắt thao tác nhanh</span>
+					<span>{_admin.dashboard.shortcuts}</span>
 				</div>
-				<span class="mosaic-badge badge-slate">Tiện ích</span>
+				<span class="mosaic-badge badge-slate">{_admin.dashboard.tools}</span>
 			</div>
 			<div class="mosaic-card-content">
 				<div class="mosaic-shortcuts-grid">
@@ -158,57 +158,57 @@
 						<div class="mosaic-shortcut-icon bg-indigo">
 							<i class="fas fa-th-list"></i>
 						</div>
-						<div class="mosaic-shortcut-label">Danh sách sản phẩm</div>
+						<div class="mosaic-shortcut-label">{_admin.dashboard.productList}</div>
 					</a>
 					<a n:href="ProductLabels:" class="mosaic-shortcut-item">
 						<div class="mosaic-shortcut-icon bg-emerald">
 							<i class="fas fa-barcode"></i>
 						</div>
-						<div class="mosaic-shortcut-label">In nhãn mã vạch</div>
+						<div class="mosaic-shortcut-label">{_admin.dashboard.printBarcodes}</div>
 					</a>
 					<a n:href="PrintTemplates:" class="mosaic-shortcut-item">
 						<div class="mosaic-shortcut-icon bg-sky">
 							<i class="fas fa-file-pdf"></i>
 						</div>
-						<div class="mosaic-shortcut-label">Mẫu in tem giá</div>
+						<div class="mosaic-shortcut-label">{_admin.dashboard.printTemplates}</div>
 					</a>
 					<a n:href="Settings:" class="mosaic-shortcut-item">
 						<div class="mosaic-shortcut-icon bg-slate">
 							<i class="fas fa-sliders"></i>
 						</div>
-						<div class="mosaic-shortcut-label">Cài đặt chung</div>
+						<div class="mosaic-shortcut-label">{_admin.dashboard.settings}</div>
 					</a>
 					<a n:href="Currencies:" class="mosaic-shortcut-item">
 						<div class="mosaic-shortcut-icon bg-amber">
 							<i class="fas fa-coins"></i>
 						</div>
-						<div class="mosaic-shortcut-label">Bảng tiền tệ</div>
+						<div class="mosaic-shortcut-label">{_admin.dashboard.currencies}</div>
 					</a>
 					<a n:href="AdminUsers:" class="mosaic-shortcut-item">
 						<div class="mosaic-shortcut-icon bg-rose">
 							<i class="fas fa-users-gear"></i>
 						</div>
-						<div class="mosaic-shortcut-label">Tài khoản quản trị</div>
+						<div class="mosaic-shortcut-label">{_admin.dashboard.adminUsers}</div>
 					</a>
 				</div>
 
 				<!-- System Info InfoBox -->
 				<div class="mosaic-system-box">
 					<div class="mosaic-system-row">
-						<span class="mosaic-system-label"><i class="fas fa-server"></i> Phiên bản PHP:</span>
+						<span class="mosaic-system-label"><i class="fas fa-server"></i> {_admin.dashboard.phpVersion}</span>
 						<span class="mosaic-system-val">{$systemInfo['phpVersion']}</span>
 					</div>
 					<div class="mosaic-system-row">
-						<span class="mosaic-system-label"><i class="fas fa-money-bill-wave"></i> Tiền tệ mặc định:</span>
+						<span class="mosaic-system-label"><i class="fas fa-money-bill-wave"></i> {_admin.dashboard.defaultCurrency}</span>
 						<span class="mosaic-system-val font-bold">{$systemInfo['defaultCurrency']}</span>
 					</div>
 					<div class="mosaic-system-row">
-						<span class="mosaic-system-label"><i class="fas fa-clock"></i> Thời gian máy chủ:</span>
+						<span class="mosaic-system-label"><i class="fas fa-clock"></i> {_admin.dashboard.serverTime}</span>
 						<span class="mosaic-system-val">{$systemInfo['serverTime']}</span>
 					</div>
 					<div class="mosaic-system-row">
-						<span class="mosaic-system-label"><i class="fas fa-shield-halved"></i> Trạng thái hệ thống:</span>
-						<span class="mosaic-badge badge-emerald"><i class="fas fa-circle-check"></i> Hoạt động tốt</span>
+						<span class="mosaic-system-label"><i class="fas fa-shield-halved"></i> {_admin.dashboard.systemStatus}</span>
+						<span class="mosaic-badge badge-emerald"><i class="fas fa-circle-check"></i> {_admin.dashboard.statusOk}</span>
 					</div>
 				</div>
 			</div>
@@ -220,10 +220,10 @@
 		<div class="mosaic-card-title-row">
 			<div class="mosaic-card-heading">
 				<i class="fas fa-clock-rotate-left text-sky"></i>
-				<span>Sản phẩm cập nhật gần đây</span>
+				<span>{_admin.dashboard.recentProducts}</span>
 			</div>
 			<a n:href="Products:" class="mosaic-btn mosaic-btn-outline-sm">
-				<span>Xem tất cả sản phẩm</span>
+				<span>{_admin.dashboard.viewAllProducts}</span>
 				<i class="fas fa-arrow-right"></i>
 			</a>
 		</div>
@@ -233,11 +233,11 @@
 				<thead>
 					<tr>
 						<th style="width: 60px;">ID</th>
-						<th>Tên sản phẩm</th>
-						<th>Mã Code / EAN</th>
-						<th>Trạng thái</th>
-						<th>Ngày tạo</th>
-						<th class="text-right" style="width: 140px;">Hành động</th>
+						<th>{_admin.dashboard.colName}</th>
+						<th>{_admin.dashboard.colCode}</th>
+						<th>{_admin.dashboard.colStatus}</th>
+						<th>{_admin.dashboard.colCreated}</th>
+						<th class="text-right" style="width: 140px;">{_admin.dashboard.colActions}</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -251,7 +251,7 @@
 									</div>
 									<div class="mosaic-prod-meta">
 										<a n:href="Products:edit $prod->id" class="mosaic-prod-name">
-											{$prod->name ?: 'Chưa đặt tên'}
+											{$prod->name ?: ('admin.dashboard.unnamed'|translate)}
 										</a>
 										<span class="mosaic-prod-sub" n:ifset="$prod->perex">
 											{$prod->perex|truncate:60}
@@ -269,11 +269,11 @@
 							<td>
 								{if $prod->is_active}
 									<span class="mosaic-badge badge-emerald">
-										<i class="fas fa-circle-check"></i> Đang bán
+										<i class="fas fa-circle-check"></i> {_admin.dashboard.statusActive}
 									</span>
 								{else}
 									<span class="mosaic-badge badge-slate">
-										<i class="fas fa-circle-minus"></i> Ẩn
+										<i class="fas fa-circle-minus"></i> {_admin.dashboard.statusHidden}
 									</span>
 								{/if}
 							</td>
@@ -286,10 +286,10 @@
 							</td>
 							<td class="text-right">
 								<div class="mosaic-action-btns">
-									<a n:href="Products:edit $prod->id" class="mosaic-action-btn" title="Chỉnh sửa">
+									<a n:href="Products:edit $prod->id" class="mosaic-action-btn" title="{_admin.dashboard.edit}">
 										<i class="fas fa-pen-to-square"></i>
 									</a>
-									<a n:href="ProductLabels:default search => $prod->code ?: $prod->name" class="mosaic-action-btn action-print" title="In nhãn">
+									<a n:href="ProductLabels:default search => $prod->code ?: $prod->name" class="mosaic-action-btn action-print" title="{_admin.dashboard.printLabel}">
 										<i class="fas fa-print"></i>
 									</a>
 								</div>
@@ -299,7 +299,7 @@
 						<tr>
 							<td colspan="6" class="text-center py-8 text-muted">
 								<i class="fas fa-inbox fa-2x mb-2 block"></i>
-								Chưa có dữ liệu sản phẩm gần đây
+								{_admin.dashboard.noRecentProducts}
 							</td>
 						</tr>
 					{/if}
@@ -323,7 +323,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		{/foreach}
 
 		if (catNames.length === 0) {
-			catNames = ['Chưa phân loại'];
+			catNames = [{_admin.dashboard.uncategorized}];
 			catCounts = [1];
 		}
 

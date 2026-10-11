@@ -88,13 +88,13 @@
 				<div class="top-menu mosaic-top-menu">
 					<!-- Left: Sidebar Toggle & Search Bar -->
 					<div class="mosaic-header-left">
-						<button type="button" class="push-sidebar mosaic-sidebar-toggle" title="Thu gọn / Mở rộng Menu">
+						<button type="button" class="push-sidebar mosaic-sidebar-toggle" title="{_admin.ui.toggleMenu}">
 							<i class="fas fa-bars-staggered"></i>
 						</button>
 
 						<div class="mosaic-search-box" onclick="document.getElementById('mosaicQuickSearchInput').focus();">
 							<i class="fas fa-search mosaic-search-icon"></i>
-							<input type="text" id="mosaicQuickSearchInput" class="mosaic-search-input" placeholder="Tìm nhanh sản phẩm, mã EAN, danh mục... (Ctrl+K)">
+							<input type="text" id="mosaicQuickSearchInput" class="mosaic-search-input" placeholder="{_admin.ui.quickSearch}">
 							<kbd class="mosaic-search-kbd">Ctrl K</kbd>
 						</div>
 					</div>
@@ -102,7 +102,7 @@
 					<!-- Right: Actions, Language, User Dropdown -->
 					<div class="mosaic-header-right">
 						<!-- Store Preview -->
-						<a href="/" target="_blank" class="mosaic-nav-icon-btn" title="Xem website ngoài">
+						<a href="/" target="_blank" class="mosaic-nav-icon-btn" title="{_admin.ui.viewWebsite}">
 							<i class="fas fa-arrow-up-right-from-square"></i>
 						</a>
 
@@ -142,7 +142,7 @@
 							<ul class="dropdown-menu dropdown-menu-right mosaic-dropdown-menu mosaic-user-menu" role="menu">
 								<li class="mosaic-user-menu-header">
 									<div class="mosaic-user-menu-name">{$adminUser->name}</div>
-									<div class="mosaic-user-menu-email">{isset($adminUser->email) ? $adminUser->email : 'Quản trị viên'}</div>
+									<div class="mosaic-user-menu-email">{isset($adminUser->email) ? $adminUser->email : ('admin.ui.administrator'|translate)}</div>
 								</li>
 								<li class="divider"></li>
 								<li role="presentation">
