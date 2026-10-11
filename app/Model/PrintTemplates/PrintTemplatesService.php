@@ -112,13 +112,13 @@ class PrintTemplatesService
 	{
 		return match ($labelTypeId) {
 			ProductLabelsEntity::TYPE_A4 => ['width_mm' => 210, 'height_mm' => 297],
-			// The reviewed "Velikost 2B" design is stored as one 133 × 52 mm
-			// label. It is placed twice on an A4 sheet by renderSize2BPage().
-			ProductLabelsEntity::TYPE_SIZE_2 => ['width_mm' => 133, 'height_mm' => 38],
+			ProductLabelsEntity::TYPE_A5 => ['width_mm' => 210, 'height_mm' => 148.5],
+			ProductLabelsEntity::TYPE_SIZE_1 => ['width_mm' => 164, 'height_mm' => 41],
+			ProductLabelsEntity::TYPE_SIZE_2 => ['width_mm' => 133, 'height_mm' => 41],
+			ProductLabelsEntity::TYPE_SIZE_3 => ['width_mm' => 182, 'height_mm' => 56],
 			ProductLabelsEntity::TYPE_SIZE_2B => ['width_mm' => 133, 'height_mm' => 52],
 			ProductLabelsEntity::TYPE_SIZE_2_AKCE => ['width_mm' => 133, 'height_mm' => 38],
 			ProductLabelsEntity::TYPE_PECIVO => ['width_mm' => 150, 'height_mm' => 41],
-			ProductLabelsEntity::TYPE_A5 => ['width_mm' => 200, 'height_mm' => 138.5],
 			default => NULL,
 		};
 	}
@@ -157,7 +157,7 @@ class PrintTemplatesService
 				'name' => 'Fikko Cena Vel.2',
 				'labelTypeId' => ProductLabelsEntity::TYPE_SIZE_2,
 				'widthMm' => 133,
-				'heightMm' => 38,
+				'heightMm' => 41,
 				'sourceFile' => 'vel2.latte',
 			],
 			self::PRESET_VEL3 => [
@@ -264,6 +264,11 @@ class PrintTemplatesService
 		$isSize2B = $this->isSize2Template($template);
 		$isA5 = $this->isA5Template($template);
 		$price = $product->getPriceWithLog($branchesId);
+		$rawPrice = $product->getPrice($branchesId);
+		if ($price && $rawPrice && (float)$price->price <= (float)$price->price_action && (float)$rawPrice->price > (float)$price->price_action) {
+			$price = clone $price;
+			$price->price = $rawPrice->price;
+		}
 		if ($priceOverride && $price) {
 			$price = $this->applyPriceOverride($price, $priceOverride);
 		}
@@ -271,17 +276,31 @@ class PrintTemplatesService
 		// A queued label is a snapshot for printing. Its sale_percent means the
 		// action price must remain on the label even after the action date ends,
 		// which is how the previous TCPDF renderer behaved.
+		$hasPriceAction = $price && (float)$price->price_action > 0 && (float)$price->price > (float)$price->price_action;
 		$usesStoredLabelDiscount = $label && (float)$label->sale_percent > 0 && $price && (float)$price->price_action > 0;
 		$isDiscounted = ($price && !empty($price->is_valid_action)) || $usesStoredLabelDiscount;
-		$finalPrice = $isDiscounted ? (float)$price->price_action : (float)($price->price ?? 0);
-		$basePrice = (float)($price->price ?? 0);
+		$finalPrice = ($isDiscounted || $hasPriceAction) ? (float)$price->price_action : (float)($price->price ?? 0);
+		$basePrice = ($isDiscounted || $hasPriceAction) ? (float)($price->price ?? 0) : 0.0;
 		// A queued label carries an explicit "-X %" ribbon (admin-entered, same field the
 		// previous TCPDF renderer read); without a label (e.g. direct product preview),
 		// fall back to the computed discount ratio so the ribbon still has a real value.
+		// Legal 30-day-lowest-price rule (CACH-LAM-CODE.md §3/§5): the "Nejnižší
+		// cena za 30 dní" value AND the discount % must come from the true 30-day
+		// low (ProductsEntity::getRefPrice(), backed by product_prices_log —
+		// already written on every price change), never from the current regular
+		// price. A queued label's admin-typed sale_percent is a trusted historical
+		// snapshot and bypasses this check (same as before). When a live product is
+		// discounted but has no valid 30-day low (e.g. the regular price only just
+		// rose), it falls back to the plain "Běžná cena" comparison box instead of
+		// fabricating a 30-day claim — no %, no "Akce platí do".
+		$refPrice30 = $isDiscounted ? $product->getRefPrice($branchesId) : NULL;
+		$hasValidRef30 = $refPrice30 !== NULL && $refPrice30 > $finalPrice;
+		$isAkce30 = $usesStoredLabelDiscount || ($isDiscounted && $hasValidRef30);
+		$lowestPrice30 = $hasValidRef30 ? $refPrice30 : $basePrice;
 		$salePercent = $label && (float)$label->sale_percent > 0
 			? (float)$label->sale_percent
-			: ($isDiscounted && $basePrice > 0 ? floor((($basePrice - $finalPrice) / $basePrice) * 100) : 0.0);
-		$hasSaleRibbon = $isDiscounted && $salePercent > 0;
+			: ($hasValidRef30 ? floor((($refPrice30 - $finalPrice) / $refPrice30) * 100) : 0.0);
+		$hasSaleRibbon = $isAkce30 && $salePercent > 0;
 		$finalPriceMajor = number_format(floor($finalPrice), 0, ',', ' ');
 		$priceDigits = strlen(str_replace([' ', ','], '', $finalPriceMajor));
 		$labelName = $label?->name ?: $product->name;
@@ -317,6 +336,7 @@ class PrintTemplatesService
 			'price' => $price,
 			'basePrice' => $basePrice,
 			'basePriceText' => number_format($basePrice, 2, ',', ' '),
+			'lowestPrice30Text' => number_format($lowestPrice30, 2, ',', ' '),
 			'finalPrice' => $finalPrice,
 			'finalPriceMajor' => $finalPriceMajor,
 			'finalPriceMinor' => ','.substr(number_format($finalPrice, 2, '.', ''), -2),
@@ -328,6 +348,7 @@ class PrintTemplatesService
 				? number_format($saving, 0, ',', ' ')
 				: number_format($saving, 2, ',', ' '),
 			'isDiscounted' => $isDiscounted,
+			'isAkce30' => $isAkce30,
 			'currencySymbol' => $currencySymbol,
 			'unit' => $unit,
 			'unitText' => $unit ? sprintf('%s / %s %s', number_format($unit->price, 2, ',', ' '), $unit->unitWeight, $unit->unitShort) : NULL,
@@ -338,6 +359,7 @@ class PrintTemplatesService
 			'bars' => match (TRUE) {
 				$ean === '' => [],
 				$isA4 => EanBarcodeHelper::getBars($ean, 0.38),
+				str_contains($template->html_source, 'fikko-vel3') => EanBarcodeHelper::getBars($ean, 0.33),
 				$isSize2BAkce => EanBarcodeHelper::getBars($ean, 0.33),
 				$isPecivo => EanBarcodeHelper::getBars($ean, 0.24),
 				$isSize2 => EanBarcodeHelper::getBars($ean, 0.28),
@@ -568,14 +590,22 @@ class PrintTemplatesService
 	/** @param ProductPricesEntity|null $price */
 	private function formatValidity(?ProductPricesEntity $price): string
 	{
-		if (!$price || empty($price->is_valid_action)) {
+		if (!$price) {
 			return '';
 		}
 
 		$from = $price->action_from?->format('j. n.');
 		$to = $price->action_to?->format('j. n.');
 
-		return trim(implode(' - ', array_filter([$from, $to])));
+		if (!$from && !$to) {
+			return '';
+		}
+
+		if ($from && $to && $from === $to) {
+			return $from;
+		}
+
+		return trim(implode(' – ', array_filter([$from, $to])));
 	}
 
 
@@ -699,7 +729,7 @@ class PrintTemplatesService
 			}
 			elseif ($queueType === 'size2') {
 				$w = (float)$template->width_mm > 0 ? (float)$template->width_mm : 133.0;
-				$h = (float)$template->height_mm > 0 ? (float)$template->height_mm : 38.0;
+				$h = (float)$template->height_mm > 0 ? (float)$template->height_mm : 41.0;
 				foreach (array_chunk($queueJobs, 7) as $chunk) {
 					$htmls = array_map(fn($j) => $this->renderHtml($j['template'], $j['label']->getProduct(), $branchesId, $j['label'], $j['priceOverride'] ?? NULL), $chunk);
 					$pages[] = $this->renderStackedSheet($htmls, $w, $h, 8.0, 8.0, 3.0);
@@ -795,7 +825,9 @@ class PrintTemplatesService
 
 	private function isA5Template(PrintTemplatesEntity $template): bool
 	{
-		return (float)$template->width_mm === 200.0 && (float)$template->height_mm === 138.5;
+		return ((float)$template->width_mm === 200.0 && (float)$template->height_mm === 138.5)
+			|| ((float)$template->width_mm === 210.0 && (float)$template->height_mm === 148.5)
+			|| (int)($template->product_label_type_id ?? 0) === ProductLabelsEntity::TYPE_A5;
 	}
 
 
@@ -824,9 +856,9 @@ class PrintTemplatesService
 		return '<style>'
 			. '@page{margin:0}body{margin:0!important;padding:0!important;width:210mm!important}'
 			. '.a5-sheet{position:relative;width:210mm;height:297mm;overflow:hidden}'
-			. '.a5-label{position:absolute;left:0;width:210mm;height:142mm;overflow:visible}'
-			. '.a5-label.first{top:3mm}.a5-label.second{top:151mm}'
-			. '.a5-divider{position:absolute;top:147mm;left:8mm;width:194mm;z-index:5}'
+			. '.a5-label{position:absolute;left:0;width:210mm;height:148.5mm;overflow:visible}'
+			. '.a5-label.first{top:0}.a5-label.second{top:148.5mm}'
+			. '.a5-divider{position:absolute;top:148.5mm;left:0;width:210mm;z-index:5}'
 			. '.a5-divider-line{display:block;width:100%;border-top:0.3mm dashed #555}'
 			. '</style>' . $styles1 . $styles2
 			. '<div class="a5-sheet">'
@@ -905,7 +937,7 @@ class PrintTemplatesService
 
 	private function isVel1Template(PrintTemplatesEntity $template): bool
 	{
-		return ((float)$template->width_mm === 164.0 || ((float)$template->width_mm === 150.0 && (float)$template->height_mm === 44.0)) && !$this->isPecivoTemplate($template);
+		return ((float)$template->width_mm === 164.0 || ((float)$template->width_mm === 150.0 && (float)$template->height_mm === 44.0) || (int)($template->product_label_type_id ?? 0) === ProductLabelsEntity::TYPE_SIZE_1) && !$this->isPecivoTemplate($template);
 	}
 
 
@@ -917,7 +949,8 @@ class PrintTemplatesService
 
 	private function isVel3Template(PrintTemplatesEntity $template): bool
 	{
-		return (float)$template->width_mm === 182.0 && (float)$template->height_mm === 56.0;
+		return ((float)$template->width_mm === 182.0 && (float)$template->height_mm === 56.0)
+			|| (int)($template->product_label_type_id ?? 0) === ProductLabelsEntity::TYPE_SIZE_3;
 	}
 
 

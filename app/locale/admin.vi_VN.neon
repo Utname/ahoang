@@ -823,6 +823,7 @@ terms:
 	print: 'In'
 	hideValidity: 'Ẩn Platnost (Hạn KM)'
 	hideIngredients: 'Ẩn Složení (Thành phần)'
+	thawed: 'Rozmrazeno (hàng đông lạnh đã rã đông)'
 	cron_part_hour: 'Hodina'
 	cron_part_hour_repeat_after_2: 'Každé 2 hodiny'
 	cron_part_hour_repeat_after_3: 'Každé 3 hodiny'

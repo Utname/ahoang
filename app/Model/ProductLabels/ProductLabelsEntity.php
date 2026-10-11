@@ -30,14 +30,21 @@ class ProductLabelsEntity extends BaseEntity
 			'term' => 'admin.globals.productLabelTypes.'.self::TYPE_SIZE_2,
 			'img' => ''
 		],
+		self::TYPE_SIZE_3 => [
+			'term' => 'admin.globals.productLabelTypes.'.self::TYPE_SIZE_3,
+			'img' => ''
+		],
 		self::TYPE_SIZE_2B => [
 			'term' => 'admin.globals.productLabelTypes.'.self::TYPE_SIZE_2B,
 			'img' => ''
 		],
-		self::TYPE_SIZE_2_AKCE => [
-			'term' => 'admin.globals.productLabelTypes.'.self::TYPE_SIZE_2_AKCE,
-			'img' => ''
-		],
+		// TYPE_SIZE_2_AKCE is intentionally left out of this list: vel2.latte now
+		// detects the discount itself ($isAkce30) and switches between the
+		// comparison and 30-day-discount display on its own, so printing it no
+		// longer needs a separate "Vel. 2 Akce" quantity counter in the admin
+		// form (app/AdminModule/Products/Traits/ProductLabelsTrait.php builds one
+		// input per entry here). The constant/template/preset are untouched so
+		// any already-queued type_id=7 labels still print correctly.
 		self::TYPE_PECIVO => [
 			'term' => 'admin.globals.productLabelTypes.'.self::TYPE_PECIVO,
 			'img' => ''

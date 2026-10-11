@@ -9,6 +9,51 @@ $(function () {
         $dropdown.closest('td').removeClass('has-open-dropdown');
     });
 
+    // The product list's "print options" menu (ProductLabelsControl.latte) is
+    // taller than a row and sits inside .mosaic-list-panel / .page-inner, both
+    // overflow:hidden, which cut it off near the end of the list. Pinning it to
+    // the viewport (position:fixed, no transformed ancestor) escapes that
+    // clipping; it opens below the button, or above when there is no room.
+    var placePrintMenu = function ($wrapper) {
+        var btn = $wrapper.children('.dropdown-toggle')[0];
+        var menu = $wrapper.children('.pl-print-menu')[0];
+        if (!btn || !menu) {
+            return;
+        }
+        var set = function (prop, value) {
+            menu.style.setProperty(prop, value, 'important');
+        };
+        set('position', 'fixed');
+        set('margin', '0');
+        set('bottom', 'auto');
+        set('right', 'auto');
+
+        var rect = btn.getBoundingClientRect();
+        var gap = 4;
+        var edge = 10;
+        var width = menu.offsetWidth;
+        var height = menu.scrollHeight;
+        var spaceBelow = window.innerHeight - rect.bottom - gap - edge;
+        var spaceAbove = rect.top - gap - edge;
+        var openUp = height > spaceBelow && spaceAbove > spaceBelow;
+        var maxHeight = Math.max(120, openUp ? spaceAbove : spaceBelow);
+        set('max-height', maxHeight + 'px');
+        var shown = Math.min(height, maxHeight);
+
+        var left = Math.min(rect.right - width, window.innerWidth - width - edge);
+        set('left', Math.max(edge, left) + 'px');
+        set('top', (openUp ? rect.top - gap - shown : rect.bottom + gap) + 'px');
+    };
+
+    $(document).on('shown.bs.dropdown', '.pl-dropdown-wrapper', function () {
+        placePrintMenu($(this));
+    });
+    $(window).on('scroll resize', function () {
+        $('.pl-dropdown-wrapper.open').each(function () {
+            placePrintMenu($(this));
+        });
+    });
+
     $("body").on('click', "a.ajax", function (event) {
         event.preventDefault();
 
@@ -309,6 +354,11 @@ $(function () {
     });
 
     $("body").on("shown.bs.dropdown", ".dropdown", function () {
+        // positioned on its own (placePrintMenu above); "dropup" would set
+        // bottom:100% next to its top:100% and squash it to a thin strip
+        if ($(this).hasClass("pl-dropdown-wrapper")) {
+            return;
+        }
         var $ul = $(this).children(".dropdown-menu");
         var $button = $(this).children(".dropdown-toggle");
         var ulOffset = $ul.offset();

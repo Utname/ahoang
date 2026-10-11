@@ -1,453 +1,207 @@
 <style>
     @page { size: A4; margin: 0; }
-    html, body { margin: 0; padding: 0; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; background: #fff; color: #111; -webkit-font-smoothing: antialiased; }
-    * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    html, body { margin: 0; padding: 0; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; background: #fff; color: #111; }
 
+    /* Layout notes (Dompdf, measured against A4.dc.html / A4 Akce.dc.html
+       printed from Chromium — all numbers are mm on the A4 page):
+       - Dompdf has no flexbox and ignores box-sizing (padding is added outside
+         width/height), so instead of the reference's flex column every block
+         is absolutely positioned on a padding-free 210 x 297 page.
+       - Single-line text uses line-height 0: Dompdf then puts the glyph
+         baseline exactly at the block's top, so each top below IS the
+         baseline measured in the reference.
+       - Multi-line text (name, Poznamka 3) keeps a real line-height chosen so
+         the line pitch matches the reference; Dompdf multiplies line-height
+         by the font's natural height (Helvetica/DejaVu 1.2804em), and puts the
+         first baseline at top + 1.024 x line-height x font-size. */
     .page {
-        box-sizing: border-box;
-        width: 100%;
-        height: 269mm;
-        padding: 14mm;
+        position: relative;
+        width: 210mm;
+        height: 297mm;
+        overflow: hidden;
         background: #fff;
         color: #111;
-        overflow: hidden;
         page-break-inside: avoid;
-        page-break-after: avoid;
     }
+    .abs { position: absolute; white-space: nowrap; }
+    .lh0 { line-height: 0; }
+    .nu { font-family: Nunito, sans-serif; font-weight: 900; font-style: italic; }
+    .center { text-align: center; }
+    .right { text-align: right; }
 
-    .logo-box {
-        width: 210mm;
-        margin: 6mm -14mm 6mm -14mm;
-        text-align: center;
-    }
-    .logo-box img {
-        width: 36mm;
-        height: 25mm;
-        display: inline-block;
-    }
+    .logo { position: absolute; top: 27mm; }
 
-    .header-box {
-        display: table;
-        width: 210mm;
-        height: 23mm;
-        background: #111;
-        color: #fff;
-        text-align: center;
-        margin: 0 -14mm;
-    }
-    .header-box .title {
-        display: table-cell;
-        vertical-align: middle;
-        font-family: Nunito, sans-serif;
-        font-weight: 900;
-        font-style: italic;
-        font-size: 18mm;
-        line-height: 1;
-        letter-spacing: 0.04em;
-    }
+    .header-bar { position: absolute; left: 9mm; top: 63.25mm; width: 192mm; height: 22mm; background: #111; }
+    .header-title { left: 0; top: 78.23mm; width: 210mm; color: #fff; font-size: 14mm; letter-spacing: 0.02em; }
 
-    .content-box {
-        margin-top: 3mm;
-    }
+    .flow { position: absolute; left: 0; top: 86.75mm; width: 210mm; }
+    .middle { position: relative; width: 210mm; height: 155mm; }
     .prod-name {
+        margin-left: 14mm;
+        width: 182mm;
         font-size: 8mm;
-        line-height: 1.15;
         font-weight: 400;
+        line-height: 0.898;
+        max-height: 18.4mm;
+        overflow: hidden;
         text-align: center;
-        padding-bottom: 2mm;
     }
+    .sub-text { font-family: Nunito, sans-serif; font-style: italic; font-weight: 400; font-size: 6mm; }
+    .platnost-label { font-size: 3.6mm; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 700; opacity: 0.65; }
+    .platnost-val { font-size: 5mm; font-weight: 800; margin-left: 3mm; }
+    .note1 { font-size: 6mm; }
 
-    .subtitle-box {
-        text-align: center;
-        padding-bottom: 1.5mm;
-    }
-    .subtitle-box .sub-text {
-        font-family: Nunito, sans-serif;
-        font-style: italic;
-        font-weight: 400;
-        font-size: 6mm;
-        line-height: 1.1;
-    }
+    .flag-img { position: absolute; left: 14mm; width: 15mm; height: 15mm; border: 0.4mm solid #111; border-radius: 50%; }
+    .origin-label { left: 33mm; font-size: 3.5mm; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; opacity: 0.65; }
+    .origin-name { left: 33mm; font-size: 5.3mm; font-weight: 800; }
 
-    .main-row {
-        position: relative;
-        padding-top: 2mm;
-    }
-    .left-col {
+    .lowest-label { font-size: 3.6mm; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 700; }
+    .lowest-val { font-size: 11mm; }
+    .lowest-val span { font-size: 6.5mm; }
+    .regular-label { font-size: 4mm; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; margin-right: 3mm; }
+    .strike {
         position: absolute;
-        top: 0;
-        left: 0;
-        white-space: nowrap;
-    }
-    .note1-text {
-        font-family: Nunito, sans-serif;
-        font-weight: 900;
-        font-style: italic;
-        font-size: 6mm;
-        line-height: 1.1;
-        margin-bottom: 4mm;
-        white-space: nowrap;
-    }
-    .origin-box {
-        display: table;
-        white-space: nowrap;
-    }
-    .origin-box .flag-cell {
-        display: table-cell;
-        width: 15mm;
-        vertical-align: middle;
-    }
-    .origin-box .flag-img {
-        width: 15mm;
-        height: 15mm;
-        display: block;
-        border: 0.4mm solid #111;
-        border-radius: 50%;
-    }
-    .origin-box .flag-text {
-        display: table-cell;
-        padding-left: 3.5mm;
-        vertical-align: middle;
-        white-space: nowrap;
-    }
-    .origin-box .flag-label {
-        font-size: 3.5mm;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        font-weight: 700;
-        opacity: 0.65;
-        white-space: nowrap;
-    }
-    .origin-box .flag-name {
-        font-size: 5.3mm;
-        font-weight: 800;
-        line-height: 1.1;
-        white-space: nowrap;
+        height: 1.2mm;
+        background: #111;
+        border-radius: 0.6mm;
     }
 
-    .price-col {
-        text-align: center;
-        margin-left: 45mm;
-    }
-    .lowest-box {
-        position: relative;
-        text-align: right;
-        padding-right: 15mm;
-        margin-bottom: 1.5mm;
-    }
-    .lowest-label {
-        display: inline-block;
-        vertical-align: middle;
-        font-size: 3.6mm;
-        line-height: 1.2;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-        font-weight: 700;
-        text-align: right;
-        margin-right: 3mm;
-    }
-    .lowest-val-box {
-        position: relative;
-        display: inline-block;
-        vertical-align: middle;
-    }
-    .lowest-val {
-        font-family: Nunito, sans-serif;
-        font-weight: 900;
-        font-style: italic;
-        font-size: 11mm;
-        line-height: 1;
-        color: #111;
-    }
-    .lowest-val span {
-        font-size: 6.5mm;
-    }
-    .a4-strike-wrap { position: absolute; left: 0; top: 0; width: 0; height: 0; overflow: visible; display: inline-block; }
-    .lowest-strike-img {
+    .our-label { font-size: 4mm; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; }
+
+    .price-table { border-collapse: collapse; margin: 0 auto; }
+    .price-table td { padding: 0; vertical-align: top; white-space: nowrap; }
+    .price-major { letter-spacing: -0.03em; }
+    .rel { position: relative; }
+
+    .save-box { position: absolute; height: 21.4mm; transform: rotate(-1.2deg); }
+    .save-brush { position: absolute; left: 0; top: 0; height: 21.4mm; }
+    .save-pig { position: absolute; left: 9.5mm; top: 4.2mm; width: 13mm; height: 13mm; }
+    .save-text { left: 26mm; top: 13.43mm; color: #fff; }
+    .save-copy { font-size: 6mm; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; }
+    .save-val { font-size: 12.5mm; margin-left: 2mm; }
+    .save-suffix { font-size: 5mm; font-weight: 600; margin-left: 2mm; }
+
+    .unit-row { font-size: 4.8mm; font-weight: 700; }
+    .unit-val { font-size: 6mm; margin-left: 3.5mm; }
+
+    .note3 {
         position: absolute;
-        left: -2mm;
-        top: 6.0mm;
-        height: 7mm;
-    }
-
-    .our-label {
-        font-size: 4mm;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        font-weight: 700;
-        margin-bottom: 2mm;
-    }
-
-    .main-price {
-        display: table;
-        margin: 0 auto;
-        white-space: nowrap;
-    }
-    .price-major {
-        display: table-cell;
-        vertical-align: top;
-        font-family: Nunito, sans-serif;
-        font-weight: 900;
-        font-style: italic;
-        font-size: 61mm;
-        line-height: 0.82;
-        letter-spacing: -0.03em;
-    }
-    .price-minor-col {
-        display: table-cell;
-        vertical-align: top;
-        padding-left: 2mm;
-        text-align: left;
-    }
-    .price-minor {
-        font-family: Nunito, sans-serif;
-        font-weight: 900;
-        font-style: italic;
-        font-size: 23.5mm;
-        line-height: 0.9;
-    }
-    .price-currency {
-        font-family: Nunito, sans-serif;
-        font-weight: 900;
-        font-style: italic;
-        font-size: 6.5mm;
-        line-height: 0.9;
-        white-space: nowrap;
-        margin-top: 13mm;
-    }
-
-    .save-box {
-        position: relative;
-        width: 112mm;
-        height: 19mm;
-        margin: 3.5mm auto 0 auto;
-        color: #fff;
-    }
-    .save-brush {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 0;
-    }
-    .save-inner {
-        position: relative;
-        z-index: 1;
-        width: 100%;
-        height: 19mm;
-        text-align: center;
-    }
-    .save-table {
-        height: 19mm;
-        border-collapse: collapse;
-        margin: 0 auto;
-    }
-    .save-pig-cell {
-        vertical-align: middle;
-        text-align: right;
-        padding-right: 3.5mm;
-    }
-    .save-pig {
-        display: block;
-        width: 11.5mm;
-        height: 11.5mm;
-    }
-    .save-copy-cell {
-        vertical-align: middle;
-        text-align: left;
-        white-space: nowrap;
-        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-size: 6.8mm;
-        font-weight: 800;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: #fff;
-        line-height: 1;
-        padding-right: 3.5mm;
-    }
-    .save-val-cell {
-        vertical-align: middle;
-        text-align: left;
-        white-space: nowrap;
-        font-family: Nunito, sans-serif;
-        font-weight: 900;
-        font-style: italic;
-        font-size: 13.5mm;
-        line-height: 1;
-        color: #fff;
-    }
-
-    .unit-box {
-        margin-top: 2mm;
-        font-size: 4.8mm;
-        font-weight: 700;
-    }
-    .unit-val {
-        font-family: Nunito, sans-serif;
-        font-weight: 900;
-        font-style: italic;
+        left: 30mm;
+        width: 150mm;
         font-size: 6mm;
-        margin-left: 2mm;
-    }
-
-    .note3-box {
+        line-height: 0.766;
+        max-height: 13.8mm;
+        overflow: hidden;
         text-align: center;
-        margin-top: 6mm;
-        clear: both;
-    }
-    .note3-text {
-        font-family: Nunito, sans-serif;
-        font-weight: 900;
-        font-style: italic;
-        font-size: 6mm;
-        line-height: 1.15;
-        text-align: center;
-        max-width: 150mm;
-        margin: 0 auto;
     }
 
-    .bottom-box {
-        display: table;
-        width: 100%;
-        margin-top: 6mm;
-        clear: both;
-    }
-    .barcode-col {
-        display: table-cell;
-        vertical-align: bottom;
-        width: 50mm;
-        text-align: left;
-    }
-    .barcode-bars {
-        display: block;
-        height: 8.5mm;
-        white-space: nowrap;
-    }
-    .barcode-ean {
-        font-size: 2.9mm;
-        letter-spacing: 0.14em;
-        font-weight: 600;
-        margin-top: 1mm;
-    }
+    .barcode-bars { position: absolute; left: 14mm; top: 262.45mm; height: 8.5mm; }
+    .barcode-bars div { float: left; height: 8.5mm; }
+    .barcode-ean { left: 14mm; top: 274.29mm; font-size: 2.9mm; letter-spacing: 0.14em; font-weight: 600; }
 
-    .validity-box {
-        display: table-cell;
-        vertical-align: bottom;
-        text-align: center;
-        padding-bottom: 1mm;
-    }
-    .validity-text {
-        font-size: 3.6mm;
-        font-weight: 600;
-        letter-spacing: 0.02em;
-        white-space: nowrap;
-    }
-
-    .price-digits-3 .price-major { font-size: 50mm; }
-    .price-digits-3 .price-minor { font-size: 20mm; }
-    .price-digits-3 .price-currency { margin-top: 10mm; font-size: 6mm; }
-    
+    .validity { left: 0; top: 281.96mm; width: 210mm; font-size: 3.6mm; font-weight: 600; letter-spacing: 0.02em; }
+    .validity b { font-weight: 800; }
 </style>
 
-{var $pageClasses = 'page' . ($priceDigits >= 3 ? ' price-digits-3' : '')}
-{var $logoMarkup = '<img src="' . $logoDataUri . '" alt="Fikko market">'}
-{var $flagMarkup = $flagIconDataUri ? '<img class="flag-img" src="' . $flagIconDataUri . '" alt="">' : ''}
-{var $brushMarkup = '<img class="save-brush" src="' . $brushDataUri . '" alt="">'}
-{var $pigMarkup = '<img class="save-pig" src="' . $pigIconDataUri . '" alt="">'}
-{var $strikeWidth = (strlen($basePriceText) <= 4 ? '38mm' : (strlen($basePriceText) <= 5 ? '44mm' : (strlen($basePriceText) <= 6 ? '54mm' : '64mm')))}
-{var $strikeMarkup = '<img class="lowest-strike-img" src="' . $strikeSlashDataUri . '" style="width:' . $strikeWidth . '" alt="">'}
+{* Everything between the product name and Poznámka 3 lives in .middle, which
+   follows the name in normal flow: a two-line name pushes it down by exactly one
+   name line (9.198mm), like the reference. Positions inside .middle are the
+   reference page coordinates minus where .middle starts for a one-line name
+   (name top 86.75 + one 9.198mm line). *}
+{var $dl = -95.948}
+{var $dc = -95.948}
+{* The reference centers the price column on its widest child; in the
+   comparison-price variant (wider Ušetříte badge with "oproti běžné ceně") the
+   whole column sits 4mm further right — measured in A4.dc.html vs A4 Akce. *}
+{var $isCompare = !$isAkce30 && $basePrice > $finalPrice}
+{var $b = $isCompare ? 4.0 : 0.0}
+{var $digits = strlen(str_replace(' ', '', $finalPriceMajor))}
+{var $ps = $digits >= 4 ? 47 / 61 : 1}
+{var $fsMajor = round(61 * $ps, 2)}
+{var $fsMinor = round(23.5 * $ps, 2)}
+{var $fsCur = round(6.5 * $ps, 2)}
+{var $priceBase = 197.56 + $dc}
+{* Ušetříte badge width = padding + pig + gaps + text, text widths per
+   character from the Dompdf fonts actually used (measured). *}
+{var $saveValText = $savingText . ' ' . $currencySymbol}
+{var $saveW = 9.5 + 13 + 3.5 + 37.8 + 2 + mb_strlen($saveValText) * 6.6 + ($isCompare ? 2 + 50.7 : 0) + 9.5}
+{var $saveCx = 113.05 + $b}
+{* Logo scaled/placed so its ink matches the reference logo ink (our PNG has
+   less built-in margin than the reference JPG). *}
+{var $logoH = 27.15}
+{var $logoW = $logoH * 760 / 700}
 
-<section class="{$pageClasses}" data-document-role="page" data-label="Fikko Cena – tem A4 Akce" data-screen-label="A4 – 1 tem">
+<div class="page">
 
-    <div class="logo-box">
-        {$logoMarkup|noescape}
+    <img class="logo" src="{$logoDataUri|nocheck}" style="left:{=round(105.19 - 0.4845 * $logoW, 3)|noescape}mm;top:{=round(42.07 - 0.474 * $logoH, 3)|noescape}mm;width:{=round($logoW, 3)|noescape}mm;height:{=round($logoH, 3)|noescape}mm" alt="Fikko market">
+
+    <div class="header-bar"></div>
+    <div class="abs lh0 nu center header-title">FIKKO CENA</div>
+
+    <div class="flow">
+    <div class="prod-name">{$labelName}</div>
+    <div class="middle">
+
+    <div n:if="$label && $label->is_more_species" class="abs lh0 center sub-text" style="left:14mm;width:182mm;top:{=round(104.16 + $dl, 3)|noescape}mm">Více druhů</div>
+    <div n:if="!$isAkce30 && $validityText" class="abs lh0 right" style="left:14mm;width:182mm;top:{=round(104.16 + $dl, 3)|noescape}mm"><span class="platnost-label">Platnost</span><span class="platnost-val">{$validityText}</span></div>
+
+    <div n:if="$note1" class="abs lh0 nu center note1" style="left:14mm;width:182mm;top:{=round(113.16 + $dl, 3)|noescape}mm">{$note1}</div>
+
+    {if $country}
+        <img n:if="$flagIconDataUri" class="flag-img" src="{$flagIconDataUri|nocheck}" style="top:{=round(119.05 + $dl, 3)|noescape}mm" alt="">
+        <div class="abs lh0 origin-label" style="top:{=round(124.53 + $dl, 3)|noescape}mm">Země původu</div>
+        <div class="abs lh0 origin-name" style="top:{=round(130.88 + $dl, 3)|noescape}mm">{$country->name}</div>
+    {/if}
+
+    {* AKCE_30: "Nejnižší cena za 30 dní" + struck 30-day price, right-aligned. *}
+    <table n:if="$isAkce30 && $basePrice > $finalPrice" class="abs" style="left:14mm;width:{=round(194.4 - 14, 3)|noescape}mm;top:{=round(126.92 + $dc, 3)|noescape}mm;border-collapse:collapse" cellpadding="0" cellspacing="0">
+        <tr>
+            <td></td>
+            <td style="width:1%;padding:0 3mm 0 0;vertical-align:top;text-align:right;white-space:nowrap">
+                <div class="lh0 lowest-label">Nejnižší cena</div>
+                <div class="lh0 lowest-label rel" style="top:4.49mm">za 30 dní</div>
+            </td>
+            <td style="width:1%;padding:0;vertical-align:top;white-space:nowrap">
+                <div class="lh0 nu lowest-val rel" style="top:4.76mm">{$lowestPrice30Text}&nbsp;<span>{$currencySymbol}</span><div class="strike" style="left:0.75%;width:98.5%;top:-4.43mm;transform:rotate(-5.8deg)"></div></div>
+            </td>
+        </tr>
+    </table>
+    {* SROVNANI: "Běžná cena" + regular price, not struck (CACH-LAM-CODE §3). *}
+    <div n:if="$isCompare" class="abs lh0 right" style="left:14mm;width:{=round(202.4 - 14, 3)|noescape}mm;top:{=round(131.68 + $dc, 3)|noescape}mm"><span class="regular-label">Běžná cena</span><span class="nu lowest-val">{$basePriceText}&nbsp;<span>{$currencySymbol}</span></span></div>
+
+    <div class="abs lh0 center our-label" style="left:{=round(108.25 + $b - 60, 3)|noescape}mm;width:120mm;top:{=round(148.35 + $dc, 3)|noescape}mm">Naše cena</div>
+
+    <div class="abs" style="left:{=round(124.45 + $b - 105, 3)|noescape}mm;width:210mm;top:{=round($priceBase, 3)|noescape}mm">
+        <table class="price-table" cellpadding="0" cellspacing="0">
+            <tr>
+                <td><div class="lh0 nu price-major" style="font-size:{=round($fsMajor, 3)|noescape}mm">{$finalPriceMajor}</div></td>
+                <td style="padding-left:1.2mm">
+                    <div class="lh0 nu rel" style="font-size:{=round($fsMinor, 3)|noescape}mm;top:{=round(-26.72 * $ps, 3)|noescape}mm">{$finalPriceMinor}</div>
+                    <div class="lh0 nu rel" style="font-size:{=round($fsCur, 3)|noescape}mm;top:{=round(-5.03 * $ps, 3)|noescape}mm">{$currencySymbol} / ks</div>
+                </td>
+            </tr>
+        </table>
     </div>
 
-    <header class="header-box">
-        <div class="title">FIKKO CENA</div>
-    </header>
-
-    <div class="content-box">
-        <div class="prod-name">{$labelName}</div>
-
-        <div n:if="$label && $label->is_more_species" class="subtitle-box">
-            <div class="sub-text">Více druhů</div>
-        </div>
-
-        <div class="main-row">
-            <div class="left-col">
-                <div n:if="$note1" class="note1-text">{$note1}</div>
-                <div n:if="$country" class="origin-box">
-                    <div class="flag-cell">{$flagMarkup|noescape}</div>
-                    <div class="flag-text">
-                        <div class="flag-label">Země původu</div>
-                        <div class="flag-name">{$country->name}</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="price-col">
-                <div class="lowest-box">
-                    <div class="lowest-label">Nejnižší cena<br>za 30 dní</div>
-                    <div class="lowest-val-box">
-                        <span class="lowest-val">{$basePriceText} <span>{$currencySymbol}</span></span><span class="a4-strike-wrap">{$strikeMarkup|noescape}</span>
-                    </div>
-                </div>
-
-                <div class="our-label">Naše cena</div>
-
-                <div class="main-price">
-                    <div class="price-major">{$finalPriceMajor}</div>
-                    <div class="price-minor-col">
-                        <div class="price-minor">{$finalPriceMinor}</div>
-                        <div class="price-currency">{$currencySymbol} / ks</div>
-                    </div>
-                </div>
-
-                <div n:if="$saving > 0" class="save-box">
-                    {$brushMarkup|noescape}
-                    <div class="save-inner">
-                        <table class="save-table" cellpadding="0" cellspacing="0" border="0">
-                            <tr>
-                                <td class="save-pig-cell">
-                                    {$pigMarkup|noescape}
-                                </td>
-                                <td class="save-copy-cell">
-                                    UŠETŘÍTE
-                                </td>
-                                <td class="save-val-cell">
-                                    {$savingText}&nbsp;{$currencySymbol}
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-                </div>
-
-                <div n:if="$unit" class="unit-box">
-                    <span>Cena za {$unit->unitWeight} {$unit->unitShort}</span>
-                    <span class="unit-val">{$unit->price|number:2,',',' '} {$currencySymbol}</span>
-                </div>
-            </div>
-        </div>
-
-        <div n:if="$note3 || $note2" class="note3-box">
-            <div class="note3-text">{$note3 ?: $note2}</div>
-        </div>
-
-        <div class="bottom-box">
-            <div class="barcode-col">
-                <div n:if="$bars" class="barcode-bars">
-                    <div n:foreach="$bars as $bar" style="float:left;height:8.5mm;background:{$bar['color']|noescape};width:{$bar['width']|noescape}"></div>
-                    <div style="clear:both"></div>
-                </div>
-                <div n:if="$eanText" class="barcode-ean">EAN {$eanText}</div>
-            </div>
-
-            <div n:if="!$hideValidity && $validityText" class="validity-box">
-                <div class="validity-text">Akce platí do <b>{$validityText}</b> nebo do vyprodání zásob</div>
-            </div>
-        </div>
+    <div n:if="$basePrice > $finalPrice && $saving > 0" class="save-box" style="left:{=round($saveCx - $saveW / 2, 3)|noescape}mm;top:{=round(207.7 + $dc, 3)|noescape}mm;width:{=round($saveW, 3)|noescape}mm">
+        <img class="save-brush" src="{$brushDataUri|nocheck}" style="width:{=round($saveW, 3)|noescape}mm" alt="">
+        <img class="save-pig" src="{$pigIconDataUri|nocheck}" alt="">
+        <div class="abs lh0 save-text"><span class="save-copy">Ušetříte</span><span class="nu save-val">{$saveValText}</span><span n:if="$isCompare" class="save-suffix">oproti běžné ceně</span></div>
     </div>
 
-</section>
+    <div n:if="$unit" class="abs lh0 center unit-row" style="left:{=round(138.4 + $b - 70, 3)|noescape}mm;width:140mm;top:{=round(236.45 + $dc, 3)|noescape}mm">Cena za {$unit->unitWeight} {$unit->unitShort}<span class="nu unit-val">{$unit->price|number:2,',',' '}&nbsp;{$currencySymbol}</span></div>
+
+    </div>
+    </div>
+
+    <div n:if="$note3 || $note2" class="note3 nu" style="top:251.83mm">{$note3 ?: $note2}</div>
+
+    <div n:if="$bars" class="barcode-bars">
+        <div n:foreach="$bars as $bar" style="background:{$bar['color']|noescape};width:{$bar['width']|noescape}"></div>
+    </div>
+    <div n:if="$eanText" class="abs lh0 barcode-ean">EAN {$eanText}</div>
+
+    {* "Akce platí do" only on AKCE_30 (CACH-LAM-CODE §3). *}
+    <div n:if="!$hideValidity && ($isAkce30 || (!$isDiscounted && $validityText))" class="abs lh0 center validity">{if $validityText}Akce platí do <b>{$validityText}</b> nebo do vyprodání zásob{else}Akce platí do vyprodání zásob{/if}</div>
+
+</div>

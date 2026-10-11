@@ -823,6 +823,7 @@ terms:
 	print: 'Tisknout'
 	hideValidity: 'Skrýt platnost'
 	hideIngredients: 'Skrýt složení'
+	thawed: 'Rozmrazeno'
 	cron_part_hour: 'Hodina'
 	cron_part_hour_repeat_after_2: 'Každé 2 hodiny'
 	cron_part_hour_repeat_after_3: 'Každé 3 hodiny'

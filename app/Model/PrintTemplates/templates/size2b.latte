@@ -407,11 +407,11 @@
         <table class="vel2-price-table" cellpadding="0" cellspacing="0">
             <tr>
                 <td class="vel2-price-left">
-                    <div n:if="$isDiscounted && $basePrice > $finalPrice" class="vel2-base-row">
+                    <div n:if="$basePrice > $finalPrice" class="vel2-base-row">
                         <span class="vel2-base-label">Běžná<br>cena</span>
                         <span class="vel2-base-val">{$basePriceText} <span class="vel2-base-currency">{$currencySymbol}</span></span>
                     </div>
-                    <div n:if="$isDiscounted && $saving > 0" class="vel2-save-box">
+                    <div n:if="$basePrice > $finalPrice && $saving > 0" class="vel2-save-box">
                         {$brushMarkup|noescape}
                         <table class="vel2-save-table" cellpadding="0" cellspacing="0" border="0">
                             <tr>

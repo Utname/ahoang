@@ -1,13 +1,28 @@
 <style>
     @page { margin: 0; }
-    html, body { margin: 0; padding: 0; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; background: #fff; color: #111; -webkit-font-smoothing: antialiased; }
-    * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    html, body {
+        margin: 0;
+        padding: 0;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        background: #fff;
+        color: #111;
+        -webkit-font-smoothing: antialiased;
+    }
+    * {
+        box-sizing: border-box;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
 
+    /* Dompdf ignores box-sizing:border-box here and draws the 0.4mm border
+       outside width/height — measured on the real PDF: a 150x41 box came out
+       150.8x41.8mm. So the inner box is 149.2x40.2mm, and the outer size
+       (inner + border) is exactly the reference's 150x41mm. */
     .fikko-pecivo {
         box-sizing: border-box;
         position: relative;
-        width: 150mm;
-        height: 41mm;
+        width: 149.2mm;
+        height: 40.2mm;
         border: 0.4mm dashed #111;
         background: #fff;
         color: #111;
@@ -44,143 +59,232 @@
         color: #111;
     }
 
-    /* 2. Center Content Column (78mm x 41mm) */
+    /* 2. Center Content Column: the reference's 1fr = 149.2 - 32 - 40 */
     .pecivo-center-col {
         position: absolute;
         top: 0;
         left: 32mm;
-        width: 78mm;
+        width: 77.2mm;
         height: 40.2mm;
-        padding: 0.6mm 2.5mm 0.6mm 2.5mm;
+        padding: 1mm 2.5mm 0.6mm 2.5mm;
     }
 
-    /* Top Box: Product Name and Subtitle */
+    /* Top: Product Name and Subtitle */
     .pecivo-top-box {
-        width: 73mm;
-        max-width: 73mm;
+        position: absolute;
+        top: 1mm;
+        left: 2.5mm;
+        width: 72.2mm;
         overflow: hidden;
-        white-space: nowrap;
     }
     .pecivo-prod-name {
-        font-size: 3.4mm;
+        font-size: 3.6mm;
         font-weight: 700;
         line-height: 1.15;
+        color: #111;
+        max-height: 9.6mm;
         overflow: hidden;
-        white-space: nowrap;
     }
     .pecivo-prod-sub {
         font-family: Nunito, sans-serif;
         font-weight: 900;
         font-style: italic;
-        font-size: 3.2mm;
-        line-height: 1.15;
-        overflow: hidden;
-        white-space: nowrap;
-        margin-top: 0.1mm;
+        font-size: 3.6mm;
+        line-height: 1.1;
+        color: #111;
+        margin-top: 0.2mm;
     }
 
-    /* Middle Row: Notes (left) + Price (right) */
-    .pecivo-mid-table {
-        width: 73mm;
-        border-collapse: collapse;
-        margin-top: 0;
+    /* Middle Area: Notes on left, Price group on right, vertically centered
+       like the reference's flex:1 middle row. Its height lives on the cells:
+       Dompdf ignores height on the table itself (it shrank to its content and
+       sat at the top, so nothing was ever centered). Top/height are taken
+       from Pecivo.dc.html rendered in Chromium and measured against this
+       card, so the price lands where the reference puts it. */
+    .pecivo-middle-box {
+        position: absolute;
+        top: 14.24mm;
+        left: 2.5mm;
+        width: 72.2mm;
     }
+    .pecivo-middle-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    /* Every cell/inline-block container here sets an explicit font-size and
+       line-height: without one Dompdf gives it the default 16px (~5.6mm) line
+       box, which inflated these boxes far beyond their content (measured: the
+       Rozmrazeno badge rendered 6.3mm tall instead of 4.6mm, and the unit
+       price sat 5.2mm below the price digits instead of the reference 0.5mm,
+       pushing it into the barcode). */
     .pecivo-notes-cell {
-        width: 31mm;
+        width: 25mm;
+        height: 19.96mm;
         vertical-align: middle;
         text-align: left;
-        padding-right: 1mm;
-    }
-    .pecivo-note-row {
-        margin-bottom: 0.6mm;
-        white-space: nowrap;
+        font-size: 2.4mm;
         line-height: 1.15;
     }
+    .pecivo-note-row {
+        margin-bottom: 1.2mm;
+        line-height: 1.15;
+        white-space: nowrap;
+        overflow: hidden;
+    }
     .pecivo-note-tag {
-        font-size: 2.3mm;
+        font-size: 2.4mm;
         letter-spacing: 0.06em;
         text-transform: uppercase;
         font-weight: 700;
         color: #111;
         display: inline-block;
-        margin-right: 1.2mm;
+        margin-right: 1.5mm;
     }
     .pecivo-note-val {
-        font-size: 2.7mm;
+        font-size: 3mm;
         font-weight: 700;
         color: #111;
-        display: inline-block;
     }
 
     .pecivo-price-cell {
-        width: 42mm;
+        width: 47.2mm;
+        height: 19.96mm;
         vertical-align: middle;
         text-align: right;
         white-space: nowrap;
+        font-size: 2.4mm;
+        line-height: 1;
     }
-    .pecivo-price-wrap {
-        display: inline-block;
-        white-space: nowrap;
+
+    /* Main price group: one price-group wrapper holding price-integer beside
+       a price-decimal-unit column (price-decimal over price-unit) — matches
+       Pecivo.dc.html's price block structure exactly. Dompdf's HTML parser
+       does not treat the stylesheet block as raw text/CDATA the way a
+       browser does, so a CSS comment anywhere in this block must never
+       contain literal angle-bracket markup (confirmed: an earlier version
+       of this exact comment, describing the bug using real example tags,
+       made Dompdf exit the stylesheet block early and dump the remainder of
+       this CSS as literal text onto the printed page — so this warning is
+       deliberately written with no angle brackets anywhere, including in
+       this sentence).
+       The reference's flex row (align-items:center) is a two-cell table here
+       (vertical-align:middle), since Dompdf has no flexbox.
+       Dompdf line-height semantics differ from a browser's (see
+       FrameDecorator/Text::get_margin_height): the box is line-height x the
+       font's natural height (1.5004em for this Nunito), not x font-size, and
+       the glyph is not centered in it. So each reference value L becomes
+       line-height L/1.5004 (same box height as in the browser), and a
+       relative top shift — which moves only the glyph, not the layout —
+       puts each glyph where Chromium draws it in Pecivo.dc.html. Shifts are
+       in em so the 3/4-digit sizes scale with them, and were calibrated by
+       measuring both PDFs: every baseline lands within 0.05mm of the
+       reference. */
+    .price-group {
+        margin-left: auto;
+        border-collapse: collapse;
+        line-height: 1;
     }
-    .pecivo-price-major {
-        display: inline-block;
-        vertical-align: top;
+    .price-integer-cell {
+        vertical-align: middle;
+        padding: 0;
+    }
+    .price-integer {
         font-family: Nunito, sans-serif;
         font-weight: 900;
         font-style: italic;
-        font-size: 15mm;
-        line-height: 0.82;
+        font-size: 17mm;
+        line-height: 0.5665;
+        position: relative;
+        top: 0.0215em;
+        color: #111;
     }
-    .pecivo-price-minor-col {
-        display: inline-block;
-        vertical-align: top;
+    .price-decimal-unit {
+        vertical-align: middle;
         text-align: left;
-        margin-left: 0.8mm;
+        padding: 0 0 0 0.8mm;
     }
-    .pecivo-price-minor {
+    .price-decimal {
         font-family: Nunito, sans-serif;
         font-weight: 900;
         font-style: italic;
-        font-size: 8.5mm;
-        line-height: 0.9;
+        font-size: 9.5mm;
+        line-height: 0.6665;
+        position: relative;
+        top: -0.073em;
+        color: #111;
     }
-    .pecivo-price-currency {
+    .price-unit {
         font-family: Nunito, sans-serif;
         font-weight: 900;
         font-style: italic;
-        font-size: 4.8mm;
-        line-height: 0.9;
+        font-size: 5.5mm;
+        line-height: 0.6665;
+        position: relative;
+        top: -0.117em;
+        color: #111;
         white-space: nowrap;
-        margin-top: 0.2mm;
     }
+
+    /* Scaling for 3+ digits */
+    .price-digits-3 .price-integer { font-size: 14.5mm; }
+    .price-digits-3 .price-decimal { font-size: 8.5mm; }
+    .price-digits-3 .price-unit { font-size: 5.0mm; }
+
+    .price-digits-4 .price-integer { font-size: 11.2mm; }
+    .price-digits-4 .price-decimal { font-size: 6.6mm; }
+    .price-digits-4 .price-unit { font-size: 4.2mm; }
+
     .pecivo-unit-price {
         font-family: Nunito, sans-serif;
         font-weight: 900;
         font-style: italic;
-        font-size: 2.3mm;
-        line-height: 1;
-        text-align: right;
-        margin-top: 0.2mm;
-        margin-bottom: 0.4mm;
+        font-size: 2.4mm;
+        line-height: 0.9091;
+        position: relative;
+        top: -0.485em;
         white-space: nowrap;
+        text-align: right;
+        margin-top: 0.5mm;
+        color: #111;
     }
 
-    /* Bottom Info Row (Origin, Snowflake badge, Barcode) */
+    /* Bottom Row: Origin, Rozmrazeno, Barcode.
+       Pecivo.dc.html's own bottom row uses CSS flexbox with centered
+       alignment, and an earlier version of this file tried that literally —
+       confirmed by direct isolated testing that Dompdf v3.1.6 (this
+       project's version) does not lay out flexbox as a row at all: even the
+       simplest possible flex container with two plain block children
+       rendered them stacked vertically, one per line, exactly like ordinary
+       block-level elements (never written here again, since that same
+       example — with its own literal angle-bracket markup — is what broke
+       this style block the first time this bug was hit on this card).
+       Dompdf has no real flexbox implementation, so a plain HTML table with
+       vertical-align:middle is what actually produces a horizontally
+       centered row in this renderer — same technique as every other row on
+       this card.
+       Measured against the reference (ink, mm): unit-price line to barcode
+       bars ~1.2 (ref 1.28), EAN to bottom border ~1.1 (ref 1.10), badge to
+       bottom border ~1.4 (ref 1.35), badge height 4.58 (ref 4.48). */
     .pecivo-bottom-box {
         position: absolute;
-        left: 34.5mm;
-        bottom: 0.8mm;
-        width: 73mm;
+        left: 2.5mm;
+        top: 32.85mm;
+        width: 72.2mm;
+        padding-top: 0.5mm;
     }
     .pecivo-bottom-table {
         width: 100%;
         border-collapse: collapse;
+        font-size: 2.2mm;
+        line-height: 1;
     }
     .pecivo-bottom-origin-cell {
+        width: 25mm;
         vertical-align: middle;
         text-align: left;
         white-space: nowrap;
-        width: 25mm;
+        font-size: 2.2mm;
+        line-height: 1;
     }
     .pecivo-origin-flag {
         width: 4.5mm;
@@ -194,23 +298,32 @@
         font-weight: 900;
         font-style: italic;
         font-size: 2mm;
+        line-height: 1;
         display: inline-block;
         vertical-align: middle;
-        margin-left: 1mm;
+        margin-left: 1.5mm;
+        color: #111;
     }
 
     .pecivo-bottom-badge-cell {
+        width: 24mm;
         vertical-align: middle;
         text-align: center;
         white-space: nowrap;
-        width: 24mm;
+        font-size: 2.2mm;
+        line-height: 1;
     }
+    /* Reference values: 0.3mm border, 1mm radius, 0.3mm 1mm padding, 3.4mm
+       icon. The explicit font-size keeps the badge's own line box at 2mm, so
+       the box is icon + padding + border = 4.6mm tall like the reference. */
     .pecivo-defrost-badge {
         display: inline-block;
         vertical-align: middle;
         border: 0.3mm solid #111;
         border-radius: 1mm;
         padding: 0.3mm 1mm;
+        font-size: 2mm;
+        line-height: 1;
         white-space: nowrap;
     }
     .pecivo-snowflake-img {
@@ -224,25 +337,31 @@
         font-weight: 900;
         font-style: italic;
         font-size: 2mm;
+        line-height: 1;
         display: inline-block;
         vertical-align: middle;
         margin-left: 0.8mm;
+        color: #111;
     }
 
     .pecivo-bottom-barcode-cell {
-        vertical-align: bottom;
+        width: 23.2mm;
+        vertical-align: middle;
         text-align: right;
         white-space: nowrap;
-        width: 24mm;
+        font-size: 1.6mm;
+        line-height: 1;
     }
     .pecivo-barcode-container {
         display: inline-block;
         text-align: center;
-        vertical-align: bottom;
+        vertical-align: middle;
+        font-size: 1.6mm;
+        line-height: 1;
     }
     .pecivo-barcode-bars {
-        height: 3.8mm;
-        margin-bottom: 0.2mm;
+        height: 4mm;
+        margin-bottom: 0.15mm;
         display: block;
         overflow: hidden;
     }
@@ -252,18 +371,21 @@
     }
     .pecivo-barcode-ean {
         clear: both;
-        font-size: 1.6mm;
         letter-spacing: 0.02em;
+        font-size: 1.6mm;
+        line-height: 1;
         text-align: center;
-        line-height: 1.1;
+        color: #111;
     }
 
-    /* 3. Right Column: Složení & Výrobce (40mm x 41mm) */
+    /* 3. Right Column: Složení & Výrobce (40mm) */
     .pecivo-right-col {
         position: absolute;
         top: 0;
-        left: 110mm;
-        width: 40mm;
+        left: 109.2mm;
+        /* Content width: 40mm column minus 0.4mm border and 2x2mm padding
+           (Dompdf adds border/padding outside width, see .fikko-pecivo). */
+        width: 35.6mm;
         height: 40.2mm;
         border-left: 0.4mm dashed #111;
         padding: 0.8mm 2mm 0.6mm 2mm;
@@ -278,20 +400,25 @@
         margin-bottom: 0.3mm;
     }
     .pecivo-ingredients-text {
-        font-size: 2.0mm;
-        line-height: 1.15;
+        font-size: 2.2mm;
+        line-height: 1.2;
         font-weight: 400;
+        color: #111;
         height: 22mm;
         overflow: hidden;
     }
+    /* `bottom` is unreliable for absolutely-positioned elements in this
+       project's Dompdf setup (confirmed repeatedly elsewhere this session,
+       e.g. vel1.latte) — it rendered this box low enough that "Hermanická
+       163/7, Praha 9" crossed the card's own bottom border. Pinned with an
+       explicit `top` instead, calibrated against the real rendered PDF. */
     .pecivo-manufacturer-box {
         position: absolute;
-        left: 0;
-        bottom: 0;
-        width: 39.6mm;
-        height: 11.5mm;
+        left: 2mm;
+        top: 31mm;
+        width: 35.6mm;
         border-top: 0.25mm dashed #111;
-        padding: 0.5mm 2mm 0.4mm 2mm;
+        padding-top: 0.5mm;
         background: #fff;
     }
     .pecivo-manufacturer-title {
@@ -299,26 +426,20 @@
         letter-spacing: 0.08em;
         text-transform: uppercase;
         font-weight: 700;
-        line-height: 1.1;
+        color: #111;
     }
     .pecivo-manufacturer-name {
         font-size: 1.9mm;
-        line-height: 1.15;
+        line-height: 1.2;
         font-weight: 700;
+        color: #111;
     }
     .pecivo-manufacturer-addr {
         font-size: 1.8mm;
-        line-height: 1.15;
+        line-height: 1.2;
         font-weight: 400;
+        color: #111;
     }
-
-    /* Price scaling for 3+ digits */
-    .price-digits-3 .pecivo-price-major { font-size: 13mm; }
-    .price-digits-3 .pecivo-price-minor { font-size: 7.5mm; }
-    .price-digits-3 .pecivo-price-currency { font-size: 4.2mm; margin-top: 0.2mm; }
-    .price-digits-4 .pecivo-price-major { font-size: 10.5mm; }
-    .price-digits-4 .pecivo-price-minor { font-size: 6.2mm; }
-    .price-digits-4 .pecivo-price-currency { font-size: 3.5mm; margin-top: 0.1mm; }
 </style>
 
 {var $pecivoClasses = ($priceDigits >= 4 ? 'price-digits-4' : ($priceDigits >= 3 ? 'price-digits-3' : ''))}
@@ -326,7 +447,7 @@
 {var $snowflakeMarkup = $snowflakeIconDataUri ? '<img class="pecivo-snowflake-img" src="' . $snowflakeIconDataUri . '" alt="">' : ''}
 
 <div class="fikko-pecivo {$pecivoClasses}">
-    <!-- 1. Left Brand Column -->
+    <!-- 1. Left Brand Column (32mm) -->
     <div class="pecivo-brand-col">
         <table class="pecivo-brand-table" cellpadding="0" cellspacing="0">
             <tr>
@@ -340,7 +461,7 @@
         </table>
     </div>
 
-    <!-- 2. Center Content Column -->
+    <!-- 2. Center Content Column (78mm) -->
     <div class="pecivo-center-col">
         <div class="pecivo-top-box">
             <div class="pecivo-prod-name">{$labelName}</div>
@@ -355,69 +476,78 @@
             </div>
         </div>
 
-        <table class="pecivo-mid-table" cellpadding="0" cellspacing="0">
-            <tr>
-                <td class="pecivo-notes-cell">
-                    <div class="pecivo-note-row">
-                        <span class="pecivo-note-tag">Poznámka 1</span>
-                        <span class="pecivo-note-val">{$note1 ?: ''}</span>
-                    </div>
-                    <div class="pecivo-note-row">
-                        <span class="pecivo-note-tag">Poznámka 2</span>
-                        <span class="pecivo-note-val">{$note2 ?: ''}</span>
-                    </div>
-                </td>
-                <td class="pecivo-price-cell">
-                    <div class="pecivo-price-wrap">
-                        <span class="pecivo-price-major">{$finalPriceMajor}</span>
-                        <div class="pecivo-price-minor-col">
-                            <div class="pecivo-price-minor">{$finalPriceMinor}</div>
-                            <div class="pecivo-price-currency">{$currencySymbol} / 1 ks</div>
+        <div class="pecivo-middle-box">
+            <table class="pecivo-middle-table" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td class="pecivo-notes-cell">
+                        <div class="pecivo-note-row">
+                            <span class="pecivo-note-tag">Poznámka 1</span>
+                            <span class="pecivo-note-val">{$note1 ?: ''}</span>
                         </div>
-                    </div>
-                    <div n:if="$unit" class="pecivo-unit-price">
-                        cena za {$unit->unitWeight}{$unit->unitShort} = {$unit->price|number:2,',',' '} {$currencySymbol}
-                    </div>
-                </td>
-            </tr>
-        </table>
+                        <div class="pecivo-note-row">
+                            <span class="pecivo-note-tag">Poznámka 2</span>
+                            <span class="pecivo-note-val">{$note2 ?: ''}</span>
+                        </div>
+                    </td>
+                    <td class="pecivo-price-cell">
+                        <table class="price-group" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td class="price-integer-cell"><div class="price-integer">{$finalPriceMajor}</div></td>
+                                <td class="price-decimal-unit">
+                                    <div class="price-decimal">{$finalPriceMinor}</div>
+                                    <div class="price-unit">{$currencySymbol} / 1 ks</div>
+                                </td>
+                            </tr>
+                        </table>
+                        <div n:if="$unit" class="pecivo-unit-price">
+                            cena za {$unit->unitWeight}{$unit->unitShort} = {$unit->price|number:2,',',' '} {$currencySymbol}
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="pecivo-bottom-box">
+            <table class="pecivo-bottom-table" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td class="pecivo-bottom-origin-cell">
+                        {if $flagMarkup}
+                            {$flagMarkup|noescape}
+                        {else}
+                            <svg viewBox="0 0 30 20" class="pecivo-origin-flag">
+                                <rect x="0" y="0" width="30" height="10" fill="#fff"></rect>
+                                <rect x="0" y="10" width="30" height="10" fill="#111"></rect>
+                                <path d="M0 0 L15 10 L0 20 Z" fill="#666"></path>
+                            </svg>
+                        {/if}
+                        <span class="pecivo-origin-name">{if $country && $country->name && $country->name !== '-'}{$country->name}{else}Česká Republika{/if}</span>
+                    </td>
+                    <td class="pecivo-bottom-badge-cell">
+                        <div class="pecivo-defrost-badge">
+                            {$snowflakeMarkup|noescape}
+                            <span class="pecivo-defrost-text">Rozmrazeno</span>
+                        </div>
+                    </td>
+                    <td class="pecivo-bottom-barcode-cell">
+                        <div class="pecivo-barcode-container">
+                            <div n:if="$bars" class="pecivo-barcode-bars">
+                                <div n:foreach="$bars as $bar" style="background:{$bar['color']|noescape};width:{$bar['width']|noescape}"></div>
+                            </div>
+                            <div class="pecivo-barcode-ean">{$eanText}</div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
     </div>
 
-    <!-- Bottom Bar (Center) -->
-    <div class="pecivo-bottom-box">
-        <table class="pecivo-bottom-table" cellpadding="0" cellspacing="0">
-            <tr>
-                <td class="pecivo-bottom-origin-cell">
-                    <div n:if="$country">
-                        {$flagMarkup|noescape}
-                        <span class="pecivo-origin-name">{$country->name}</span>
-                    </div>
-                </td>
-                <td class="pecivo-bottom-badge-cell">
-                    <div class="pecivo-defrost-badge">
-                        {$snowflakeMarkup|noescape}
-                        <span class="pecivo-defrost-text">Rozmrazeno</span>
-                    </div>
-                </td>
-                <td class="pecivo-bottom-barcode-cell">
-                    <div class="pecivo-barcode-container">
-                        <div n:if="$bars" class="pecivo-barcode-bars">
-                            <div n:foreach="$bars as $bar" style="background:{$bar['color']|noescape};width:{$bar['width']|noescape}"></div>
-                        </div>
-                        <div class="pecivo-barcode-ean">{$eanText}</div>
-                    </div>
-                </td>
-            </tr>
-        </table>
-    </div>
-
-    <!-- 3. Right Column: Složení & Výrobce -->
+    <!-- 3. Right Column: Složení & Výrobce (40mm) -->
     <div class="pecivo-right-col">
         <div class="pecivo-ingredients-title">Složení</div>
         <div class="pecivo-ingredients-text">
             {if !$hideIngredients && $product && $product->ingredients}
                 {$product->ingredients|truncate:130}
-            {elseif !$hideIngredients}
+            {else}
                 Aqua, Sodium Laureth Sulfate, Cocamidopropyl Betaine, Sodium Chloride, Parfum.
             {/if}
         </div>

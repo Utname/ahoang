@@ -149,7 +149,10 @@ class ProductLabelsService
 		// Non-A4 label types (A5, Vel.1, Vel.3, etc.) use new HTML/Dompdf templates by default when available;
 		// A4 labels only use the new template when specifically ticked for the product ($newA4ProductIds).
 		$templateJobs = [];
-		foreach (array_keys(ProductLabelsEntity::TYPES_ARR) as $templateTypeId) {
+		// TYPE_SIZE_2_AKCE is not offered in the admin form (TYPES_ARR) but labels
+		// already queued with it must still reach its template, not TCPDF.
+		$templateTypeIds = array_unique([...array_keys(ProductLabelsEntity::TYPES_ARR), ProductLabelsEntity::TYPE_SIZE_2_AKCE]);
+		foreach ($templateTypeIds as $templateTypeId) {
 			if (!isset($itemsBuffer[$templateTypeId]['items'])) {
 				continue;
 			}

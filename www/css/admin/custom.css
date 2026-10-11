@@ -4169,6 +4169,13 @@ main.page-content,
     z-index: 1000 !important;
 }
 
+/* Every cell of the open row shares z-index 1000, so a later sibling cell
+   (eye / actions column) painted over the open menu; lift its own cell. */
+.mosaic-table-compact tr > td.has-open-dropdown,
+.mosaic-table-compact tr > td:has(.dropdown.open) {
+    z-index: 1001 !important;
+}
+
 .mosaic-table-compact .dropdown {
     position: relative;
 }

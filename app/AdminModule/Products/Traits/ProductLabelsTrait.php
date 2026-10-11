@@ -57,6 +57,9 @@ trait ProductLabelsTrait
 		$form->addSelect('price_text', 'admin.terms.labelPriceText', $this->global['productLabelPriceTypes']);
 		$form->addCheckbox('hide_validity', NULL);
 		$form->addCheckbox('hide_ingredients', NULL);
+		// Pečivo only (CACH-LAM-CODE.md §2 "thawed?: boolean"): controls the
+		// "Rozmrazeno" badge, which must not print for bread that wasn't frozen.
+		$form->addCheckbox('thawed', 'admin.terms.thawed');
 		$form->addText('note_1', 'admin.terms.note1');
 		$form->addText('note_2', 'admin.terms.note2');
 		$form->addText('note_3', 'admin.terms.note3');
@@ -195,6 +198,7 @@ trait ProductLabelsTrait
 		$form->addSelect('price_text', 'admin.terms.labelPriceText', $this->global['productLabelPriceTypes']);
 		$form->addCheckbox('hide_validity', NULL);
 		$form->addCheckbox('hide_ingredients', NULL);
+		$form->addCheckbox('thawed', 'admin.terms.thawed');
 		$form->addText('note_1', 'admin.terms.note1');
 		$form->addText('note_2', 'admin.terms.note2');
 		$form->addText('note_3', 'admin.terms.note3');
@@ -491,6 +495,12 @@ trait ProductLabelsTrait
 			elseif ($file instanceof \Dompdf\Dompdf) {
 				header('Content-Type: application/pdf');
 				header('Content-Disposition: ' . ($isDownload ? 'attachment' : 'inline') . '; filename="' . date('Y_m_d') . '-' . time() . '.pdf"');
+				// Every template edit needs to show up on the very next open of this
+				// same URL — no explicit cache header meant browsers were free to
+				// serve a stale PDF (e.g. a re-focused tab, back/forward cache)
+				// after the template was fixed server-side.
+				header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+				header('Pragma: no-cache');
 				echo $file->output();
 				exit;
 			}
