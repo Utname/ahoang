@@ -292,23 +292,43 @@ $(function () {
         ajaxGet(url);
     });
 
-    // Product label preview/download: use whatever is currently typed in this row's
-    // price/date fields, even if not saved yet (no request is sent to save them —
-    // the values just ride along as query params for this one print/preview).
-    $("body").on('click', "a.print-with-live-price", function (event) {
-        var productsId = $(this).data('products-id');
-        var row = $(this).closest('tr');
-        var price = row.find("input[name='price__"+productsId+"']").val();
-        var priceAction = row.find("input[name='price_action__"+productsId+"']").val();
-        var actionFrom = row.find("input[name='action_from__"+productsId+"']").val();
-        var actionTo = row.find("input[name='action_to__"+productsId+"']").val();
+    // Product label preview/download: print with whatever is currently typed in the
+    // product rows' price/date fields, even if the row was not saved yet. Every row
+    // whose fields differ from the loaded values rides along as one JSON query param
+    // (priceOverrides); nothing is saved (ProductLabelsTrait::parsePriceOverrides()).
+    var collectPriceOverrides = function () {
+        var overrides = {};
+        var fields = ['price', 'price_action', 'action_from', 'action_to'];
+        $("input[name^='price__']").each(function () {
+            var productsId = this.name.substring('price__'.length);
+            var row = $(this).closest('tr');
+            var values = {};
+            var changed = false;
+            fields.forEach(function (field) {
+                var input = row.find("input[name='" + field + "__" + productsId + "']")[0];
+                values[field] = input ? input.value : '';
+                if (input && input.value !== input.defaultValue) {
+                    changed = true;
+                }
+            });
+            if (changed) {
+                overrides[productsId] = values;
+            }
+        });
+        return overrides;
+    };
 
-        var params = "&overridePrice=" + encodeURIComponent(price || '')
-            + "&overridePriceAction=" + encodeURIComponent(priceAction || '')
-            + "&overrideActionFrom=" + encodeURIComponent(actionFrom || '')
-            + "&overrideActionTo=" + encodeURIComponent(actionTo || '');
+    var printLinkSelector = "a[href*='do=downloadPdf'], a[href*='do=downloadSingleProductLabelPdf'], a[href*='do=downloadProductAllLabelsPdf'], a[href*='do=downloadPdfGroup']";
 
-        this.href = this.href + (this.href.indexOf('?') === -1 ? '?' : '&') + params.substring(1);
+    $("body").on('mousedown click', printLinkSelector, function () {
+        var url = new URL(this.href, window.location.href);
+        var overrides = collectPriceOverrides();
+        if ($.isEmptyObject(overrides)) {
+            url.searchParams.delete('priceOverrides');
+        } else {
+            url.searchParams.set('priceOverrides', JSON.stringify(overrides));
+        }
+        this.href = url.toString();
     });
 
     $("body").on('change', "input.url-source", function (event) {

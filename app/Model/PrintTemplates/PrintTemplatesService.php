@@ -277,7 +277,9 @@ class PrintTemplatesService
 		// action price must remain on the label even after the action date ends,
 		// which is how the previous TCPDF renderer behaved.
 		$hasPriceAction = $price && (float)$price->price_action > 0 && (float)$price->price > (float)$price->price_action;
-		$usesStoredLabelDiscount = $label && (float)$label->sale_percent > 0 && $price && (float)$price->price_action > 0;
+		// With typed-but-unsaved prices ($priceOverride) the queued label's stored
+		// sale_percent is stale, so the discount is worked out from the new prices.
+		$usesStoredLabelDiscount = !$priceOverride && $label && (float)$label->sale_percent > 0 && $price && (float)$price->price_action > 0;
 		$isDiscounted = ($price && !empty($price->is_valid_action)) || $usesStoredLabelDiscount;
 		$finalPrice = ($isDiscounted || $hasPriceAction) ? (float)$price->price_action : (float)($price->price ?? 0);
 		$basePrice = ($isDiscounted || $hasPriceAction) ? (float)($price->price ?? 0) : 0.0;
@@ -297,7 +299,7 @@ class PrintTemplatesService
 		$hasValidRef30 = $refPrice30 !== NULL && $refPrice30 > $finalPrice;
 		$isAkce30 = $usesStoredLabelDiscount || ($isDiscounted && $hasValidRef30);
 		$lowestPrice30 = $hasValidRef30 ? $refPrice30 : $basePrice;
-		$salePercent = $label && (float)$label->sale_percent > 0
+		$salePercent = !$priceOverride && $label && (float)$label->sale_percent > 0
 			? (float)$label->sale_percent
 			: ($hasValidRef30 ? floor((($refPrice30 - $finalPrice) / $refPrice30) * 100) : 0.0);
 		$hasSaleRibbon = $isAkce30 && $salePercent > 0;
@@ -438,7 +440,7 @@ class PrintTemplatesService
 	 *
 	 * @param array{price?: ?float, price_action?: ?float, action_from?: ?string, action_to?: ?string} $priceOverride
 	 */
-	private function applyPriceOverride(ProductPricesEntity $price, array $priceOverride): ProductPricesEntity
+	public function applyPriceOverride(ProductPricesEntity $price, array $priceOverride): ProductPricesEntity
 	{
 		$price = clone $price;
 

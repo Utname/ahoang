@@ -22,13 +22,12 @@ class ProductLabelsService
 	 * @param int $branchesId
 	 * @param bool $printed
 	 * @param array $ids
-	 * @param array{price?: ?float, price_action?: ?float, action_from?: ?string, action_to?: ?string}|null $priceOverride
+	 * @param array<int, array{price?: ?float, price_action?: ?float, action_from?: ?string, action_to?: ?string}>|array{price?: ?float, price_action?: ?float, action_from?: ?string, action_to?: ?string}|null $priceOverride
 	 *        Renders with these price/date values instead of the ones currently saved in
 	 *        product_prices, without writing anything to the database — lets the admin
-	 *        preview/print a label reflecting price or date fields they just edited inline
-	 *        in the product list but haven't saved yet. Only meaningful (and only ever
-	 *        passed) when $ids targets a single label, since it applies to every job built
-	 *        in this call.
+	 *        preview/print labels reflecting price or date fields they just edited inline
+	 *        in the product list but haven't saved yet. Either a map keyed by product ID
+	 *        (each product gets its own values), or one override applied to every label.
 	 * @param int[] $newA4ProductIds Product IDs whose A4 label should be rendered with the new HTML template.
 	 *        A4 labels of every other product are printed with the legacy TCPDF layout.
 	 * @return string|TCPDF|Dompdf|NULL
@@ -172,7 +171,7 @@ class ProductLabelsService
 						: NULL;
 
 					if ($template) {
-						$pageJobs[] = ['template' => $template, 'label' => $label, 'priceOverride' => $priceOverride];
+						$pageJobs[] = ['template' => $template, 'label' => $label, 'priceOverride' => $this->overrideFor($priceOverride, (int)$product->id)];
 					}
 					else {
 						$allUseTemplate = FALSE;
@@ -235,7 +234,7 @@ class ProductLabelsService
 						$pdfY = 82;
 
 						$product = $labelTypeItems[0]->getProduct();
-						$productPrice = $product->getPriceWithLog($branchesId);
+						$productPrice = $this->priceFor($product, $branchesId, $priceOverride);
 						$basePriceUnit = $product->getUnitValue($productPrice->price, $labelTypeItems[0]->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItems[0]->default_units_id : NULL, $labelTypeItems[0]->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItems[0]->default_units_weight : NULL);
 						$actionPriceUnit = $product->getUnitValue($productPrice->price_action, $labelTypeItems[0]->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItems[0]->default_units_id : NULL, $labelTypeItems[0]->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItems[0]->default_units_weight : NULL);
 						$basePricePars = explode('.', (string)number_format($labelTypeItems[0]->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g && $basePriceUnit && $actionPriceUnit ? $basePriceUnit->price : ($productPrice->price ?: 0.0), 2, '.', ''));
@@ -324,7 +323,7 @@ class ProductLabelsService
 						foreach ($labelTypeItems as $labelTypeItemIndex => $labelTypeItem) {
 							$pdfY = 28 + ($labelTypeItemIndex * 140);
 							$product = $labelTypeItem->getProduct();
-							$productPrice = $product->getPriceWithLog($branchesId);
+							$productPrice = $this->priceFor($product, $branchesId, $priceOverride);
 							$basePriceUnit = $product->getUnitValue($productPrice->price, $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItem->default_units_id : NULL, $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItem->default_units_weight : NULL);
 							$actionPriceUnit = $product->getUnitValue($productPrice->price_action, $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItem->default_units_id : NULL, $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItem->default_units_weight : NULL);
 							$basePricePars = explode('.', (string)number_format($labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g && $basePriceUnit && $actionPriceUnit ? $basePriceUnit->price : ($productPrice->price ?: 0.0), 2, '.', ''));
@@ -407,7 +406,7 @@ class ProductLabelsService
 						$pdfY = 1;
 						foreach ($labelTypeItems as $labelTypeItem) {
 							$product = $labelTypeItem->getProduct();
-							$productPrice = $product->getPriceWithLog($branchesId);
+							$productPrice = $this->priceFor($product, $branchesId, $priceOverride);
 							$basePriceUnit = $product->getUnitValue($productPrice->price, $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItem->default_units_id : NULL, $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItem->default_units_weight : NULL);
 							$actionPriceUnit = $product->getUnitValue($productPrice->price_action, $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItem->default_units_id : NULL, $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItem->default_units_weight : NULL);
 							$basePricePars = explode('.', (string)number_format($labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g && $basePriceUnit && $actionPriceUnit ? $basePriceUnit->price : ($productPrice->price ?: 0.0), 2, '.', ''));
@@ -484,7 +483,7 @@ class ProductLabelsService
 						$pdfY = 1;
 						foreach ($labelTypeItems as $labelTypeItem) {
 							$product = $labelTypeItem->getProduct();
-							$productPrice = $product->getPriceWithLog($branchesId);
+							$productPrice = $this->priceFor($product, $branchesId, $priceOverride);
 							$basePriceUnit = $product->getUnitValue($productPrice->price, $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItem->default_units_id : NULL, $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItem->default_units_weight : NULL);
 							$actionPriceUnit = $product->getUnitValue($productPrice->price_action, $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItem->default_units_id : NULL, $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItem->default_units_weight : NULL);
 							$basePricePars = explode('.', (string)number_format($labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g && $basePriceUnit && $actionPriceUnit ? $basePriceUnit->price : ($productPrice->price ?: 0.0), 2, '.', ''));
@@ -557,7 +556,7 @@ class ProductLabelsService
 							$pdfYItem = $pdfY;
 
 							$product = $labelTypeItem->getProduct();
-							$productPrice = $product->getPriceWithLog($branchesId);
+							$productPrice = $this->priceFor($product, $branchesId, $priceOverride);
 							$basePriceUnit = $product->getUnitValue($productPrice->price, $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItem->default_units_id : NULL, $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItem->default_units_weight : NULL);
 							$actionPriceUnit = $product->getUnitValue($productPrice->price_action, $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItem->default_units_id : NULL, $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItem->default_units_weight : NULL);
 							$basePricePars = explode('.', (string)number_format($labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g && $basePriceUnit && $actionPriceUnit ? $basePriceUnit->price : ($productPrice->price ?: 0.0), 2, '.', ''));
@@ -703,6 +702,37 @@ class ProductLabelsService
 		}
 
 		return $zipFile;
+	}
+
+
+	/**
+	 * The unsaved price/date values for one product: $priceOverride is either a map
+	 * keyed by product ID or a single override meant for every label.
+	 */
+	private function overrideFor(?array $priceOverride, int $productId): ?array
+	{
+		if (!$priceOverride) {
+			return NULL;
+		}
+		foreach (['price', 'price_action', 'action_from', 'action_to'] as $field) {
+			if (array_key_exists($field, $priceOverride)) {
+				return $priceOverride;
+			}
+		}
+
+		return $priceOverride[$productId] ?? NULL;
+	}
+
+
+	/**
+	 * Product price as the legacy TCPDF layouts read it, with any unsaved values applied.
+	 */
+	private function priceFor(ProductsEntity $product, int $branchesId, ?array $priceOverride): ?ProductPricesEntity
+	{
+		$price = $product->getPriceWithLog($branchesId);
+		$override = $this->overrideFor($priceOverride, (int)$product->id);
+
+		return $price && $override ? $this->printTemplatesService->applyPriceOverride($price, $override) : $price;
 	}
 
 

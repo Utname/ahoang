@@ -461,28 +461,24 @@ trait ProductLabelsTrait
 	 * @return void
 	 * @throws AbortException
 	 */
-	public function handleDownloadPdf($itemId = NULL, $printed = TRUE, $overridePrice = NULL, $overridePriceAction = NULL, $overrideActionFrom = NULL, $overrideActionTo = NULL)
+	public function handleDownloadPdf($itemId = NULL, $printed = TRUE, $overridePrice = NULL, $overridePriceAction = NULL, $overrideActionFrom = NULL, $overrideActionTo = NULL, $priceOverrides = NULL)
 	{
 		// Lets "Xem trước"/"Tải xuống" reflect price/date fields the admin just typed in
 		// the product list row but hasn't clicked the save (floppy disk) icon for yet —
-		// without writing anything to product_prices. Same 'd.m.Y' parsing convention as
-		// ProductPricesTrait::handleUpdatePricesAll(), which is what a real save uses.
-		$priceOverride = NULL;
-		if ($overridePrice !== NULL || $overridePriceAction !== NULL || $overrideActionFrom !== NULL || $overrideActionTo !== NULL) {
-			$parseDate = static function (?string $value): ?string {
-				if (!$value) {
-					return NULL;
-				}
-				$dt = \DateTime::createFromFormat('d.m.Y', $value);
-				return $dt ? $dt->format('Y-m-d') : NULL;
-			};
-			$priceOverride = [
-				'price' => $overridePrice !== NULL && $overridePrice !== '' ? (float)$overridePrice : NULL,
-				'price_action' => $overridePriceAction !== NULL && $overridePriceAction !== '' ? (float)$overridePriceAction : NULL,
-				'action_from' => $parseDate($overrideActionFrom),
-				'action_to' => $parseDate($overrideActionTo),
-			];
+		// without writing anything to product_prices.
+		$priceOverride = $this->parsePriceOverrides($priceOverrides);
+		if ($itemId && ($overridePrice !== NULL || $overridePriceAction !== NULL || $overrideActionFrom !== NULL || $overrideActionTo !== NULL)) {
+			$labelProductId = (int)($this->productLabelsRepo->findEntity($itemId)?->products_id ?? 0);
+			if ($labelProductId) {
+				$priceOverride[$labelProductId] = $this->normalizePriceOverride([
+					'price' => $overridePrice,
+					'price_action' => $overridePriceAction,
+					'action_from' => $overrideActionFrom,
+					'action_to' => $overrideActionTo,
+				]);
+			}
 		}
+		$priceOverride = $priceOverride ?: NULL;
 
 		$isDownload = !in_array($printed, [FALSE, 0, '0', 'false', 'FALSE', ''], TRUE);
 
@@ -526,7 +522,7 @@ trait ProductLabelsTrait
 	 * @return void
 	 * @throws AbortException
 	 */
-	public function handleDownloadSingleProductLabelPdf(int $productsId, int $typeId, bool $isDownload = TRUE): void
+	public function handleDownloadSingleProductLabelPdf(int $productsId, int $typeId, bool $isDownload = TRUE, $priceOverrides = NULL): void
 	{
 		$branchesId = $this->session->filters[$this->getName()]['custom__branches'] ?? 0;
 		$adminUserId = $this->adminUser->id ?? 0;
@@ -567,7 +563,7 @@ trait ProductLabelsTrait
 				$this->flashMessage($this->trans('admin.terms.noLabelsToPrint') ?? 'Vui lòng chọn số lượng tem lớn hơn 0 để tải.', 'warning');
 				$this->redirect('this');
 			}
-			$this->handleDownloadPdf($label->id, $isDownload);
+			$this->handleDownloadPdf($label->id, $isDownload, NULL, NULL, NULL, NULL, $priceOverrides);
 		}
 	}
 
@@ -584,7 +580,7 @@ trait ProductLabelsTrait
 	 * @return void
 	 * @throws AbortException
 	 */
-	public function handleDownloadProductAllLabelsPdf(int $productsId, bool $isDownload = TRUE, $overridePrice = NULL, $overridePriceAction = NULL, $overrideActionFrom = NULL, $overrideActionTo = NULL): void
+	public function handleDownloadProductAllLabelsPdf(int $productsId, bool $isDownload = TRUE, $overridePrice = NULL, $overridePriceAction = NULL, $overrideActionFrom = NULL, $overrideActionTo = NULL, $priceOverrides = NULL): void
 	{
 		$branchesId = (int)($this->session->filters[$this->getName()]['custom__branches'] ?? 0);
 		$adminUserId = (int)($this->adminUser->id ?? 0);
@@ -594,22 +590,16 @@ trait ProductLabelsTrait
 			$this->redirect('this');
 		}
 
-		$priceOverride = NULL;
+		$priceOverride = $this->parsePriceOverrides($priceOverrides);
 		if ($overridePrice !== NULL || $overridePriceAction !== NULL || $overrideActionFrom !== NULL || $overrideActionTo !== NULL) {
-			$parseDate = static function (?string $value): ?string {
-				if (!$value) {
-					return NULL;
-				}
-				$dt = \DateTime::createFromFormat('d.m.Y', $value);
-				return $dt ? $dt->format('Y-m-d') : NULL;
-			};
-			$priceOverride = [
-				'price' => $overridePrice !== NULL && $overridePrice !== '' ? (float)$overridePrice : NULL,
-				'price_action' => $overridePriceAction !== NULL && $overridePriceAction !== '' ? (float)$overridePriceAction : NULL,
-				'action_from' => $parseDate($overrideActionFrom),
-				'action_to' => $parseDate($overrideActionTo),
-			];
+			$priceOverride[$productsId] = $this->normalizePriceOverride([
+				'price' => $overridePrice,
+				'price_action' => $overridePriceAction,
+				'action_from' => $overrideActionFrom,
+				'action_to' => $overrideActionTo,
+			]);
 		}
+		$priceOverride = $priceOverride ?: NULL;
 
 		$labelIds = [];
 		foreach ($this->global['productLabelTypes'] as $typeId => $term) {
@@ -875,11 +865,62 @@ trait ProductLabelsTrait
 
 
 	/**
+	 * Unsaved price/date values typed in the product list rows, sent by the print links
+	 * as JSON {productId: {price, price_action, action_from, action_to}} (see
+	 * www/js/admin/custom.js). Returns them keyed by product ID; nothing is saved.
+	 *
+	 * @return array<int, array{price: ?float, price_action: ?float, action_from: ?string, action_to: ?string}>
+	 */
+	private function parsePriceOverrides($json): array
+	{
+		$data = is_string($json) && $json !== '' ? json_decode($json, TRUE) : NULL;
+		if (!is_array($data)) {
+			return [];
+		}
+
+		$overrides = [];
+		foreach ($data as $productId => $values) {
+			if ((int)$productId > 0 && is_array($values)) {
+				$overrides[(int)$productId] = $this->normalizePriceOverride($values);
+			}
+		}
+
+		return $overrides;
+	}
+
+
+	/**
+	 * Same conventions as ProductPricesTrait::handleUpdatePricesAll() (the real save):
+	 * empty = no value, dates as d.m.Y. A decimal comma is accepted too.
+	 *
+	 * @return array{price: ?float, price_action: ?float, action_from: ?string, action_to: ?string}
+	 */
+	private function normalizePriceOverride(array $values): array
+	{
+		$number = static function ($value): ?float {
+			$value = trim(str_replace([' ', ','], ['', '.'], (string)($value ?? '')));
+			return $value === '' || !is_numeric($value) ? NULL : (float)$value;
+		};
+		$date = static function ($value): ?string {
+			$dt = $value ? \DateTime::createFromFormat('!d.m.Y', trim((string)$value)) : FALSE;
+			return $dt ? $dt->format('Y-m-d') : NULL;
+		};
+
+		return [
+			'price' => $number($values['price'] ?? NULL),
+			'price_action' => $number($values['price_action'] ?? NULL),
+			'action_from' => $date($values['action_from'] ?? NULL),
+			'action_to' => $date($values['action_to'] ?? NULL),
+		];
+	}
+
+
+	/**
 	 * @param int $typeId
 	 * @param bool $isDownload TRUE = download attachment, FALSE = preview inline in browser
 	 * @return void
 	 */
-	public function handleDownloadPdfGroup(int $typeId, bool $isDownload = TRUE)
+	public function handleDownloadPdfGroup(int $typeId, bool $isDownload = TRUE, $priceOverrides = NULL)
 	{
 		$branchesId = (int)($this->session->filters[$this->getName()]['custom__branches'] ?? 0);
 		$adminUserId = (int)($this->adminUser->id ?? 0);
@@ -897,7 +938,7 @@ trait ProductLabelsTrait
 			$this->redirect('this');
 		}
 
-		$file = $this->productLabelsService->generatePdf($branchesId, (bool)$isDownload, array_values($labelIds), NULL, $this->getNewA4ProductIds());
+		$file = $this->productLabelsService->generatePdf($branchesId, (bool)$isDownload, array_values($labelIds), $this->parsePriceOverrides($priceOverrides) ?: NULL, $this->getNewA4ProductIds());
 		if ($file) {
 			$this->session->labelsIsPrint = TRUE;
 			$typeName = $this->global['productLabelTypes'][$typeId] ?? ('group-'.$typeId);
