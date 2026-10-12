@@ -535,27 +535,7 @@ trait ProductLabelsTrait
 		]);
 
 		if (!$label && ($product = $this->repository->findEntity($productsId))) {
-			$productPrice = $product->getPrice($branchesId);
-			$labelHeader = $this->productLabelHeadersRepo->findAll()->order('pos_order')->limit(1)->fetch();
-			$row = $this->productLabelsRepo->insert([
-				'product_label_headers_id' => $labelHeader ? $labelHeader->id : NULL,
-				'products_id' => $product->id,
-				'branches_id' => $branchesId,
-				'admin_users_id' => $adminUserId,
-				'count' => $isDownload ? 0 : 1,
-				'datetime_printed' => NULL,
-				'type_id' => $typeId,
-				'sale_text' => '',
-				'sale_percent' => $productPrice ? $productPrice->getActionPercents(TRUE) : 0,
-				'is_more_species' => 0,
-				'price_text' => \ProductLabelsEntity::PRICE_TYPE_CZK,
-				'origin_countries_id' => $product->country_origin ?: NULL,
-				'name' => $product->name,
-				'note_1' => $product->label_note_1,
-				'note_2' => $product->label_note_2,
-				'note_3' => $product->label_note_3,
-			]);
-			$label = \ProductLabelsRepository::getEntity($row);
+			$label = $this->productLabelsRepo->insertForProduct($product, $branchesId, $adminUserId, $typeId, $isDownload ? 0 : 1);
 		}
 
 		if ($label) {
@@ -611,27 +591,7 @@ trait ProductLabelsTrait
 			]);
 
 			if (!$label) {
-				$productPrice = $product->getPrice($branchesId);
-				$labelHeader = $this->productLabelHeadersRepo->findAll()->order('pos_order')->limit(1)->fetch();
-				$row = $this->productLabelsRepo->insert([
-					'product_label_headers_id' => $labelHeader ? $labelHeader->id : NULL,
-					'products_id' => $product->id,
-					'branches_id' => $branchesId,
-					'admin_users_id' => $adminUserId,
-					'count' => $isDownload ? 0 : 1,
-					'datetime_printed' => NULL,
-					'type_id' => $typeId,
-					'sale_text' => '',
-					'sale_percent' => $productPrice ? $productPrice->getActionPercents(TRUE) : 0,
-					'is_more_species' => 0,
-					'price_text' => \ProductLabelsEntity::PRICE_TYPE_CZK,
-					'origin_countries_id' => $product->country_origin ?: NULL,
-					'name' => $product->name,
-					'note_1' => $product->label_note_1,
-					'note_2' => $product->label_note_2,
-					'note_3' => $product->label_note_3,
-				]);
-				$label = \ProductLabelsRepository::getEntity($row);
+				$label = $this->productLabelsRepo->insertForProduct($product, $branchesId, $adminUserId, $typeId, $isDownload ? 0 : 1);
 			}
 
 			if ($label) {

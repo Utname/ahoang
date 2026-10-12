@@ -42,7 +42,8 @@ The mapping table in `QUY-TAC-THIET-KE-MAU-IN.md` is outdated.
 - **SROVNÁNÍ**: "Běžná cena" (no strike), "Ušetříte … oproti běžné ceně"; no %, no "Akce"
 - **ZÁKLAD**: only "Naše cena"
 - Known gaps (not fixed yet): type is driven by the label's stored `sale_percent`; sales outside
-  their dates still print the sale price; A4 prints "Platnost" on non-AKCE labels.
+  their dates still print the sale price; A4 prints "Platnost" on non-AKCE labels; Pečivo always
+  shows "Rozmrazeno" (ignores `label.thawed`) and prints "Česká Republika" when there is no country.
 - Texts printed on labels stay Czech in every admin language.
 
 Print links send unsaved row values as `priceOverrides` JSON {productId: {price, price_action,
@@ -68,6 +69,14 @@ Remote `ahoang` = github.com/Utname/ahoang; pushing `master` auto-deploys Railwa
 `radiant-education`, service `web` (Dockerfile). DB shell on Railway:
 `railway ssh -s web -- mysql --skip-ssl -h "$MYSQLHOST" -u "$MYSQLUSER" -p"$MYSQLPASSWORD" "$MYSQLDATABASE"`.
 
-## Search scope
+## Search scope and big files
 `.ignore` files skip `www/plugins/` (Font Awesome etc.), SQL dumps in `app/database/`, binary
 assets and `*.min.*`. Don't open those unless a task needs them.
+
+These are large; Grep for the spot first, then Read only that range (offset/limit):
+`www/css/admin/custom.css` (~36k tokens), `www/css/admin/modern.css` (~22k),
+`app/AdminModule/Products/templates/default.latte` (~18k), `www/js/admin/custom.js` (~16k),
+`app/AdminModule/ProductLabels/templates/default.latte` (~15k), `app/locale/admin.*.neon` (~13k each),
+`PrintTemplatesService.php` and `ProductLabelsService.php` (~10k each).
+Locale files are nested NEON (tabs and, in places, spaces): add keys under the right section.
+New queue labels: `ProductLabelsRepository::insertForProduct()`.

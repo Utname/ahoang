@@ -242,12 +242,7 @@ class PrintTemplatesService
 	 * @param ProductsEntity $product
 	 * @param int $branchesId
 	 * @param array{price?: ?float, price_action?: ?float, action_from?: ?string, action_to?: ?string}|null $priceOverride
-	 *        Renders as if product_prices held these values instead of whatever is
-	 *        actually saved — used for "preview with the price/date fields I just typed
-	 *        but haven't saved yet" (see ProductLabelsControl::handleSaveLabelCount() and
-	 *        ProductLabelsTrait::handleDownloadPdf()). Nothing is written to the database;
-	 *        a clone of the real price row is mutated in memory only. action_from/action_to
-	 *        are 'Y-m-d' strings (already normalized by the caller) or NULL to clear.
+	 *        Unsaved values typed in the product list (dates Y-m-d); applied to a clone, never saved.
 	 * @return string rendered HTML, ready for renderPdf() or direct display
 	 */
 	public function renderHtml(PrintTemplatesEntity $template, ProductsEntity $product, int $branchesId, ?ProductLabelsEntity $label = NULL, ?array $priceOverride = NULL): string
@@ -283,18 +278,10 @@ class PrintTemplatesService
 		$isDiscounted = ($price && !empty($price->is_valid_action)) || $usesStoredLabelDiscount;
 		$finalPrice = ($isDiscounted || $hasPriceAction) ? (float)$price->price_action : (float)($price->price ?? 0);
 		$basePrice = ($isDiscounted || $hasPriceAction) ? (float)($price->price ?? 0) : 0.0;
-		// A queued label carries an explicit "-X %" ribbon (admin-entered, same field the
-		// previous TCPDF renderer read); without a label (e.g. direct product preview),
-		// fall back to the computed discount ratio so the ribbon still has a real value.
-		// Legal 30-day-lowest-price rule (CACH-LAM-CODE.md §3/§5): the "Nejnižší
-		// cena za 30 dní" value AND the discount % must come from the true 30-day
-		// low (ProductsEntity::getRefPrice(), backed by product_prices_log —
-		// already written on every price change), never from the current regular
-		// price. A queued label's admin-typed sale_percent is a trusted historical
-		// snapshot and bypasses this check (same as before). When a live product is
-		// discounted but has no valid 30-day low (e.g. the regular price only just
-		// rose), it falls back to the plain "Běžná cena" comparison box instead of
-		// fabricating a 30-day claim — no %, no "Akce platí do".
+		// 30-day rule (CACH-LAM-CODE.md §3/§5): the "Nejnižší cena za 30 dní" value and
+		// the % come from the 30-day low (getRefPrice(), product_prices_log). Without a
+		// valid low the label falls back to the "Běžná cena" comparison. A queued label's
+		// stored sale_percent still forces AKCE_30 (known gap, see CLAUDE.md).
 		$refPrice30 = $isDiscounted ? $product->getRefPrice($branchesId) : NULL;
 		$hasValidRef30 = $refPrice30 !== NULL && $refPrice30 > $finalPrice;
 		$isAkce30 = $usesStoredLabelDiscount || ($isDiscounted && $hasValidRef30);
@@ -373,31 +360,11 @@ class PrintTemplatesService
 			'template' => $template,
 			'logoDataUri' => $this->imageAsDataUri(WWW_DIR . '/images/fikko-logo-mono.png', 'image/png'),
 			'brushDataUri' => $this->imageAsDataUri(WWW_DIR . '/images/brush-20.png', 'image/png'),
-			// Dompdf mis-renders brush-20.png at roughly half its declared height when
-			// the box is large enough (confirmed on the A5 ribbon "-X %" badge, 58.5×24.2mm) —
-			// isolated to Dompdf's handling of large near-black/near-gray PNGs specifically;
-			// the exact same artwork retinted with a faint navy cast (barely perceptible at
-			// print size) renders at the correct height. Same shape/alpha as brush-20.png,
-			// used only where the badge is large enough to trip this. Rendered via <img> (a5-discount.latte),
-			// which is unaffected by the background-image bug below — keep this one with its alpha
-			// channel intact.
+			// Dompdf renders the near-black brush-20.png at half height (or white) in large
+			// boxes; this navy-tinted copy renders correctly. Use it via <img>.
 			'ribbonBadgeBrushDataUri' => $this->imageAsDataUri(WWW_DIR . '/images/brush-20-ribbon-badge.png', 'image/png'),
-			// Same navy artwork as ribbonBadgeBrushDataUri above, pre-flattened onto an opaque white
-			// background (no alpha channel at all — PNG color type 2, not 6) for use as a CSS
-			// background-image (Vel.3's "Ušetříte" badge). Dompdf's pure-GD background-image
-			// compositor (Cpdf::addImagePngAlpha) has a confirmed bug with 8-bit RGBA source PNGs —
-			// its own source carries a "FIXME: doesn't work well with 8bit PNGs" comment — where
-			// $eight_bit = ($byte & 4) !== 4 evaluates false for color type 6, sending it down a
-			// broken non-gamma-corrected extraction branch that silently produces an invisible result
-			// (background-color still paints, the image on top of it never does) even though every
-			// intermediate GD buffer measured correct. A plain <img> tag with the SAME alpha PNG
-			// renders fine (different call path, see ribbonBadgeBrushDataUri above), but CSS
-			// background-image does not. Since Vel.3's badge always sits on the label's plain white
-			// background, flattening away the alpha channel ahead of time sidesteps the Dompdf bug
-			// entirely instead of working around it at render time. Kept as a separate variable
-			// (not reusing ribbonBadgeBrushDataUri) so this doesn't change a5-discount.latte's
-			// already-working <img>-based ribbon badge, which sits on artwork this flattening was
-			// never verified against.
+			// Same artwork flattened onto white (no alpha): Dompdf's CSS background-image
+			// path drops 8-bit RGBA PNGs, so use this one for background-image.
 			'ribbonBadgeBrushFlatDataUri' => $this->imageAsDataUri(WWW_DIR . '/images/brush-20-ribbon-badge-flat.png', 'image/png'),
 			// Dompdf does not render inline <svg> markup at all (confirmed: even a bare filled
 			// <rect> inside <svg> paints nothing), so the save-badge's piggy-bank mascot from the

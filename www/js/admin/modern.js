@@ -14,19 +14,9 @@ $(document).ready(function () {
         $(this).closest(".panel").children('.panel-body').slideToggle('fast');
     });
 
-    // Both handlers below must agree on the same breakpoint as the CSS
-    // that actually hides the sidebar off-canvas
-    // (www/css/admin/custom.css "@media (max-width: 991px)" — .page-sidebar
-    // { transform: translateX(-225px) }, revealed only via .visible). Using
-    // a different number here (767 was tried first, matching an old
-    // Bootstrap convention) opens a dead zone between the two breakpoints:
-    // confirmed via Playwright at 820-991px widths that clicking the
-    // toggle there silently did nothing, because JS ran the desktop
-    // collapse handler (adds mosaic-sidebar-collapsed, sets width:64px)
-    // while the CSS still forced the sidebar off-canvas at translateX(-225px)
-    // regardless — the collapse class has no visible effect there, and if
-    // the sidebar had been opened (.visible) at a wider window and then
-    // resized into this range, there was no way left to close it either.
+    // Must equal the CSS breakpoint that moves the sidebar off-canvas
+    // (custom.css "@media (max-width: 991px)"); a different value leaves a
+    // width range where the toggle does nothing.
     var MOBILE_BREAKPOINT = 991;
 
     // Push Menu (mobile off-canvas slide-in only — see breakpoint note above).
@@ -54,21 +44,9 @@ $(document).ready(function () {
         }
     });
 
-    // Desktop collapse/expand ("Thu gọn / Mở rộng Menu" button). The
-    // .push-sidebar handler above only toggles a `visible` class that CSS
-    // only reacts to at/below the breakpoint — above it, it does nothing,
-    // which is why this button looked dead. This toggles a separate body
-    // class the Mosaic CSS reacts to, and remembers the choice across
-    // reloads.
-    //
-    // The toggle <button> in @layout.latte carries BOTH the "push-sidebar"
-    // and "mosaic-sidebar-toggle" classes on the same element, so jQuery
-    // binds and fires BOTH handlers on every click. At/below the breakpoint
-    // that used to also add `mosaic-sidebar-collapsed` (forcing the sidebar
-    // to a permanent 64px icon rail) at the same time as `visible` (the
-    // intended full-width overlay), producing an icon-only rail instead of
-    // the overlay. Each handler now only acts on its own side of the
-    // breakpoint so only one behavior applies at a time.
+    // Desktop collapse/expand of the sidebar, remembered across reloads. The
+    // toggle button has both "push-sidebar" and "mosaic-sidebar-toggle", so
+    // each handler only acts on its own side of the breakpoint.
     if (window.innerWidth > MOBILE_BREAKPOINT && localStorage.getItem('mosaicSidebarCollapsed') === '1') {
         $('body').addClass('mosaic-sidebar-collapsed');
     }
@@ -181,30 +159,10 @@ $(document).ready(function () {
     });
 
 
-    // Hover-menu flyout positioning (JS, not pure CSS)
-    //
-    // The flyout sub-menus rely on `position: absolute; left: 100%` to
-    // escape the sidebar to the right. The sidebar also needs
-    // `overflow-y: auto` so a long menu list can scroll. Browsers force
-    // overflow-x to behave like overflow-y whenever only one of the two is
-    // `visible` (https://www.w3.org/TR/css-overflow-3/#overflow-control) —
-    // so as long as the sidebar scrolls vertically, ANY `overflow-x:
-    // visible` written in CSS is silently downgraded to `auto`, which clips
-    // every flyout no matter how the CSS is written. Confirmed directly via
-    // Chrome DevTools Protocol (getComputedStyle().overflowX stayed "auto"
-    // even though every matched CSS rule said "visible !important").
-    //
-    // `position: fixed` isn't subject to an ancestor's `overflow` at all
-    // (it escapes the containing block chain to position against the
-    // viewport), so this repositions each flyout to `fixed` with its
-    // top/left computed from the hovered <li>'s actual screen position on
-    // every hover — working at any nesting depth, since
-    // getBoundingClientRect() always returns viewport-relative coordinates
-    // regardless of how deeply nested the <li> is. CSS already shows/hides
-    // the flyout via :hover (`.hover-menu ... > li:hover > ul.sub-menu`) —
-    // this only fixes *where* it renders, using setProperty(...,
-    // 'important') since the existing CSS positions it with `!important`
-    // too and a plain inline style wouldn't be able to override that.
+    // Hover-menu flyouts: the scrolling sidebar (overflow-y: auto) forces
+    // overflow-x to auto too and clips absolutely positioned flyouts, so each
+    // flyout is placed with position: fixed from the hovered <li>'s rect
+    // ('important' because the CSS positions it with !important).
     if ($('body').hasClass('hover-menu')) {
         $(document).on('mouseenter', '.sidebar .accordion-menu li.droplink', function () {
             var flyout = this.querySelector(':scope > ul.sub-menu');

@@ -117,27 +117,7 @@ class ProductLabelsControl extends \Nette\Application\UI\Control
 				$this->productLabelsRepo->update($existing);
 			}
 			else {
-				$productPrice = $product->getPrice($branchesId);
-				$labelHeader = $this->productLabelHeadersRepo->findAll()->order('pos_order')->limit(1)->fetch();
-				$values = [
-					'product_label_headers_id' => $labelHeader ? $labelHeader->id : NULL,
-					'products_id' => $product->id,
-					'branches_id' => $branchesId,
-					'admin_users_id' => $adminUserId,
-					'count' => 1,
-					'datetime_printed' => NULL,
-					'type_id' => $typeId,
-					'sale_text' => '',
-					'sale_percent' => $productPrice ? $productPrice->getActionPercents(TRUE) : 0,
-					'is_more_species' => 0,
-					'price_text' => \ProductLabelsEntity::PRICE_TYPE_CZK,
-					'origin_countries_id' => $product->country_origin ?: NULL,
-					'name' => $product->name,
-					'note_1' => $product->label_note_1,
-					'note_2' => $product->label_note_2,
-					'note_3' => $product->label_note_3,
-				];
-				$this->productLabelsRepo->insert($values);
+				$this->productLabelsRepo->insertForProduct($product, $branchesId, $adminUserId, (int)$typeId, 1);
 			}
 		}
 
@@ -203,30 +183,9 @@ class ProductLabelsControl extends \Nette\Application\UI\Control
 			$item->datetime_printed = NULL;
 			$this->productLabelsRepo->update($item);
 		}
-		elseif ($typeId && $this->getBranchesId() && ($product = $this->getItem()) && ($productPrice = $product->getPrice($this->getBranchesId())) && ($labelHeader = $this->productLabelHeadersRepo->findAll()
-				->order('pos_order')
-				->limit(1)
-				->fetch())) {
-			$values = [
-				'product_label_headers_id' => $labelHeader->id,
-				'products_id' => $product->id,
-				'branches_id' => $this->getBranchesId(),
-				'admin_users_id' => $GLOBALS['adminUser']->id,
-				'count' => max(0, $count),
-				'datetime_printed' => NULL,
-				'type_id' => $typeId,
-				'sale_text' => '',
-				'sale_percent' => $productPrice->getActionPercents(TRUE),
-				'is_more_species' => 0,
-				'price_text' => \ProductLabelsEntity::PRICE_TYPE_CZK,
-				'origin_countries_id' => $product->country_origin ?: NULL,
-				'name' => $product->name,
-				'note_1' => $product->label_note_1,
-				'note_2' => $product->label_note_2,
-				'note_3' => $product->label_note_3,
-			];
-
-			$this->productLabelsRepo->insert($values);
+		elseif ($typeId && $this->getBranchesId() && ($product = $this->getItem()) && $product->getPrice($this->getBranchesId())
+			&& $this->productLabelHeadersRepo->findAll()->count('*')) {
+			$this->productLabelsRepo->insertForProduct($product, $this->getBranchesId(), (int)$GLOBALS['adminUser']->id, (int)$typeId, $count);
 		}
 
 		$this->redrawControl('list');

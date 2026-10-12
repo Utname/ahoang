@@ -23,11 +23,8 @@ class ProductLabelsService
 	 * @param bool $printed
 	 * @param array $ids
 	 * @param array<int, array{price?: ?float, price_action?: ?float, action_from?: ?string, action_to?: ?string}>|array{price?: ?float, price_action?: ?float, action_from?: ?string, action_to?: ?string}|null $priceOverride
-	 *        Renders with these price/date values instead of the ones currently saved in
-	 *        product_prices, without writing anything to the database — lets the admin
-	 *        preview/print labels reflecting price or date fields they just edited inline
-	 *        in the product list but haven't saved yet. Either a map keyed by product ID
-	 *        (each product gets its own values), or one override applied to every label.
+	 *        Unsaved values typed in the product list, never saved: a map keyed by product
+	 *        ID, or one override for every label.
 	 * @param int[] $newA4ProductIds Product IDs whose A4 label should be rendered with the new HTML template.
 	 *        A4 labels of every other product are printed with the legacy TCPDF layout.
 	 * @return string|TCPDF|Dompdf|NULL
@@ -234,12 +231,7 @@ class ProductLabelsService
 						$pdfY = 82;
 
 						$product = $labelTypeItems[0]->getProduct();
-						$productPrice = $this->priceFor($product, $branchesId, $priceOverride);
-						$basePriceUnit = $product->getUnitValue($productPrice->price, $labelTypeItems[0]->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItems[0]->default_units_id : NULL, $labelTypeItems[0]->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItems[0]->default_units_weight : NULL);
-						$actionPriceUnit = $product->getUnitValue($productPrice->price_action, $labelTypeItems[0]->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItems[0]->default_units_id : NULL, $labelTypeItems[0]->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItems[0]->default_units_weight : NULL);
-						$basePricePars = explode('.', (string)number_format($labelTypeItems[0]->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g && $basePriceUnit && $actionPriceUnit ? $basePriceUnit->price : ($productPrice->price ?: 0.0), 2, '.', ''));
-						$actionPricePars = explode('.', (string)number_format($labelTypeItems[0]->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g && $basePriceUnit && $actionPriceUnit ? $actionPriceUnit->price : ($productPrice->price_action ?: 0.0), 2, '.', ''));
-						$priceAddX = $labelTypeItems[0]->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g && $basePriceUnit && $actionPriceUnit ? 0 : 13;
+						[$productPrice, $basePriceUnit, $actionPriceUnit, $basePricePars, $actionPricePars, $priceAddX] = $this->legacyPrices($product, $labelTypeItems[0], $branchesId, $priceOverride, 13);
 
 						$pdfFiles[$labelTypeId]->Image(WWW_DIR.'/pdf/logo.jpg', 90, 5, 30, 30);
 						$pdfFiles[$labelTypeId]->Rect(0, 40, 210, 35, 'F', '', [0, 0, 0]);
@@ -323,12 +315,7 @@ class ProductLabelsService
 						foreach ($labelTypeItems as $labelTypeItemIndex => $labelTypeItem) {
 							$pdfY = 28 + ($labelTypeItemIndex * 140);
 							$product = $labelTypeItem->getProduct();
-							$productPrice = $this->priceFor($product, $branchesId, $priceOverride);
-							$basePriceUnit = $product->getUnitValue($productPrice->price, $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItem->default_units_id : NULL, $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItem->default_units_weight : NULL);
-							$actionPriceUnit = $product->getUnitValue($productPrice->price_action, $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItem->default_units_id : NULL, $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItem->default_units_weight : NULL);
-							$basePricePars = explode('.', (string)number_format($labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g && $basePriceUnit && $actionPriceUnit ? $basePriceUnit->price : ($productPrice->price ?: 0.0), 2, '.', ''));
-							$actionPricePars = explode('.', (string)number_format($labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g && $basePriceUnit && $actionPriceUnit ? $actionPriceUnit->price : ($productPrice->price_action ?: 0.0), 2, '.', ''));
-							$priceAddX = $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g && $basePriceUnit && $actionPriceUnit ? 0 : 11;
+							[$productPrice, $basePriceUnit, $actionPriceUnit, $basePricePars, $actionPricePars, $priceAddX] = $this->legacyPrices($product, $labelTypeItem, $branchesId, $priceOverride, 11);
 
 							$pdfFiles[$labelTypeId]->Rect(0, $pdfY - 28, 210, 26, 'F', '', [0, 0, 0]);
 							$pdfFiles[$labelTypeId]->Image(WWW_DIR.'/pdf/logo.jpg', 1, $pdfY - 27, 24, 24);
@@ -406,12 +393,7 @@ class ProductLabelsService
 						$pdfY = 1;
 						foreach ($labelTypeItems as $labelTypeItem) {
 							$product = $labelTypeItem->getProduct();
-							$productPrice = $this->priceFor($product, $branchesId, $priceOverride);
-							$basePriceUnit = $product->getUnitValue($productPrice->price, $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItem->default_units_id : NULL, $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItem->default_units_weight : NULL);
-							$actionPriceUnit = $product->getUnitValue($productPrice->price_action, $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItem->default_units_id : NULL, $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItem->default_units_weight : NULL);
-							$basePricePars = explode('.', (string)number_format($labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g && $basePriceUnit && $actionPriceUnit ? $basePriceUnit->price : ($productPrice->price ?: 0.0), 2, '.', ''));
-							$actionPricePars = explode('.', (string)number_format($labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g && $basePriceUnit && $actionPriceUnit ? $actionPriceUnit->price : ($productPrice->price_action ?: 0.0), 2, '.', ''));
-							$priceAddX = $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g && $basePriceUnit && $actionPriceUnit ? 0 : 7;
+							[$productPrice, $basePriceUnit, $actionPriceUnit, $basePricePars, $actionPricePars, $priceAddX] = $this->legacyPrices($product, $labelTypeItem, $branchesId, $priceOverride, 7);
 
 							$pdfFiles[$labelTypeId]->Line(1, $pdfY, 209, $pdfY, ['color' => [0, 0, 0]]);
 							$pdfFiles[$labelTypeId]->Line(1, $pdfY + 30, 60, $pdfY + 30, ['color' => [0, 0, 0]]);
@@ -483,12 +465,7 @@ class ProductLabelsService
 						$pdfY = 1;
 						foreach ($labelTypeItems as $labelTypeItem) {
 							$product = $labelTypeItem->getProduct();
-							$productPrice = $this->priceFor($product, $branchesId, $priceOverride);
-							$basePriceUnit = $product->getUnitValue($productPrice->price, $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItem->default_units_id : NULL, $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItem->default_units_weight : NULL);
-							$actionPriceUnit = $product->getUnitValue($productPrice->price_action, $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItem->default_units_id : NULL, $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItem->default_units_weight : NULL);
-							$basePricePars = explode('.', (string)number_format($labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g && $basePriceUnit && $actionPriceUnit ? $basePriceUnit->price : ($productPrice->price ?: 0.0), 2, '.', ''));
-							$actionPricePars = explode('.', (string)number_format($labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g && $basePriceUnit && $actionPriceUnit ? $actionPriceUnit->price : ($productPrice->price_action ?: 0.0), 2, '.', ''));
-							$priceAddX = $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g && $basePriceUnit && $actionPriceUnit ? 0 : 5;
+							[$productPrice, $basePriceUnit, $actionPriceUnit, $basePricePars, $actionPricePars, $priceAddX] = $this->legacyPrices($product, $labelTypeItem, $branchesId, $priceOverride, 5);
 
 							$pdfFiles[$labelTypeId]->Line(1, $pdfY, 153, $pdfY, ['color' => [0, 0, 0]]);
 							$pdfFiles[$labelTypeId]->Line(1, $pdfY + 30, 40, $pdfY + 30, ['color' => [0, 0, 0]]);
@@ -556,12 +533,7 @@ class ProductLabelsService
 							$pdfYItem = $pdfY;
 
 							$product = $labelTypeItem->getProduct();
-							$productPrice = $this->priceFor($product, $branchesId, $priceOverride);
-							$basePriceUnit = $product->getUnitValue($productPrice->price, $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItem->default_units_id : NULL, $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItem->default_units_weight : NULL);
-							$actionPriceUnit = $product->getUnitValue($productPrice->price_action, $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItem->default_units_id : NULL, $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g ? $labelTypeItem->default_units_weight : NULL);
-							$basePricePars = explode('.', (string)number_format($labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g && $basePriceUnit && $actionPriceUnit ? $basePriceUnit->price : ($productPrice->price ?: 0.0), 2, '.', ''));
-							$actionPricePars = explode('.', (string)number_format($labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g && $basePriceUnit && $actionPriceUnit ? $actionPriceUnit->price : ($productPrice->price_action ?: 0.0), 2, '.', ''));
-							$priceAddX = $labelTypeItem->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g && $basePriceUnit && $actionPriceUnit ? 0 : 5;
+							[$productPrice, $basePriceUnit, $actionPriceUnit, $basePricePars, $actionPricePars, $priceAddX] = $this->legacyPrices($product, $labelTypeItem, $branchesId, $priceOverride, 5);
 
 							$pdfFiles[$labelTypeId]->Rect(1, $pdfYItem, 208, 14, 'F', '', [0, 0, 0]);
 							$pdfFiles[$labelTypeId]->Image(WWW_DIR.'/pdf/logo.jpg', 2, $pdfYItem + 1, 12, 12);
@@ -721,6 +693,31 @@ class ProductLabelsService
 		}
 
 		return $priceOverride[$productId] ?? NULL;
+	}
+
+
+	/**
+	 * Prices for the legacy TCPDF layouts: the price row (with unsaved values), unit
+	 * prices when the label shows Kč / 100 g, the base/action prices split into
+	 * [whole, decimals], and the x offset of the whole part ($addX unless unit prices
+	 * are shown).
+	 */
+	private function legacyPrices(ProductsEntity $product, ProductLabelsEntity $label, int $branchesId, ?array $priceOverride, int $addX): array
+	{
+		$productPrice = $this->priceFor($product, $branchesId, $priceOverride);
+		$perUnit = $label->price_text == ProductLabelsEntity::PRICE_TYPE_CZK_100g;
+		$basePriceUnit = $product->getUnitValue($productPrice->price, $perUnit ? $label->default_units_id : NULL, $perUnit ? $label->default_units_weight : NULL);
+		$actionPriceUnit = $product->getUnitValue($productPrice->price_action, $perUnit ? $label->default_units_id : NULL, $perUnit ? $label->default_units_weight : NULL);
+		$useUnit = $perUnit && $basePriceUnit && $actionPriceUnit;
+
+		return [
+			$productPrice,
+			$basePriceUnit,
+			$actionPriceUnit,
+			explode('.', (string)number_format($useUnit ? $basePriceUnit->price : ($productPrice->price ?: 0.0), 2, '.', '')),
+			explode('.', (string)number_format($useUnit ? $actionPriceUnit->price : ($productPrice->price_action ?: 0.0), 2, '.', '')),
+			$useUnit ? 0 : $addX,
+		];
 	}
 
 
