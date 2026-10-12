@@ -1,0 +1,11 @@
+# Paths skipped by ripgrep-based search (Claude Code Grep/Glob, VS Code search).
+# Git, the build and the website are not affected; files can still be opened by
+# path. Folder-specific rules live in a .ignore inside each folder, so they
+# apply whichever folder a search starts from:
+#   www/plugins/      third-party libraries (Font Awesome alone ~190 MB)
+#   www/downloads/    www/pdf/    deploy/sample-images/   binary assets
+#   app/database/     *.sql dumps (long INSERT lines, copies of templates)
+
+*.min.js
+*.min.css
+*.map
