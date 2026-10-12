@@ -22,4 +22,11 @@ sed -i "s/__PORT__/${PORT}/g" /etc/apache2/ports.conf /etc/apache2/sites-availab
 a2dismod mpm_event mpm_worker >/dev/null 2>&1 || true
 a2enmod mpm_prefork rewrite deflate expires headers >/dev/null 2>&1 || true
 
+# Labels render from print_templates.html_source, so copy the .latte files from
+# this image into the database on every start. Only when a database is
+# configured; a failure must not stop the web server from starting.
+if [ -n "${MYSQLHOST:-}" ]; then
+	php /var/www/html/bin/sync-print-templates.php || echo "print template sync failed" >&2
+fi
+
 exec apache2-foreground

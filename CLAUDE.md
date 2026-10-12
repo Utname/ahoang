@@ -18,7 +18,9 @@ Nette 3 + Latte 3 + PHP 8.2 admin/e-shop for a Czech grocery chain. Most work is
 
 ## Label templates
 Labels render from `print_templates.html_source` in the DB, **not** from the .latte file.
-After editing a template run `php bin/sync-print-templates.php [name ...]`.
+After editing a template run `php bin/sync-print-templates.php [name ...]` locally; on Railway
+`docker/entrypoint.sh` runs it on every container start, so a deploy syncs the templates
+(edits made in the admin template editor are overwritten by the next deploy).
 
 | file | type id | size mm | design file |
 |---|---|---|---|
