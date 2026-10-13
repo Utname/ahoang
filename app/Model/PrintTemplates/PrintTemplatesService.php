@@ -767,7 +767,7 @@ class PrintTemplatesService
 			return $this->renderDompdf($this->renderA5Page($html), 210, 297)->output();
 		}
 		if (is_array($layout)) {
-			return $this->renderDompdf($this->renderStackedSheet([$html], $layout['w'], $layout['h'], 8.0, 8.0, $layout['gap']), 210, 297)->output();
+			return $this->renderDompdf($this->renderStackedSheet([$html], $layout['w'], $layout['h'], 8.0, 8.0, $layout['gap'], $layout['cut']), 210, 297)->output();
 		}
 
 		$dompdf = $this->renderDompdf(
@@ -811,7 +811,7 @@ class PrintTemplatesService
 				}
 				elseif (is_array($layout)) {
 					foreach (array_chunk($queueJobs, $layout['perPage']) as $chunk) {
-						$pages[] = $this->renderStackedSheet(array_map($render, $chunk), $layout['w'], $layout['h'], 8.0, 8.0, $layout['gap']);
+						$pages[] = $this->renderStackedSheet(array_map($render, $chunk), $layout['w'], $layout['h'], 8.0, 8.0, $layout['gap'], $layout['cut']);
 					}
 				}
 				else {
@@ -932,7 +932,11 @@ class PrintTemplatesService
 		// 8mm top margin, at least 5mm left at the bottom
 		$perPage = max(1, (int)floor((297 - 8 - 5 + $gap) / ($h + $gap)));
 
-		return ['w' => $w, 'h' => $h, 'gap' => $gap, 'perPage' => $perPage];
+		// labels with their own dashed frame are cut along it: no extra line between them;
+		// frameless ones (Vel. 3) get the dashed cut line of their design
+		$cut = !str_contains((string)$template->html_source, 'dashed');
+
+		return ['w' => $w, 'h' => $h, 'gap' => $gap, 'perPage' => $perPage, 'cut' => $cut];
 	}
 
 
@@ -1002,6 +1006,7 @@ class PrintTemplatesService
 	 * @param float $leftMm Left offset in mm
 	 * @param float $topStartMm Top offset for 1st item in mm
 	 * @param float $gapMm Gap between consecutive items in mm
+	 * @param bool $cutLines dashed cut line between items (labels without a frame of their own)
 	 * @return string Complete HTML page string
 	 */
 	private function renderStackedSheet(
@@ -1010,7 +1015,8 @@ class PrintTemplatesService
 		float $heightMm,
 		float $leftMm = 8.0,
 		float $topStartMm = 8.0,
-		float $gapMm = 4.0
+		float $gapMm = 4.0,
+		bool $cutLines = TRUE
 	): string {
 		$allStyles = [];
 		$labelItemsHtml = '';
@@ -1026,7 +1032,7 @@ class PrintTemplatesService
 
 			$currentTop = $topStartMm + ($index * $step);
 
-			if ($index > 0) {
+			if ($index > 0 && $cutLines) {
 				$cutTop = $currentTop - ($gapMm / 2);
 				$labelItemsHtml .= sprintf(
 					'<div class="stacked-divider" style="top:%.2fmm;left:%.2fmm;width:%.2fmm;"><span class="stacked-divider-line"></span></div>',
