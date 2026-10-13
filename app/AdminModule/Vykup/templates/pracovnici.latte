@@ -1,0 +1,56 @@
+{block content}
+<div class="col-md-12 vk-page">
+    {include '_nav.latte'}
+
+    <div class="vk-two vk-two-staff">
+        <div class="vk-card vk-staff-card">
+            <div class="vk-staff-head">
+                <div class="vk-card-title">{=sprintf(('admin.vykup.staffTitle'|translate), $vkBranch['name'])}</div>
+                <div class="vk-muted">{_admin.vykup.staffHint}</div>
+            </div>
+            {foreach $staffList as $person}
+                <div n:class="vk-staff-row, !$person->active ? vk-void">
+                    {if $vkCanEdit}
+                        <input class="vk-input vk-flex" value="{$person->name}" maxlength="60" data-rename-url="{link renameStaff! $person->id}" aria-label="{_admin.vykup.colStaff}">
+                    {else}
+                        <span class="vk-flex vk-b">{$person->name}</span>
+                    {/if}
+                    <span n:class="vk-badge, $person->active ? vk-badge-ok : vk-badge-muted">{$person->active ? ('admin.vykup.stActive'|translate) : ('admin.vykup.stHidden'|translate)}</span>
+                    <a n:if="$vkCanEdit" href="{link staffActive! $person->id, !$person->active}" class="vk-btn">{$person->active ? ('admin.vykup.hideStaff'|translate) : ('admin.vykup.showStaff'|translate)}</a>
+                </div>
+            {/foreach}
+            <div n:if="!count($staffList)" class="vk-empty">{_admin.vykup.noStaff}</div>
+            {if $vkCanEdit}
+                {form staffForm class => 'vk-staff-add', autocomplete => 'off'}
+                    {input name class => 'vk-input vk-input-dashed vk-flex', placeholder => ('admin.vykup.newStaffPh'|translate)}
+                    <button n:name="add" class="vk-btn vk-btn-primary">+ {_admin.vykup.addStaff}</button>
+                {/form}
+            {/if}
+        </div>
+
+        <div n:if="$vkCanEdit" class="vk-card">
+            <div class="vk-card-title">{_admin.vykup.headerTitle}</div>
+            <div class="vk-muted">{_admin.vykup.headerHint}</div>
+            {form headerForm class => 'vk-header-form', autocomplete => 'off'}
+                <label>{_admin.vykup.headerCode}{input code class => 'vk-input'}</label>
+                <label>{_admin.vykup.headerCompany}{input company class => 'vk-input'}</label>
+                <label>{_admin.vykup.headerIco}{input ico class => 'vk-input'}</label>
+                <div class="vk-muted">{_admin.vykup.headerPreview}: <b>{$vkBranch['code']}-V{$vkToday|date:'ymd'}-001</b> · {$vkBranch['title']}, {$vkBranch['address']}</div>
+                <div><button n:name="save" class="vk-btn vk-btn-dark">{_admin.vykup.save}</button></div>
+            {/form}
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-rename-url]'), function (input) {
+        input.addEventListener('change', function () {
+            var url = new URL(input.getAttribute('data-rename-url'), location.href);
+            url.searchParams.set('name', input.value);
+            location.href = url.toString();
+        });
+    });
+})();
+</script>
+{/block}

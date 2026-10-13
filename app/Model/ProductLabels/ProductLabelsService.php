@@ -25,8 +25,7 @@ class ProductLabelsService
 	 * @param array<int, array{price?: ?float, price_action?: ?float, action_from?: ?string, action_to?: ?string}>|array{price?: ?float, price_action?: ?float, action_from?: ?string, action_to?: ?string}|null $priceOverride
 	 *        Unsaved values typed in the product list, never saved: a map keyed by product
 	 *        ID, or one override for every label.
-	 * @param int[] $newA4ProductIds Product IDs whose A4 label should be rendered with the new HTML template.
-	 *        A4 labels of every other product are printed with the legacy TCPDF layout.
+	 * @param int[] $newA4ProductIds No longer used: A4 always prints with its HTML template.
 	 * @return string|TCPDF|Dompdf|NULL
 	 */
 	public function generatePdf(int $branchesId, bool $printed = TRUE, array $ids = [], ?array $priceOverride = NULL, array $newA4ProductIds = []): string|TCPDF|Dompdf|null
@@ -56,83 +55,34 @@ class ProductLabelsService
 		$items = ProductLabelsRepository::getEntities($items);
 		$itemsBuffer = [];
 
+		// Labels per page: the legacy TCPDF layouts are drawn for these counts; other
+		// (template-only) types use perPage from ProductLabelsEntity::TYPES_ARR.
+		$legacyPerPage = [
+			ProductLabelsEntity::TYPE_A4 => 1,
+			ProductLabelsEntity::TYPE_A5 => 2,
+			ProductLabelsEntity::TYPE_SIZE_1 => 7,
+			ProductLabelsEntity::TYPE_SIZE_2 => 7,
+			ProductLabelsEntity::TYPE_SIZE_2_AKCE => 7,
+			ProductLabelsEntity::TYPE_SIZE_3 => 4,
+			ProductLabelsEntity::TYPE_SIZE_2B => 5,
+			ProductLabelsEntity::TYPE_PECIVO => 6,
+		];
 		foreach ($items as $item) {
-			switch ($item->type_id) {
-				case ProductLabelsEntity::TYPE_A4:
-					$itemsBuffer[$item->type_id]['pageParams'] = ['P', 'A4'];
-					for ($i = 1; $i <= max(1, $item->count); $i++) {
-						$itemsBuffer[$item->type_id]['items'][][0] = $item;
-					}
-					break;
-				case ProductLabelsEntity::TYPE_A5:
-					$itemsBuffer[$item->type_id]['pageParams'] = ['P', 'A4'];
-					for ($i = 1; $i <= max(1, $item->count); $i++) {
-						if (!isset($itemsBuffer[$item->type_id]['items']) || count($itemsBuffer[$item->type_id]['items'][array_key_last($itemsBuffer[$item->type_id]['items'])]) >= 2) {
-							$itemsBuffer[$item->type_id]['items'][][] = $item;
-						}
-						else {
-							$itemsBuffer[$item->type_id]['items'][array_key_last($itemsBuffer[$item->type_id]['items'])][] = $item;
-						}
-					}
-
-					break;
-				case ProductLabelsEntity::TYPE_SIZE_1:
-					$itemsBuffer[$item->type_id]['pageParams'] = ['P', 'A4'];
-					for ($i = 1; $i <= max(1, $item->count); $i++) {
-						if (!isset($itemsBuffer[$item->type_id]['items']) || count($itemsBuffer[$item->type_id]['items'][array_key_last($itemsBuffer[$item->type_id]['items'])]) >= 7) {
-							$itemsBuffer[$item->type_id]['items'][][] = $item;
-						}
-						else {
-							$itemsBuffer[$item->type_id]['items'][array_key_last($itemsBuffer[$item->type_id]['items'])][] = $item;
-						}
-					}
-
-					break;
-				case ProductLabelsEntity::TYPE_SIZE_2:
-				case ProductLabelsEntity::TYPE_SIZE_2_AKCE:
-					$itemsBuffer[$item->type_id]['pageParams'] = ['P', 'A4'];
-					for ($i = 1; $i <= max(1, $item->count); $i++) {
-						if (!isset($itemsBuffer[$item->type_id]['items']) || count($itemsBuffer[$item->type_id]['items'][array_key_last($itemsBuffer[$item->type_id]['items'])]) >= 7) {
-							$itemsBuffer[$item->type_id]['items'][][] = $item;
-						}
-						else {
-							$itemsBuffer[$item->type_id]['items'][array_key_last($itemsBuffer[$item->type_id]['items'])][] = $item;
-						}
-					}
-					break;
-				case ProductLabelsEntity::TYPE_SIZE_3:
-					$itemsBuffer[$item->type_id]['pageParams'] = ['P', 'A4'];
-					for ($i = 1; $i <= max(1, $item->count); $i++) {
-						if (!isset($itemsBuffer[$item->type_id]['items']) || count($itemsBuffer[$item->type_id]['items'][array_key_last($itemsBuffer[$item->type_id]['items'])]) >= 4) {
-							$itemsBuffer[$item->type_id]['items'][][] = $item;
-						}
-						else {
-							$itemsBuffer[$item->type_id]['items'][array_key_last($itemsBuffer[$item->type_id]['items'])][] = $item;
-						}
-					}
-					break;
-				case ProductLabelsEntity::TYPE_SIZE_2B:
-					$itemsBuffer[$item->type_id]['pageParams'] = ['P', 'A4'];
-					for ($i = 1; $i <= max(1, $item->count); $i++) {
-						if (!isset($itemsBuffer[$item->type_id]['items']) || count($itemsBuffer[$item->type_id]['items'][array_key_last($itemsBuffer[$item->type_id]['items'])]) >= 5) {
-							$itemsBuffer[$item->type_id]['items'][][] = $item;
-						}
-						else {
-							$itemsBuffer[$item->type_id]['items'][array_key_last($itemsBuffer[$item->type_id]['items'])][] = $item;
-						}
-					}
-					break;
-				case ProductLabelsEntity::TYPE_PECIVO:
-					$itemsBuffer[$item->type_id]['pageParams'] = ['P', 'A4'];
-					for ($i = 1; $i <= max(1, $item->count); $i++) {
-						if (!isset($itemsBuffer[$item->type_id]['items']) || count($itemsBuffer[$item->type_id]['items'][array_key_last($itemsBuffer[$item->type_id]['items'])]) >= 6) {
-							$itemsBuffer[$item->type_id]['items'][][] = $item;
-						}
-						else {
-							$itemsBuffer[$item->type_id]['items'][array_key_last($itemsBuffer[$item->type_id]['items'])][] = $item;
-						}
-					}
-					break;
+			$typeId = (int)$item->type_id;
+			if (!isset(ProductLabelsEntity::TYPES_ARR[$typeId]) || ProductLabelsEntity::isLockedType($typeId)) {
+				continue;
+			}
+			$perPage = $legacyPerPage[$typeId] ?? ProductLabelsEntity::TYPES_ARR[$typeId]['perPage'];
+			$itemsBuffer[$typeId]['pageParams'] = ['P', 'A4'];
+			for ($i = 1; $i <= max(1, $item->count); $i++) {
+				$pages = &$itemsBuffer[$typeId]['items'];
+				if (!$pages || count($pages[array_key_last($pages)]) >= $perPage) {
+					$pages[][] = $item;
+				}
+				else {
+					$pages[array_key_last($pages)][] = $item;
+				}
+				unset($pages);
 			}
 		}
 
@@ -142,13 +92,10 @@ class ProductLabelsService
 
 		$printedIds = [];
 
-		// Non-A4 label types (A5, Vel.1, Vel.3, etc.) use new HTML/Dompdf templates by default when available;
-		// A4 labels only use the new template when specifically ticked for the product ($newA4ProductIds).
+		// Every label type prints with its HTML template when one exists; the legacy
+		// TCPDF layouts below are only a fallback for a type without a template.
 		$templateJobs = [];
-		// TYPE_SIZE_2_AKCE is not offered in the admin form (TYPES_ARR) but labels
-		// already queued with it must still reach its template, not TCPDF.
-		$templateTypeIds = array_unique([...array_keys(ProductLabelsEntity::TYPES_ARR), ProductLabelsEntity::TYPE_SIZE_2_AKCE]);
-		foreach ($templateTypeIds as $templateTypeId) {
+		foreach (array_keys(ProductLabelsEntity::TYPES_ARR) as $templateTypeId) {
 			if (!isset($itemsBuffer[$templateTypeId]['items'])) {
 				continue;
 			}
@@ -159,10 +106,7 @@ class ProductLabelsService
 				$pageJobs = [];
 				foreach ($labelItems as $label) {
 					$product = $label?->getProduct();
-					$isA4 = ($templateTypeId === ProductLabelsEntity::TYPE_A4);
-					$useTemplate = $label && $product && (
-						(!$isA4) || in_array((int)$product->id, $newA4ProductIds, TRUE)
-					);
+					$useTemplate = $label && $product;
 					$template = $useTemplate
 						? $this->printTemplatesService->findTemplateForProductLabel($label, $product, $branchesId)
 						: NULL;

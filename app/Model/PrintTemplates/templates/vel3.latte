@@ -68,11 +68,14 @@
 {var $len = mb_strlen($finalPriceMajor)}
 {* "Naše cena" group: label (8.4) + gap 2 + integer (20mm) + gap 1.2 +
    ",90" / "Kč / 1 ks" column (17.1); shrinks if it would not fit. *}
-{var $ps = min(1, (82 - 10.4) / ($len * 0.58 * 20 + 1.2 + 17.1))}
+{* unit column: ",90" or the chosen "Cena za" text (0.453em per character), whichever is wider *}
+{var $unitTxt = $priceUnitText ?: $currencySymbol . ' / 1 ks'}
+{var $unitColW = max(17.1, mb_strlen($unitTxt) * 0.453 * 4.2)}
+{var $ps = min(1, (82 - 10.4) / ($len * 0.58 * 20 + 1.2 + $unitColW))}
 {var $fsI = round(20 * $ps, 3)}
 {var $fsD = round(9 * $ps, 3)}
 {var $fsU = round(4.2 * $ps, 3)}
-{var $groupW = 10.4 + ($len * 0.58 * 20 + 1.2 + 17.1) * $ps}
+{var $groupW = 10.4 + ($len * 0.58 * 20 + 1.2 + $unitColW) * $ps}
 {var $ourL = $compare ? 98.15 : 91 - $groupW / 2}
 {var $ourT = $akce ? 35.04 : ($compare ? 36.63 : 34.04)}
 {var $saveValText = $savingText . ' ' . $currencySymbol}
@@ -82,7 +85,7 @@
 <div class="fikko-vel3">
     <div class="head">
         <div class="logo-box" style="left:0"><img class="logo" style="left:3.48mm" src="{$logoDataUri|nocheck}" alt="Fikko market"></div>
-        <div class="abs lh0 nu center head-title">FIKKO CENA</div>
+        <div class="abs lh0 nu center head-title">{$headerText|upper}</div>
         <div class="logo-box" style="left:166mm"><img class="logo" style="left:3.48mm" src="{$logoDataUri|nocheck}" alt="Fikko market"></div>
     </div>
 
@@ -137,7 +140,7 @@
             </td>
             <td style="padding:0 0 0 1.2mm;vertical-align:top;white-space:nowrap">
                 <div class="lh0 nu" style="font-size:{$fsD|noescape}mm;position:relative;top:{=round(-0.26 * $ps, 3)|noescape}mm">{$finalPriceMinor}</div>
-                <div class="lh0 nu" style="font-size:{$fsU|noescape}mm;position:relative;top:{=round(5.56 * $ps, 3)|noescape}mm">{$currencySymbol} / 1 ks</div>
+                <div class="lh0 nu" style="font-size:{$fsU|noescape}mm;position:relative;top:{=round(5.56 * $ps, 3)|noescape}mm">{$unitTxt}</div>
             </td>
         </tr>
     </table>

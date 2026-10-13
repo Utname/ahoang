@@ -35,301 +35,175 @@
 
 {block content}
 
-<style>
-.product-price-fields input,
-.product-date-fields input {
-    border-radius: 6px !important;
-    border: 1px solid #cbd5e1 !important;
-    font-size: 11.5px !important;
-    padding: 3px 6px !important;
-    height: 28px !important;
-    transition: all 0.15s ease;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.02) !important;
-}
-.product-price-fields input:focus,
-.product-date-fields input:focus {
-    border-color: #0ea5e9 !important;
-    box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.15) !important;
-}
-.product-price-fields label,
-.product-date-fields label {
-    font-size: 10px;
-    color: #64748b;
-    font-weight: 700;
-    line-height: 1.2;
-    margin-bottom: 2px;
-    display: block;
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
-}
-.td-image img {
-    border-radius: 6px;
-    border: 1px solid #e2e8f0;
-    object-fit: cover;
-}
-</style>
+{* "Admin - Produkty v2" (design_handoff_fikko): rows with Cena / Akce / Štítky k tisku,
+   a "Cena a akce" and a "Možnosti tisku a úprav" panel under each row, filter pills and
+   the dark print bar. Styles: www/css/admin/custom.css (.pv-*), behaviour: custom.js. *}
+<div id="pv-i18n" hidden
+     data-hint-none="{_admin.pv.hint.none}"
+     data-hint-akce="{_admin.pv.hint.akce}"
+     data-hint-bad-price="{_admin.pv.hint.badPrice}"
+     data-hint-bad-dates="{_admin.pv.hint.badDates}"
+     data-hint-no-akce-price="{_admin.pv.hint.noAkcePrice}"
+     data-saved="{_admin.pv.saved}"
+     data-none-checked="{_admin.pv.noneChecked}"></div>
+<div class="pv-toast" id="pv-toast"></div>
 
 <div class="col-md-12">
-    <div class="panel mosaic-list-panel">
+    <div class="panel mosaic-list-panel pv-page">
         <div class="panel-body">
             {include '_importDropdown.latte'}
             {control bulkActions}
 
             {snippet topFilters}
                 {form filters-form}
-                    <div class="mosaic-filter-bar">
-                        
-                        <!-- Row 1: Search (Left) + Print Queue Toolbar (Right) -->
-                        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px;">
-                            <div class="mosaic-list-search-box">
-                                <i class="fa fa-search search-icon"></i>
-                                {input custom__name class => 'form-control autocomplete change-to-submit', 'data-url' => $presenter->link('productsAutocomplete!'), placeholder => ('admin.ui.searchNameEan'|translate)}
-                            </div>
-
-                            <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:auto;">
-                                <a n:href="toPrint!" class="btn btn-default" style="border-radius:8px;height:38px;padding:7px 14px;font-weight:600;font-size:12.5px;border:1px solid #cbd5e1;background:#fff;color:#334155;display:inline-flex;align-items:center;gap:6px;box-shadow:0 1px 2px rgba(0,0,0,0.03);" title="{_admin.ui.filterToPrint}">
-                                    <i class="fa fa-filter text-info"></i> {_'admin.terms.toPrint'}
-                                </a>
-
-                                <a n:href="clearAllPrintCounts!" class="btn btn-default ajax with-confirm" data-message="{_'admin.terms.reallyRemoveLabels'}" style="border-radius:8px;height:38px;padding:7px 12px;font-weight:600;font-size:12.5px;border:1px solid #fee2e2;background:#fff;color:#e11d48;display:inline-flex;align-items:center;gap:6px;box-shadow:0 1px 2px rgba(0,0,0,0.03);" title="{_admin.ui.clearQueue}">
-                                    <i class="fa fa-trash-alt"></i> {_'admin.terms.removeLabels'}
-                                </a>
-
-                                {snippet headerPrintBtn}
-                                    <a href="#" class="btn" style="background:#0f172a;color:#fff;border-radius:8px;height:38px;padding:7px 16px;font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:8px;border:none;box-shadow:0 2px 6px rgba(15,23,42,0.25);" onclick="$('#modal-printPreview').modal('show'); return false;">
-                                        <span>🖨 {_'admin.terms.downloadLabels'}</span>
-                                        <span style="background:#14b8a6;color:#042f2e;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:800;">{$totalLabels ?? 0}</span>
-                                    </a>
-                                {/snippet}
-                            </div>
+                    <div class="pv-toolbar">
+                        <div class="mosaic-list-search-box pv-search">
+                            <i class="fa fa-search search-icon"></i>
+                            {input custom__name class => 'form-control autocomplete change-to-submit', 'data-url' => $presenter->link('productsAutocomplete!'), placeholder => ('admin.ui.searchNameEan'|translate)}
                         </div>
-
-                        <!-- Row 2: 5 Filter dropdowns in a dedicated grid with labels -->
-                        <div class="mosaic-filter-grid">
-                            <div>
-                                <label>
-                                    <i class="fa fa-store m-r-xxs text-primary"></i> {_'admin.terms.branch' ?? 'Chi nhánh'}
-                                </label>
-                                {input custom__branches class => 'form-control change-to-submit'}
-                            </div>
-
-                            <div>
-                                <label>
-                                    <i class="fa fa-folder-tree m-r-xxs text-primary"></i> {_'admin.terms.category' ?? 'Danh mục'}
-                                </label>
-                                {input custom__category class => 'form-control change-to-submit'}
-                            </div>
-
-                            <div>
-                                <label>
-                                    <i class="fa fa-eye m-r-xxs text-info"></i> {_'admin.terms.isActive' ?? 'Trạng thái'}
-                                </label>
-                                {input custom__is_active class => 'form-control change-to-submit'}
-                            </div>
-
-                            <div>
-                                <label>
-                                    <i class="fa fa-percent m-r-xxs text-danger"></i> {_'admin.terms.isAction' ?? 'Khuyến mãi'}
-                                </label>
-                                {input custom__is_action class => 'form-control change-to-submit'}
-                            </div>
-
-                            <div>
-                                <label>
-                                    <i class="fa fa-tags m-r-xxs" style="color:#0d9488;"></i> {_'admin.terms.labels' ?? 'Tem nhãn'}
-                                </label>
-                                {input custom__labels class => 'form-control change-to-submit'}
-                            </div>
-                        </div>
+                        <label class="pv-toolbar-field">
+                            <span><i class="fa fa-store"></i> {_'admin.terms.branch'}</span>
+                            {input custom__branches class => 'form-control change-to-submit'}
+                        </label>
+                        <label class="pv-toolbar-field">
+                            <span><i class="fa fa-folder-tree"></i> {_'admin.terms.category'}</span>
+                            {input custom__category class => 'form-control change-to-submit'}
+                        </label>
+                        <label class="pv-toolbar-field">
+                            <span><i class="fa fa-eye"></i> {_'admin.terms.isActive'}</span>
+                            {input custom__is_active class => 'form-control change-to-submit'}
+                        </label>
                     </div>
                 {/form}
             {/snippet}
 
+            <div class="pv-head">
+                <div class="pv-countline">
+                    {$itemCount} {_admin.pv.products} · {$statusCounts['running']} {_admin.pv.inAkce} · {$statusCounts['planned']} {_admin.pv.plannedCount}
+                </div>
+                <div class="pv-pills">
+                    {foreach ['' => 'all', 'running' => 'running', 'planned' => 'planned', 'toprint' => 'toprint'] as $pillStatus => $pillKey}
+                        <a n:href="statusFilter! $pillStatus" n:class="pv-pill, $statusFilter === $pillStatus ? pv-on">{_"admin.pv.filter.$pillKey"}<span>{$statusCounts[$pillKey]}</span></a>
+                    {/foreach}
+                </div>
+            </div>
 
-                <style>
-                    .mosaic-list-table-wrap { overflow-x: auto; overflow-y: visible; padding-bottom: 25px; }
-                </style>
-                <div class="mosaic-list-table-wrap dataTables_wrapper m-t-md">
-                        <table class="table table-striped table-hover mosaic-table-compact" style="margin-bottom:0;width:100%;">
-                            <thead>
-                            <tr>
-                                <th class="w-40 text-center" style="width:36px;min-width:36px;"></th>
-                                <th class="w-50 text-center" style="width:48px;min-width:48px;"></th>
-                                <th style="min-width:200px;">
-                                    <div>
-                                        <strong>{_admin.terms.name} {control sorting 'name'} / {_admin.terms.code} {control sorting 'code'} / {_admin.terms.createdAt} {control sorting 'created_at'}</strong>
-                                    </div>
-                                </th>
-                                <th class="visible-xxl w-200" style="min-width:160px;">
-                                    <div class="w-200"><strong>{_admin.terms.category}</strong></div>
-                                </th>
-                                <th class="text-center" colspan="4" style="min-width:340px;">
-                                    <div><strong>{_admin.terms.action}</strong></div>
-                                </th>
-                                <th class="text-center" style="width:235px;min-width:235px;">
-                                    <div><strong>{_admin.terms.labels}</strong></div>
-                                </th>
-                                <th class="text-center" style="width:48px;min-width:48px;">
-                                    <i class="far fa-eye" data-toggle="tooltip" title="{_admin.terms.isActive}"></i>
-                                </th>
-                                <th class="text-center" style="width:65px;min-width:65px;padding-right:8px;">
-                                    <i class="fa fa-ellipsis-v text-muted" title="{_admin.ui.actions}"></i>
-                                </th>
-                            </tr>
-                            <tr>
-                                <th colspan="3"></th>
-                                <th class="visible-xxl"></th>
-                                <th class="text-center" style="width:130px;min-width:130px;">
-                                    <div style="font-weight:700;">{_admin.terms.price}</div>
-                                </th>
-                                <th class="text-center" style="width:150px;min-width:150px;">
-                                    <div style="font-weight:700;">{_admin.terms.date}</div>
-                                </th>
-                                <th class="w-40 text-center" style="width:35px;min-width:35px;">
-                                    <div><i class="fa fa-save"></i></div>
-                                </th>
-                                <th class="w-40 text-center" style="width:35px;min-width:35px;">
-                                    <div><i class="far fa-percent"></i></div>
-                                </th>
-                                <th></th>
-                                <th colspan="2">
-                                </th>
-                            </tr>
-                            </thead>
-                            <tbody n:snippet="list">
-                            {foreach $items as $item}
-                                {var $price = $item->getPrice($presenter->session->filters[$presenter->getName()]['custom__branches'])}
-                                <tr class="row-as-link" data-id="{$item->id}">
-                                    <td class="row-as-link-ignore text-center">
-                                        {control bulkActions:checkbox $item}
-                                    </td>
-
-                                    <td class="td-image text-center">
-                                        <img n:if="$image = $item->getImage()" src="{$image->file|image:adminGallery}" />
-                                    </td>
-                                    <td>
-                                        <small><i class="far fa-clock" title="{_admin.terms.createdAt}: {$item->created_at|date:'d.m.Y H:i'}" data-toggle="tooltip"></i></small>
-                                        <strong>{$item->name}</strong><br />
-                                        <small class="pull-left">
-                                            {if $item->code_ean}
-                                                {_admin.terms.ean}: {$item->code_ean}
+            <div class="pv-table">
+                <div class="pv-table-inner">
+                    <div class="pv-grid pv-grid-head">
+                        <div>{control bulkActions:headCheckbox}</div>
+                        <div>{_admin.pv.colProduct} {control sorting 'name'}</div>
+                        <div>{_admin.pv.colPrice}</div>
+                        <div>{_admin.pv.colAkce}</div>
+                        <div>{_admin.pv.colLabels}</div>
+                        <div></div>
+                    </div>
+                    <div class="pv-rows">
+                        {var $branchesId = $presenter->session->filters[$presenter->getName()]['custom__branches']}
+                        {foreach $items as $item}
+                            {var $price = $item->getPrice($branchesId)}
+                            {var $open = $autoOpenSearch && $iterator->isFirst() && $price}
+                            <div n:class="pv-row, $open ? pv-open-labels-on" data-id="{$item->id}">
+                                <div class="pv-grid">
+                                    <div>{control bulkActions:checkbox $item}</div>
+                                    <div class="pv-prod">
+                                        <div class="pv-thumb">
+                                            {if $image = $item->getImage()}
+                                                <img src="{$image->file|image:adminGallery}" alt="">
+                                            {else}
+                                                {=mb_strtoupper(mb_substr((string)$item->name, 0, 1))}
                                             {/if}
-                                        </small>
-                                    </td>
-                                    <td class="visible-xxl">
-                                        {foreach $item->getCategories() as $i}
-                                            <span>{$i->name}</span>{sep}<br>{/sep}
-                                        {/foreach}
-                                    </td>
-                                    <td class="row-as-link-ignore product-price-fields" style="width:130px;min-width:130px;vertical-align:middle;">
-                                        <div style="margin-bottom:6px;">
-                                            <label>{_admin.terms.basePrice}:</label>
-                                            <div style="display:flex;align-items:center;gap:6px;">
-                                                <input type="number" data-item-id="{$price->id ?? NULL}" step="0.01" class="form-control form-control-sm text-right" name="price__{$item->id}" value="{$price && $price->price? $price->price : 0}" style="flex:1;font-weight:600;color:#1e293b;">
-                                                <a n:href="showPricesLog! $item->id, $presenter->session->filters[$presenter->getName()]['custom__branches']" class="ajax-modal" data-target="#modal-pricesLog" title="{_admin.ui.priceHistory}" style="color:#94a3b8;font-size:13px;display:flex;align-items:center;justify-content:center;width:18px;flex-shrink:0;">
-                                                    <i class="far fa-clock"></i>
-                                                </a>
-                                            </div>
                                         </div>
-
-                                        <div>
-                                            <label>{_admin.terms.actionPriceAbb}:</label>
-                                            <div style="display:flex;align-items:center;gap:6px;">
-                                                <input type="number" data-item-id="{$price->id ?? NULL}" step="0.01" class="form-control form-control-sm text-right" name="price_action__{$item->id}" value="{$price && $price->price_action ? $price->price_action : ''}" placeholder="—" style="flex:1;font-weight:600;color:#e11d48;">
-                                                <span style="display:flex;align-items:center;justify-content:center;width:18px;flex-shrink:0;">
-                                                    <i class="far fa-circle-info text-muted" data-toggle="tooltip" title="{$item->formatBranchTooltip($branchesPairs, 'price_action')}" style="color:#94a3b8;font-size:13px;cursor:help;"></i>
-                                                </span>
-                                            </div>
+                                        <div class="pv-prod-text">
+                                            <a n:href="edit $item->id" class="pv-name">{$item->name}</a>
+                                            <span class="pv-ean">
+                                                {if $item->code_ean}EAN {$item->code_ean}{/if}
+                                                <span n:if="!$item->is_active" class="pv-inactive">{_admin.pv.inactive}</span>
+                                            </span>
                                         </div>
-
-                                        {var $refPrice = $item->getRefPrice($presenter->session->filters[$presenter->getName()]['custom__branches'])}
-                                        {if $refPrice}
-                                            <div style="margin-top:4px;">
-                                                <span class="label label-warning" style="font-weight: normal; font-size: 9.5px; display: block; white-space: normal; line-height: 1.2; padding: 2px 4px; border-radius: 4px;" data-toggle="tooltip" title="Na webu se jako přeškrtnutá cena zobrazí {$refPrice|price} (nejnižší cena za posledních 30 dní), nikoliv základní cena.">
-                                                    <i class="fas fa-triangle-exclamation"></i> {$refPrice|price}
-                                                </span>
-                                            </div>
-                                        {/if}
-                                    </td>
-                                    <td class="row-as-link-ignore product-date-fields" style="width:150px;min-width:150px;vertical-align:middle;">
-                                        <div class="calendar-today-overlay" style="margin-bottom:6px;">
-                                            <label>{_admin.terms.actionFrom}:</label>
-                                            <div style="display:flex;align-items:center;gap:5px;">
-                                                <input type="text" data-item-id="{$price->id ?? NULL}" class="form-control form-control-sm text-center date-picker" name="action_from__{$item->id}" value="{$price && $price->action_from ? $price->action_from->format('d.m.Y') : ''}" placeholder="dd.mm.yyyy" style="flex:1;font-weight:500;">
-                                                <a href="#" class="calendar-today-btn btn btn-default btn-xs" title="{_admin.ui.today}" style="height:28px;width:28px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;border:1px solid #cbd5e1;background:#f8fafc;color:#475569;flex-shrink:0;padding:0;">
-                                                    <i class="fa fa-calendar-day" style="font-size:11px;"></i>
-                                                </a>
-                                                <span style="display:flex;align-items:center;justify-content:center;width:18px;flex-shrink:0;">
-                                                    <i class="far fa-circle-info text-muted" data-toggle="tooltip" title="{$item->formatBranchTooltip($branchesPairs, 'action_from')}" style="color:#94a3b8;font-size:13px;cursor:help;"></i>
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <div class="calendar-today-overlay">
-                                            <label>{_admin.terms.actionTo}:</label>
-                                            <div style="display:flex;align-items:center;gap:5px;">
-                                                <input type="text" data-item-id="{$price->id ?? NULL}" class="form-control form-control-sm text-center date-picker" name="action_to__{$item->id}" value="{$price && $price->action_to ? $price->action_to->format('d.m.Y') : ''}" placeholder="dd.mm.yyyy" style="flex:1;font-weight:500;">
-                                                <a href="#" class="calendar-today-btn btn btn-default btn-xs" title="{_admin.ui.today}" style="height:28px;width:28px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;border:1px solid #cbd5e1;background:#f8fafc;color:#475569;flex-shrink:0;padding:0;">
-                                                    <i class="fa fa-calendar-day" style="font-size:11px;"></i>
-                                                </a>
-                                                <span style="display:flex;align-items:center;justify-content:center;width:18px;flex-shrink:0;">
-                                                    <i class="far fa-circle-info text-muted" data-toggle="tooltip" title="{$item->formatBranchTooltip($branchesPairs, 'action_to')}" style="color:#94a3b8;font-size:13px;cursor:help;"></i>
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="row-as-link-ignore text-center">
-                                        <button type="button" class="btn btn-default btn-sm btn-save-prices hidden" title="{_admin.buttons.save}" data-products-id="{$item->id}" style="float: none; margin-right: 0;">
-                                            <i class="fa fa-save"></i>
-                                        </button>
-                                        <label class="new-a4-template-toggle" title="{_admin.terms.plNewTemplateHint}" style="display:flex;align-items:center;justify-content:center;gap:4px;margin:4px 0 0;font-size:10px;font-weight:600;color:#64748b;cursor:pointer;white-space:nowrap;">
-                                            <input type="checkbox" class="new-a4-template-checkbox" data-url="{link toggleNewA4Template! $item->id, 1}" style="margin:0;" {if in_array((int)$item->id, $presenter->getNewA4ProductIds(), TRUE)}checked{/if}>
-                                            {_admin.terms.plNewTemplate}
-                                        </label>
-                                    </td>
-                                    <td class="row-as-link-ignore text-center">
-                                        {control "productActions-$item->id"}
-                                    </td>
-                                    <td class="row-as-link-ignore text-center" style="width:235px;min-width:235px;vertical-align:middle;">
-                                        {control "productLabels-$item->id"}
-                                    </td>
-                                    <td class="text-center row-as-link-ignore" style="width:48px;min-width:48px;vertical-align:middle;">
-                                        {include APP_DIR.'/AdminModule/__inc/boolSwitch.latte', 'item' => $item, 'param' => 'is_active', 'isEye' => TRUE}
-                                    </td>
-                                    <td class="actions row-as-link-ignore text-center" style="width:65px;min-width:65px;padding-right:8px;vertical-align:middle;">
-                                        <div class="dropdown" style="display:inline-block;">
-                                            <a class="dropdown-toggle btn btn-default mosaic-row-actions-btn" data-toggle="dropdown" href="#" title="{_admin.ui.actions}">
-                                                <i class="fa fa-bars"></i>
-                                            </a>
-                                            <ul class="dropdown-menu dropdown-menu-right dropdown-list" style="border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.12);padding:6px 0;min-width:180px;">
+                                    </div>
+                                    {control "productLabels-$item->id":price}
+                                    {control "productLabels-$item->id":chips}
+                                    <div class="pv-actions">
+                                        <a n:if="$price" n:href="downloadProductAllLabelsPdf! $item->id, 0" target="_blank" class="pv-iconbtn pv-teal" title="{_admin.pv.previewAll}">◉</a>
+                                        <a n:href="edit $item->id" class="pv-iconbtn" title="{_admin.ui.edit}">✎</a>
+                                        <span class="pv-iconbtn pv-eye">{include APP_DIR.'/AdminModule/__inc/boolSwitch.latte', 'item' => $item, 'param' => 'is_active', 'isEye' => TRUE}</span>
+                                        <div class="dropdown">
+                                            <a class="dropdown-toggle pv-iconbtn" data-toggle="dropdown" href="#" title="{_admin.ui.actions}">⋯</a>
+                                            <ul class="dropdown-menu dropdown-menu-right dropdown-list">
                                                 {control baseActions $item, $iterator}
                                             </ul>
                                         </div>
-                                    </td>
-                                </tr>
-                            {/foreach}
-                            </tbody>
-                        </table>
+                                    </div>
+                                </div>
 
-                    {control paginator}
+                                <div class="pv-panel pv-panel-price" hidden>
+                                    <div class="pv-box">
+                                        <div class="pv-box-head"><b>{_admin.pv.priceTitle}</b><span>{$item->name}</span></div>
+                                        <div class="pv-pfields" data-products-id="{$item->id}" data-item-id="{$price->id ?? ''}">
+                                            <label>{_admin.pv.priceUnit}
+                                                <select name="price_unit__{$item->id}" class="pv-unit select-default">
+                                                    <option n:foreach="\ProductsEntity::PRICE_UNITS as $unitOption" value="{$unitOption}" n:attr="selected: $unitOption === $item->getPriceUnit()">{$unitOption}</option>
+                                                </select>
+                                            </label>
+                                            <label>{_admin.pv.basePrice}
+                                                <input type="number" step="0.01" name="price__{$item->id}" value="{$price && $price->price ? $price->price : ''}" class="pv-num">
+                                            </label>
+                                            <label>{_admin.pv.akcePrice}
+                                                <input type="number" step="0.01" name="price_action__{$item->id}" value="{$price && $price->price_action ? $price->price_action : ''}" placeholder="—" class="pv-num pv-num-akce">
+                                            </label>
+                                            <label class="calendar-today-overlay">{_admin.pv.akceFrom}
+                                                <input type="text" name="action_from__{$item->id}" value="{$price && $price->action_from ? $price->action_from->format('d.m.Y') : ''}" placeholder="dd.mm.yyyy" class="date-picker pv-date" autocomplete="off">
+                                            </label>
+                                            <label class="calendar-today-overlay">{_admin.pv.akceTo}
+                                                <input type="text" name="action_to__{$item->id}" value="{$price && $price->action_to ? $price->action_to->format('d.m.Y') : ''}" placeholder="dd.mm.yyyy" class="date-picker pv-date" autocomplete="off">
+                                            </label>
+                                        </div>
+                                        <div class="pv-pfoot">
+                                            <div class="pv-hint"></div>
+                                            <a n:href="showPricesLog! $item->id, $branchesId" class="ajax-modal pv-btn" data-target="#modal-pricesLog"><i class="far fa-clock m-r-xxs"></i> {_admin.ui.priceHistory}</a>
+                                            <button type="button" class="pv-btn pv-btn-red pv-end-akce">{_admin.pv.endAkce}</button>
+                                            <button type="button" class="pv-btn pv-btn-dark pv-save-price">{_admin.pv.save}</button>
+                                        </div>
+                                    </div>
+                                </div>
 
-                    {snippet printSummary}
-                        <div class="print-summary-sticky-bar" style="position:sticky;bottom:10px;z-index:90;background:#fff;border:1px solid #14b8a6;border-radius:12px;padding:12px 20px;margin-top:20px;box-shadow:0 4px 18px rgba(0,0,0,0.12);display:flex;align-items:center;justify-content:space-between;gap:15px;">
-                            <div style="font-size:13.5px;color:#5d6a7d;display:flex;align-items:center;gap:10px;">
-                                <i class="fas fa-tags" style="color:#14b8a6;font-size:18px;"></i>
-                                <span>{_admin.terms.selected} <strong style="color:#17202b;font-size:15px;">{$selectedProductsCount ?? 0}</strong> {_admin.terms.products} · <strong style="color:#042f2e;background:#ccfbf1;padding:3px 10px;border-radius:999px;font-size:14px;font-weight:800;">{$totalLabels ?? 0} {_admin.terms.labels}</strong></span>
+                                <div class="pv-panel pv-panel-labels" n:attr="hidden: !$open">
+                                    <div class="pv-lpanel">
+                                        {control "productLabels-$item->id":panel}
+                                    </div>
+                                </div>
                             </div>
-                            <div style="display:flex;align-items:center;gap:10px;">
-                                <a n:href="clearAllPrintCounts!" class="btn btn-default ajax with-confirm" data-message="{_admin.terms.reallyRemoveLabels}" style="border:1px solid #d9e0e8;border-radius:8px;padding:7px 14px;font-weight:600;color:#5d6a7d;font-size:13px;">
-                                    <i class="fa fa-trash-alt text-muted m-r-xxs"></i> {_admin.terms.clearAll}
-                                </a>
-                                <a href="#" class="btn" style="border:none;border-radius:8px;background:#14b8a6;color:#042f2e;padding:8px 20px;font-size:13.5px;font-weight:800;box-shadow:0 2px 6px rgba(20,184,166,0.3);text-decoration:none;display:inline-flex;align-items:center;gap:6px;" onclick="$('#modal-printPreview').modal('show'); return false;">
-                                    {_admin.terms.previewAndPrint} →
-                                </a>
-                            </div>
-                        </div>
-                    {/snippet}
+                        {/foreach}
+                        <div n:if="!count($items)" class="pv-empty">{_admin.pv.noRows}</div>
+                    </div>
                 </div>
+            </div>
+
+            {control paginator}
+
+            {snippet printSummary}
+                <div class="pv-bar-wrap" data-labels="{$totalLabels ?? 0}" n:attr="hidden: empty($totalLabels)">
+                    <div class="pv-bar">
+                        <span class="pv-bar-sum"><b>{$selectedProductsCount ?? 0}</b> {_admin.pv.products} · <b class="pv-bar-labels">{$totalLabels ?? 0} {_admin.pv.labels}</b></span>
+                        <div class="pv-bar-chips">
+                            <span n:foreach="$printGroups as $group" class="pv-bar-chip">{$group['name']} ×{$group['count']} · {$group['pages']} A4</span>
+                        </div>
+                        <div class="pv-flex"></div>
+                        <span class="pv-bar-checked" hidden>
+                            <select class="pv-default-tpl select-default" title="{_admin.pv.defaultTemplate}">
+                                {foreach \ProductLabelsEntity::TYPES_ARR as $typeId => $def}
+                                    {continueIf $def['group'] === \ProductLabelsEntity::GROUP_AKCE || \ProductLabelsEntity::isLockedType($typeId)}
+                                    <option value="{$typeId}">{$global['productLabelTypes'][$typeId]}</option>
+                                {/foreach}
+                            </select>
+                            <button type="button" class="pv-bar-btn pv-bulk-add" data-url="{link bulkAddLabels!}">+ {_admin.pv.toChecked} (<span class="pv-checked-n">0</span>)</button>
+                        </span>
+                        <a n:href="clearAllPrintCounts!" class="pv-bar-btn ajax with-confirm" data-message="{_admin.terms.reallyRemoveLabels}">{_admin.pv.clear}</a>
+                        <a href="#" class="pv-bar-go" onclick="$('#modal-printPreview').modal('show'); return false;">{_admin.pv.previewPrint} →</a>
+                    </div>
+                </div>
+            {/snippet}
         </div>
     </div>
 </div>
@@ -521,133 +395,77 @@
 </div>
 
 <div id="modal-labelsForm" class="modal fade">
-    <div class="modal-dialog modal-md">
-        <div n:snippet="labelsForm" class="modal-content">
+    <div class="modal-dialog pv-editor-dialog">
+        <div n:snippet="labelsForm" class="modal-content pv-editor">
             {form labelsForm class => 'ajax ajax-modal-close'}
-                <div class="modal-header">
-                    <h4>{_admin.terms.prductLabel}{$form['type_id']->getValue() && isset($global['productLabelTypes'][$form['type_id']->getValue()]) ? ' - '.$global['productLabelTypes'][$form['type_id']->getValue()] : ''}</h4>
+                {var $edTypeId = (int)$form['type_id']->getValue()}
+                {var $edDef = \ProductLabelsEntity::TYPES_ARR[$edTypeId] ?? NULL}
+                <div class="pv-editor-head">
+                    <div class="pv-editor-title">
+                        <b>{_admin.pv.editorTitle} · {$global['productLabelTypes'][$edTypeId] ?? ''}</b>
+                        <span n:if="!empty($productLabel)">{$productLabel->name} · {$edDef['dims'] ?? ''} mm</span>
+                    </div>
+                    <button type="button" class="pv-editor-x" data-dismiss="modal" aria-label="{_admin.buttons.close}">×</button>
                 </div>
-                <div n:if="!empty($productLabel)" class="modal-body clearfix">
+                <div n:if="!empty($productLabel)" class="pv-editor-body">
+                    <div class="pv-ed-shared">{_admin.pv.sharedNote}</div>
                     <div class="hidden">
                         {input products_id}
                         {input branches_id}
-                        {input type_id class => 'toggle-trigger', 'data-target' => '.labelType'}
+                        {input type_id}
+                        {input price_text}
                     </div>
-                    <div class="row">
-                        <div class="col-lg-8">
-                            <div class="form-group">
-                                {label product_label_headers_id /}
-                                {input product_label_headers_id class => 'form-control'}
-                            </div>
-                        </div>
-                        <div class="col-lg-4">
-                            <div class="form-group">
-                                {label count /}
-                                {input count class => 'form-control'}
-                            </div>
-                        </div>
+                    <div class="pv-ed-grid pv-ed-grid-head">
+                        <label><span>{_admin.pv.header} <small class="pv-ed-this">{_admin.pv.thisTemplate}: {$global['productLabelTypes'][$edTypeId] ?? ''}</small></span>{input product_label_headers_id class => 'pv-input'}</label>
+                        <label>{_admin.pv.count}{input count class => 'pv-input', type => number, min => 0}</label>
                     </div>
-
-                    <div class="form-group">
-                        {label name /}
-                        {input name class => 'form-control form-control-bigger'}
+                    <label>{_admin.pv.name}{input name class => 'pv-input pv-input-strong'}</label>
+                    <div class="pv-ed-grid">
+                        <label>{_admin.pv.sleva}
+                            {if $labelIsAkce}
+                                {input sale_percent class => 'pv-input', min => 0, max => 99, placeholder => $labelAutoPct}
+                            {else}
+                                {input sale_percent class => 'pv-input pv-input-off', readonly => TRUE}
+                            {/if}
+                        </label>
+                        <label>{_admin.pv.priceUnit}{input price_unit class => 'pv-input'}</label>
+                        <label>{_admin.pv.moreSpecies}{input is_more_species class => 'pv-input'}</label>
+                        <label>{_admin.pv.origin}{input origin_countries_id class => 'pv-input'}</label>
                     </div>
-                    <div class="row">
-                        <div class="col-lg-3">
-                            <div class="form-group">
-                                {label sale_percent /}
-                                {input sale_percent class => 'form-control'}
-                            </div>
-                        </div>
-                        <div class="col-lg-3">
-                            <div class="form-group">
-                                {label price_text /}
-                                {input price_text class => 'form-control toggle-trigger', 'data-target' => '.labelPriceText'}
-                            </div>
-                        </div>
-                        <div class="col-lg-6 labelPriceText" data-show-on="{\ProductLabelsEntity::PRICE_TYPE_CZK_100g}">
-                            <div class="form-group">
-                                {label default_units_weight /}
-                                <div class="row">
-                                    <div class="col-lg-6">
-                                        {input default_units_weight class => 'form-control'}
-                                    </div>
-                                    <div class="col-lg-6">
-                                        {input default_units_id class => 'form-control'}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="pv-ed-note">{$labelIsAkce ? sprintf(('admin.pv.slevaNoteAkce'|translate), $labelAutoPct) : ('admin.pv.slevaNoteStd'|translate)}</div>
+                    <div class="pv-ed-checks">
+                        <label><input n:name="hide_validity" class="pv-tog-validity"> {_admin.pv.hideValidity}</label>
+                        <label><input n:name="hide_ingredients" class="pv-tog-ingredients"> {_admin.pv.hideIngredients}</label>
+                        <label><input n:name="rozmrazeno"> ❄ {_admin.pv.thawed} <span>{_admin.pv.thawedNote}</span></label>
                     </div>
-                    <div class="row">
-                        <div class="col-lg-3">
-                            <div class="form-group">
-                                {label is_more_species /}
-                                {input is_more_species class => 'form-control'}
-                            </div>
-                        </div>
-                        <div class="col-lg-3">
-                            <div class="form-group">
-                                {label origin_countries_id /}
-                                {input origin_countries_id class => 'form-control'}
-                            </div>
-                        </div>
-                        <div class="col-lg-3">
-                            <div class="form-group" style="margin-top:24px;">
-                                <label class="checkbox-inline" style="font-weight:600;">
-                                    {input hide_validity} {_admin.terms.hideValidity}
-                                </label>
-                            </div>
-                        </div>
-                        <div class="col-lg-3">
-                            <div class="form-group" style="margin-top:24px;">
-                                <label class="checkbox-inline" style="font-weight:600;">
-                                    {input hide_ingredients} {_admin.terms.hideIngredients}
-                                </label>
-                            </div>
-                        </div>
-                        <div class="col-lg-3">
-                            <div class="form-group" style="margin-top:24px;">
-                                <label class="checkbox-inline" style="font-weight:600;">
-                                    {input thawed} Rozmrazeno (jen Pečivo)
-                                </label>
-                            </div>
-                        </div>
+                    <div class="pv-ed-grid pv-ed-validity">
+                        <label>{_admin.pv.validity}
+                            <select class="pv-input change-handler" data-handler="{link setLabelActionType!}&form=labelsForm&productsId={$form['products_id']->getValue()}&idItem=">
+                                <option>– {_admin.pv.choose} –</option>
+                                <option n:foreach="$productLabelActionTypesPairs as $labelActionTypeId => $labelActionTypeName" value="{$labelActionTypeId}">{$labelActionTypeName}</option>
+                            </select>
+                        </label>
+                        <label>{_admin.pv.validityText}{input sale_text class => 'pv-input'}</label>
                     </div>
-                    <div class="form-group">
-                        {label sale_text /}
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <select class="change-handler" data-handler="{link setLabelActionType!}&form=labelsForm&productsId={$form['products_id']->getValue()}&idItem=">
-                                    <option>- Vyberte -</option>
-                                    <option n:foreach="$productLabelActionTypesPairs as $labelActionTypeId => $labelActionTypeName" value="{$labelActionTypeId}">{$labelActionTypeName}</option>
-                                </select>
-                            </div>
-                            <div class="col-lg-6">
-                                {input sale_text class => 'form-control'}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        {label note_1 /}
-                        {input note_1 class => 'form-control'}
-                    </div>
-                    <div class="form-group">
-                        {label note_2 /}
-                        {input note_2 class => 'form-control'}
-                    </div>
-                    <div class="form-group">
-                        {label note_3 /}
-                        {input note_3 class => 'form-control'}
+                    <label class="pv-ed-ingredients">{_admin.pv.ingredients}
+                        {input ingredients class => 'pv-input pv-textarea', rows => 3, placeholder => ($productLabel->ingredients ? mb_substr((string)$productLabel->ingredients, 0, 120) . '…' : ('admin.pv.ingredientsPh'|translate))}
+                        <small>{_admin.pv.ingredientsHint}</small>
+                    </label>
+                    <label>{_admin.pv.note} 1{input note_1 class => 'pv-input'}</label>
+                    <label>{_admin.pv.note} 2{input note_2 class => 'pv-input'}</label>
+                    <label>{_admin.pv.note} 3{input note_3 class => 'pv-input'}</label>
+                    <div class="pv-ed-grid pv-ed-unitprice">
+                        <label>{_admin.pv.unitPrice}{input default_units_weight class => 'pv-input'}</label>
+                        <label>&nbsp;{input default_units_id class => 'pv-input'}</label>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button n:name="submit" class="btn mosaic-topbtn mosaic-topbtn-primary">
-                        <i class="fa fa-save"></i> {_admin.buttons.save}
-                    </button>
-                    <a href="#" class="btn btn-default mosaic-topbtn" data-dismiss="modal">
-                        <i class="fa fa-times"></i> {_admin.buttons.close}
-                    </a>
+                <div class="pv-editor-foot">
+                    <a n:if="!empty($productLabel)" n:href="resetLabel! $productLabel->id, $edTypeId" class="ajax pv-ed-reset">{_admin.pv.reset}</a>
+                    <div class="pv-flex"></div>
+                    <a n:if="!empty($productLabel)" n:href="downloadSingleProductLabelPdf! $productLabel->id, $edTypeId, 0" target="_blank" class="pv-btn pv-btn-outline">◉ {_admin.pv.preview}</a>
+                    <a n:if="!empty($productLabel)" n:href="downloadProductAllLabelsPdf! $productLabel->id, 0" target="_blank" class="pv-btn pv-btn-outline">◉ {_admin.pv.previewAll}</a>
+                    <a href="#" class="pv-btn" data-dismiss="modal">{_admin.pv.close}</a>
+                    <button n:name="submit" class="pv-btn pv-btn-teal">{_admin.pv.saveChanges}</button>
                 </div>
             {/form}
         </div>
@@ -772,11 +590,16 @@
                                 {input note_3 class => 'form-control'}
                             </div>
                         </div>
-                        <div class="col-lg-2 col-lg-offset-1">
+                        <div class="col-lg-3">
                             <h3 class="m-t-no">{_admin.terms.numberOfPrints}</h3>
-                            <div n:foreach="$global['productLabelTypes'] as $productLabelTypeId => $productLabelType" class="form-group">
-                                {label 'label_type_count__'.$productLabelTypeId /}
-                                {input 'label_type_count__'.$productLabelTypeId class => 'form-control'}
+                            <div class="pv-multi-counts">
+                                {foreach \ProductLabelsEntity::TYPES_ARR as $productLabelTypeId => $productLabelTypeDef}
+                                    {continueIf \ProductLabelsEntity::isLockedType($productLabelTypeId)}
+                                    <label n:class="$productLabelTypeDef['group'] === \ProductLabelsEntity::GROUP_AKCE ? pv-akce">
+                                        <span>{$global['productLabelTypes'][$productLabelTypeId]}</span>
+                                        {input 'label_type_count__'.$productLabelTypeId class => 'form-control', type => number, min => 0}
+                                    </label>
+                                {/foreach}
                             </div>
                         </div>
                     </div>
@@ -1019,7 +842,7 @@
                                                     <a n:href="removeFromQueue! $it['label']->id" class="ajax" title="{_admin.terms.removeFromQueue}" style="width:20px;height:20px;border:none;border-radius:5px;background:#fde8e8;display:flex;align-items:center;justify-content:center;color:#c0392b;text-decoration:none;font-size:11px;font-weight:700;margin-left:2px;">×</a>
                                                 </div>
                                                 <div style="display:flex;align-items:center;gap:4px;margin-bottom:6px;">
-                                                    <span style="background:#17202b;color:#fff;font-weight:800;font-style:italic;padding:1px 6px;font-size:9.5px;border-radius:3px;">Fikko Cena</span>
+                                                    <span style="background:{$group['isAkce'] ? '#b91c1c' : '#17202b'|noescape};color:#fff;font-weight:800;font-style:italic;padding:1px 6px;font-size:9.5px;border-radius:3px;">{$it['label']->getHeader()?->name ?: 'Fikko Cena'}</span>
                                                 </div>
                                                 <div style="font-weight:700;line-height:1.3;padding-right:75px;margin-bottom:8px;color:#0f172a;font-size:12px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;line-clamp:1;" title="{$it['product']->name}">
                                                     {$it['product']->name}

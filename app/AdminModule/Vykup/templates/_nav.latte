@@ -1,0 +1,23 @@
+{* Výkup lahví: title, branch, tabs (every page). *}
+<div class="vk-head">
+    <div>
+        <div class="vk-kicker">{_admin.vykup.kicker}</div>
+        <div class="vk-title">{_admin.vykup.title}</div>
+    </div>
+    <div class="vk-flex"></div>
+    {if count($vkBranchesPairs) > 1}
+        <label class="vk-branch">
+            <span>{_admin.vykup.branch}</span>
+            <select class="select-default vk-branch-select" onchange="location.href = this.value">
+                <option n:foreach="$vkBranchesPairs as $bid => $bname" value="{link branch! $bid}" n:attr="selected: $bid === $vkBranchesId">{$bname}</option>
+            </select>
+        </label>
+    {else}
+        <div class="vk-branch"><span>{_admin.vykup.branch}</span> <b>{$vkBranch['name']}</b></div>
+    {/if}
+    <div class="vk-tabs">
+        {foreach ['default' => 'tabPrijem', 'historie' => 'tabHist', 'uzaverka' => 'tabUz', 'obdobi' => 'tabPeriod', 'pracovnici' => 'tabStaff'] as $vkAction => $vkKey}
+            <a href="{link $vkAction}" n:class="vk-tab, $presenter->getAction() === $vkAction ? vk-on">{_"admin.vykup.$vkKey"}</a>
+        {/foreach}
+    </div>
+</div>

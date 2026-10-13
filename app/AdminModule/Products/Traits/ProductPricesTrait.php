@@ -215,19 +215,18 @@ trait ProductPricesTrait
 			}
 		}
 
-		if (isset($this['productActions-'.$idProduct])) {
-			$this['productActions-'.$idProduct]->redrawControl('list');
-		}
-
-		if (isset($this['productActions-'.$idProduct])) {
-			$this['productLabels-'.$idProduct]->redrawControl('list');
-		}
+		$this['productLabels-'.$idProduct]->redrawAll();
 
 		return TRUE;
 	}
 
-	public function handleUpdatePricesAll($itemId, $productsId, $price = null, $price_action = null, $action_from = null, $action_to = null, $branchId = null, $currencyId = null)
+	public function handleUpdatePricesAll($itemId, $productsId, $price = null, $price_action = null, $action_from = null, $action_to = null, $branchId = null, $currencyId = null, $price_unit = null)
 	{
+		// "Cena za" of the "Cena a akce" panel (products.price_unit)
+		if ($price_unit !== null && in_array($price_unit, \ProductsEntity::PRICE_UNITS, TRUE)) {
+			$this->repository->getDatabase()->table('products')->where('id', (int)$productsId)->update(['price_unit' => $price_unit]);
+		}
+
 		// Resolve foreign keys (only used for insert); keep them untouched on update to avoid FK issues
 		$resolvedBranchId = (int)($branchId ?: ($this->session->filters[$this->getName()]['custom__branches'] ?? 0));
 		$resolvedCurrencyId = (int)$this->globalContainer->getDefaultCurrency()->id;
@@ -307,13 +306,7 @@ trait ProductPricesTrait
 			}
 		}
 
-		$idProduct = (int)$productsId;
-		if (isset($this['productActions-'.$idProduct])) {
-			$this['productActions-'.$idProduct]->redrawControl('list');
-		}
-		if (isset($this['productLabels-'.$idProduct])) {
-			$this['productLabels-'.$idProduct]->redrawControl('list');
-		}
+		$this['productLabels-'.(int)$productsId]->redrawAll();
 
 		return TRUE;
 	}

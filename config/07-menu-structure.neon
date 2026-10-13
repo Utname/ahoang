@@ -27,6 +27,9 @@ parameters:
 		PrintTemplates: [
 			icon: 'fas fa-print'
 		]
+		Vykup: [
+			icon: 'fas fa-recycle'
+		]
 		Messages: [
 			icon: 'fas fa-message'
 		]

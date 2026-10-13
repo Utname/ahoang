@@ -9,7 +9,9 @@
          exactly at the block's top, so each top below is a reference baseline.
        - The reference row is space-between: the 30-day / Ušetříte column is
          centred under itself at the left, "Naše cena" is flush right. A plain
-         comparison reuses it with "Běžná cena" and no strike. */
+         comparison reuses it with a one-line "Běžná cena" and no strike.
+       - Also renders "Vel. 2 Složení" (167 x 38, type 15): same label plus the
+         Složení column, chosen by the template width. */
     .fikko-vel2-akce {
         position: relative;
         width: 132.2mm;
@@ -47,7 +49,7 @@
     .save-text { left: 2.8mm; top: 4.79mm; color: #fff; }
     .save-copy { font-size: 2.4mm; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; }
     .save-val { font-size: 4.5mm; margin-left: 1mm; }
-    .save-suffix { font-size: 1.8mm; font-weight: 600; margin-left: 1mm; }
+    .save-suffix { font-size: 2.1mm; font-weight: 600; margin-left: 1mm; }
 
     .our-label { font-size: 2.2mm; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; }
 
@@ -55,6 +57,12 @@
     .ean { left: 25.9mm; font-weight: 600; }
     .note3 { left: 25.6mm; width: 100mm; }
     .unit { left: 0; width: 130.3mm; }
+
+    /* "vel. 2 Slozeni.dc.html" (167 x 38): the same label plus a 34mm Složení
+       column on the right (padding 1.5 x 2mm, title then text 0.8mm below). */
+    .slozeni-col { position: absolute; left: 132.2mm; top: 0; width: 33.6mm; height: 37.2mm; border-left: 0.4mm dashed #111; overflow: hidden; }
+    .slozeni-label { left: 2mm; top: 3.55mm; font-size: 2.2mm; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; }
+    .slozeni-text { position: absolute; left: 2mm; top: 4.85mm; width: 29.6mm; line-height: 1.25; overflow: hidden; }
 </style>
 
 {var $compare = $basePrice > $finalPrice}
@@ -69,20 +77,37 @@
 {* the left column is centred on 49.0 (reference), moving right only when
    a long price would push it past the logo column *}
 {var $baseText = ($akce ? $lowestPrice30Text : $basePriceText) . ' ' . $currencySymbol}
-{var $rowW = ($akce ? 19.2 : 10.6) + 1.5 + mb_strlen($baseText) * 0.55 * 5.5}
+{var $rowW = ($akce ? 19.2 : 16.7) + 1.5 + mb_strlen($baseText) * 0.55 * 5.5}
 {var $saveValText = $savingText . ' ' . $currencySymbol}
-{var $saveW = 2.8 + 14.3 + 1 + mb_strlen($saveValText) * 0.536 * 4.5 + ($akce ? 0 : 1 + 18.2) + 2.8}
+{var $saveW = 2.8 + 14.3 + 1 + mb_strlen($saveValText) * 0.536 * 4.5 + ($akce ? 0 : 1 + 21.2) + 2.8}
 {var $colC = max(49.0, 26 + max($rowW, $saveW) / 2)}
+{* The price group gets only the width the comparison column leaves free (right edge
+   127.3, 2.5mm gap): with "oproti běžné ceně" a 3-4 digit price overlapped it. *}
+{if $compare}
+    {var $ps = max(0.3, min($ps, (127.3 - ($colC + max($rowW, $saveW) / 2) - 2.5 - 1.2) / ($len * 13.8 + 16.2)))}
+    {var $fsI = round(23 * $ps, 3)}
+    {var $fsD = round(11 * $ps, 3)}
+    {var $fsU = round(3.8 * $ps, 3)}
+{/if}
 {var $moreSpecies = $label && $label->is_more_species}
 {var $oy = $moreSpecies ? 0 : -3.26}
+{var $slozeni = (float)$template->width_mm >= 160}
+{* Složení text: 2.3mm, shrinking to 1.5mm, then cut to what fits; Dompdf does not clip
+   overflow. Capacity ~0.6em per character, ~85% of each line used after wrapping. *}
+{var $ingrFs = 2.3}
+{var $ingrCap = (int)(floor(29.6 / ($ingrFs * 0.6)) * floor(30.85 / ($ingrFs * 1.25)) * 0.85)}
+{while $ingrFs > 1.55 && $ingrCap < mb_strlen($ingredients)}
+    {var $ingrFs = $ingrFs - 0.1}
+    {var $ingrCap = (int)(floor(29.6 / ($ingrFs * 0.6)) * floor(30.85 / ($ingrFs * 1.25)) * 0.85)}
+{/while}
 
-<div class="fikko-vel2-akce">
+<div class="fikko-vel2-akce" n:attr="style: $slozeni ? 'width:166.2mm' : null">
     <div class="logo-col">
         <img class="logo" src="{$logoDataUri|nocheck}" alt="Fikko market">
         <div class="logo-divider"></div>
-        <div class="abs lh0 nu center brand" style="top:19.3mm">Mega</div>
-        <div class="abs lh0 nu center brand" style="top:23.79mm">Super</div>
-        <div class="abs lh0 nu center brand" style="top:28.56mm">Cena</div>
+        {* label header word by word ("Fikko / Cena"), top-aligned like the reference, shrunk to the 21.5mm column *}
+        {var $bFs = min(4.4, 21.5 / ($headerWordMax * 0.68))}
+        <div n:foreach="$headerWords as $i => $word" class="abs lh0 nu center brand" style="font-size:{=round($bFs, 3)|noescape}mm;top:{=round(19.3 + $i * 4.63 * $bFs / 4.4, 3)|noescape}mm">{$word}</div>
     </div>
 
     <div class="abs lh0 center name">{$labelName|truncate:60}</div>
@@ -91,7 +116,7 @@
     <div n:if="$moreSpecies" class="abs lh0 nu species">Více druhů</div>
     {if $country}
         <div class="abs lh0 nu origin" style="left:25.9mm;top:{=round(10.57 + $oy, 3)|noescape}mm">Země původu:</div>
-        <img n:if="$flagIconDataUri" class="flag" style="top:{=round(8.45 + $oy, 3)|noescape}mm" src="{$flagIconDataUri|nocheck}" alt="">
+        <img n:if="$flagRectDataUri" class="flag" style="top:{=round(8.45 + $oy, 3)|noescape}mm" src="{$flagRectDataUri|nocheck}" alt="">
         <div class="abs lh0 nu origin" style="left:46.8mm;top:{=round(10.57 + $oy, 3)|noescape}mm">{$country->name}</div>
     {/if}
 
@@ -104,8 +129,8 @@
                             <div class="lh0 base-label">Nejnižší cena</div>
                             <div class="lh0 base-label rel" style="top:2.64mm">za 30 dní</div>
                         {else}
-                            <div class="lh0 base-label">Běžná</div>
-                            <div class="lh0 base-label rel" style="top:2.64mm">cena</div>
+                            {* one line on the price's baseline, as in "vel. 2 Slozeni.dc.html" *}
+                            <div class="lh0 base-label rel" style="top:2.38mm;letter-spacing:0.08em">Běžná cena</div>
                         {/if}
                     </td>
                     <td style="padding:0;vertical-align:top;white-space:nowrap">
@@ -130,7 +155,7 @@
             </td>
             <td style="width:1%;padding:0 0 0 1.2mm;vertical-align:top;white-space:nowrap">
                 <div class="lh0 nu" style="font-size:{$fsD|noescape}mm;position:relative;top:{=round(18.79 - 5.56 * $ps, 3)|noescape}mm">{$finalPriceMinor}</div>
-                <div class="lh0 nu" style="font-size:{$fsU|noescape}mm;position:relative;top:{=round(18.79 - 1.06 * $ps, 3)|noescape}mm">{$currencySymbol} / 1 ks</div>
+                <div class="lh0 nu" style="font-size:{$fsU|noescape}mm;position:relative;top:{=round(18.79 - 1.06 * $ps, 3)|noescape}mm">{$priceUnitText ?: $currencySymbol . ' / 1 ks'}</div>
             </td>
         </tr>
     </table>
@@ -138,4 +163,12 @@
     <div class="abs lh0 bottom ean">EAN: {$eanText}</div>
     <div n:if="$note3 || $note2" class="abs lh0 nu center bottom note3">{$note3 ?: $note2}</div>
     <div n:if="$unit" class="abs lh0 nu right bottom unit">cena za {$unit->unitWeight}{$unit->unitShort} = {$unit->price|number:2,',',' '} {$currencySymbol}</div>
+
+    <div n:if="$slozeni" class="slozeni-col">
+        {* empty or hidden ingredients leave the column blank, title included (CACH-LAM-CODE.md) *}
+        {if !$hideIngredients && $ingredients !== ''}
+            <div class="abs lh0 slozeni-label">Složení</div>
+            <div class="slozeni-text" style="font-size:{=round($ingrFs, 3)|noescape}mm;height:30.85mm">{$ingredients|truncate:$ingrCap}</div>
+        {/if}
+    </div>
 </div>

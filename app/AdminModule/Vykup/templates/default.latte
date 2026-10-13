@@ -1,0 +1,176 @@
+{block content}
+{* Příjem: who receives, bottles / crates, payout, print. The amount is worked out again
+   on the server (VykupService::createVoucher); the script below only fills in the preview. *}
+<link rel="stylesheet" href="/css/vykup-voucher.css?v={=@filemtime(WWW_DIR . '/css/vykup-voucher.css')}">
+
+{define vkIcon $id}
+    {if $id === 'prepravka'}
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 8h19v12.5a1 1 0 0 1-1 1h-17a1 1 0 0 1-1-1V8Z" fill="#ccfbf1" stroke="#0f766e" stroke-width="1.6" stroke-linejoin="round"/><path d="M2.5 13h19M8.5 8v13.5M15.5 8v13.5" stroke="#0f766e" stroke-width="1.4"/><path d="M5 8V5.5a1 1 0 0 1 1-1h1.5a1 1 0 0 1 1 1V8M15.5 8V5.5a1 1 0 0 1 1-1H18a1 1 0 0 1 1 1V8" fill="none" stroke="#0f766e" stroke-width="1.4"/><path d="M9.5 10h5v1.6h-5z" fill="#0f766e"/></svg>
+    {else}
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 2h4v4.2c0 .9.4 1.7 1 2.3 1.3 1.2 2 2.8 2 4.5V21a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1v-8c0-1.7.7-3.3 2-4.5.6-.6 1-1.4 1-2.3V2Z" fill="#ccfbf1" stroke="#0f766e" stroke-width="1.6" stroke-linejoin="round"/><path d="M7.5 13.5h9v4.5h-9z" fill="#0f766e"/><path d="M9.5 4h5" stroke="#0f766e" stroke-width="1.6"/></svg>
+    {/if}
+{/define}
+
+<div class="col-md-12 vk-page">
+    {include '_nav.latte'}
+
+    <div class="vk-prijem">
+        <div class="vk-col">
+            <div n:if="$issued" class="vk-issued">
+                <span class="vk-issued-ico">✓</span>
+                <span class="vk-flex">{=sprintf(('admin.vykup.issued'|translate), $issued['voucher']->voucher_no)}</span>
+                <a n:if="$issuedCanReprint" href="{link reprint! $issued['voucher']->id}" class="vk-btn vk-btn-ok with-confirm" data-message="{_admin.vykup.reprintConfirm}">🖨 {_admin.vykup.reprint}</a>
+            </div>
+
+            {form voucherForm class => 'vk-form', autocomplete => 'off'}
+                <input n:name="staff_id" value="{$selectedStaff ?: ''}" id="vk-staff-id">
+                <div class="vk-card">
+                    <div class="vk-card-head">
+                        <span class="vk-label">{_admin.vykup.staff}</span>
+                        <span class="vk-flex"></span>
+                        <a href="{link pracovnici}" class="vk-link">{_admin.vykup.manageStaff} →</a>
+                    </div>
+                    {if $staff}
+                        <div class="vk-pills">
+                            <button n:foreach="$staff as $person" type="button" n:class="vk-pill, (int)$person->id === $selectedStaff ? vk-on" data-staff-id="{$person->id}" data-staff-name="{$person->name}">{$person->name}</button>
+                        </div>
+                    {else}
+                        <div class="vk-warn">{_admin.vykup.noStaff} <a href="{link pracovnici}">{_admin.vykup.tabStaff} →</a></div>
+                    {/if}
+                </div>
+
+                {foreach $items as $item}
+                    <div class="vk-card vk-item" data-item="{$item->id}" data-price="{$item->price_kc}">
+                        <div class="vk-item-icon">{include vkIcon $item->id}</div>
+                        <div class="vk-item-name">
+                            <b>{$vkVi ? $item->name_vi : $item->name_cs}</b>
+                            <span>{$item->price_kc} Kč / ks</span>
+                        </div>
+                        <div n:if="$item->id === 'prepravka'" class="vk-quick">
+                            <button type="button" data-add="1">+1</button>
+                            <button type="button" data-add="2">+2</button>
+                        </div>
+                        <div class="vk-stepper">
+                            <button type="button" data-step="-1" aria-label="−">−</button>
+                            {input "qty_{$item->id}" class => 'vk-qty', inputmode => 'numeric', min => 0, max => \VykupService::MAX_QTY}
+                            <button type="button" data-step="1" aria-label="+">+</button>
+                        </div>
+                        <div class="vk-item-sum"><span data-vk-sum>0</span> Kč</div>
+                        <div n:if="$item->id === 'lahev'" class="vk-pad">
+                            {for $n = 1; $n <= 20; $n++}<button type="button" data-set="{$n}">{$n}</button>{/for}
+                        </div>
+                    </div>
+                {/foreach}
+
+                <div class="vk-totalbar">
+                    <div>
+                        <div class="vk-label vk-label-dark">{_admin.vykup.payout}</div>
+                        <div class="vk-total"><span id="vk-total">0</span> Kč</div>
+                    </div>
+                    <span class="vk-flex"></span>
+                    <button type="button" class="vk-clear" id="vk-clear">{_admin.vykup.clear}</button>
+                    <button n:name="print" class="vk-print" id="vk-print" disabled>🖨 {_admin.vykup.print}</button>
+                </div>
+            {/form}
+        </div>
+
+        <div class="vk-preview-col">
+            <div class="vk-label" id="vk-preview-label" data-draft="{_admin.vykup.preview}" data-issued="{_admin.vykup.lastIssued}">{$issued ? ('admin.vykup.lastIssued'|translate) : ('admin.vykup.preview'|translate)}</div>
+            <div id="vk-preview-draft" n:class="vk-preview, $issued ? vv-hidden">
+                {include '_voucher.latte', branch => $vkBranch, vNo => $nextNo, vDate => $nowText, vStaff => $selectedStaffName, vValid => $todayText, vLines => $draftLines, vTotal => 0, vDup => NULL, vPreview => TRUE}
+            </div>
+            <div n:if="$issued" id="vk-preview-issued" class="vk-preview">
+                {include '_voucher.latte', branch => $issued['branch'], vNo => $issued['voucher']->voucher_no, vDate => $issued['voucher']->created_at->format('d.m.Y H:i'), vStaff => $issued['staff'], vValid => $issued['voucher']->issue_date->format('d.m.Y'), vLines => $issued['lines'], vTotal => $issued['total'], vDup => NULL}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    var form = document.querySelector('.vk-form');
+    if (!form) {
+        return;
+    }
+    var items = Array.prototype.slice.call(form.querySelectorAll('.vk-item'));
+    var draft = document.getElementById('vk-preview-draft');
+    var issued = document.getElementById('vk-preview-issued');
+    var label = document.getElementById('vk-preview-label');
+    var staffInput = document.getElementById('vk-staff-id');
+    var printBtn = document.getElementById('vk-print');
+    var fmt = function (n) { return n.toLocaleString('cs-CZ'); };
+    var qtyOf = function (item) {
+        var n = parseInt(String(item.querySelector('.vk-qty').value).replace(/\D/g, ''), 10) || 0;
+        return Math.min({\VykupService::MAX_QTY}, Math.max(0, n));
+    };
+    var each = function (selector, fn) { Array.prototype.forEach.call(draft.querySelectorAll(selector), fn); };
+
+    var update = function () {
+        var total = 0;
+        var shown = 0;
+        items.forEach(function (item) {
+            var id = item.getAttribute('data-item');
+            var q = qtyOf(item);
+            var sum = q * parseInt(item.getAttribute('data-price'), 10);
+            item.querySelector('.vk-qty').value = q;
+            item.querySelector('[data-vk-sum]').textContent = fmt(sum);
+            Array.prototype.forEach.call(item.querySelectorAll('[data-set]'), function (b) {
+                b.classList.toggle('vk-on', parseInt(b.getAttribute('data-set'), 10) === q);
+            });
+            total += sum;
+            each('[data-vv-qty="' + id + '"]', function (el) { el.textContent = q; });
+            each('[data-vv-sum="' + id + '"]', function (el) { el.textContent = fmt(sum); });
+            each('[data-vv-line="' + id + '"], [data-vv-code="' + id + '"]', function (el) { el.classList.toggle('vv-hidden', q <= 0); });
+            if (q > 0) {
+                shown++;
+                each('[data-vv-n="' + id + '"]', function (el) { el.textContent = shown; });
+            }
+        });
+        if (!shown && items.length) {
+            // an empty voucher still shows the first item, with 0
+            var first = items[0].getAttribute('data-item');
+            each('[data-vv-line="' + first + '"], [data-vv-code="' + first + '"]', function (el) { el.classList.remove('vv-hidden'); });
+            each('[data-vv-n="' + first + '"]', function (el) { el.textContent = 1; });
+        }
+        var scan = draft.querySelector('.vv-scan');
+        scan.textContent = shown > 1 ? scan.getAttribute('data-vv-scan-many').replace('%n', shown) : scan.getAttribute('data-vv-scan-one');
+        draft.querySelector('[data-vv-total]').textContent = fmt(total);
+        document.getElementById('vk-total').textContent = fmt(total);
+        // no staff chosen (or none in the branch) → nothing to print
+        printBtn.disabled = total <= 0 || !(parseInt(staffInput.value, 10) > 0);
+        if (issued) {
+            issued.classList.toggle('vv-hidden', total > 0);
+            draft.classList.toggle('vv-hidden', total <= 0);
+            label.textContent = label.getAttribute(total > 0 ? 'data-draft' : 'data-issued');
+        }
+    };
+
+    form.addEventListener('click', function (e) {
+        var b = e.target.closest('button');
+        if (!b || b.type === 'submit') {
+            return;
+        }
+        var item = b.closest('.vk-item');
+        if (b.hasAttribute('data-staff-id')) {
+            staffInput.value = b.getAttribute('data-staff-id');
+            Array.prototype.forEach.call(form.querySelectorAll('[data-staff-id]'), function (p) { p.classList.toggle('vk-on', p === b); });
+            each('[data-vv-staff]', function (el) { el.textContent = b.getAttribute('data-staff-name'); });
+        } else if (item && b.hasAttribute('data-set')) {
+            item.querySelector('.vk-qty').value = b.getAttribute('data-set');
+        } else if (item && b.hasAttribute('data-step')) {
+            item.querySelector('.vk-qty').value = qtyOf(item) + parseInt(b.getAttribute('data-step'), 10);
+        } else if (item && b.hasAttribute('data-add')) {
+            item.querySelector('.vk-qty').value = qtyOf(item) + parseInt(b.getAttribute('data-add'), 10);
+        } else if (b.id === 'vk-clear') {
+            items.forEach(function (it) { it.querySelector('.vk-qty').value = 0; });
+        }
+        update();
+    });
+    form.addEventListener('input', update);
+    form.addEventListener('submit', function () {
+        setTimeout(function () { printBtn.disabled = true; }, 0);
+    });
+    update();
+})();
+</script>
+{/block}

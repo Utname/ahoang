@@ -35,6 +35,9 @@
     .middle { position: relative; width: 210mm; height: 100mm; }
     .name { font-size: 5.6mm; font-weight: 400; line-height: 0.898; max-height: 12.88mm; overflow: hidden; text-align: center; }
     .sub { font-family: Nunito, sans-serif; font-style: italic; font-weight: 400; font-size: 6mm; }
+    /* "Platnost 1. 8. – 31. 8.": right end of the Více druhů row ("A5 bez povodni cen") */
+    .platnost-label { font-size: 2.6mm; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 700; opacity: 0.65; }
+    .platnost-val { font-size: 3.6mm; font-weight: 800; margin-left: 2mm; }
 
     .ribbon { position: absolute; width: 50mm; height: 18mm; transform: rotate(-1.2deg); }
     .ribbon img { position: absolute; left: 0; top: 0; width: 50mm; height: 18mm; }
@@ -124,16 +127,28 @@
 {var $saveValText = $savingText . ' ' . $currencySymbol}
 {var $saveW = $g['padX'] * 2 + $g['pigS'] + $g['pigGap'] + 6.2 * $g['copyFs'] + $g['valGap'] + mb_strlen($saveValText) * 0.536 * $g['valFs'] + ($isCompare ? 1.5 + 10.12 * 3.9 : 0)}
 {var $note3Lh = 0.7665}
+{* Složení: Dompdf ignores max-height, so a long text ran into the barcode. It shrinks
+   to 75% of the design size, then is cut to what fits the box (~0.58em per character,
+   ~85% of each line used after wrapping). *}
+{var $ingrFs = $g['ingrFs']}
+{var $ingrCap = (int)(floor($g['ingrW'] / ($ingrFs * 0.58)) * floor($g['ingrMax'] / ($ingrFs * $g['ingrLh'])) * 0.85)}
+{while $ingrFs > $g['ingrFs'] * 0.76 && $ingrCap < mb_strlen($ingredients)}
+    {var $ingrFs = $ingrFs - 0.1}
+    {var $ingrCap = (int)(floor($g['ingrW'] / ($ingrFs * 0.58)) * floor($g['ingrMax'] / ($ingrFs * $g['ingrLh'])) * 0.85)}
+{/while}
 
 <div class="a5">
     <div class="bar" style="left:{$g['barL']|noescape}mm;top:{$g['barT']|noescape}mm;width:{$g['barW']|noescape}mm;height:{$g['barH']|noescape}mm"></div>
     <img class="logo" src="{$logoDataUri|nocheck}" style="left:{$g['logoL']|noescape}mm;top:{$g['logoT']|noescape}mm;width:{$g['logoW']|noescape}mm;height:{$g['logoH']|noescape}mm" alt="Fikko market">
-    <div class="abs lh0 nu center title" style="left:{=round($g['barL'], 3)|noescape}mm;width:{=round($g['barW'], 3)|noescape}mm;top:{$g['titleB']|noescape}mm">FIKKO CENA</div>
+    {* A longer header than "FIKKO CENA" shrinks to fit the bar, baseline lifted to stay centred. *}
+    {var $hdrFs = min(12, ($g['barW'] - 10) / max(1, mb_strlen($headerText) * 0.7))}
+    <div class="abs lh0 nu center title" style="left:{=round($g['barL'], 3)|noescape}mm;width:{=round($g['barW'], 3)|noescape}mm;top:{=round($g['titleB'] - (12 - $hdrFs) * 0.36, 3)|noescape}mm;font-size:{=round($hdrFs, 3)|noescape}mm">{$headerText|upper}</div>
 
     <div class="flow" style="top:{$g['nameTop']|noescape}mm">
         <div class="name" style="margin-left:{$g['pad']|noescape}mm;width:{=210 - 2 * $g['pad']|noescape}mm">{$labelName}</div>
         <div class="middle">
             <div n:if="$label && $label->is_more_species" class="abs lh0 center sub" style="left:0;width:210mm;top:{=round($g['subB'] - $m, 3)|noescape}mm">Více druhů</div>
+            <div n:if="!$akce && $validityRange" class="abs lh0 right" style="left:0;width:{=210 - $g['pad']|noescape}mm;top:{=round($g['subB'] - $m, 3)|noescape}mm"><span class="platnost-label">Platnost</span><span class="platnost-val">{$validityRange}</span></div>
             <div n:if="$note1" class="abs lh0 nu center" style="left:0;width:210mm;font-size:{$g['note1Fs']|noescape}mm;top:{=round($g['note1B'] - $m, 3)|noescape}mm">{$note1}</div>
 
             <div n:if="$akce && $hasSaleRibbon" class="ribbon" style="left:8mm;top:{=round(57.2 - $m, 3)|noescape}mm">
@@ -147,9 +162,9 @@
                 <div class="abs lh0 origin-name" style="left:{$g['originX']|noescape}mm;top:{=round($g['originNB'] + $rb - $m, 3)|noescape}mm">{$country->name}</div>
             {/if}
 
-            {if !$hideIngredients && $product && $product->ingredients}
+            {if !$hideIngredients && $ingredients !== ''}
                 <div class="abs lh0 ingr-label" style="left:{$g['ingrL']|noescape}mm;top:{=round($g['ingrLB'] + $rb - $m, 3)|noescape}mm">Složení</div>
-                <div class="ingr" style="left:{$g['ingrL']|noescape}mm;width:{$g['ingrW']|noescape}mm;top:{=round($g['ingrTop'] + $rb - $m, 3)|noescape}mm;font-size:{$g['ingrFs']|noescape}mm;line-height:{$g['ingrLh']|noescape};max-height:{$g['ingrMax']|noescape}mm">{$product->ingredients}</div>
+                <div class="ingr" style="left:{$g['ingrL']|noescape}mm;width:{$g['ingrW']|noescape}mm;top:{=round($g['ingrTop'] + $rb - $m, 3)|noescape}mm;font-size:{=round($ingrFs, 3)|noescape}mm;line-height:{$g['ingrLh']|noescape};max-height:{$g['ingrMax']|noescape}mm">{$ingredients|truncate:$ingrCap}</div>
             {/if}
 
             {* AKCE_30: "Nejnižší cena za 30 dní" + struck 30-day price. *}
@@ -175,7 +190,7 @@
                         <td><div class="lh0 nu price-major" style="font-size:{=round($g['fsI'] * $ps, 3)|noescape}mm">{$finalPriceMajor}</div></td>
                         <td style="padding-left:{$g['gapI']|noescape}mm">
                             <div class="lh0 nu rel" style="font-size:{=round($g['fsD'] * $ps, 3)|noescape}mm;top:{=round($g['decRel'] * $ps, 3)|noescape}mm">{$finalPriceMinor}</div>
-                            <div class="lh0 nu rel" style="font-size:{=round($g['fsU'] * $ps, 3)|noescape}mm;top:{=round($g['curRel'] * $ps, 3)|noescape}mm">{$currencySymbol} / 1 ks</div>
+                            <div class="lh0 nu rel" style="font-size:{=round($g['fsU'] * $ps, 3)|noescape}mm;top:{=round($g['curRel'] * $ps, 3)|noescape}mm">{$priceUnitText ?: $currencySymbol . ' / 1 ks'}</div>
                         </td>
                     </tr>
                 </table>
@@ -205,5 +220,5 @@
     <div n:if="$unit" class="abs lh0 right unit" style="left:0;width:{$g['unitR']|noescape}mm;top:{$g['unitB']|noescape}mm">Cena za {$unit->unitWeight} {$unit->unitShort}<span class="nu unit-val">{$unit->price|number:2,',',' '}&nbsp;{$currencySymbol}</span></div>
 
     {* "Akce platí do" only on AKCE_30 (CACH-LAM-CODE §3). *}
-    <div n:if="$akce && !$hideValidity && $validityText" class="abs lh0 center validity" style="left:0;width:210mm;top:144.91mm">Akce platí do <b>{$validityText}</b> nebo do vyprodání zásob</div>
+    <div n:if="!$hideValidity && ($akce || ($validityCustom && !$validityRange))" class="abs lh0 center validity" style="left:0;width:210mm;top:144.91mm">{if $validityCustom}{$validityText}{elseif $validityUntil}Akce platí do <b>{$validityUntil}</b> nebo do vyprodání zásob{else}Akce platí do vyprodání zásob{/if}</div>
 </div>

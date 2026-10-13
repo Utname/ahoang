@@ -1,0 +1,56 @@
+{block content}
+{var $t = $report['total']}
+<div class="col-md-12 vk-page">
+    {include '_nav.latte'}
+
+    <form method="get" action="{link obdobi}" class="vk-card vk-filter">
+        <label class="vk-input-label">{_admin.vykup.pFromL}
+            <input type="date" name="from" value="{$from}" onchange="this.form.submit()">
+        </label>
+        <label class="vk-input-label">{_admin.vykup.pToL}
+            <input type="date" name="to" value="{$to}" onchange="this.form.submit()">
+        </label>
+        <div class="vk-chips">
+            {foreach ['week' => 'pWeek', 'month' => 'pMonth', 'lastMonth' => 'pLastMonth', 'days30' => 'p30'] as $key => $labelKey}
+                <a href="{link obdobi, from => $presets[$key][0], to => $presets[$key][1]}" n:class="vk-chip, $from === $presets[$key][0] && $to === $presets[$key][1] ? vk-on-teal">{_"admin.vykup.$labelKey"}</a>
+            {/foreach}
+        </div>
+        <span class="vk-flex"></span>
+        <a href="{link export, from => $from, to => $to}" class="vk-btn">⬇ {_admin.vykup.exportBtn}</a>
+    </form>
+
+    <div class="vk-kpis">
+        <div class="vk-kpi"><span>{_admin.vykup.kVouchers}</span><b>{$t->vouchers|number:0,',',' '}</b></div>
+        <div class="vk-kpi"><span>{_admin.vykup.kBottles}</span><b>{$t->lahev|number:0,',',' '}</b></div>
+        <div class="vk-kpi"><span>{_admin.vykup.kCrates}</span><b>{$t->prepravka|number:0,',',' '}</b></div>
+        <div class="vk-kpi"><span>{_admin.vykup.kAmount}</span><b>{$t->kc|number:0,',',' '} Kč</b></div>
+    </div>
+
+    {if !(int)$t->vouchers}
+        <div class="vk-card vk-empty">{_admin.vykup.pEmptyMsg}</div>
+    {else}
+        <div class="vk-two vk-two-wide">
+            <div class="vk-card vk-table-card">
+                <div class="vk-card-title vk-pad-title">{_admin.vykup.pByDay} <span class="vk-muted">{$from|date:'d.m.Y'} – {$to|date:'d.m.Y'}</span></div>
+                <div class="vk-table vk-period">
+                    <div class="vk-tr vk-th"><div>{_admin.vykup.colDate}</div><div class="vk-r">{_admin.vykup.vouchers}</div><div class="vk-r">{_admin.vykup.colBottles}</div><div class="vk-r">{_admin.vykup.colCrates}</div><div class="vk-r">{_admin.vykup.colAmount}</div></div>
+                    <div n:foreach="$report['byDay'] as $d" class="vk-tr">
+                        <div class="vk-b"><a href="{link historie, date => $d->d->format('Y-m-d')}">{$d->d->format('d.m.Y')}</a></div><div class="vk-r vk-num">{$d->vouchers}</div><div class="vk-r vk-num">{$d->lahev|number:0,',',' '}</div><div class="vk-r vk-num">{$d->prepravka|number:0,',',' '}</div><div class="vk-r vk-num vk-b">{$d->kc|number:0,',',' '} Kč</div>
+                    </div>
+                    <div class="vk-tr vk-tfoot"><div>{_admin.vykup.pTotal}</div><div class="vk-r">{$t->vouchers|number:0,',',' '}</div><div class="vk-r">{$t->lahev|number:0,',',' '}</div><div class="vk-r">{$t->prepravka|number:0,',',' '}</div><div class="vk-r vk-teal">{$t->kc|number:0,',',' '} Kč</div></div>
+                </div>
+            </div>
+            <div class="vk-card vk-table-card">
+                <div class="vk-card-title vk-pad-title">{_admin.vykup.pByStaff}</div>
+                <div class="vk-table vk-period">
+                    <div class="vk-tr vk-th"><div>{_admin.vykup.colStaff}</div><div class="vk-r">{_admin.vykup.vouchers}</div><div class="vk-r">{_admin.vykup.colBottles}</div><div class="vk-r">{_admin.vykup.colCrates}</div><div class="vk-r">{_admin.vykup.colAmount}</div></div>
+                    <div n:foreach="$report['byStaff'] as $s" class="vk-tr">
+                        <div class="vk-b">{$s->name}</div><div class="vk-r vk-num">{$s->vouchers}</div><div class="vk-r vk-num">{$s->lahev|number:0,',',' '}</div><div class="vk-r vk-num">{$s->prepravka|number:0,',',' '}</div><div class="vk-r vk-num vk-b">{$s->kc|number:0,',',' '} Kč</div>
+                    </div>
+                    <div class="vk-tr vk-tfoot"><div>{_admin.vykup.pTotal}</div><div class="vk-r">{$t->vouchers|number:0,',',' '}</div><div class="vk-r">{$t->lahev|number:0,',',' '}</div><div class="vk-r">{$t->prepravka|number:0,',',' '}</div><div class="vk-r vk-teal">{$t->kc|number:0,',',' '} Kč</div></div>
+                </div>
+            </div>
+        </div>
+    {/if}
+</div>
+{/block}

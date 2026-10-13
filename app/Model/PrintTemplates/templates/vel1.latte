@@ -65,14 +65,19 @@
 
 {var $compare = $basePrice > $finalPrice}
 {var $digits = strlen(str_replace(' ', '', $finalPriceMajor))}
-{var $ps = $digits >= 4 ? 0.78 : 1}
+{* unit column: ",90" or the chosen "Cena za" text (0.453em per character), whichever is wider *}
+{var $unitTxt = $priceUnitText ?: $currencySymbol . ' / 1 ks'}
+{var $unitColW = max(14.8, mb_strlen($unitTxt) * 0.453 * 3.6)}
+{* integer width in em: 0.58 per digit, 0.37 for the thousands space ("1 299") *}
+{var $intEm = $digits * 0.58 + substr_count($finalPriceMajor, ' ') * 0.37}
+{var $ps = min($digits >= 4 ? 0.78 : 1, (($compare ? 160 - 98.7 : 130) - 8.3 - 1) / ($intEm * 21 + $unitColW))}
 {var $fsI = round(21 * $ps, 3)}
 {var $fsD = round(9.5 * $ps, 3)}
 {var $fsU = round(3.6 * $ps, 3)}
 {* "Naše cena" group starts 5mm right of the divider (reference grid); with
    no comparison there is no divider, so the group is centred on the content
    area instead (its width estimated from the Dompdf font metrics). *}
-{var $groupW = 8.3 + $digits * 0.58 * $fsI + 1 + 14.8 * $ps}
+{var $groupW = 8.3 + $intEm * $fsI + 1 + $unitColW * $ps}
 {var $ourL = $compare ? 98.7 : 93.6 - $groupW / 2}
 {var $saveValText = $savingText . ' ' . $currencySymbol}
 {var $saveW = 3 + 15.2 + 1 + mb_strlen($saveValText) * 0.536 * 4.5 + 1 + 20.2 + 3}
@@ -81,8 +86,9 @@
     <div class="logo-col">
         <img class="logo" src="{$logoDataUri|nocheck}" alt="Fikko market">
         <div class="logo-divider"></div>
-        <div class="abs lh0 nu center brand" style="top:20.36mm">Fikko</div>
-        <div class="abs lh0 nu center brand" style="top:26.44mm">Cena</div>
+        {* label header word by word ("Fikko / Cena"), top-aligned like the reference, shrunk to the 21.5mm column *}
+        {var $bFs = min(5.8, 21.5 / ($headerWordMax * 0.68))}
+        <div n:foreach="$headerWords as $i => $word" class="abs lh0 nu center brand" style="font-size:{=round($bFs, 3)|noescape}mm;top:{=round(20.36 + $i * 6.08 * $bFs / 5.8, 3)|noescape}mm">{$word}</div>
     </div>
 
     <div class="abs lh0 center name">{$labelName|truncate:60}</div>
@@ -131,7 +137,7 @@
             </td>
             <td style="padding:0 0 0 1mm;vertical-align:top;white-space:nowrap">
                 <div class="lh0 nu" style="font-size:{$fsD|noescape}mm;position:relative;top:{=round(-0.53 * $ps, 3)|noescape}mm">{$finalPriceMinor}</div>
-                <div class="lh0 nu" style="font-size:{$fsU|noescape}mm;position:relative;top:{=round(4.5 * $ps, 3)|noescape}mm">{$currencySymbol} / 1 ks</div>
+                <div class="lh0 nu" style="font-size:{$fsU|noescape}mm;position:relative;top:{=round(4.5 * $ps, 3)|noescape}mm">{$unitTxt}</div>
             </td>
         </tr>
     </table>

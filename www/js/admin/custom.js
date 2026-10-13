@@ -301,7 +301,7 @@ $(function () {
         var fields = ['price', 'price_action', 'action_from', 'action_to'];
         $("input[name^='price__']").each(function () {
             var productsId = this.name.substring('price__'.length);
-            var row = $(this).closest('tr');
+            var row = $(this).closest('tr, .pv-row');
             var values = {};
             var changed = false;
             fields.forEach(function (field) {
@@ -774,6 +774,45 @@ var setTabs = function (id) {
     }
 
 }
+
+// Select2 4.0.0-rc.2 places an open dropdown in page coordinates, which is only right
+// when it is attached to <body>. In a modal (dropdownParent = .modal, position fixed)
+// it ended up shifted by the page scroll and the modal's own scroll, i.e. off screen
+// when the label editor was opened from a row further down. Convert to the parent's
+// coordinates after every positioning.
+;(function () {
+    if (!$.fn.select2 || !$.fn.select2.amd) {
+        return;
+    }
+    var AttachBody = $.fn.select2.amd.require('select2/dropdown/attachBody');
+    var position = AttachBody.prototype._positionDropdown;
+    AttachBody.prototype._positionDropdown = function () {
+        position.apply(this, arguments);
+        var $parent = $(this.$dropdownParent);
+        if (!$parent.length || $parent.is('body')) {
+            return;
+        }
+        var offset = $parent.offset();
+        this.$dropdownContainer.css({
+            top: parseFloat(this.$dropdownContainer.css('top')) - offset.top + $parent.scrollTop(),
+            left: parseFloat(this.$dropdownContainer.css('left')) - offset.left + $parent.scrollLeft()
+        });
+    };
+
+    // While a dropdown is open Select2 pins every scrollable parent (it resets their
+    // scrollTop on each scroll), so the label editor modal jerked back instead of
+    // scrolling. Let the parents scroll and keep the dropdown on its field instead.
+    var hasScroll = $.fn.select2.amd.require('select2/utils').hasScroll;
+    var attach = AttachBody.prototype._attachPositioningHandler;
+    AttachBody.prototype._attachPositioningHandler = function (container) {
+        attach.apply(this, arguments);
+        var self = this;
+        var scrollEvent = 'scroll.select2.' + container.id;
+        this.$container.parents().filter(hasScroll).off(scrollEvent).on(scrollEvent, function () {
+            self._positionDropdown();
+        });
+    };
+})();
 
 var initSelect2 = function () {
     $("select:not(.with-search):not(.no-search):not(.select-default)").each(function(e){
@@ -1953,3 +1992,201 @@ $(function() {
         $(".descriptions-type[value='"+$(this).data('id')+"']").prop('checked', true).trigger('change');
     });
 })
+
+// Products list, "Admin - Produkty v2" (Products/templates/default.latte,
+// __components/ProductLabels): row panels, price save, header selects, the
+// print bar and the label editor modal.
+$(function () {
+    if (!$('#pv-i18n').length) {
+        return;
+    }
+    var text = function (key) {
+        return $('#pv-i18n').attr('data-' + key) || '';
+    };
+    var toastTimer;
+    var toast = function (message, warn) {
+        var $toast = $('#pv-toast');
+        if (!message) {
+            return;
+        }
+        $toast.toggleClass('pv-toast-warn', !!warn).text((warn ? '' : '✓ ') + message).stop(true, true).fadeIn(120);
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () {
+            $toast.fadeOut(200);
+        }, 2600);
+    };
+
+    var number = function (value) {
+        value = String(value || '').replace(',', '.').trim();
+        return value === '' ? null : parseFloat(value);
+    };
+    var isoDate = function (value) {
+        var m = String(value || '').trim().match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+        return m ? m[3] + '-' + ('0' + m[2]).slice(-2) + '-' + ('0' + m[1]).slice(-2) : '';
+    };
+    var field = function ($row, name) {
+        var $fields = $row.find('.pv-pfields');
+        return $fields.find("[name='" + name + '__' + $fields.data('products-id') + "']");
+    };
+
+    // hint under the price fields; returns FALSE when the values cannot be saved
+    var updateHint = function ($row) {
+        var base = number(field($row, 'price').val());
+        var akce = number(field($row, 'price_action').val());
+        var from = isoDate(field($row, 'action_from').val());
+        var to = isoDate(field($row, 'action_to').val());
+        var key = 'hint-none';
+        var warn = false;
+        if (akce === null && (from || to)) {
+            // dates alone do not make an action; saving is still allowed
+            $row.find('.pv-hint').text(text('hint-no-akce-price')).addClass('pv-warn-text');
+            return true;
+        }
+        if (akce !== null) {
+            if (base !== null && akce >= base) {
+                key = 'hint-bad-price';
+                warn = true;
+            } else if (from && to && to < from) {
+                key = 'hint-bad-dates';
+                warn = true;
+            } else {
+                key = 'hint-akce';
+            }
+        }
+        $row.find('.pv-hint').text(text(key)).toggleClass('pv-warn-text', warn);
+        return !warn;
+    };
+
+    // one panel open at a time ("Cena a akce" or "Možnosti tisku a úprav")
+    var togglePanel = function ($row, which) {
+        var $panel = $row.find('.pv-panel-' + which);
+        var wasOpen = !$panel.prop('hidden');
+        $('.pv-row').removeClass('pv-open-price-on pv-open-labels-on').find('.pv-panel').prop('hidden', true);
+        if (!wasOpen) {
+            $panel.prop('hidden', false);
+            $row.addClass('pv-open-' + which + '-on');
+            if (which === 'price') {
+                updateHint($row);
+            }
+        }
+    };
+    $('body').on('click', '.pv-open-price', function (e) {
+        e.preventDefault();
+        togglePanel($(this).closest('.pv-row'), 'price');
+    });
+    $('body').on('click', '.pv-open-labels', function (e) {
+        e.preventDefault();
+        togglePanel($(this).closest('.pv-row'), 'labels');
+    });
+    $('body').on('input change', '.pv-pfields input, .pv-pfields select', function () {
+        updateHint($(this).closest('.pv-row'));
+    });
+
+    var savePrice = function ($row) {
+        if (!updateHint($row)) {
+            toast($row.find('.pv-hint').text(), true);
+            return;
+        }
+        var $fields = $row.find('.pv-pfields');
+        var value = function (name) {
+            return encodeURIComponent(field($row, name).val() || '');
+        };
+        var url = '?do=updatePricesAll'
+            + '&itemId=' + encodeURIComponent($fields.data('item-id') || '')
+            + '&productsId=' + encodeURIComponent($fields.data('products-id'))
+            + '&price=' + value('price')
+            + '&price_action=' + value('price_action')
+            + '&action_from=' + value('action_from')
+            + '&action_to=' + value('action_to')
+            + '&price_unit=' + value('price_unit')
+            + '&branchId=' + encodeURIComponent($("select[name='custom__branches']").val() || '');
+        ajaxGet(url, function () {
+            $fields.find('input').each(function () {
+                this.defaultValue = this.value;
+            });
+            toast(text('saved'));
+            togglePanel($row, 'price');
+        });
+    };
+    $('body').on('click', '.pv-save-price', function () {
+        savePrice($(this).closest('.pv-row'));
+    });
+    $('body').on('click', '.pv-end-akce', function () {
+        var $row = $(this).closest('.pv-row');
+        field($row, 'price_action').val('');
+        field($row, 'action_from').val('');
+        field($row, 'action_to').val('');
+        savePrice($row);
+    });
+
+    // Hlavička in a chip / card
+    $('body').on('change', '.pv-hdr', function () {
+        ajaxGet(String($(this).data('url')).replace('999999', $(this).val()));
+    });
+    // "+" on an Akce template of a product without a running action
+    $('body').on('click', '.pv-warn-click', function () {
+        toast($(this).data('msg'), true);
+    });
+
+    // print bar: shown with queued labels or ticked products
+    var checkedIds = function () {
+        return $('.pv-row .bulk-checkbox:checked').map(function () {
+            return $(this).data('id');
+        }).get();
+    };
+    var syncBar = function () {
+        var ids = checkedIds();
+        var $wrap = $('.pv-bar-wrap');
+        $('.pv-row').each(function () {
+            $(this).toggleClass('pv-checked', $(this).find('.bulk-checkbox').is(':checked'));
+        });
+        $wrap.find('.pv-checked-n').text(ids.length);
+        $wrap.find('.pv-bar-checked').prop('hidden', !ids.length);
+        $wrap.prop('hidden', !ids.length && !parseInt($wrap.attr('data-labels') || '0', 10));
+        try {
+            var saved = localStorage.getItem('pvDefaultTemplate');
+            if (saved && $wrap.find(".pv-default-tpl option[value='" + saved + "']").length) {
+                $wrap.find('.pv-default-tpl').val(saved);
+            }
+        } catch (e) {
+        }
+    };
+    $('body').on('change', '.bulk-checkbox, .bulk-check-all', function () {
+        setTimeout(syncBar, 0);
+    });
+    $('body').on('change', '.pv-default-tpl', function () {
+        try {
+            localStorage.setItem('pvDefaultTemplate', this.value);
+        } catch (e) {
+        }
+    });
+    $('body').on('click', '.pv-bulk-add', function () {
+        var ids = checkedIds();
+        if (!ids.length) {
+            toast(text('none-checked'), true);
+            return;
+        }
+        var url = new URL(String($(this).data('url')), window.location.href);
+        url.searchParams.set('ids', ids.join(','));
+        url.searchParams.set('typeId', $('.pv-default-tpl').val());
+        ajaxGet(url.toString(), function (payload) {
+            toast(payload && payload.pvToast);
+        });
+    });
+    $(document).ajaxComplete(function () {
+        setTimeout(syncBar, 0);
+    });
+    syncBar();
+
+    // label editor: Složení and Akce platí do… follow their "Skrýt" checkboxes
+    var syncEditor = function () {
+        var $modal = $('#modal-labelsForm');
+        $modal.find('.pv-ed-ingredients').prop('hidden', $modal.find('.pv-tog-ingredients').is(':checked'));
+        $modal.find('.pv-ed-validity').prop('hidden', $modal.find('.pv-tog-validity').is(':checked'));
+    };
+    $('body').on('change', '.pv-tog-ingredients, .pv-tog-validity', syncEditor);
+    $('#modal-labelsForm').on('shown.bs.modal', syncEditor);
+    $(document).ajaxComplete(function () {
+        setTimeout(syncEditor, 0);
+    });
+});

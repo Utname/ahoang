@@ -6,6 +6,10 @@ Nette 3 + Latte 3 + PHP 8.2 admin/e-shop for a Czech grocery chain. Most work is
 ## Where things are
 - `app/AdminModule/Products/` – product list (`templates/default.latte`, big), label print
   handlers in `Traits/ProductLabelsTrait.php`, inline price save in `Traits/ProductPricesTrait.php`
+- Product list = design "Admin - Produkty v2": each row is `__components/ProductLabels/ProductLabelsControl`
+  with three snippets (`:price` Cena/Akce cells, `:chips` Štítky k tisku, `:panel` Možnosti tisku);
+  its `render()` outputs all three for ajax redraws (`redrawAll()`). Styles `.pv-*` in custom.css,
+  behaviour at the end of custom.js, texts `admin.pv.*`
 - `app/Model/ProductLabels/ProductLabelsService.php` – `generatePdf()`: queue → PDF; new HTML
   templates via Dompdf, otherwise the legacy TCPDF layouts in the same file
 - `app/Model/PrintTemplates/PrintTemplatesService.php` – `renderHtml()` (price/discount logic,
@@ -22,19 +26,22 @@ After editing a template run `php bin/sync-print-templates.php [name ...]` local
 `docker/entrypoint.sh` runs it on every container start, so a deploy syncs the templates
 (edits made in the admin template editor are overwritten by the next deploy).
 
-| file | type id | size mm | design file |
+| file | type ids (`ProductLabelsEntity::TYPES_ARR`) | size mm | design file |
 |---|---|---|---|
-| a4-discount | 1 A4 | 210×297 | A4 / A4 Akce |
-| a5-discount | 2 A5 | 210×148.5 | A5 / A5 Akce |
+| a4-discount | 1 A4, 10 A4 Akce | 210×297 | A4 / A4 Akce |
+| a5-discount | 2 A5, 11 A5 Akce | 210×148.5 | A5 / A5 Akce |
 | vel1 | 3 | 164×41 | vel. 1 |
 | vel2 | 4 | 133×41 | vel. 2 |
-| vel3 | 5 | 182×56 | vel. 3 / vel. 3 Akce |
-| vel2b-akce | 6 | 133×52 | vel. 2B Akce |
-| vel2-akce | 7 (hidden in admin) | 133×38 | vel. 2 Akce |
+| vel3 | 5, 12 Vel. 3 Akce | 182×56 | vel. 3 / vel. 3 Akce |
+| vel2b-akce | 6 Vel. 2B Akce, 14 Vel. 2 B, 16 Vel. 2B Složení (167×52) | 133×52 | vel. 2B Akce / velikost 2B / vel. 2B Slozeni |
+| vel2-akce | 7 Vel. 2 Akce, 15 Vel. 2 Složení (167×38) | 133×38 | vel. 2 Akce / vel. 2 Slozeni |
 | pecivo | 8 | 150×41 | Pecivo |
 | fruit | 9 | 50×35 | Etiketa ovoce vaha (32 per A4 sheet) |
 
-A4 uses the new template only for products ticked "Nová šablona", otherwise legacy TCPDF.
+Type 13 Vel. 1 B has no design yet: listed but locked (`isLockedType()`). A 167 mm row renders
+the same file with a Složení column (template picks it by `width_mm`). Sheet stacking for every
+size comes from `PrintTemplatesService::sheetLayout()`. `bin/migrate.php` adds the new columns
+(products.rozmrazeno, products.price_unit, product_labels.ingredients/price_unit); entrypoint runs it.
 Designs: `C:\Users\adsf\Downloads\design_handoff_fikko\` – `CACH-LAM-CODE.md` is authoritative.
 The mapping table in `QUY-TAC-THIET-KE-MAU-IN.md` is outdated.
 
@@ -43,9 +50,14 @@ The mapping table in `QUY-TAC-THIET-KE-MAU-IN.md` is outdated.
   through, %, "Akce platí do"
 - **SROVNÁNÍ**: "Běžná cena" (no strike), "Ušetříte … oproti běžné ceně"; no %, no "Akce"
 - **ZÁKLAD**: only "Naše cena"
-- Known gaps (not fixed yet): type is driven by the label's stored `sale_percent`; sales outside
-  their dates still print the sale price; A4 prints "Platnost" on non-AKCE labels; Pečivo always
-  shows "Rozmrazeno" (ignores `label.thawed`) and prints "Česká Republika" when there is no country.
+- The chosen template decides (`renderHtml()`, group in TYPES_ARR): **akce** templates print AKCE_30
+  whenever there is an action price (30-day low, or the regular price when there is none – the
+  user chooses this), **std** templates never AKCE (SROVNÁNÍ only within the action dates), **spec**
+  apply the rule automatically within the dates. Label `sale_percent` 0 = computed; >0 = typed in ✎.
+- "Běžná cena" (SROVNÁNÍ) = the regular price saved/typed in the row (`product_prices.price`), never
+  `getPriceWithLog()`'s log reference (the shop's own earlier price) – that one is only the 30-day low.
+- Header (`product_label_headers`) is shared by the product's labels: A4/A5/Vel.3 title bar, narrow templates print it
+  word by word in the brand column. Akce templates start with "Akce !!!", others "Fikko Cena".
 - Texts printed on labels stay Czech in every admin language.
 
 Print links send unsaved row values as `priceOverrides` JSON {productId: {price, price_action,
@@ -58,6 +70,26 @@ action_from, action_to}} (custom.js → `ProductLabelsTrait::parsePriceOverrides
 - Latte strips `data:` URIs in `src` → use `|nocheck`; decimals in `style` get escaped →
   `{=round($x, 3)|noescape}`; no `<`/`>` inside CSS comments (breaks the style block).
 - `brush-20.png` renders white in large boxes → `ribbonBadgeBrushDataUri`.
+- Country flags (countries.image) are square icons with transparent bands: `countryFlagImages()` trims
+  them — `flagIconDataUri` square for round flags, `flagRectDataUri` for rectangles.
+- Multi-label PDFs (Náhled všech, queue print) are ONE document: templates share class names, so
+  `renderProductLabelsPdf()` scopes each template's CSS (`scopeTemplateHtml()`). Keep it when changing
+  that path; a single-label preview can look right while the combined one is broken.
+- `max-height`/`overflow:hidden` do not clip text → long Složení is shrunk and `|truncate`d in the template.
+
+## Výkup lahví (bottle/crate returns)
+Design: `design_handoff_fikko/Vykup lahvi.dc.html` + `vykup-lahvi/README-TICH-HOP.md`.
+`app/AdminModule/Vykup/` (presenter, templates `_nav`, `_voucher` = 80 mm voucher, `print` = own page
+that prints itself), rules in `app/Model/Vykup/VykupService.php`, EAN-8 SVG in `VykupEan8.php`.
+- Tables `vykup_*` + `branches.vykup_code` (voucher prefix) come from `bin/migrate.php`; items lahev
+  00000819 3 Kč, prepravka 00000802 100 Kč (GoKasa must have the same EANs). Company/IČO are
+  settings `vykup_company`/`vykup_ico`, edited on the Pracovníci tab.
+- Works in one branch from the session, limited to the admin's branches. Times use Europe/Prague
+  (`VykupService::now()/today()`), not the DB/PHP clock.
+- Voucher no. `<code>-V<ymd>-<seq>` per branch per day; reprint max 2× same day (DUPLIKÁT);
+  storno never deletes, restore same day only. Permissions `Vykup_list` / `Vykup_edit` (staff, header).
+- Texts `admin.vykup.*`; the voucher itself is always Czech. The presenter has no repository, so it
+  overrides `createComponentEditForm()` for `BaseModulePresenter::beforeRender()`.
 
 ## Run / test
 - Local: http://localhost, MariaDB db `website` user root/toor
@@ -82,3 +114,8 @@ These are large; Grep for the spot first, then Read only that range (offset/limi
 `PrintTemplatesService.php` and `ProductLabelsService.php` (~10k each).
 Locale files are nested NEON (tabs and, in places, spaces): add keys under the right section.
 New queue labels: `ProductLabelsRepository::insertForProduct()`.
+Label texts are shared per product (✎ edits all templates at once): `ProductLabelsRepository::saveShared()`
+writes `SHARED_FIELDS` to every label of the product and to its `type_id` 0 row, which new labels copy.
+The header is shared too: `setHeaderForProduct()` (chip/card select, or a header changed in ✎) sets it on
+every template, creating count-0 labels where missing. Only `count` is per template. The row control
+reads labels with `ProductLabelsControl::getLabels()` (fresh query), not `$product->getProductLabels()`.

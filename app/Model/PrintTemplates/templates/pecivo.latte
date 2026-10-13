@@ -77,10 +77,13 @@
         width: 72.2mm;
         overflow: hidden;
     }
+    /* Dompdf spaces this font 1.28x the line-height (measured: 1.15 gave 5.3mm
+       lines, and a second name line was cut by max-height); 0.9 gives the
+       reference's 4.14mm (3.6mm x 1.15). */
     .pecivo-prod-name {
         font-size: 3.6mm;
         font-weight: 700;
-        line-height: 1.15;
+        line-height: 0.9;
         color: #111;
         max-height: 9.6mm;
         overflow: hidden;
@@ -443,7 +446,38 @@
 </style>
 
 {var $pecivoClasses = ($priceDigits >= 4 ? 'price-digits-4' : ($priceDigits >= 3 ? 'price-digits-3' : ''))}
-{var $flagMarkup = $flagIconDataUri ? '<img class="pecivo-origin-flag" src="' . $flagIconDataUri . '" alt="">' : ''}
+{* Fitting the 72.2mm centre column. Widths in em per character, measured on the
+   Dompdf PDF: name 0.59, sub-line 0.51, note tag 0.80 (+2.4mm gap), note value 0.60,
+   price digits 0.60, ",90" 1.47em, unit text 0.45, "cena za …" 0.50. Without this a
+   3-4 digit price was pushed across the right line by the notes, and a two-line name
+   plus a two-line "Akce platí do …" ran into the notes. *}
+{* "Více druhů" and the chosen text share the line (neither drops the other); Poznámka 3 when both are empty *}
+{var $sub = implode(' · ', array_filter([($label && $label->is_more_species) ? 'Více druhů' : '', $validityCustom ? (string)$validityText : ''])) ?: (string)($note3 ?: '')}
+{var $subFs = $sub !== '' ? max(2.6, min(3.6, 72.2 / (mb_strlen($sub) * 0.51))) : 3.6}
+{var $sub = $sub !== '' ? ($sub|truncate:(int)floor(72.2 / ($subFs * 0.51))) : ''}
+{var $fsI0 = $priceDigits >= 4 ? 11.2 : ($priceDigits >= 3 ? 14.5 : 17)}
+{var $fsD0 = $priceDigits >= 4 ? 6.6 : ($priceDigits >= 3 ? 8.5 : 9.5)}
+{var $fsU0 = $priceDigits >= 4 ? 4.2 : ($priceDigits >= 3 ? 5.0 : 5.5)}
+{var $unitTxt = $priceUnitText ?: $currencySymbol . ' / 1 ks'}
+{var $intEm = strlen(str_replace(' ', '', $finalPriceMajor)) * 0.6 + substr_count($finalPriceMajor, ' ') * 0.3}
+{var $groupW = $intEm * $fsI0 + max(1.47 * $fsD0, mb_strlen($unitTxt) * 0.453 * $fsU0) + 0.8}
+{var $unitPriceW = $unit ? mb_strlen('cena za ' . $unit->unitWeight . $unit->unitShort . ' = ' . number_format($unit->price, 2, ',', ' ') . ' ' . $currencySymbol) * 0.5 * 2.4 : 0}
+{* note value at 3mm: capitals/digits 0.77em, spaces 0.28em, other letters 0.56em *}
+{var $n1 = (string)$note1}
+{var $n2 = (string)$note2}
+{var $n1W = 3 * (0.77 * preg_match_all('/[\p{Lu}\d]/u', $n1) + 0.28 * substr_count($n1, ' ') + 0.56 * (mb_strlen($n1) - preg_match_all('/[\p{Lu}\d ]/u', $n1)))}
+{var $n2W = 3 * (0.77 * preg_match_all('/[\p{Lu}\d]/u', $n2) + 0.28 * substr_count($n2, ' ') + 0.56 * (mb_strlen($n2) - preg_match_all('/[\p{Lu}\d ]/u', $n2)))}
+{var $notesW = 21.7 + max($n1W, $n2W)}
+{var $ps = max(0.7, min(1, (72.2 - $notesW - 3) / $groupW))}
+{var $priceW = max($groupW * $ps, $unitPriceW)}
+{if $notesW > 72.2 - 3 - $priceW}
+    {* still too wide: the notes give way *}
+    {var $noteMax = max(3, (int)floor((72.2 - 3 - $priceW - 21.7) / 2.31))}
+    {var $note1 = ((string)$note1|truncate:$noteMax)}
+    {var $note2 = ((string)$note2|truncate:$noteMax)}
+    {var $notesW = 72.2 - 3 - $priceW}
+{/if}
+{var $flagMarkup = $flagRectDataUri ? '<img class="pecivo-origin-flag" src="' . $flagRectDataUri . '" alt="">' : ''}
 {var $snowflakeMarkup = $snowflakeIconDataUri ? '<img class="pecivo-snowflake-img" src="' . $snowflakeIconDataUri . '" alt="">' : ''}
 
 <div class="fikko-pecivo {$pecivoClasses}">
@@ -452,9 +486,10 @@
         <table class="pecivo-brand-table" cellpadding="0" cellspacing="0">
             <tr>
                 <td class="pecivo-brand-cell">
-                    <div class="pecivo-brand-text">
-                        <div>Fikko</div>
-                        <div>Cena</div>
+                    {* the label header (default "Fikko / Cena") word by word, shrunk to the 28mm column *}
+                    {var $bFs = min(7.5, 28 / ($headerWordMax * 0.68))}
+                    <div class="pecivo-brand-text" style="font-size:{=round($bFs, 3)|noescape}mm">
+                        <div n:foreach="$headerWords as $word">{$word}</div>
                     </div>
                 </td>
             </tr>
@@ -464,22 +499,16 @@
     <!-- 2. Center Content Column (78mm) -->
     <div class="pecivo-center-col">
         <div class="pecivo-top-box">
-            <div class="pecivo-prod-name">{$labelName}</div>
-            <div n:if="($label && $label->is_more_species) || ($label && $label->sale_text) || $note3" class="pecivo-prod-sub">
-                {if $label && $label->is_more_species}
-                    Více druhů
-                {elseif $label && $label->sale_text}
-                    {$label->sale_text}
-                {elseif $note3}
-                    {$note3}
-                {/if}
-            </div>
+            {* at most two lines (~60 characters) above the notes *}
+            <div class="pecivo-prod-name">{$labelName|truncate:60}</div>
+            {* one line; the "Akce platí do …" text follows Skrýt platnost *}
+            <div n:if="$sub !== ''" class="pecivo-prod-sub" style="font-size:{=round($subFs, 3)|noescape}mm;white-space:nowrap">{$sub}</div>
         </div>
 
         <div class="pecivo-middle-box">
             <table class="pecivo-middle-table" cellpadding="0" cellspacing="0">
                 <tr>
-                    <td class="pecivo-notes-cell">
+                    <td class="pecivo-notes-cell" style="width:{=round($notesW, 3)|noescape}mm">
                         <div class="pecivo-note-row">
                             <span class="pecivo-note-tag">Poznámka 1</span>
                             <span class="pecivo-note-val">{$note1 ?: ''}</span>
@@ -489,13 +518,13 @@
                             <span class="pecivo-note-val">{$note2 ?: ''}</span>
                         </div>
                     </td>
-                    <td class="pecivo-price-cell">
+                    <td class="pecivo-price-cell" style="width:{=round(72.2 - $notesW, 3)|noescape}mm">
                         <table class="price-group" cellpadding="0" cellspacing="0">
                             <tr>
-                                <td class="price-integer-cell"><div class="price-integer">{$finalPriceMajor}</div></td>
-                                <td class="price-decimal-unit">
-                                    <div class="price-decimal">{$finalPriceMinor}</div>
-                                    <div class="price-unit">{$currencySymbol} / 1 ks</div>
+                                <td class="price-integer-cell"><div class="price-integer" style="font-size:{=round($fsI0 * $ps, 3)|noescape}mm">{$finalPriceMajor}</div></td>
+                                <td class="price-decimal-unit" style="padding-left:{=round(0.8 * $ps, 3)|noescape}mm">
+                                    <div class="price-decimal" style="font-size:{=round($fsD0 * $ps, 3)|noescape}mm">{$finalPriceMinor}</div>
+                                    <div class="price-unit" style="font-size:{=round($fsU0 * $ps, 3)|noescape}mm">{$unitTxt}</div>
                                 </td>
                             </tr>
                         </table>
@@ -518,7 +547,7 @@
                         {/if}
                     </td>
                     <td class="pecivo-bottom-badge-cell">
-                        <div n:if="$label && $label->thawed" class="pecivo-defrost-badge">
+                        <div n:if="$isThawed" class="pecivo-defrost-badge">
                             {$snowflakeMarkup|noescape}
                             <span class="pecivo-defrost-text">Rozmrazeno</span>
                         </div>
@@ -539,9 +568,9 @@
     <!-- 3. Right Column: Složení & Výrobce (40mm) -->
     <div class="pecivo-right-col">
         {* Empty or hidden ingredients hide the whole block, title included (CACH-LAM-CODE.md). *}
-        {if !$hideIngredients && $product && trim((string)$product->ingredients) !== ''}
+        {if !$hideIngredients && $ingredients !== ''}
             <div class="pecivo-ingredients-title">Složení</div>
-            <div class="pecivo-ingredients-text">{$product->ingredients|truncate:130}</div>
+            <div class="pecivo-ingredients-text">{$ingredients|truncate:130}</div>
         {/if}
 
         <div class="pecivo-manufacturer-box">

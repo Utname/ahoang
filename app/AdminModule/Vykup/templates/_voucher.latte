@@ -1,0 +1,67 @@
+{* Výkup lahví voucher (80mm, always Czech) – print page and the Příjem preview.
+   Parameters: $branch, $vNo, $vDate, $vStaff, $vValid, $vLines (id, name, qty, price, sum, ean, svg),
+   $vTotal, $vDup (null or n / max / time), $vPreview (TRUE: every item is rendered and the
+   Příjem script shows the ones with a count, data-vv-* attributes). *}
+{define vvIcon $id}
+    {if $id === 'prepravka'}
+        <svg class="vv-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 8h19v12.5a1 1 0 0 1-1 1h-17a1 1 0 0 1-1-1V8Z" fill="none" stroke="#000" stroke-width="1.8" stroke-linejoin="round"/><path d="M2.5 13h19M8.5 8v13.5M15.5 8v13.5" stroke="#000" stroke-width="1.5"/><path d="M5 8V5.5a1 1 0 0 1 1-1h1.5a1 1 0 0 1 1 1V8M15.5 8V5.5a1 1 0 0 1 1-1H18a1 1 0 0 1 1 1V8" fill="none" stroke="#000" stroke-width="1.5"/><path d="M9.5 10h5v1.6h-5z" fill="#000"/></svg>
+    {else}
+        <svg class="vv-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 2h4v4.2c0 .9.4 1.7 1 2.3 1.3 1.2 2 2.8 2 4.5V21a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1v-8c0-1.7.7-3.3 2-4.5.6-.6 1-1.4 1-2.3V2Z" fill="none" stroke="#000" stroke-width="1.8" stroke-linejoin="round"/><path d="M7.5 13.5h9v4.5h-9z" fill="#000"/><path d="M9.5 4h5" stroke="#000" stroke-width="1.8"/></svg>
+    {/if}
+{/define}
+
+{var $vPreview = $vPreview ?? FALSE}
+{var $vShownCount = 0}
+{foreach $vLines as $l}{if $l['qty'] > 0}{var $vShownCount = $vShownCount + 1}{/if}{/foreach}
+<div class="vv-voucher" n:attr="id: $vPreview ? 'vv-preview'">
+    <div class="vv-head">
+        <div class="vv-brand">{$branch['title']}</div>
+        <div class="vv-xs">{$branch['address']}</div>
+        <div n:if="$branch['company'] || $branch['ico']" class="vv-xs">{$branch['company']}{if $branch['company'] && $branch['ico']} · {/if}{if $branch['ico']}IČO: {$branch['ico']}{/if}</div>
+    </div>
+    <div class="vv-rule-dash"></div>
+    <div class="vv-title">VÝKUP ZÁLOH</div>
+    <div n:if="$vDup" class="vv-dup">
+        <div class="vv-dup-t">DUPLIKÁT</div>
+        <div class="vv-xs">DUPLIKÁT {$vDup['n']}/{$vDup['max']} · {$vDup['time']} – originál zničen</div>
+    </div>
+    <div class="vv-meta">
+        <div class="vv-kv"><span>Poukaz č.</span><span class="vv-b">{$vNo}</span></div>
+        <div class="vv-kv"><span>Datum</span><span>{$vDate}</span></div>
+        <div class="vv-kv"><span>Přijal(a)</span><span data-vv-staff>{$vStaff}</span></div>
+    </div>
+    <div class="vv-rule-dash"></div>
+    {foreach $vLines as $l}
+        <div n:class="vv-line, $l['qty'] <= 0 ? vv-hidden" data-vv-line="{$l['id']}">
+            <div class="vv-line-name">{$l['name']}</div>
+            <div class="vv-kv"><span><span data-vv-qty="{$l['id']}">{$l['qty']}</span> ks × {$l['price']} Kč</span><b><span data-vv-sum="{$l['id']}">{$l['sum']|number:0,',',' '}</span> Kč</b></div>
+        </div>
+    {/foreach}
+    <div class="vv-rule"></div>
+    <div class="vv-total"><span>K VYPLACENÍ</span><b><span data-vv-total>{$vTotal|number:0,',',' '}</span> Kč</b></div>
+    <div class="vv-rule-dash"></div>
+    <div class="vv-scan" data-vv-scan-one="Pokladna: zadejte počet × a načtěte kód" data-vv-scan-many="Pokladna: zadejte počet × a načtěte – VŠECHNY kódy (%n)">{$vShownCount > 1 ? 'Pokladna: zadejte počet × a načtěte – VŠECHNY kódy (' . $vShownCount . ')' : 'Pokladna: zadejte počet × a načtěte kód'}</div>
+    {var $vN = 0}
+    {foreach $vLines as $l}
+        {if $l['qty'] > 0}{var $vN = $vN + 1}{/if}
+        <div n:class="vv-code, $l['qty'] <= 0 ? vv-hidden" data-vv-code="{$l['id']}">
+            <div class="vv-code-head">
+                <span class="vv-num" data-vv-n="{$l['id']}">{$l['qty'] > 0 ? $vN : ''}</span>
+                {include vvIcon $l['id']}
+                <span class="vv-code-name">{$l['name']}</span>
+                <span class="vv-qty"><span data-vv-qty="{$l['id']}">{$l['qty']}</span> ×</span>
+            </div>
+            <div class="vv-code-calc"><span><span data-vv-qty="{$l['id']}">{$l['qty']}</span> ks × {$l['price']} Kč</span><b><span data-vv-sum="{$l['id']}">{$l['sum']|number:0,',',' '}</span> Kč</b></div>
+            <div class="vv-bars">
+                {$l['svg']|noescape}
+                <div class="vv-ean">{$l['ean']}</div>
+            </div>
+        </div>
+    {/foreach}
+    <div class="vv-rule-dash"></div>
+    <div class="vv-valid">
+        <div class="vv-valid-t">PLATNOST</div>
+        <div class="vv-valid-d">Poukaz platí pouze v den vystavení {$vValid}</div>
+    </div>
+    <div class="vv-foot">Předložte u pokladny. Poukaz je jednorázový – pokladní si jej po načtení ponechá.</div>
+</div>

@@ -268,27 +268,57 @@ class PrintTemplatesService
 			$price = $this->applyPriceOverride($price, $priceOverride);
 		}
 		$ean = trim($product->getDefaultCode() ?: '');
-		// A queued label is a snapshot for printing. Its sale_percent means the
-		// action price must remain on the label even after the action date ends,
-		// which is how the previous TCPDF renderer behaved.
+		// Old rule (types outside TYPES_ARR): a queued label is a snapshot, its
+		// sale_percent keeps the action price on it after the action date ends.
 		$hasPriceAction = $price && (float)$price->price_action > 0 && (float)$price->price > (float)$price->price_action;
 		// With typed-but-unsaved prices ($priceOverride) the queued label's stored
 		// sale_percent is stale, so the discount is worked out from the new prices.
 		$usesStoredLabelDiscount = !$priceOverride && $label && (float)$label->sale_percent > 0 && $price && (float)$price->price_action > 0;
 		$isDiscounted = ($price && !empty($price->is_valid_action)) || $usesStoredLabelDiscount;
+		// The chosen template decides the layout ("Admin - Produkty v2"): an Akce
+		// template prints -% and the 30-day low whenever there is an action price,
+		// a std template ("Naše cena, bez %") never does and compares only during
+		// the action dates; the special ones apply the 30-day rule automatically, also
+		// only during the action dates. Types outside TYPES_ARR keep the old rule.
+		$labelTypeId = (int)($label?->type_id ?: ($template->product_label_type_id ?? 0));
+		$typeGroup = ProductLabelsEntity::TYPES_ARR[$labelTypeId]['group'] ?? NULL;
+		if ($typeGroup === ProductLabelsEntity::GROUP_AKCE) {
+			$isDiscounted = $hasPriceAction;
+		}
+		elseif ($typeGroup !== NULL) {
+			$usesStoredLabelDiscount = FALSE;
+			$isDiscounted = $price && !empty($price->is_valid_action);
+			$hasPriceAction = $isDiscounted;
+		}
 		$finalPrice = ($isDiscounted || $hasPriceAction) ? (float)$price->price_action : (float)($price->price ?? 0);
 		$basePrice = ($isDiscounted || $hasPriceAction) ? (float)($price->price ?? 0) : 0.0;
 		// 30-day rule (CACH-LAM-CODE.md §3/§5): the "Nejnižší cena za 30 dní" value and
 		// the % come from the 30-day low (getRefPrice(), product_prices_log). Without a
-		// valid low the label falls back to the "Běžná cena" comparison. A queued label's
-		// stored sale_percent still forces AKCE_30 (known gap, see CLAUDE.md).
+		// valid low the label falls back to the "Běžná cena" comparison; an Akce template
+		// then shows the regular price as the low.
 		$refPrice30 = $isDiscounted ? $product->getRefPrice($branchesId) : NULL;
 		$hasValidRef30 = $refPrice30 !== NULL && $refPrice30 > $finalPrice;
-		$isAkce30 = $usesStoredLabelDiscount || ($isDiscounted && $hasValidRef30);
+		$isAkce30 = match ($typeGroup) {
+			ProductLabelsEntity::GROUP_AKCE => $isDiscounted,
+			ProductLabelsEntity::GROUP_STD => FALSE,
+			default => $usesStoredLabelDiscount || ($isDiscounted && $hasValidRef30),
+		};
 		$lowestPrice30 = $hasValidRef30 ? $refPrice30 : $basePrice;
-		$salePercent = !$priceOverride && $label && (float)$label->sale_percent > 0
-			? (float)$label->sale_percent
-			: ($hasValidRef30 ? floor((($refPrice30 - $finalPrice) / $refPrice30) * 100) : 0.0);
+		// "Běžná cena" on a comparison label is the regular price saved (or typed) in the row.
+		// During an action getPriceWithLog() swaps in the price-log reference, the shop's own
+		// earlier price, which belongs only in "Nejnižší cena za 30 dní" (ZAKON-30-DNI).
+		if (!$isAkce30 && $basePrice > 0) {
+			$regularPrice = (float)(($priceOverride['price'] ?? NULL) ?: ($rawPrice->price ?? 0));
+			if ($regularPrice > 0) {
+				$basePrice = $regularPrice;
+			}
+		}
+		$salePercent = match (TRUE) {
+			!$priceOverride && $label && (float)$label->sale_percent > 0 => (float)$label->sale_percent,
+			$hasValidRef30 => floor((($refPrice30 - $finalPrice) / $refPrice30) * 100),
+			$isAkce30 && $basePrice > 0 => floor((($basePrice - $finalPrice) / $basePrice) * 100),
+			default => 0.0,
+		};
 		$hasSaleRibbon = $isAkce30 && $salePercent > 0;
 		$finalPriceMajor = number_format(floor($finalPrice), 0, ',', ' ');
 		$priceDigits = strlen(str_replace([' ', ','], '', $finalPriceMajor));
@@ -302,7 +332,31 @@ class PrintTemplatesService
 		$currencySymbol = $price?->getCurrency()?->symbol ?: 'Kč';
 		$hideValidity = (bool)($label?->hide_validity ?? 0);
 		$hideIngredients = (bool)($label?->hide_ingredients ?? 0);
-		$validityText = $hideValidity ? NULL : ($label?->sale_text ?: $this->formatValidity($price));
+		// action dates only on a label that prints the action; a custom text always
+		$validityText = $hideValidity ? NULL : ($label?->sale_text ?: (($isDiscounted || $isAkce30) ? $this->formatValidity($price) : NULL));
+		// the newer columns are read through the row: Nette's column auto-detection
+		// leaves them out of an entity's copied values
+		$ingredients = trim((string)($label?->getRow()->ingredients ?? '')) ?: trim((string)($product->ingredients ?? ''));
+		$isThawed = $product->isRozmrazeno() || !empty($label?->thawed);
+		// "Cena za" (products.price_unit, per label override): plain "Kč" keeps
+		// each template's own "Kč / 1 ks" text.
+		$priceUnit = ($label?->getRow()->price_unit ?? NULL) ?: $product->getPriceUnit();
+		// Header chosen per label; the narrow templates print it word by word in their
+		// brand column ("Fikko / Cena"), at most three lines.
+		$headerText = $label?->getHeader()?->name ?: 'Fikko Cena';
+		$headerWords = preg_split('/\s+/u', trim(rtrim($headerText, ' !'))) ?: [];
+		$headerWords = $headerWords && $headerWords[0] !== '' ? $headerWords : ['Fikko', 'Cena'];
+		if (count($headerWords) > 3) {
+			$headerWords = [$headerWords[0], $headerWords[1], implode(' ', array_slice($headerWords, 2))];
+		}
+		$priceUnitText = match ($priceUnit) {
+			'Kč/ks' => $currencySymbol . ' / 1 ks',
+			'Kč/balení' => $currencySymbol . ' / 1 balení',
+			'Kč/kg' => $currencySymbol . ' / 1 kg',
+			'Kč/100 g' => $currencySymbol . ' / 100 g',
+			'Kč/l' => $currencySymbol . ' / 1 l',
+			default => NULL,
+		};
 
 		$note1 = $label?->note_1 ?: $product->label_note_1;
 		$note2 = $label?->note_2 ?: $product->label_note_2;
@@ -320,6 +374,12 @@ class PrintTemplatesService
 			'note3' => $note3,
 			'hideValidity' => $hideValidity,
 			'hideIngredients' => $hideIngredients,
+			'ingredients' => $ingredients,
+			'isThawed' => $isThawed,
+			'headerText' => $headerText,
+			'headerWords' => $headerWords,
+			'headerWordMax' => max(array_map('mb_strlen', $headerWords)),
+			'priceUnitText' => $priceUnitText,
 			'labelName' => $labelName,
 			'labelNameLength' => function_exists('mb_strlen') ? mb_strlen($labelName) : strlen($labelName),
 			'price' => $price,
@@ -343,6 +403,12 @@ class PrintTemplatesService
 			'unitText' => $unit ? sprintf('%s / %s %s', number_format($unit->price, 2, ',', ' '), $unit->unitWeight, $unit->unitShort) : NULL,
 			'country' => $country,
 			'validityText' => $validityText,
+			// a text from the editor ("Akce platí do…" / Text na štítku) is a whole sentence
+			// "Akce platí do 06.10.2026 nebo do vyprodání zásob" takes the end date only (design A4/A5 Akce)
+			// "Platnost 10. 10. – 15. 10." (A4 comparison) always from the action dates, never the chosen text
+			'validityRange' => !$hideValidity && $isDiscounted ? ($this->formatValidity($price) ?: NULL) : NULL,
+			'validityUntil' => !$hideValidity && ($isDiscounted || $isAkce30) && $price?->action_to ? $price->action_to->format('d.m.Y') : NULL,
+			'validityCustom' => !$hideValidity && trim((string)($label?->sale_text ?? '')) !== '',
 			'ean' => $ean,
 			'eanText' => $ean !== '' ? EanBarcodeHelper::getDigits($ean) : '',
 			'bars' => match (TRUE) {
@@ -373,7 +439,9 @@ class PrintTemplatesService
 			// The origin flag uses the country's own uploaded image (countries.image) via the same
 			// getImageDir() lookup the old TCPDF renderer used, not a static placeholder — so it
 			// actually matches the product's real origin country instead of always showing Czech.
-			'flagIconDataUri' => $this->countryFlagDataUri($country),
+			'flagIconDataUri' => $this->countryFlagImages($country)['round'],
+			// the rectangular flags (Vel. 2 Akce / Složení, Pečivo)
+			'flagRectDataUri' => $this->countryFlagImages($country)['rect'],
 			'snowflakeIconDataUri' => $this->imageAsDataUri(WWW_DIR . '/images/snowflake-icon.png', 'image/png'),
 			'pigIconDataUri' => $this->imageAsDataUri(WWW_DIR . '/images/pig-icon.png', 'image/png'),
 			// A5's save-badge uses a flat piggy-bank silhouette (Material Symbols "savings"
@@ -598,22 +666,88 @@ class PrintTemplatesService
 	 * renderer reads via ImagesService::getImageDir() — real per-country artwork, not a
 	 * one-size-fits-all placeholder.
 	 */
-	private function countryFlagDataUri(?CountriesEntity $country): string
+	/**
+	 * The country images are square icons (128x128 or 16x16) with the flag in the
+	 * middle and transparent bands above and below it; stretched into a label's
+	 * circle or rectangle those bands showed as white gaps. Trimmed to the flag:
+	 * 'rect' for the rectangular flags, 'round' centre-cropped to a square so it
+	 * fills a circle. Falls back to the original file when GD cannot read it.
+	 *
+	 * @return array{round: string, rect: string}
+	 */
+	private function countryFlagImages(?CountriesEntity $country): array
 	{
-		$image = $country?->image;
-
-		if (!$image) {
-			return '';
+		static $cache = [];
+		$image = (string)($country?->image ?? '');
+		if ($image === '') {
+			return ['round' => '', 'rect' => ''];
+		}
+		if (isset($cache[$image])) {
+			return $cache[$image];
 		}
 
+		$path = FS_DIR . '/images/' . ImagesService::getImageDir($image) . '/' . $image;
 		$mime = match (strtolower((string)pathinfo($image, PATHINFO_EXTENSION))) {
 			'jpg', 'jpeg' => 'image/jpeg',
 			'gif' => 'image/gif',
 			'webp' => 'image/webp',
 			default => 'image/png',
 		};
+		$original = $this->imageAsDataUri($path, $mime);
+		$source = is_file($path) && function_exists('imagecreatefromstring') ? @imagecreatefromstring((string)file_get_contents($path)) : FALSE;
+		if (!$source) {
+			return $cache[$image] = ['round' => $original, 'rect' => $original];
+		}
 
-		return $this->imageAsDataUri(FS_DIR . '/images/' . ImagesService::getImageDir($image) . '/' . $image, $mime);
+		// bounding box of the opaque pixels
+		$w = imagesx($source);
+		$h = imagesy($source);
+		$x1 = $w; $y1 = $h; $x2 = -1; $y2 = -1;
+		for ($y = 0; $y < $h; $y++) {
+			for ($x = 0; $x < $w; $x++) {
+				$alpha = imagecolorsforindex($source, imagecolorat($source, $x, $y))['alpha'];
+				if ($alpha < 20) {
+					$x1 = min($x1, $x); $x2 = max($x2, $x);
+					$y1 = min($y1, $y); $y2 = max($y2, $y);
+				}
+			}
+		}
+		if ($x2 < 0) {
+			return $cache[$image] = ['round' => $original, 'rect' => $original];
+		}
+		// half-transparent anti-aliased edge rows left a light line along the circle
+		if ($x2 - $x1 > 40 && $y2 - $y1 > 40) {
+			$x1++; $y1++; $x2--; $y2--;
+		}
+		$fw = $x2 - $x1 + 1;
+		$fh = $y2 - $y1 + 1;
+		$side = min($fw, $fh);
+
+		return $cache[$image] = [
+			'rect' => $this->pngDataUri($source, $x1, $y1, $fw, $fh, (int)round(120 * $fw / $fh), 120),
+			'round' => $this->pngDataUri($source, $x1 + intdiv($fw - $side, 2), $y1 + intdiv($fh - $side, 2), $side, $side, 120, 120),
+		];
+	}
+
+
+	/** A region of a GD image, resampled to $outW x $outH, as a PNG data URI. */
+	private function pngDataUri(\GdImage $source, int $x, int $y, int $w, int $h, int $outW, int $outH): string
+	{
+		$out = imagecreatetruecolor($outW, $outH);
+		imagealphablending($out, FALSE);
+		imagesavealpha($out, TRUE);
+		imagefill($out, 0, 0, imagecolorallocatealpha($out, 255, 255, 255, 127));
+		// a tiny icon (16 px) is scaled pixel by pixel: smoothing blurred its stripes
+		if ($w < 40 || $h < 40) {
+			imagecopyresized($out, $source, 0, 0, $x, $y, $outW, $outH, $w, $h);
+		}
+		else {
+			imagecopyresampled($out, $source, 0, 0, $x, $y, $outW, $outH, $w, $h);
+		}
+		ob_start();
+		imagepng($out);
+
+		return 'data:image/png;base64,' . base64_encode((string)ob_get_clean());
 	}
 
 
@@ -628,23 +762,12 @@ class PrintTemplatesService
 	public function renderPdf(PrintTemplatesEntity $template, ProductsEntity $product, int $branchesId, ?ProductLabelsEntity $label = NULL, ?array $priceOverride = NULL): string
 	{
 		$html = $this->renderHtml($template, $product, $branchesId, $label, $priceOverride);
-		if ($this->isSize2BTemplate($template)) {
-			return $this->renderDompdf($this->renderStackedSheet([$html], 133, 52, 8.0, 8.0, 4.0), 210, 297)->output();
-		}
-		if ($this->isSize2Template($template)) {
-			return $this->renderDompdf($this->renderStackedSheet([$html], 133, 38, 8.0, 8.0, 3.0), 210, 297)->output();
-		}
-		if ($this->isA5Template($template)) {
+		$layout = $this->sheetLayout($template);
+		if ($layout === 'a5') {
 			return $this->renderDompdf($this->renderA5Page($html), 210, 297)->output();
 		}
-		if ($this->isPecivoTemplate($template)) {
-			return $this->renderDompdf($this->renderStackedSheet([$html], 150, 41, 8.0, 8.0, 4.0), 210, 297)->output();
-		}
-		if ($this->isVel1Template($template)) {
-			return $this->renderDompdf($this->renderStackedSheet([$html], 164, 41, 8.0, 8.0, 4.0), 210, 297)->output();
-		}
-		if ($this->isVel3Template($template)) {
-			return $this->renderDompdf($this->renderStackedSheet([$html], 182, 56, 8.0, 8.0, 6.0), 210, 297)->output();
+		if (is_array($layout)) {
+			return $this->renderDompdf($this->renderStackedSheet([$html], $layout['w'], $layout['h'], 8.0, 8.0, $layout['gap']), 210, 297)->output();
 		}
 
 		$dompdf = $this->renderDompdf(
@@ -667,98 +790,53 @@ class PrintTemplatesService
 		}
 
 		$pages = [];
-		$queueType = null;
+		$queueKey = NULL;
 		$queueJobs = [];
 
-		$flushQueue = function () use (&$pages, &$queueType, &$queueJobs, $branchesId) {
-			if (!$queueJobs || !$queueType) {
-				$queueJobs = [];
-				$queueType = null;
-				return;
-			}
+		// All labels share one Dompdf document, and the templates reuse class names
+		// (.name, .brand, .save …) with different positions: each template's CSS is
+		// scoped to its own wrapper so a later template cannot restyle an earlier one.
+		$render = fn(array $j): string => $this->scopeTemplateHtml(
+			$this->renderHtml($j['template'], $j['label']->getProduct(), $branchesId, $j['label'], $j['priceOverride'] ?? NULL),
+			'pt-t'.(int)$j['template']->id,
+		);
 
-			$template = $queueJobs[0]['template'];
-
-			if ($queueType === 'a5') {
-				foreach (array_chunk($queueJobs, 2) as $pair) {
-					$h1 = $this->renderHtml($pair[0]['template'], $pair[0]['label']->getProduct(), $branchesId, $pair[0]['label'], $pair[0]['priceOverride'] ?? NULL);
-					$h2 = isset($pair[1])
-						? $this->renderHtml($pair[1]['template'], $pair[1]['label']->getProduct(), $branchesId, $pair[1]['label'], $pair[1]['priceOverride'] ?? NULL)
-						: NULL;
-					$pages[] = $this->renderA5Page($h1, $h2);
+		$flushQueue = function () use (&$pages, &$queueKey, &$queueJobs, $render) {
+			if ($queueJobs) {
+				$layout = $this->sheetLayout($queueJobs[0]['template']);
+				if ($layout === 'a5') {
+					foreach (array_chunk($queueJobs, 2) as $pair) {
+						$pages[] = $this->renderA5Page($render($pair[0]), isset($pair[1]) ? $render($pair[1]) : NULL);
+					}
+				}
+				elseif (is_array($layout)) {
+					foreach (array_chunk($queueJobs, $layout['perPage']) as $chunk) {
+						$pages[] = $this->renderStackedSheet(array_map($render, $chunk), $layout['w'], $layout['h'], 8.0, 8.0, $layout['gap']);
+					}
+				}
+				else {
+					foreach ($queueJobs as $j) {
+						$pages[] = $render($j);
+					}
 				}
 			}
-			elseif ($queueType === 'vel2b') {
-				$w = (float)$template->width_mm > 0 ? (float)$template->width_mm : 133.0;
-				$h = (float)$template->height_mm > 0 ? (float)$template->height_mm : 52.0;
-				foreach (array_chunk($queueJobs, 5) as $chunk) {
-					$htmls = array_map(fn($j) => $this->renderHtml($j['template'], $j['label']->getProduct(), $branchesId, $j['label'], $j['priceOverride'] ?? NULL), $chunk);
-					$pages[] = $this->renderStackedSheet($htmls, $w, $h, 8.0, 8.0, 4.0);
-				}
-			}
-			elseif ($queueType === 'size2') {
-				$w = (float)$template->width_mm > 0 ? (float)$template->width_mm : 133.0;
-				$h = (float)$template->height_mm > 0 ? (float)$template->height_mm : 41.0;
-				foreach (array_chunk($queueJobs, 7) as $chunk) {
-					$htmls = array_map(fn($j) => $this->renderHtml($j['template'], $j['label']->getProduct(), $branchesId, $j['label'], $j['priceOverride'] ?? NULL), $chunk);
-					$pages[] = $this->renderStackedSheet($htmls, $w, $h, 8.0, 8.0, 3.0);
-				}
-			}
-			elseif ($queueType === 'pecivo') {
-				$w = (float)$template->width_mm > 0 ? (float)$template->width_mm : 150.0;
-				$h = (float)$template->height_mm > 0 ? (float)$template->height_mm : 41.0;
-				foreach (array_chunk($queueJobs, 6) as $chunk) {
-					$htmls = array_map(fn($j) => $this->renderHtml($j['template'], $j['label']->getProduct(), $branchesId, $j['label'], $j['priceOverride'] ?? NULL), $chunk);
-					$pages[] = $this->renderStackedSheet($htmls, $w, $h, 8.0, 8.0, 4.0);
-				}
-			}
-			elseif ($queueType === 'vel1') {
-				$w = (float)$template->width_mm > 0 ? (float)$template->width_mm : 164.0;
-				$h = (float)$template->height_mm > 0 ? (float)$template->height_mm : 41.0;
-				foreach (array_chunk($queueJobs, 6) as $chunk) {
-					$htmls = array_map(fn($j) => $this->renderHtml($j['template'], $j['label']->getProduct(), $branchesId, $j['label'], $j['priceOverride'] ?? NULL), $chunk);
-					$pages[] = $this->renderStackedSheet($htmls, $w, $h, 8.0, 8.0, 4.0);
-				}
-			}
-			elseif ($queueType === 'vel3') {
-				$w = (float)$template->width_mm > 0 ? (float)$template->width_mm : 182.0;
-				$h = (float)$template->height_mm > 0 ? (float)$template->height_mm : 56.0;
-				foreach (array_chunk($queueJobs, 4) as $chunk) {
-					$htmls = array_map(fn($j) => $this->renderHtml($j['template'], $j['label']->getProduct(), $branchesId, $j['label'], $j['priceOverride'] ?? NULL), $chunk);
-					$pages[] = $this->renderStackedSheet($htmls, $w, $h, 8.0, 8.0, 6.0);
-				}
-			}
-			else {
-				foreach ($queueJobs as $j) {
-					$pages[] = $this->renderHtml($j['template'], $j['label']->getProduct(), $branchesId, $j['label'], $j['priceOverride'] ?? NULL);
-				}
-			}
-
 			$queueJobs = [];
-			$queueType = null;
+			$queueKey = NULL;
 		};
 
 		foreach ($jobs as $job) {
-			$product = $job['label']->getProduct();
-			if (!$product) {
+			if (!$job['label']->getProduct()) {
 				continue;
 			}
 
-			$type = match (TRUE) {
-				$this->isA5Template($job['template']) => 'a5',
-				$this->isSize2BTemplate($job['template']) => 'vel2b',
-				$this->isSize2Template($job['template']) => 'size2',
-				$this->isPecivoTemplate($job['template']) => 'pecivo',
-				$this->isVel1Template($job['template']) => 'vel1',
-				$this->isVel3Template($job['template']) => 'vel3',
-				default => 'other',
-			};
-
-			if ($queueType !== null && $queueType !== $type) {
+			// Labels of the same size share a sheet, whichever template they use.
+			$layout = $this->sheetLayout($job['template']);
+			$key = is_array($layout) ? $layout['w'] . 'x' . $layout['h'] : ($layout ?? 'page');
+			if ($queueKey !== NULL && $queueKey !== $key) {
 				$flushQueue();
 			}
 
-			$queueType = $type;
+			$queueKey = $key;
 			$queueJobs[] = $job;
 		}
 
@@ -780,6 +858,84 @@ class PrintTemplatesService
 	}
 
 
+	/**
+	 * Rendered label HTML as its (scoped) style blocks followed by the label markup in
+	 * a <div class="$scope"> wrapper, ready for renderStackedSheet() / renderA5Page().
+	 */
+	private function scopeTemplateHtml(string $html, string $scope): string
+	{
+		preg_match_all('#<style\b[^>]*>(.*?)</style>#is', $html, $styles);
+		$body = preg_match('#<body\b[^>]*>(.*)</body>#is', $html, $match)
+			? $match[1]
+			: preg_replace('#<style\b[^>]*>.*?</style>#is', '', $html);
+		$body = preg_replace('#<style\b[^>]*>.*?</style>#is', '', (string)$body);
+
+		$css = '';
+		foreach ($styles[1] as $style) {
+			$css .= '<style>'.$this->scopeCss($style, $scope).'</style>';
+		}
+
+		return $css.'<div class="'.$scope.'">'.$body.'</div>';
+	}
+
+
+	/**
+	 * Prefixes every selector with ".$scope ". The templates' CSS has flat rules only;
+	 * @page / @font-face blocks stay as they are, html/body rules apply to the wrapper.
+	 */
+	private function scopeCss(string $css, string $scope): string
+	{
+		$css = preg_replace('#/\*.*?\*/#s', '', $css) ?? $css;
+
+		return preg_replace_callback('#([^{}]+)\{([^{}]*)\}#', function (array $rule) use ($scope): string {
+			$prelude = trim($rule[1]);
+			if ($prelude === '' || $prelude[0] === '@') {
+				return $rule[0];
+			}
+			$selectors = array_map(static function (string $selector) use ($scope): string {
+				$selector = trim($selector);
+				if (preg_match('#^(html|body)\b(.*)$#i', $selector, $m)) {
+					return '.'.$scope.$m[2];
+				}
+
+				return '.'.$scope.' '.$selector;
+			}, explode(',', $prelude));
+
+			return implode(', ', $selectors).' {'.$rule[2].'}';
+		}, $css) ?? $css;
+	}
+
+
+	/**
+	 * Where a template sits on the A4 sheet: 'a5' (two-up), stacked strips
+	 * ['w', 'h', 'gap', 'perPage'] in mm, or NULL for a page of its own (A4, fruit).
+	 *
+	 * @return 'a5'|array{w: float, h: float, gap: float, perPage: int}|null
+	 */
+	private function sheetLayout(PrintTemplatesEntity $template): string|array|null
+	{
+		if ($this->isA5Template($template)) {
+			return 'a5';
+		}
+
+		$w = (float)$template->width_mm;
+		$h = (float)$template->height_mm;
+		if ($w >= 200 || $w < 100 || $h <= 0) {
+			return NULL;
+		}
+
+		$gap = match (TRUE) {
+			$h >= 56 => 6.0,
+			$h <= 38 || ($w === 133.0 && $h <= 41) => 3.0,
+			default => 4.0,
+		};
+		// 8mm top margin, at least 5mm left at the bottom
+		$perPage = max(1, (int)floor((297 - 8 - 5 + $gap) / ($h + $gap)));
+
+		return ['w' => $w, 'h' => $h, 'gap' => $gap, 'perPage' => $perPage];
+	}
+
+
 	private function isSize2BTemplate(PrintTemplatesEntity $template): bool
 	{
 		return (float)$template->width_mm === 133.0 && ((float)$template->height_mm === 52.0 || str_contains($template->html_source, 'fikko-vel2b') || (int)($template->product_label_type_id ?? 0) === ProductLabelsEntity::TYPE_SIZE_2B);
@@ -796,7 +952,7 @@ class PrintTemplatesService
 	{
 		return ((float)$template->width_mm === 200.0 && (float)$template->height_mm === 138.5)
 			|| ((float)$template->width_mm === 210.0 && (float)$template->height_mm === 148.5)
-			|| (int)($template->product_label_type_id ?? 0) === ProductLabelsEntity::TYPE_A5;
+			|| in_array((int)($template->product_label_type_id ?? 0), [ProductLabelsEntity::TYPE_A5, ProductLabelsEntity::TYPE_A5_AKCE], TRUE);
 	}
 
 
@@ -901,25 +1057,6 @@ class PrintTemplatesService
 			. '<div class="stacked-sheet">'
 			. $labelItemsHtml
 			. '</div>';
-	}
-
-
-	private function isVel1Template(PrintTemplatesEntity $template): bool
-	{
-		return ((float)$template->width_mm === 164.0 || ((float)$template->width_mm === 150.0 && (float)$template->height_mm === 44.0) || (int)($template->product_label_type_id ?? 0) === ProductLabelsEntity::TYPE_SIZE_1) && !$this->isPecivoTemplate($template);
-	}
-
-
-	private function isPecivoTemplate(PrintTemplatesEntity $template): bool
-	{
-		return (float)$template->width_mm === 150.0 && ((float)$template->height_mm === 41.0 || str_contains($template->html_source, 'fikko-pecivo') || (int)($template->product_label_type_id ?? 0) === ProductLabelsEntity::TYPE_PECIVO);
-	}
-
-
-	private function isVel3Template(PrintTemplatesEntity $template): bool
-	{
-		return ((float)$template->width_mm === 182.0 && (float)$template->height_mm === 56.0)
-			|| (int)($template->product_label_type_id ?? 0) === ProductLabelsEntity::TYPE_SIZE_3;
 	}
 
 

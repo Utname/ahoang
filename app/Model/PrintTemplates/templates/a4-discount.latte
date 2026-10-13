@@ -136,14 +136,19 @@
     <img class="logo" src="{$logoDataUri|nocheck}" style="left:{=round(105.19 - 0.4845 * $logoW, 3)|noescape}mm;top:{=round(42.07 - 0.474 * $logoH, 3)|noescape}mm;width:{=round($logoW, 3)|noescape}mm;height:{=round($logoH, 3)|noescape}mm" alt="Fikko market">
 
     <div class="header-bar"></div>
-    <div class="abs lh0 nu center header-title">FIKKO CENA</div>
+    {* A longer header than "FIKKO CENA" shrinks to fit the 192mm bar, baseline lifted to stay centred. *}
+    {var $hdrFs = min(14, 180 / max(1, mb_strlen($headerText) * 0.7))}
+    <div class="abs lh0 nu center header-title" style="font-size:{=round($hdrFs, 3)|noescape}mm;top:{=round(78.23 - (14 - $hdrFs) * 0.36, 3)|noescape}mm">{$headerText|upper}</div>
 
     <div class="flow">
-    <div class="prod-name">{$labelName}</div>
+    {* a name just over one line (design sample, 41 characters) shrinks to stay on one line like the
+       design; longer names keep 8mm on two lines. ~0.64em per character in the Dompdf font. *}
+    {var $nameFs = $labelNameLength * 0.64 * 8 > 180 && $labelNameLength * 0.64 * 6.8 <= 180 ? round(180 / ($labelNameLength * 0.64), 2) : 8}
+    <div class="prod-name" style="font-size:{$nameFs|noescape}mm">{$labelName}</div>
     <div class="middle">
 
     <div n:if="$label && $label->is_more_species" class="abs lh0 center sub-text" style="left:14mm;width:182mm;top:{=round(104.16 + $dl, 3)|noescape}mm">Více druhů</div>
-    <div n:if="!$isAkce30 && $validityText" class="abs lh0 right" style="left:14mm;width:182mm;top:{=round(104.16 + $dl, 3)|noescape}mm"><span class="platnost-label">Platnost</span><span class="platnost-val">{$validityText}</span></div>
+    <div n:if="!$isAkce30 && $validityRange" class="abs lh0 right" style="left:14mm;width:182mm;top:{=round(104.16 + $dl, 3)|noescape}mm"><span class="platnost-label">Platnost</span><span class="platnost-val">{$validityRange}</span></div>
 
     <div n:if="$note1" class="abs lh0 nu center note1" style="left:14mm;width:182mm;top:{=round(113.16 + $dl, 3)|noescape}mm">{$note1}</div>
 
@@ -177,7 +182,7 @@
                 <td><div class="lh0 nu price-major" style="font-size:{=round($fsMajor, 3)|noescape}mm">{$finalPriceMajor}</div></td>
                 <td style="padding-left:1.2mm">
                     <div class="lh0 nu rel" style="font-size:{=round($fsMinor, 3)|noescape}mm;top:{=round(-26.72 * $ps, 3)|noescape}mm">{$finalPriceMinor}</div>
-                    <div class="lh0 nu rel" style="font-size:{=round($fsCur, 3)|noescape}mm;top:{=round(-5.03 * $ps, 3)|noescape}mm">{$currencySymbol} / ks</div>
+                    <div class="lh0 nu rel" style="font-size:{=round($fsCur, 3)|noescape}mm;top:{=round(-5.03 * $ps, 3)|noescape}mm">{$priceUnitText ?: $currencySymbol . ' / ks'}</div>
                 </td>
             </tr>
         </table>
@@ -202,6 +207,7 @@
     <div n:if="$eanText" class="abs lh0 barcode-ean">EAN {$eanText}</div>
 
     {* "Akce platí do" only on AKCE_30 (CACH-LAM-CODE §3). *}
-    <div n:if="!$hideValidity && ($isAkce30 || (!$isDiscounted && $validityText))" class="abs lh0 center validity">{if $validityText}Akce platí do <b>{$validityText}</b> nebo do vyprodání zásob{else}Akce platí do vyprodání zásob{/if}</div>
+    {* the chosen text replaces "Akce platí do …" on an Akce label; a comparison label already has Platnost *}
+    <div n:if="!$hideValidity && ($isAkce30 || ($validityCustom && !$validityRange))" class="abs lh0 center validity">{if $validityCustom}{$validityText}{elseif $validityUntil}Akce platí do <b>{$validityUntil}</b> nebo do vyprodání zásob{else}Akce platí do vyprodání zásob{/if}</div>
 
 </div>

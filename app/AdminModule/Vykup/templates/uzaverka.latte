@@ -1,0 +1,92 @@
+{block content}
+{var $t = $report['total']}
+{var $appValues = ['lahev' => (int)$t->lahev, 'prepravka' => (int)$t->prepravka, 'kc' => (int)$t->kc]}
+<div class="col-md-12 vk-page">
+    {include '_nav.latte'}
+
+    <div class="vk-kpis">
+        <div class="vk-kpi"><span>{_admin.vykup.kVouchers}</span><b>{$t->vouchers|number:0,',',' '}</b></div>
+        <div class="vk-kpi"><span>{_admin.vykup.kDup}</span><b>{$report['dups']}</b></div>
+        <div class="vk-kpi"><span>{_admin.vykup.kBottles}</span><b>{$t->lahev|number:0,',',' '}</b></div>
+        <div class="vk-kpi"><span>{_admin.vykup.kCrates}</span><b>{$t->prepravka|number:0,',',' '}</b></div>
+        <div class="vk-kpi"><span>{_admin.vykup.kAmount}</span><b>{$t->kc|number:0,',',' '} Kč</b></div>
+    </div>
+
+    <div class="vk-two">
+        <div class="vk-card">
+            <div class="vk-card-title">{_admin.vykup.recon}</div>
+            <div class="vk-hint">{_admin.vykup.reconHint}</div>
+            {form closeForm class => 'vk-recon', autocomplete => 'off'}
+                <div class="vk-recon-row vk-recon-head"><div></div><div class="vk-r">App</div><div class="vk-c">GoKasa</div><div class="vk-r">{_admin.vykup.diff}</div></div>
+                {foreach ['lahev' => 'rcBottles', 'prepravka' => 'rcCrates', 'kc' => 'rcAmount'] as $key => $labelKey}
+                    <div class="vk-recon-row" data-app="{$appValues[$key]}">
+                        <div class="vk-b">{_"admin.vykup.$labelKey"}</div>
+                        <div class="vk-r vk-num">{$appValues[$key]|number:0,',',' '}</div>
+                        {* own cell: live validation adds a message span after the input *}
+                        <div>{input "pos_$key" class => 'vk-input vk-recon-input', placeholder => '—', inputmode => 'numeric', min => 0}</div>
+                        <div class="vk-r vk-b vk-num vk-diff">—</div>
+                    </div>
+                {/foreach}
+                <div class="vk-recon-msg" id="vk-recon-msg" data-wait="{_admin.vykup.reconWait}" data-ok="{_admin.vykup.reconOk}" data-bad="{_admin.vykup.reconBad}">{_admin.vykup.reconWait}</div>
+                <div class="vk-recon-foot">
+                    <span n:if="$closed" class="vk-muted">{=sprintf(('admin.vykup.closedAt'|translate), $closed->closed_at->format('H:i'))} – {$closed->ok ? ('admin.vykup.stMatch'|translate) : ('admin.vykup.stMismatch'|translate)}</span>
+                    <span class="vk-flex"></span>
+                    <button n:name="save" class="vk-btn vk-btn-dark">{_admin.vykup.saveClose}</button>
+                </div>
+            {/form}
+        </div>
+
+        <div class="vk-card">
+            <div class="vk-card-head">
+                <div class="vk-card-title">{_admin.vykup.byStaff}</div>
+                <span class="vk-flex"></span>
+                <a href="{link export, from => $vkToday, to => $vkToday}" class="vk-btn">⬇ {_admin.vykup.export}</a>
+            </div>
+            <div class="vk-table vk-staff-table">
+                <div class="vk-tr vk-th"><div>{_admin.vykup.colStaff}</div><div class="vk-r">{_admin.vykup.vouchers}</div><div class="vk-r">{_admin.vykup.colBottles}</div><div class="vk-r">{_admin.vykup.colCrates}</div><div class="vk-r">{_admin.vykup.colAmount}</div></div>
+                <div n:foreach="$report['byStaff'] as $s" class="vk-tr">
+                    <div class="vk-b">{$s->name}</div><div class="vk-r vk-num">{$s->vouchers}</div><div class="vk-r vk-num">{$s->lahev|number:0,',',' '}</div><div class="vk-r vk-num">{$s->prepravka|number:0,',',' '}</div><div class="vk-r vk-num vk-b">{$s->kc|number:0,',',' '} Kč</div>
+                </div>
+                <div n:if="!count($report['byStaff'])" class="vk-empty">{_admin.vykup.noHist}</div>
+            </div>
+            <div class="vk-muted">{=sprintf(('admin.vykup.voidNote'|translate), $report['voided'])}</div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    var rows = Array.prototype.slice.call(document.querySelectorAll('.vk-recon-row[data-app]'));
+    var msg = document.getElementById('vk-recon-msg');
+    if (!msg) {
+        return;
+    }
+    var update = function () {
+        var filled = 0;
+        var bad = 0;
+        rows.forEach(function (row) {
+            var input = row.querySelector('input');
+            var diffEl = row.querySelector('.vk-diff');
+            var raw = String(input.value).replace(/\D/g, '');
+            diffEl.className = 'vk-r vk-b vk-num vk-diff';
+            if (raw === '') {
+                diffEl.textContent = '—';
+                return;
+            }
+            var d = parseInt(raw, 10) - parseInt(row.getAttribute('data-app'), 10);
+            filled++;
+            if (d !== 0) {
+                bad++;
+            }
+            diffEl.textContent = (d > 0 ? '+' : '') + d.toLocaleString('cs-CZ');
+            diffEl.classList.add(d === 0 ? 'vk-ok-text' : 'vk-bad-text');
+        });
+        var state = filled === 0 ? 'wait' : (bad ? 'bad' : 'ok');
+        msg.textContent = msg.getAttribute('data-' + state);
+        msg.className = 'vk-recon-msg vk-recon-' + state;
+    };
+    rows.forEach(function (row) { row.querySelector('input').addEventListener('input', update); });
+    update();
+})();
+</script>
+{/block}

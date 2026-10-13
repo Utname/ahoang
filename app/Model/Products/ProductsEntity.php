@@ -21,6 +21,9 @@ class ProductsEntity extends BaseEntity
 		self::UNITS_TYPE_PACKAGE => "Balení",
 		self::UNITS_TYPE_CENTIMETER => "Cm",
 	];
+	/** "Cena za" printed next to the label price (products.price_unit, product_labels.price_unit) */
+	const PRICE_UNITS = ['Kč', 'Kč/ks', 'Kč/balení', 'Kč/kg', 'Kč/100 g', 'Kč/l'];
+
 	const UNITS_TYPE_PIECE = 0;
 	const UNITS_TYPE_LITERS = 1;
 	const UNITS_TYPE_MILLILITERS = 2;
@@ -123,6 +126,25 @@ class ProductsEntity extends BaseEntity
 		}
 
 		return $category;
+	}
+
+
+	/**
+	 * "Cena za" (products.price_unit). Read through the row: Nette's column
+	 * auto-detection leaves a newly used column out of the entity's copied values.
+	 */
+	public function getPriceUnit(): string
+	{
+		$unit = $this->getRow()->price_unit ?? NULL;
+
+		return in_array($unit, self::PRICE_UNITS, TRUE) ? $unit : 'Kč';
+	}
+
+
+	/** Rozmrazeno (products.rozmrazeno), a flag for all labels of the product. */
+	public function isRozmrazeno(): bool
+	{
+		return !empty($this->getRow()->rozmrazeno);
 	}
 
 

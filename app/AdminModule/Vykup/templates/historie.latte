@@ -1,0 +1,63 @@
+{block content}
+<div class="col-md-12 vk-page">
+    {include '_nav.latte'}
+
+    <div class="vk-card vk-table-card">
+        <form method="get" action="{link historie}" class="vk-filter">
+            <input type="search" name="q" value="{$q}" placeholder="{_admin.vykup.searchPh}" class="vk-input vk-search">
+            <label class="vk-input-label">{_admin.vykup.date}
+                <input type="date" name="date" value="{$date}" onchange="this.form.submit()">
+            </label>
+            <input n:if="$staffId" type="hidden" name="staff" value="{$staffId}">
+            <div class="vk-chips">
+                <a href="{link historie, date => $vkToday, staff => $staffId, q => $q}" n:class="vk-chip, $date === $vkToday ? vk-on-teal">{_admin.vykup.today}</a>
+                <a href="{link historie, date => $yesterday, staff => $staffId, q => $q}" n:class="vk-chip, $date === $yesterday ? vk-on-teal">{_admin.vykup.yesterday}</a>
+            </div>
+            <div class="vk-chips">
+                <a href="{link historie, date => $date, q => $q}" n:class="vk-pill, !$staffId ? vk-on">{_admin.vykup.allStaff}</a>
+                <a n:foreach="$staffList as $person" href="{link historie, date => $date, staff => $person->id, q => $q}" n:class="vk-pill, $staffId === (int)$person->id ? vk-on">{$person->name}</a>
+            </div>
+            <span class="vk-flex"></span>
+            <span class="vk-muted">{=sprintf(('admin.vykup.histCount'|translate), count($rows))}</span>
+        </form>
+
+        <div class="vk-table vk-hist">
+            <div class="vk-tr vk-th">
+                <div>{_admin.vykup.colNo}</div><div>{_admin.vykup.colTime}</div><div>{_admin.vykup.colStaff}</div>
+                <div class="vk-r">{_admin.vykup.colBottles}</div><div class="vk-r">{_admin.vykup.colCrates}</div><div class="vk-r">{_admin.vykup.colAmount}</div>
+                <div class="vk-c">{_admin.vykup.colStatus}</div><div></div>
+            </div>
+            {foreach $rows as $row}
+                <div n:class="vk-tr, $row->status === 'void' ? vk-void">
+                    <div class="vk-b vk-num">{$row->voucher_no}<span n:if="$row->reprints" class="vk-dupmark" title="{_admin.vykup.kDup}">⚠ {$row->reprints}×</span></div>
+                    <div class="vk-muted vk-num">{$row->created_at->format('H:i')}</div>
+                    <div>{$row->staff_name}</div>
+                    <div class="vk-r vk-num">{$row->lahev|number:0,',',' '}</div>
+                    <div class="vk-r vk-num">{$row->prepravka|number:0,',',' '}</div>
+                    <div class="vk-r vk-num vk-b">{$row->total_kc|number:0,',',' '} Kč</div>
+                    <div class="vk-c"><span n:class="vk-badge, $row->status === 'void' ? vk-badge-void : vk-badge-ok">{$row->status === 'void' ? ('admin.vykup.stVoid'|translate) : ('admin.vykup.stOk'|translate)}</span></div>
+                    <div class="vk-actions">
+                        <a n:if="$canReprint[$row->id]" href="{link reprint! $row->id, 'historie'}" class="vk-btn vk-btn-teal with-confirm" data-message="{_admin.vykup.reprintConfirm}">🖨 {_admin.vykup.reprint}</a>
+                        {if $row->status === 'void'}
+                            <a n:if="$row->issue_date->format('Y-m-d') === $vkToday" href="{link restore! $row->id}" class="vk-btn">{_admin.vykup.actRestore}</a>
+                        {else}
+                            <a href="{link void! $row->id}" class="vk-btn vk-btn-danger with-confirm" data-message="{_admin.vykup.voidConfirm}">{_admin.vykup.actVoid}</a>
+                        {/if}
+                    </div>
+                </div>
+            {/foreach}
+            {if count($rows)}
+                <div class="vk-tr vk-tfoot">
+                    <div>{_admin.vykup.dayTotal}</div><div></div><div class="vk-tfoot-sub">{$total['count']} ×</div>
+                    <div class="vk-r">{$total['lahev']|number:0,',',' '}</div>
+                    <div class="vk-r">{$total['prepravka']|number:0,',',' '}</div>
+                    <div class="vk-r vk-teal">{$total['kc']|number:0,',',' '} Kč</div>
+                    <div></div><div></div>
+                </div>
+            {else}
+                <div class="vk-empty">{_admin.vykup.noHist}</div>
+            {/if}
+        </div>
+    </div>
+</div>
+{/block}

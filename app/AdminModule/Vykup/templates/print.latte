@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{$voucher->voucher_no}</title>
+<link rel="stylesheet" href="/css/vykup-voucher.css?v={=@filemtime(WWW_DIR . '/css/vykup-voucher.css')}">
+<style>
+    .vv-bar { max-width: 80mm; margin: 0 auto 12px; display: flex; gap: 8px; justify-content: space-between; font-family: Arial, sans-serif; font-size: 13px; }
+    .vv-bar a, .vv-bar button { border: 1px solid #94a3b8; background: #fff; color: #0f172a; border-radius: 8px; padding: 7px 12px; font: inherit; font-weight: 700; text-decoration: none; cursor: pointer; }
+</style>
+</head>
+<body class="vv-page">
+{* 80mm voucher, always Czech. Prints by itself, then goes back to where it came from.
+   Printer dialog: the thermal printer, scale 100 %, not "fit to page". *}
+<div class="vv-bar vv-noprint">
+    <a href="{$backUrl}">← Zpět</a>
+    <button type="button" onclick="window.print()">🖨 Tisk</button>
+</div>
+{include '_voucher.latte', branch => $branch, vNo => $voucher->voucher_no, vDate => $voucher->created_at->format('d.m.Y H:i'), vStaff => $staff, vValid => $voucher->issue_date->format('d.m.Y'), vLines => $lines, vTotal => $total, vDup => $dup}
+<script>
+(function () {
+    var back = {$backUrl};
+    var done = false;
+    var leave = function () {
+        if (!done) {
+            done = true;
+            location.href = back;
+        }
+    };
+    window.addEventListener('afterprint', function () { setTimeout(leave, 300); });
+    window.addEventListener('load', function () { setTimeout(function () { window.print(); }, 200); });
+})();
+</script>
+</body>
+</html>

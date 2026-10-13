@@ -66,22 +66,32 @@
 {* "Naše cena" group: label + integer (19mm) + ",90" / "Kč / 1 ks" column.
    Its width is estimated from the Dompdf font metrics; the price shrinks
    when it would not fit next to the comparison group (3+ digits). *}
+{* integer width in em: 0.58 per digit, 0.37 for the thousands space ("1 299") *}
+{var $intEm = $digits * 0.58 + substr_count($finalPriceMajor, ' ') * 0.37}
+{* unit column: ",90" or the chosen "Cena za" text (0.453em per character), whichever is wider *}
+{var $unitTxt = $priceUnitText ?: $currencySymbol . ' / 1 ks'}
+{var $unitColW = max(14.8, mb_strlen($unitTxt) * 0.453 * 3.6)}
 {var $ourAvail = $compare ? 47 : 100}
-{var $ps = min(1, ($ourAvail - 8.3) / ($digits * 0.58 * 19 + 1 + 14.8))}
+{var $ps = min(1, ($ourAvail - 8.3) / ($intEm * 19 + 1 + $unitColW))}
 {var $fsI = round(19 * $ps, 3)}
 {var $fsD = round(8.5 * $ps, 3)}
 {var $fsU = round(3.6 * $ps, 3)}
-{var $groupW = 8.3 + ($digits * 0.58 * 19 + 1 + 14.8) * $ps}
+{var $groupW = 8.3 + ($intEm * 19 + 1 + $unitColW) * $ps}
 {var $ourL = $compare ? 81.7 : 78.15 - $groupW / 2}
 {var $saveValText = $savingText . ' ' . $currencySymbol}
 {var $saveW = 2.5 + 11.8 + 1 + mb_strlen($saveValText) * 0.536 * 4.2 + ($isAkce30 ? 0 : 1 + 18.2) + 2.5}
+{* A wider badge (e.g. "300 Kč" + "oproti běžné ceně") would cross the logo column:
+   it stops 1mm short of it (74.4 - 25) and its text shrinks to fit. *}
+{var $ss = $saveW > 49.4 ? (49.4 - 5) / ($saveW - 5) : 1}
+{var $saveW = min($saveW, 49.4)}
 
 <div class="fikko-vel2">
     <div class="logo-col">
         <img class="logo" src="{$logoDataUri|nocheck}" alt="Fikko market">
         <div class="logo-divider"></div>
-        <div class="abs lh0 nu center brand" style="top:20.36mm">Fikko</div>
-        <div class="abs lh0 nu center brand" style="top:26.44mm">Cena</div>
+        {* label header word by word ("Fikko / Cena"), top-aligned like the reference, shrunk to the 21.5mm column *}
+        {var $bFs = min(5.8, 21.5 / ($headerWordMax * 0.68))}
+        <div n:foreach="$headerWords as $i => $word" class="abs lh0 nu center brand" style="font-size:{=round($bFs, 3)|noescape}mm;top:{=round(20.36 + $i * 6.08 * $bFs / 5.8, 3)|noescape}mm">{$word}</div>
     </div>
 
     <div class="abs lh0 center name">{$labelName|truncate:58}</div>
@@ -118,7 +128,7 @@
 
         <div n:if="$saving > 0" class="save" style="left:{=round(74.4 - $saveW, 3)|noescape}mm;width:{=round($saveW, 3)|noescape}mm">
             <img class="save-brush" src="{$brushDataUri|nocheck}" style="width:{=round($saveW, 3)|noescape}mm" alt="">
-            <div class="abs lh0 save-text"><span class="save-copy">Ušetříte</span><span class="nu save-val">{$saveValText}</span><span n:if="!$isAkce30" class="save-suffix">oproti běžné ceně</span></div>
+            <div class="abs lh0 save-text"><span class="save-copy" style="font-size:{=round(2 * $ss, 3)|noescape}mm">Ušetříte</span><span class="nu save-val" style="font-size:{=round(4.2 * $ss, 3)|noescape}mm;margin-left:{=round($ss, 3)|noescape}mm">{$saveValText}</span><span n:if="!$isAkce30" class="save-suffix" style="font-size:{=round(1.8 * $ss, 3)|noescape}mm;margin-left:{=round($ss, 3)|noescape}mm">oproti běžné ceně</span></div>
         </div>
 
         <div n:if="!$isAkce30" class="divider"></div>
@@ -135,12 +145,12 @@
             </td>
             <td style="padding:0 0 0 1mm;vertical-align:top;white-space:nowrap">
                 <div class="lh0 nu" style="font-size:{$fsD|noescape}mm;position:relative;top:{=round(-0.53 * $ps, 3)|noescape}mm">{$finalPriceMinor}</div>
-                <div class="lh0 nu" style="font-size:{$fsU|noescape}mm;position:relative;top:{=round(4.49 * $ps, 3)|noescape}mm">{$currencySymbol} / 1 ks</div>
+                <div class="lh0 nu" style="font-size:{$fsU|noescape}mm;position:relative;top:{=round(4.49 * $ps, 3)|noescape}mm">{$unitTxt}</div>
             </td>
         </tr>
     </table>
 
-    <div n:if="$unit" class="abs lh0 nu4 right unit">cena za {$unit->unitWeight}{$unit->unitShort} = {$unit->price|number:2,',',' '} {$currencySymbol}</div>
+    <div n:if="$unit" class="abs lh0 nu4 right unit">cena za {$unit->unitWeight} {$unit->unitShort} = {$unit->price|number:2,',',' '} {$currencySymbol}</div>
 
     <div n:if="$bars" class="bars">
         <div n:foreach="$bars as $bar" style="background:{$bar['color']|noescape};width:{$bar['width']|noescape}"></div>

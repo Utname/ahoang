@@ -26,6 +26,7 @@ a2enmod mpm_prefork rewrite deflate expires headers >/dev/null 2>&1 || true
 # this image into the database on every start. Only when a database is
 # configured; a failure must not stop the web server from starting.
 if [ -n "${MYSQLHOST:-}" ]; then
+	php /var/www/html/bin/migrate.php || echo "database migration failed" >&2
 	php /var/www/html/bin/sync-print-templates.php || echo "print template sync failed" >&2
 fi
 

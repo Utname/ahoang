@@ -240,6 +240,18 @@ class ProductsPresenter extends BaseModulePresenter
 				}
 			}
 
+			// filter pills "Probíhá akce" / "Naplánované" (ProductLabelsControl::getActionStatus())
+			if (isset($filters['akce_status']) && in_array($filters['akce_status'], [ProductLabelsControl::STATUS_RUNNING, ProductLabelsControl::STATUS_PLANNED], TRUE)) {
+				$sql = 'products.id IN (SELECT products_id FROM product_prices WHERE branches_id = ? AND price_action > 0 AND price > price_action AND action_from IS NOT NULL AND ';
+				$today = date('Y-m-d');
+				if ($filters['akce_status'] === ProductLabelsControl::STATUS_RUNNING) {
+					$selection->where($sql.'action_from <= ? AND (action_to IS NULL OR action_to >= ?))', $filters['branches'] ?? 0, $today, $today);
+				}
+				else {
+					$selection->where($sql.'action_from > ?)', $filters['branches'] ?? 0, $today);
+				}
+			}
+
 			if (isset($filters['name']) && $filters['name']) {
 				$searchPars = [];
 				foreach (explode(' ', $filters['name']) as $searchPar) {
@@ -328,6 +340,15 @@ class ProductsPresenter extends BaseModulePresenter
 		$this->template->totalLabels = $summary['totalLabels'];
 		$this->template->selectedProductsCount = $summary['selectedProductsCount'];
 		$this->template->printGroups = $summary['groups'];
+		$this->template->allPrintGroups = $summary['allGroups'];
+
+		// "Admin - Produkty v2": filter pills, and a search that finds one product
+		// opens its labels panel
+		$filters = $this->session->filters[$this->getName()] ?? [];
+		$this->template->statusCounts = $this->getStatusCounts();
+		$this->template->statusFilter = !empty($filters['custom__labels']) ? 'toprint' : ($filters['custom__akce_status'] ?? '');
+		$this->template->itemCount = $paginator->getPaginator()->getItemCount();
+		$this->template->autoOpenSearch = !empty($filters['custom__name']) && $paginator->getPaginator()->getItemCount() === 1;
 	}
 
 
