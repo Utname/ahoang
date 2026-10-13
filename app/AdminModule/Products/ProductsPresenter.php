@@ -260,8 +260,28 @@ class ProductsPresenter extends BaseModulePresenter
 				foreach (explode(' ', $filters['name']) as $searchPar) {
 					$searchPars[] = '%'.$searchPar.'%';
 				}
+				$nameSql = implode(' AND ', array_fill(0, count($searchPars), 'products_mld.name LIKE ?'));
 
-				$selection->where('products.code_ean = ? OR products.id IN (SELECT products_id FROM product_codes WHERE value = ?) OR ('.implode(' AND ', array_fill(0, count($searchPars), 'products_mld.name LIKE ?')).')', $filters['name'], $filters['name'], ...$searchPars);
+				// EAN / product codes first (indexed, bin/migrate.php), then plain ids: an OR on
+				// the joined products table made MariaDB scan everything (search while typing).
+				// 8+ digits is a code: matched by its start (typed EAN), no name scan.
+				$term = trim((string)$filters['name']);
+				$isCode = (bool)preg_match('/^\d{8,}$/', $term);
+				$codeIds = $this->repository->getDatabase()
+					->query($isCode
+						? 'SELECT id FROM products WHERE code_ean LIKE ? UNION SELECT products_id FROM product_codes WHERE value LIKE ? LIMIT 500'
+						: 'SELECT id FROM products WHERE code_ean = ? UNION SELECT products_id FROM product_codes WHERE value = ?',
+						...($isCode ? [$term.'%', $term.'%'] : [$term, $term]))
+					->fetchPairs(NULL, 'id');
+				if ($isCode) {
+					$selection->where('products_mld.products_id IN (?)', $codeIds ?: [0]);
+				}
+				elseif ($codeIds) {
+					$selection->where("($nameSql) OR products_mld.products_id IN (?)", ...[...$searchPars, $codeIds]);
+				}
+				else {
+					$selection->where($nameSql, ...$searchPars);
+				}
 			}
 
 			if (isset($filters['is_active'])) {
@@ -289,8 +309,8 @@ class ProductsPresenter extends BaseModulePresenter
 				// paginator above was created before the list existed (count 0)
 				$this->filters = $this->session->filters[$this->getName()] ?? [];
 				$this->recountPaginator = TRUE;
+				$this->redrawControl('productCount');
 				$this->redrawControl('productList');
-				$this->redrawControl('printSummary');
 				return;
 			}
 
@@ -344,9 +364,10 @@ class ProductsPresenter extends BaseModulePresenter
 		if ($this->session->newProductModalSearch) {
 			$newProductModalSearch = TRUE;
 			$newProductModalEan = $this->session->newProductModalEan;
-			$newProductModalCount = $this->repository->findAll()
-				->where('products.code_ean = ? OR products.id IN (SELECT products_id FROM product_codes WHERE value = ?)', $newProductModalEan, $newProductModalEan)
-				->count();
+			// products table only (indexed code_ean); the joined list selection scanned everything
+			$newProductModalCount = (int)$this->repository->getDatabase()
+				->query('SELECT COUNT(*) FROM products WHERE code_ean = ? OR id IN (SELECT products_id FROM product_codes WHERE value = ?)', $newProductModalEan, $newProductModalEan)
+				->fetchField();
 			$this->session->newProductModalSearch = FALSE;
 			$this->session->newProductModalEan = NULL;
 		}
@@ -355,11 +376,14 @@ class ProductsPresenter extends BaseModulePresenter
 		$paginator = $this['paginator'];
 		$this->template->canChangePage = ($paginator->getPaginator()->getPage() < $paginator->getPaginator()->getLastPage());
 
-		$this->template->categories = $this->categories = $this->categoriesRepo->findAllEntities();
 		$this->template->newProductModal = $this->newProductModal || ($newProductModalSearch && !$newProductModalCount);
 		$this->template->newProductModalEan = $newProductModalSearch && !$newProductModalCount ? $newProductModalEan : NULL;
 
-		$summary = $this->getQueuedPrintSummary();
+		// the search while typing redraws only the list: categories (modals), the print
+		// queue and the status counts do not change with it
+		$searchOnly = $this->recountPaginator;
+		$this->template->categories = $this->categories = $searchOnly ? [] : $this->categoriesRepo->findAllEntities();
+		$summary = $searchOnly ? ['totalLabels' => 0, 'selectedProductsCount' => 0, 'groups' => [], 'allGroups' => []] : $this->getQueuedPrintSummary();
 		$this->template->queuedPrintSummary = $summary;
 		$this->template->totalLabels = $summary['totalLabels'];
 		$this->template->selectedProductsCount = $summary['selectedProductsCount'];
@@ -369,7 +393,7 @@ class ProductsPresenter extends BaseModulePresenter
 		// "Admin - Produkty v2": filter pills, and a search that finds one product
 		// opens its labels panel
 		$filters = $this->session->filters[$this->getName()] ?? [];
-		$this->template->statusCounts = $this->getStatusCounts();
+		$this->template->statusCounts = $searchOnly ? ['all' => 0, 'running' => 0, 'planned' => 0, 'toprint' => 0] : $this->getStatusCounts();
 		$this->template->statusFilter = !empty($filters['custom__labels']) ? 'toprint' : ($filters['custom__akce_status'] ?? '');
 		$this->template->itemCount = $paginator->getPaginator()->getItemCount();
 		$this->template->autoOpenSearch = !empty($filters['custom__name']) && $paginator->getPaginator()->getItemCount() === 1;

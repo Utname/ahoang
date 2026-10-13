@@ -270,6 +270,13 @@ class ProductLabelsControl extends \Nette\Application\UI\Control
 	}
 
 
+	/** "Možnosti tisku" panel, loaded when the row is first opened (the list renders it empty). */
+	public function handleLoadPanel(): void
+	{
+		$this->redrawControl('panel');
+	}
+
+
 	public function handleIncrement(int $typeId): void
 	{
 		$this->changeCount($typeId, 1);

@@ -192,19 +192,26 @@ class GlobalContainer
 
 
 	/**
-	 * @return void
+	 * Crop/title data of one image or file, looked up by name (indexed, bin/migrate.php)
+	 * and kept for the request. Loading all files_data rows (~24k) on every page that
+	 * shows an image cost ~60 ms of SQL plus the arrays.
 	 */
-	public function loadFilesDataBuffer()
+	private function findFilesData(int $typeId, string $filename): ?stdClass
 	{
 		if (!isset($GLOBALS['lang'])) {
 			$GLOBALS['lang'] = $this->getDefaultLanguage()->id;
 		}
-		if (is_null($this->filesDataBuffer)) {
-			$this->filesDataBuffer = [];
-			foreach ($this->filesDataRepository->findAll() as $filesDataRow) {
-				$this->filesDataBuffer[$filesDataRow->types_id][$filesDataRow->file] = $filesDataRow->toArray();
-			}
+		if (!isset($this->filesDataBuffer[$typeId]) || !array_key_exists($filename, $this->filesDataBuffer[$typeId])) {
+			$row = $this->filesDataRepository->findAll()
+				->where('files_data.types_id', $typeId)
+				->where('files_data.file', $filename)
+				->order('files_data.id DESC')
+				->limit(1)
+				->fetch();
+			$this->filesDataBuffer[$typeId][$filename] = $row ? $row->toArray() : NULL;
 		}
+
+		return $this->filesDataBuffer[$typeId][$filename] !== NULL ? (object)$this->filesDataBuffer[$typeId][$filename] : NULL;
 	}
 
 	/**
@@ -213,9 +220,7 @@ class GlobalContainer
 	 */
 	public function getImageData(string $filename): ?stdClass
 	{
-		$this->loadFilesDataBuffer();
-
-		return isset($this->filesDataBuffer[FilesDataEntity::TYPE_IMAGE][$filename]) ? (object)$this->filesDataBuffer[FilesDataEntity::TYPE_IMAGE][$filename] : NULL;
+		return $this->findFilesData(FilesDataEntity::TYPE_IMAGE, $filename);
 	}
 
 	/**
@@ -224,9 +229,7 @@ class GlobalContainer
 	 */
 	public function getFileData(string $filename): ?stdClass
 	{
-		$this->loadFilesDataBuffer();
-
-		return isset($this->filesDataBuffer[FilesDataEntity::TYPE_FILE][$filename]) ? (object)$this->filesDataBuffer[FilesDataEntity::TYPE_FILE][$filename] : NULL;
+		return $this->findFilesData(FilesDataEntity::TYPE_FILE, $filename);
 	}
 
 	/**

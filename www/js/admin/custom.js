@@ -2083,7 +2083,19 @@ $(function () {
         e.preventDefault();
         togglePanel($(this).closest('.pv-row'), 'price');
     });
+    // the labels panel of a row is rendered on its first opening (default.latte .pv-lazy)
+    var loadPanel = function ($row) {
+        var $lazy = $row.find('.pv-lazy[data-load]');
+        if ($lazy.length) {
+            var url = $lazy.attr('data-load');
+            $lazy.removeAttr('data-load').addClass('pv-lazy-loading');
+            ajaxGet(url, function () {
+                $lazy.removeClass('pv-lazy pv-lazy-loading');
+            });
+        }
+    };
     $('body').on('click', '.pv-open-labels', function (e) {
+        loadPanel($(this).closest('.pv-row'));
         e.preventDefault();
         togglePanel($(this).closest('.pv-row'), 'labels');
     });

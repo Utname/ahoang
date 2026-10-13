@@ -19,6 +19,14 @@ const COLUMNS = [
 	['branches', 'vykup_code', 'VARCHAR(6) NULL'],
 ];
 
+// product search by EAN (Produkty list): without an index every search scanned the table
+const INDEXES = [
+	['products', 'products_code_ean', 'code_ean'],
+	['product_codes', 'product_codes_value', 'value'],
+	// GlobalContainer::getImageData() looks images up by name
+	['files_data', 'files_data_type_file', 'types_id, file'],
+];
+
 // Výkup lahví (design_handoff_fikko/Vykup lahvi.dc.html, vykup-lahvi/README-TICH-HOP.md)
 const TABLES = [
 	'vykup_staff' => "CREATE TABLE vykup_staff (
@@ -122,6 +130,19 @@ foreach (COLUMNS as [$table, $column, $definition]) {
 	}
 	$pdo->exec(sprintf('ALTER TABLE `%s` ADD COLUMN `%s` %s', $table, $column, $definition));
 	printf("%s.%s added\n", $table, $column);
+}
+
+$indexExists = $pdo->prepare('SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND INDEX_NAME = ?');
+foreach (INDEXES as [$table, $index, $columns]) {
+	$indexExists->execute([$database, $table, $index]);
+	if ((int)$indexExists->fetchColumn() > 0) {
+		printf("index %s.%s exists
+", $table, $index);
+		continue;
+	}
+	$pdo->exec(sprintf('ALTER TABLE `%s` ADD INDEX `%s` (%s)', $table, $index, $columns));
+	printf("index %s.%s added
+", $table, $index);
 }
 
 foreach (TABLES as $table => $sql) {

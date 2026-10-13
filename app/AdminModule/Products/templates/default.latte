@@ -79,11 +79,11 @@
                 {/form}
             {/snippet}
 
-            {* redrawn alone by the search while typing (ProductsPresenter onFilterChange) *}
-            {snippet productList}
+            {* the search while typing redraws only productCount and productList (ProductsPresenter
+               onFilterChange); the status counts and pills do not depend on the search *}
             <div class="pv-head">
                 <div class="pv-countline">
-                    {$itemCount} {_admin.pv.products} · {$statusCounts['running']} {_admin.pv.inAkce} · {$statusCounts['planned']} {_admin.pv.plannedCount}
+                    <span n:snippet="productCount">{$itemCount} {_admin.pv.products}</span> · {$statusCounts['running']} {_admin.pv.inAkce} · {$statusCounts['planned']} {_admin.pv.plannedCount}
                 </div>
                 <div class="pv-pills">
                     {foreach ['' => 'all', 'running' => 'running', 'planned' => 'planned', 'toprint' => 'toprint'] as $pillStatus => $pillKey}
@@ -92,6 +92,7 @@
                 </div>
             </div>
 
+            {snippet productList}
             <div class="pv-table">
                 <div class="pv-table-inner">
                     <div class="pv-grid pv-grid-head">
@@ -174,7 +175,13 @@
 
                                 <div class="pv-panel pv-panel-labels" n:attr="hidden: !$open">
                                     <div class="pv-lpanel">
-                                        {control "productLabels-$item->id":panel}
+                                        {* ~90 % of a row's HTML: rendered for an open row only, the others load it
+                                           on first open (custom.js .pv-lazy, ProductLabelsControl::handleLoadPanel) *}
+                                        {if $open}
+                                            {control "productLabels-$item->id":panel}
+                                        {else}
+                                            <div id="snippet-productLabels-{$item->id}-panel" class="pv-lazy" data-load="{link "productLabels-$item->id-loadPanel!"}"></div>
+                                        {/if}
                                     </div>
                                 </div>
                             </div>

@@ -10,6 +10,11 @@ Nette 3 + Latte 3 + PHP 8.2 admin/e-shop for a Czech grocery chain. Most work is
   with three snippets (`:price` Cena/Akce cells, `:chips` Štítky k tisku, `:panel` Možnosti tisku);
   its `render()` outputs all three for ajax redraws (`redrawAll()`). Styles `.pv-*` in custom.css,
   behaviour at the end of custom.js, texts `admin.pv.*`
+- Search while typing: the filters form goes by ajax, `ProductsPresenter` onFilterChange redraws only
+  `productCount` + `productList` (`recountPaginator`: the paginator was created before the list).
+  Name filter looks EAN/codes up first (indexes from `bin/migrate.php`); 8+ digits = EAN prefix only.
+  The `:panel` part is rendered only for an open row; others load it on first open
+  (`.pv-lazy`, `handleLoadPanel`) – it was ~90 % of the list HTML.
 - `app/Model/ProductLabels/ProductLabelsService.php` – `generatePdf()`: queue → PDF; new HTML
   templates via Dompdf, otherwise the legacy TCPDF layouts in the same file
 - `app/Model/PrintTemplates/PrintTemplatesService.php` – `renderHtml()` (price/discount logic,
