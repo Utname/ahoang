@@ -1499,6 +1499,7 @@ pv:
 		badPrice: 'The promotion price must be lower than the regular price.'
 		badDates: 'The "until" date is before the "from" date.'
 		noAkcePrice: 'Only the promotion dates are set – without a promotion price there is no promotion and labels print the regular price.'
+		noFrom: '„Akce od“ date missing – the promotion is not running: standard templates print the regular price, Akce templates the promotion price.'
 	noneChecked: 'No products selected'
 	defaultTemplate: 'Template for the selected'
 	toChecked: 'Add to selected'

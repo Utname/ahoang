@@ -44,6 +44,7 @@
      data-hint-bad-price="{_admin.pv.hint.badPrice}"
      data-hint-bad-dates="{_admin.pv.hint.badDates}"
      data-hint-no-akce-price="{_admin.pv.hint.noAkcePrice}"
+     data-hint-no-from="{_admin.pv.hint.noFrom}"
      data-saved="{_admin.pv.saved}"
      data-none-checked="{_admin.pv.noneChecked}"></div>
 <div class="pv-toast" id="pv-toast"></div>
@@ -59,7 +60,8 @@
                     <div class="pv-toolbar">
                         <div class="mosaic-list-search-box pv-search">
                             <i class="fa fa-search search-icon"></i>
-                            {input custom__name class => 'form-control autocomplete change-to-submit', 'data-url' => $presenter->link('productsAutocomplete!'), placeholder => ('admin.ui.searchNameEan'|translate)}
+                            {* filters while typing (custom.js .pv-live-search); Enter submits the page *}
+                            {input custom__name class => 'form-control pv-live-search', autocomplete => 'off', placeholder => ('admin.ui.searchNameEan'|translate)}
                         </div>
                         <label class="pv-toolbar-field">
                             <span><i class="fa fa-store"></i> {_'admin.terms.branch'}</span>
@@ -77,6 +79,8 @@
                 {/form}
             {/snippet}
 
+            {* redrawn alone by the search while typing (ProductsPresenter onFilterChange) *}
+            {snippet productList}
             <div class="pv-head">
                 <div class="pv-countline">
                     {$itemCount} {_admin.pv.products} · {$statusCounts['running']} {_admin.pv.inAkce} · {$statusCounts['planned']} {_admin.pv.plannedCount}
@@ -102,7 +106,7 @@
                         {var $branchesId = $presenter->session->filters[$presenter->getName()]['custom__branches']}
                         {foreach $items as $item}
                             {var $price = $item->getPrice($branchesId)}
-                            {var $open = $autoOpenSearch && $iterator->isFirst() && $price}
+                            {var $open = $price && (($autoOpenSearch && $iterator->isFirst()) || ($searchEan && $item->getDefaultCode() === $searchEan))}
                             <div n:class="pv-row, $open ? pv-open-labels-on" data-id="{$item->id}">
                                 <div class="pv-grid">
                                     <div>{control bulkActions:checkbox $item}</div>
@@ -181,6 +185,7 @@
             </div>
 
             {control paginator}
+            {/snippet}
 
             {snippet printSummary}
                 <div class="pv-bar-wrap" data-labels="{$totalLabels ?? 0}" n:attr="hidden: empty($totalLabels)">

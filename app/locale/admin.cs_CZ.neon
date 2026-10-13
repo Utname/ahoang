@@ -1520,6 +1520,7 @@ pv:
 		badPrice: 'Akční cena musí být nižší než běžná.'
 		badDates: 'Datum „do“ je před „od“.'
 		noAkcePrice: 'Zadali jste jen data akce – bez akční ceny se akce neprovede a štítky tisknou běžnou cenu.'
+		noFrom: 'Chybí datum „Akce od“ – akce neběží: běžné šablony tisknou běžnou cenu, šablony Akce akční cenu.'
 	noneChecked: 'Nejsou vybrané žádné produkty'
 	defaultTemplate: 'Šablona pro vybrané'
 	toChecked: 'Přidat k vybraným'

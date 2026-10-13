@@ -1522,6 +1522,7 @@ pv:
 		badPrice: 'Giá khuyến mãi phải thấp hơn giá thường.'
 		badDates: 'Ngày „đến“ trước ngày „từ“.'
 		noAkcePrice: 'Mới nhập ngày khuyến mãi – chưa có giá khuyến mãi thì khuyến mãi không chạy và tem in giá thường.'
+		noFrom: 'Thiếu ngày „Akce od“ – khuyến mãi chưa chạy: mẫu thường in giá thường, mẫu Akce vẫn in giá khuyến mãi.'
 	noneChecked: 'Chưa chọn sản phẩm nào'
 	defaultTemplate: 'Mẫu cho sản phẩm đã chọn'
 	toChecked: 'Thêm cho SP đã chọn'

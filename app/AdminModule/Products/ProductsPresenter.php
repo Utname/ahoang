@@ -41,6 +41,9 @@ class ProductsPresenter extends BaseModulePresenter
 		BulkActionsControl::ACTION_DELETE,
 	];
 
+	/** @var bool the search while typing reset the page before the list was built */
+	protected $recountPaginator = FALSE;
+
 	/** @var \ProductsRepository @inject */
 	public $repository;
 
@@ -277,13 +280,25 @@ class ProductsPresenter extends BaseModulePresenter
 
 		$this['filters']->setOnFilterChange(function (FiltersControl $filtersControl, Form $filtersForm) {
 			$values = $filtersForm->getValues(TRUE);
+			$this->getPaginatorControl()->setPage(1);
+
+			// search while typing ("Admin - Produkty v2"): only the list is redrawn, the
+			// input keeps focus; an unknown EAN offers a new product only on Enter (scanner)
+			if ($this->isAjax()) {
+				// startup() read the filters before the form stored the new ones, and the
+				// paginator above was created before the list existed (count 0)
+				$this->filters = $this->session->filters[$this->getName()] ?? [];
+				$this->recountPaginator = TRUE;
+				$this->redrawControl('productList');
+				$this->redrawControl('printSummary');
+				return;
+			}
 
 			if (isset($values['custom__name']) && $values['custom__name'] && is_numeric($values['custom__name'])) {
 				$this->session->newProductModalSearch = TRUE;
 				$this->session->newProductModalEan = $values['custom__name'];
 			}
 
-			$this->getPaginatorControl()->setPage(1);
 			$this->redirect('this');
 		});
 
@@ -310,6 +325,15 @@ class ProductsPresenter extends BaseModulePresenter
 	/**
 	 * @return void
 	 */
+	public function applyPaging()
+	{
+		if ($this->recountPaginator) {
+			$this->getPaginatorControl()->getPaginator()->setItemCount($this->selection->count('*'));
+		}
+		parent::applyPaging();
+	}
+
+
 	public function renderDefault()
 	{
 		parent::renderDefault();
@@ -349,6 +373,8 @@ class ProductsPresenter extends BaseModulePresenter
 		$this->template->statusFilter = !empty($filters['custom__labels']) ? 'toprint' : ($filters['custom__akce_status'] ?? '');
 		$this->template->itemCount = $paginator->getPaginator()->getItemCount();
 		$this->template->autoOpenSearch = !empty($filters['custom__name']) && $paginator->getPaginator()->getItemCount() === 1;
+		// an exact EAN opens its product even among more hits (design "Admin - Produkty v2")
+		$this->template->searchEan = preg_match('/^\d{6,}$/', trim((string)($filters['custom__name'] ?? ''))) ? trim($filters['custom__name']) : NULL;
 	}
 
 

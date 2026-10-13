@@ -4814,6 +4814,7 @@ body.mosaic-login-page main.page-content {
 .pv-st-ended { background: #f1f5f9; color: #64748b; }
 .pv-st-none { background: #f8fafc; color: #94a3b8; }
 .pv-range { font-size: 12px; color: #5d6a7d; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.pv-akce-line { font-size: 13px; font-weight: 800; color: #0f766e; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .pv-muted { font-size: 12px; color: #94a3b8; }
 .pv-flex { flex: 1; }
 

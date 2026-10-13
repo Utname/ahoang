@@ -2049,6 +2049,10 @@ $(function () {
             } else if (from && to && to < from) {
                 key = 'hint-bad-dates';
                 warn = true;
+            } else if (!from) {
+                // saving is allowed, but without "od" the action does not run
+                $row.find('.pv-hint').text(text('hint-no-from')).addClass('pv-warn-text');
+                return true;
             } else {
                 key = 'hint-akce';
             }
@@ -2056,6 +2060,11 @@ $(function () {
         $row.find('.pv-hint').text(text(key)).toggleClass('pv-warn-text', warn);
         return !warn;
     };
+
+    // "Cena za" select: the Cena / Akce cells show the chosen unit at once (saved by Uložit)
+    $('body').on('change', '.pv-row select.pv-unit', function () {
+        $(this).closest('.pv-row').find('.pv-unit-txt').text($(this).val());
+    });
 
     // one panel open at a time ("Cena a akce" or "Možnosti tisku a úprav")
     var togglePanel = function ($row, which) {
@@ -2188,5 +2197,47 @@ $(function () {
     $('#modal-labelsForm').on('shown.bs.modal', syncEditor);
     $(document).ajaxComplete(function () {
         setTimeout(syncEditor, 0);
+    });
+
+    // search while typing (design: no Enter, no suggestion list): the filters form goes
+    // by ajax and only the product list is redrawn, so the input keeps its focus. Only
+    // the newest answer is used. Enter still submits the page (a scanned unknown EAN
+    // then offers a new product).
+    var searchTimer;
+    var searchSeq = 0;
+    var searchLast = $('.pv-live-search').val();
+    $('body').on('input', '.pv-live-search', function () {
+        var input = this;
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(function () {
+            if (input.value === searchLast) {
+                return;
+            }
+            searchLast = input.value;
+            var seq = ++searchSeq;
+            $.ajax({
+                url: input.form.action,
+                type: 'POST',
+                data: new FormData(input.form),
+                contentType: false,
+                processData: false,
+                success: function (payload) {
+                    if (seq === searchSeq) {
+                        // same clean-up as ajaxFormFile() before init() runs again
+                        destroyAllWSW();
+                        destroyAllIconPickers();
+                        destroyAllColorPickers();
+                        destroyAllSelects();
+                        ajaxCallback(payload);
+                    }
+                }
+            });
+        }, 350);
+    });
+    $('body').on('keydown', '.pv-live-search', function (e) {
+        if (e.keyCode === 13) {
+            clearTimeout(searchTimer);
+            searchSeq++;
+        }
     });
 });

@@ -12,17 +12,20 @@
     {var $hdrPlaceholder = 999999}
     {if $item}
         <button type="button" class="pv-cellbtn pv-open-price" data-id="{$item->id}">
-            {if !$price}
+            {* a price row without a regular price (NULL, e.g. from a quick create) counts as no price *}
+            {if !$price || $price->price === NULL}
                 <span class="pv-muted">{_admin.pv.noPrice}</span>
             {elseif $running}
-                <span class="pv-strike">{$price->price|number:2,',',' '} {$unit}</span>
-                <span class="pv-main"><b class="pv-akce-price">{$price->price_action|number:2,',',' '} {$unit}</b><span class="pv-pct">−{=round(((float)$price->price - (float)$price->price_action) / (float)$price->price * 100)} %</span></span>
+                <span class="pv-strike">{$price->price|number:2,',',' '} <span class="pv-unit-txt">{$unit}</span></span>
+                <span class="pv-main"><b class="pv-akce-price">{$price->price_action|number:2,',',' '} <span class="pv-unit-txt">{$unit}</span></b><span class="pv-pct">−{=round(((float)$price->price - (float)$price->price_action) / (float)$price->price * 100)} %</span></span>
             {else}
-                <span class="pv-main"><b>{$price->price|number:2,',',' '} {$unit}</b></span>
+                <span class="pv-main"><b>{$price->price|number:2,',',' '} <span class="pv-unit-txt">{$unit}</span></b></span>
             {/if}
         </button>
         <button type="button" class="pv-cellbtn pv-open-price" data-id="{$item->id}">
             <span class="pv-status pv-st-{$status}">{_"admin.pv.status.$status"}</span>
+            {* the typed action price also when the action is not running (no "od" date, planned, ended) *}
+            <span n:if="!$running && $price && (float)$price->price_action > 0" class="pv-akce-line">{$price->price_action|number:2,',',' '} <span class="pv-unit-txt">{$unit}</span></span>
             <span class="pv-range">
                 {if $price && ($price->action_from || $price->action_to)}
                     {* saved dates always show; without a lower action price they do nothing *}
@@ -33,6 +36,8 @@
             </span>
             {if $status === \App\AdminModule\Presenters\ProductLabelsControl::STATUS_NONE && $price && ($price->action_from || $price->action_to)}
                 <span class="pv-missing">{(float)$price->price_action <= 0 ? ('admin.pv.missingAkcePrice'|translate) : ((float)$price->price_action >= (float)$price->price ? ('admin.pv.hint.badPrice'|translate) : ('admin.pv.missingFrom'|translate))}</span>
+            {elseif $price && (float)$price->price_action > 0 && !$price->action_from && !$price->action_to}
+                <span class="pv-missing">{_admin.pv.missingFrom}</span>
             {/if}
         </button>
     {/if}

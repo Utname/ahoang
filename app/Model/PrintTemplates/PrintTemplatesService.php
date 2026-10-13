@@ -424,7 +424,7 @@ class PrintTemplatesService
 				default => [],
 			},
 			'template' => $template,
-			'logoDataUri' => $this->imageAsDataUri(WWW_DIR . '/images/fikko-logo-mono.png', 'image/png'),
+			'logoDataUri' => $this->imageAsDataUri(WWW_DIR . '/images/fikko-logo-color.png', 'image/png'),
 			'brushDataUri' => $this->imageAsDataUri(WWW_DIR . '/images/brush-20.png', 'image/png'),
 			// Dompdf renders the near-black brush-20.png at half height (or white) in large
 			// boxes; this navy-tinted copy renders correctly. Use it via <img>.
