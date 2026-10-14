@@ -793,116 +793,14 @@
 {/snippet}
 
 <div id="modal-printPreview" class="modal fade" tabindex="-1" role="dialog">
-    <div class="modal-dialog" style="width: 92%; max-width: 1200px;">
-        <div class="modal-content" style="border-radius:14px;overflow:hidden;border:1px solid #e6eaf0;box-shadow:0 10px 30px rgba(0,0,0,0.15);">
-            <div class="modal-header" style="background:#fff;padding:16px 22px;border-bottom:1px solid #eef1f5;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
-                <div style="display:flex;align-items:center;gap:12px;">
-                    <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius:8px;font-weight:600;padding:6px 14px;font-size:13px;border:1px solid #d9e0e8;">
-                        ← {_admin.terms.back}
-                    </button>
-                    <h4 class="modal-title" style="margin:0;font-weight:800;font-size:18px;color:#0f172a;">
-                        {_admin.terms.printPreviewTitle} <span style="color:#8794a5;font-weight:500;font-size:14px;">· {$totalLabels ?? 0} {_admin.terms.labels}</span>
-                    </h4>
-                </div>
-                <div style="display:flex;align-items:center;gap:8px;">
-                    <a n:href="clearAllPrintCounts!" class="btn btn-default ajax with-confirm" data-message="{_admin.terms.reallyRemoveLabels}" style="border-radius:8px;font-weight:600;color:#c0392b;background:#fde8e8;border:none;padding:7px 12px;font-size:13px;">
-                        <i class="fa fa-trash-alt m-r-xxs"></i> {_admin.terms.clearAll}
-                    </a>
-                    <a n:href="downloadPdf! NULL, FALSE" target="_blank" class="btn btn-default" style="border:1px solid #0284c7;border-radius:8px;background:#f0f9ff;color:#0369a1;padding:7px 14px;font-size:13px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
-                        <i class="fa fa-eye"></i> {_admin.ui.previewAll}
-                    </a>
-                    <a n:href="downloadPdf! NULL, TRUE" target="_blank" class="btn" style="border:none;border-radius:8px;background:#14b8a6;color:#042f2e;padding:7px 16px;font-size:13px;font-weight:800;box-shadow:0 2px 6px rgba(20,184,166,0.3);text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
-                        <i class="fa fa-download"></i> {_admin.ui.downloadAll}
-                    </a>
-                </div>
-            </div>
-            <div class="modal-body" style="background:#f6f7f9;padding:22px;max-height:calc(85vh - 120px);overflow-y:auto;">
-                {snippet printPreviewSnippet}
-                    {if empty($printGroups)}
-                        <div class="text-center" style="padding:50px 20px;color:#8794a5;">
-                            <i class="fas fa-tags" style="font-size:45px;margin-bottom:15px;color:#cbd5e1;"></i>
-                            <p style="font-size:16px;font-weight:700;color:#334155;margin-bottom:6px;">{_admin.terms.noLabelsInQueue}</p>
-                            <p style="font-size:13px;color:#64748b;">{_admin.terms.addLabelsHint}</p>
-                        </div>
-                    {else}
-                        <div style="display:flex;flex-direction:column;gap:20px;">
-                            {foreach $printGroups as $group}
-                                <div style="background:#fff;border:1px solid #e6eaf0;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
-                                    <div style="display:flex;align-items:center;gap:10px;padding:12px 18px;background:#fafbfc;border-bottom:1px solid #eef1f5;flex-wrap:wrap;">
-                                        <div style="font-size:16px;font-weight:800;color:#0f172a;">{$group['name']}</div>
-                                        <div style="font-size:12px;color:#8794a5;font-weight:500;">({$group['dims']})</div>
-                                        <div style="flex:1;"></div>
-                                        <div style="font-size:13px;color:#5d6a7d;margin-right:10px;">
-                                            <strong style="color:#042f2e;background:#ccfbf1;padding:2px 8px;border-radius:6px;font-size:13px;">{$group['count']} {_admin.terms.labels}</strong> · <strong style="color:#0f172a;">{$group['pages']}</strong> {_admin.terms.pagesA4}
-                                        </div>
-                                        <div style="display:flex;align-items:center;gap:6px;">
-                                            <a n:href="downloadPdfGroup! $group['typeId'], FALSE" target="_blank" class="btn btn-sm btn-default" style="border:1px solid #cbd5e1;border-radius:7px;padding:5px 11px;font-size:12px;font-weight:600;color:#0369a1;background:#f8fafc;" title="Xem trước trong tab mới">
-                                                <i class="far fa-eye m-r-xxs"></i> {_admin.ui.preview}
-                                            </a>
-                                            <a n:href="downloadPdfGroup! $group['typeId'], TRUE" target="_blank" class="btn btn-sm btn-default" style="border:1px solid #14b8a6;border-radius:7px;padding:5px 12px;font-size:12px;font-weight:700;color:#042f2e;background:#ccfbf1;" title="{_admin.ui.downloadPdf}">
-                                                <i class="fa fa-download m-r-xxs text-primary"></i> {_admin.ui.downloadPdfOf} {$group['name']}
-                                            </a>
-                                        </div>
-                                    </div>
-                                    <div style="display:flex;gap:14px;padding:16px;flex-wrap:wrap;background:#fff;">
-                                        {foreach $group['items'] as $it}
-                                            <div style="position:relative;border:1px solid #e2e8f0;border-radius:10px;width:255px;padding:12px;box-sizing:border-box;display:flex;flex-direction:column;font-size:11px;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,0.04);">
-                                                <div style="position:absolute;top:8px;right:8px;display:flex;align-items:center;gap:3px;">
-                                                    <a n:href="decrementQueue! $it['label']->id" class="ajax" style="width:20px;height:20px;border:1px solid #d9e0e8;border-radius:5px;background:#fff;display:flex;align-items:center;justify-content:center;color:#5d6a7d;text-decoration:none;font-size:11px;line-height:1;font-weight:700;">−</a>
-                                                    <div style="background:#0f172a;color:#fff;border-radius:999px;padding:1px 8px;font-size:10.5px;font-weight:700;">{$it['count']}×</div>
-                                                    <a n:href="incrementQueue! $it['label']->id" class="ajax" style="width:20px;height:20px;border:1px solid #d9e0e8;border-radius:5px;background:#fff;display:flex;align-items:center;justify-content:center;color:#5d6a7d;text-decoration:none;font-size:11px;line-height:1;font-weight:700;">+</a>
-                                                    <a n:href="removeFromQueue! $it['label']->id" class="ajax" title="{_admin.terms.removeFromQueue}" style="width:20px;height:20px;border:none;border-radius:5px;background:#fde8e8;display:flex;align-items:center;justify-content:center;color:#c0392b;text-decoration:none;font-size:11px;font-weight:700;margin-left:2px;">×</a>
-                                                </div>
-                                                <div style="display:flex;align-items:center;gap:4px;margin-bottom:6px;">
-                                                    <span style="background:{$group['isAkce'] ? '#b91c1c' : '#17202b'|noescape};color:#fff;font-weight:800;font-style:italic;padding:1px 6px;font-size:9.5px;border-radius:3px;">{$it['label']->getHeader()?->name ?: 'Fikko Cena'}</span>
-                                                </div>
-                                                <div style="font-weight:700;line-height:1.3;padding-right:75px;margin-bottom:8px;color:#0f172a;font-size:12px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;line-clamp:1;" title="{$it['product']->name}">
-                                                    {$it['product']->name}
-                                                </div>
-                                                <div style="margin-top:auto;display:flex;align-items:baseline;justify-content:space-between;gap:6px;margin-bottom:8px;">
-                                                    <div style="font-size:10.5px;color:#5d6a7d;">
-                                                        Běžná <strong>{$it['price'] ? $it['price']->price : 0|price}</strong>
-                                                    </div>
-                                                    <div style="font-weight:800;font-style:italic;font-size:16px;color:#0d9488;">
-                                                        {$it['price'] && $it['price']->price_action ? $it['price']->price_action : ($it['price'] ? $it['price']->price : 0)|price}
-                                                    </div>
-                                                </div>
-                                                <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #f1f5f9;padding-top:8px;margin-top:2px;gap:6px;">
-                                                    <span style="font-size:9px;color:#94a3b8;font-weight:600;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="{if $it['product']->code_ean}EAN: {$it['product']->code_ean}{else}{$group['name']}{/if}">{if $it['product']->code_ean}EAN: {$it['product']->code_ean}{else}{$group['name']}{/if}</span>
-                                                    <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
-                                                        <a n:href="label! $it['product']->id, $group['typeId']" class="ajax-modal btn btn-xs btn-default" data-target="#modal-labelsForm" title="{_admin.ui.editLabel}" style="padding:2px 6px;font-size:10px;border-radius:4px;">
-                                                            <i class="fas fa-pencil text-muted"></i> {_admin.ui.edit}
-                                                        </a>
-                                                        <a n:href="downloadSingleProductLabelPdf! $it['product']->id, $group['typeId'], FALSE" target="_blank" class="btn btn-xs btn-default" title="{_admin.ui.previewPdfNewTab}" style="padding:2px 6px;font-size:10px;border-radius:4px;color:#0369a1;">
-                                                            <i class="far fa-eye"></i> Xem
-                                                        </a>
-                                                        <a n:href="downloadSingleProductLabelPdf! $it['product']->id, $group['typeId'], TRUE" target="_blank" class="btn btn-xs btn-default" title="{_admin.ui.downloadPdf}" style="padding:2px 6px;font-size:10px;border-radius:4px;color:#0d9488;">
-                                                            <i class="fa fa-download"></i> {_admin.ui.download}
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        {/foreach}
-                                    </div>
-                                </div>
-                            {/foreach}
-                        </div>
-                    {/if}
-                {/snippet}
-            </div>
-            <div class="modal-footer" style="background:#fff;padding:12px 22px;border-top:1px solid #eef1f5;display:flex;align-items:center;justify-content:space-between;">
-                <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius:8px;font-weight:600;">
-                    {_admin.buttons.close}
-                </button>
-                <div style="display:flex;align-items:center;gap:8px;">
-                    <a n:href="downloadPdf! NULL, FALSE" target="_blank" class="btn btn-default" style="border:1px solid #0284c7;border-radius:8px;background:#f0f9ff;color:#0369a1;padding:7px 14px;font-size:13px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
-                        <i class="fa fa-eye"></i> {_admin.ui.previewAll}
-                    </a>
-                    <a n:href="downloadPdf! NULL, TRUE" target="_blank" class="btn" style="border:none;border-radius:8px;background:#14b8a6;color:#042f2e;padding:7px 16px;font-size:13px;font-weight:800;box-shadow:0 2px 6px rgba(20,184,166,0.3);text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
-                        <i class="fa fa-download"></i> {_admin.ui.downloadAll}
-                    </a>
-                </div>
-            </div>
+    <div class="modal-dialog pp-dialog">
+        <div class="modal-content pp-content">
+            {* Náhled tisku v3, shared with Tisk z mobilu (ProductLabelsTrait::buildPrintPreview) *}
+            {snippet printPreviewSnippet}
+                {if !empty($pp)}
+                    {include '../../__components/PrintPreview/printPreview.latte', pp => $pp}
+                {/if}
+            {/snippet}
         </div>
     </div>
 </div>

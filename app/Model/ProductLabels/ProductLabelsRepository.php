@@ -56,11 +56,21 @@ class ProductLabelsRepository extends BaseRepository
 
 		if (!$this->findShared($productsId, $branchesId, $adminUserId)) {
 			$headerId = $headerId ?: $this->db->table('product_label_headers')->order('pos_order')->limit(1)->fetch()?->id;
+			// only some fields may be given (e.g. Původ from Náhled tisku): the NOT NULL text
+			// columns start empty, the label prints the product card for them
 			$this->insert($where + $shared + [
 				'type_id' => 0,
 				'count' => 0,
 				'datetime_printed' => NULL,
 				'product_label_headers_id' => $headerId,
+				'name' => '',
+				'sale_text' => '',
+				'sale_percent' => 0,
+				'price_text' => ProductLabelsEntity::PRICE_TYPE_CZK,
+				'note_1' => '',
+				'note_2' => '',
+				'note_3' => '',
+				'is_more_species' => 0,
 			]);
 		}
 	}

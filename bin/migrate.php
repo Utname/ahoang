@@ -28,6 +28,7 @@ const INDEXES = [
 ];
 
 // Výkup lahví (design_handoff_fikko/Vykup lahvi.dc.html, vykup-lahvi/README-TICH-HOP.md)
+// and Tisk z mobilu (print_lists)
 const TABLES = [
 	'vykup_staff' => "CREATE TABLE vykup_staff (
 		id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -91,6 +92,34 @@ const TABLES = [
 		closed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 		PRIMARY KEY (branches_id, close_date)
 	) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+	// Tisk z mobilu (predani-tisk-stitku): label lists sent from the phone, printed on a PC.
+	// An item is product + template type + count + header; overrides (JSON) change only
+	// that print, never the product card or the admin's own label queue.
+	'print_lists' => "CREATE TABLE print_lists (
+		id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+		list_no VARCHAR(20) NOT NULL,
+		branches_id INT NOT NULL,
+		admin_users_id INT NULL,
+		device VARCHAR(40) NULL,
+		source VARCHAR(10) NOT NULL DEFAULT 'mobile',
+		status VARCHAR(10) NOT NULL DEFAULT 'waiting',
+		created_at DATETIME NOT NULL,
+		printed_at DATETIME NULL,
+		printed_by INT NULL,
+		UNIQUE KEY uq_print_list_no (branches_id, list_no),
+		KEY ix_print_lists_branch (branches_id, status, created_at)
+	) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
+	'print_list_items' => "CREATE TABLE print_list_items (
+		id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+		print_lists_id INT UNSIGNED NOT NULL,
+		products_id INT NOT NULL,
+		type_id SMALLINT NOT NULL,
+		qty SMALLINT UNSIGNED NOT NULL DEFAULT 1,
+		product_label_headers_id INT NULL,
+		overrides TEXT NULL,
+		KEY ix_print_list_items_list (print_lists_id),
+		CONSTRAINT fk_print_list_items_list FOREIGN KEY (print_lists_id) REFERENCES print_lists(id) ON DELETE CASCADE
+	) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
 ];
 
 // rows that must exist (INSERT IGNORE: an edited row is left alone)
@@ -107,6 +136,13 @@ const ROWS = [
 		('Vykup_list', NOW(), 'list', 'Vykup'), ('Vykup_edit', NOW(), 'edit', 'Vykup')",
 	"INSERT IGNORE INTO admin_roles_admin_permissions_rel (admin_roles_id, admin_permissions_id)
 		SELECT 1, id FROM admin_permissions WHERE id IN ('Vykup_list', 'Vykup_edit')
+		AND EXISTS (SELECT 1 FROM admin_roles WHERE id = 1)
+		AND NOT EXISTS (SELECT 1 FROM admin_roles_admin_permissions_rel WHERE admin_roles_id = 1 AND admin_permissions_id = admin_permissions.id)",
+	"INSERT IGNORE INTO admin_modules (id, created_at, name) VALUES ('PrintLists', NOW(), 'Tisk z mobilu')",
+	"INSERT IGNORE INTO admin_permissions (id, created_at, name, admin_modules_id) VALUES
+		('PrintLists_list', NOW(), 'list', 'PrintLists'), ('PrintLists_edit', NOW(), 'edit', 'PrintLists')",
+	"INSERT IGNORE INTO admin_roles_admin_permissions_rel (admin_roles_id, admin_permissions_id)
+		SELECT 1, id FROM admin_permissions WHERE id IN ('PrintLists_list', 'PrintLists_edit')
 		AND EXISTS (SELECT 1 FROM admin_roles WHERE id = 1)
 		AND NOT EXISTS (SELECT 1 FROM admin_roles_admin_permissions_rel WHERE admin_roles_id = 1 AND admin_permissions_id = admin_permissions.id)",
 ];

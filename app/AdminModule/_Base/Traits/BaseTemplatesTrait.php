@@ -37,6 +37,10 @@ trait BaseTemplatesTrait
 		];
 	}
 
+	/** @var \PrintListsService @inject */
+	public $printListsService;
+
+
 	/**
 	 * @return void
 	 */
@@ -50,8 +54,31 @@ trait BaseTemplatesTrait
 			$menuGenerator->setIconClassPrefix('menu-icon');
 			$menuGenerator->setTranslator($this->translator);
 			$menuGenerator->setAdminPermissionsService($this->aps);
+			$menuGenerator->setBadges($this->menuBadges());
 			return $menuGenerator->generate()->toHtml();
 		});
+	}
+
+
+	/**
+	 * Counts next to menu items: lists sent from the phone and waiting to be printed in
+	 * the admin's branch (the one chosen in Tisk z mobilu, else the admin's default).
+	 * @return array<string, int>
+	 */
+	protected function menuBadges(): array
+	{
+		try {
+			if (!$this->aps->has('PrintLists_list')) {
+				return [];
+			}
+			$branchesId = (int)($this->getSession('printLists')->branch ?? 0) ?: (int)($this->adminUser->default_branches_id ?? 0);
+			$branchesId = $branchesId ?: $this->printListsService->firstBranchId($this->adminUser->is_all_branches_permission ? NULL : $this->adminUser->getBranchesIds());
+
+			return $branchesId ? ['PrintLists' => $this->printListsService->waitingCount($branchesId)] : [];
+		}
+		catch (\Throwable $e) {
+			return [];
+		}
 	}
 
 }

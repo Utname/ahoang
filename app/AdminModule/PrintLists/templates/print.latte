@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{$list->list_no} · {_admin.pl.title}</title>
+<style>
+    html, body { margin: 0; height: 100%; background: #e5e7eb; font-family: Arial, sans-serif; }
+    .bar { display: flex; align-items: center; gap: 10px; padding: 10px 16px; background: #0f172a; color: #fff; font-size: 14px; }
+    .bar a, .bar button { border: 1px solid #334155; background: #1e293b; color: #fff; border-radius: 8px; padding: 7px 14px; font: inherit; font-weight: 700; text-decoration: none; cursor: pointer; }
+    .bar button { background: #14b8a6; border-color: #14b8a6; color: #042f2e; }
+    .bar span { color: #94a3b8; }
+    .bar .flex { flex: 1; }
+    iframe { display: block; width: 100%; height: calc(100% - 52px); border: 0; background: #fff; }
+</style>
+</head>
+<body>
+{* "Tisknout": the list's PDF (exact mm, Dompdf) and the print dialog; the list is already
+   marked printed. Scale 100 %, never "fit to page". *}
+<div class="bar">
+    <a href="{$backUrl}">← {_admin.pl.back}</a>
+    <b>{$list->list_no}</b>
+    <span>{_admin.pl.printHint}</span>
+    <span class="flex"></span>
+    <button type="button" id="print">🖨 {_admin.pl.printBtn}</button>
+</div>
+<iframe id="pdf" src="{$pdfUrl}" title="{$list->list_no}"></iframe>
+<script>
+(function () {
+    var frame = document.getElementById('pdf');
+    var printPdf = function () {
+        try {
+            frame.contentWindow.focus();
+            frame.contentWindow.print();
+        } catch (e) {
+            window.open(frame.src, '_blank');
+        }
+    };
+    document.getElementById('print').addEventListener('click', printPdf);
+    frame.addEventListener('load', function () { setTimeout(printPdf, 600); });
+})();
+</script>
+</body>
+</html>

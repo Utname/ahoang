@@ -849,6 +849,104 @@ trait ProductLabelsTrait
 	}
 
 
+	/**
+	 * Náhled tisku v3 of the admin's queue: cards and links for the shared
+	 * __components/PrintPreview/printPreview.latte.
+	 * @param array{totalLabels: int, groups: array} $summary getQueuedPrintSummary()
+	 */
+	public function buildPrintPreview(array $summary): array
+	{
+		$branchesId = (int)($this->session->filters[$this->getName()]['custom__branches'] ?? 0);
+		$groups = [];
+		$pages = 0;
+		foreach ($summary['groups'] as $typeId => $group) {
+			$cards = [];
+			foreach ($group['items'] as $it) {
+				/** @var \ProductLabelsEntity $label */
+				$label = $it['label'];
+				$product = $it['product'];
+				$productsId = (int)$label->products_id;
+				$texts = array_filter([
+					'name' => $label->name !== ($product->name ?? NULL) ? $label->name : NULL,
+					'is_more_species' => $label->is_more_species,
+					'ingredients' => $label->getRow()->ingredients ?? NULL,
+					'thawed' => $label->thawed,
+					'price_unit' => $label->getRow()->price_unit ?? NULL,
+				]);
+				$cards[] = [
+					'qty' => (int)$it['count'],
+					'headerId' => (int)$label->product_label_headers_id,
+					'originId' => (int)($label->origin_countries_id ?: ($product->country_origin ?? 0)),
+					// a component link, so its parameters get the component prefix
+					'headerUrl' => $this['productLabels-' . $productsId]->link('setHeader!', ['typeId' => (int)$typeId, 'headerId' => 999999]),
+					'originUrl' => $this->link('setLabelOrigin!', ['productsId' => $productsId, 'countryId' => 999999]),
+					'decUrl' => $this->link('decrementQueue!', ['labelId' => (int)$label->id]),
+					'incUrl' => $this->link('incrementQueue!', ['labelId' => (int)$label->id]),
+					'removeUrl' => $this->link('removeFromQueue!', ['labelId' => (int)$label->id]),
+					'editUrl' => $this->link('label!', ['productsId' => $productsId, 'typeId' => (int)$typeId]),
+					'editTarget' => '#modal-labelsForm',
+					'viewUrl' => $this->link('downloadSingleProductLabelPdf!', ['productsId' => $productsId, 'typeId' => (int)$typeId, 'isDownload' => 0]),
+					'pdfUrl' => $this->link('downloadSingleProductLabelPdf!', ['productsId' => $productsId, 'typeId' => (int)$typeId, 'isDownload' => 1]),
+				] + \PrintPreviewInfo::of($product, $branchesId, (int)$typeId, $texts);
+			}
+			$pages += (int)$group['pages'];
+			$groups[] = [
+				'typeId' => (int)$typeId,
+				'name' => $group['name'],
+				'dims' => $group['dims'],
+				'isAkce' => $group['isAkce'],
+				'count' => (int)$group['count'],
+				'pages' => (int)$group['pages'],
+				'perPage' => (int)$group['perPage'],
+				'viewUrl' => $this->link('downloadPdfGroup!', ['typeId' => (int)$typeId, 'isDownload' => 0]),
+				'pdfUrl' => $this->link('downloadPdfGroup!', ['typeId' => (int)$typeId, 'isDownload' => 1]),
+				'cards' => $cards,
+			];
+		}
+
+		return [
+			'totalCount' => (int)$summary['totalLabels'],
+			'totalPages' => $pages,
+			'clearUrl' => $this->link('clearAllPrintCounts!'),
+			// the queue as a list of Tisk z mobilu (e.g. printed on another PC)
+			'sendUrl' => $this->aps->has('PrintLists_edit') ? $this->link('queueToPrintList!') : NULL,
+			'clearConfirm' => $this->trans('admin.terms.reallyRemoveLabels'),
+			'viewAllUrl' => $this->link('downloadPdf!', ['itemId' => NULL, 'printed' => 0]),
+			'downloadAllUrl' => $this->link('downloadPdf!', ['itemId' => NULL, 'printed' => 1]),
+			'headersPairs' => $this->productLabelHeadersPairs,
+			'countriesPairs' => $this->countriesPairs,
+			'groups' => $groups,
+		];
+	}
+
+
+	/** "Odeslat do Tisk z mobilu": the queue becomes a list there and is emptied here. */
+	public function handleQueueToPrintList(): void
+	{
+		if (!$this->aps->has('PrintLists_edit')) {
+			$this->redirect('this');
+		}
+		$branchesId = (int)($this->session->filters[$this->getName()]['custom__branches'] ?? 0);
+		$listId = $this->printListsService->createFromQueue($branchesId, (int)$this->adminUser->id);
+		if (!$listId) {
+			$this->flashMessage($this->trans('admin.pl.queueEmpty'), 'danger');
+			$this->redirect('this');
+		}
+		$this->getSession('printLists')->branch = $branchesId;
+		$this->flashMessage(sprintf($this->trans('admin.pl.fromQueueDone'), $this->printListsService->get($branchesId, $listId)->list_no), 'success');
+		$this->redirect('PrintLists:default', ['list' => $listId, 'filter' => 'waiting', 'date' => '']);
+	}
+
+
+	/** Původ chosen in a Náhled tisku card: shared by the product's labels, like the ✎ texts. */
+	public function handleSetLabelOrigin(int $productsId, int $countryId = 0): void
+	{
+		$branchesId = (int)($this->session->filters[$this->getName()]['custom__branches'] ?? 0);
+		$this->productLabelsRepo->saveShared($productsId, $branchesId, (int)$this->adminUser->id, ['origin_countries_id' => $countryId ?: NULL]);
+		$this->redrawProductRow($productsId);
+	}
+
+
 	/** +1 / −1 / remove in the print preview modal. */
 	public function handleIncrementQueue(int $labelId)
 	{

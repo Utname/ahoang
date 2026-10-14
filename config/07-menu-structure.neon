@@ -24,6 +24,9 @@ parameters:
 		ProductLabels: [
 			icon: 'fas fa-tag'
 		]
+		PrintLists: [
+			icon: 'fas fa-mobile-screen'
+		]
 		PrintTemplates: [
 			icon: 'fas fa-print'
 		]

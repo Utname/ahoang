@@ -1,0 +1,259 @@
+{block content}
+{* Tisk z mobilu (predani-tisk-stitku "Admin – Tisk z mobilu"): lists on the left, the chosen
+   list per template on the right. Rows reuse the Produkty markup (.pv-row, .pv-pfields,
+   .pv-hdr) so "Cena a akce" and the header select run on the same custom.js code. *}
+<div id="pv-i18n" hidden
+     data-hint-none="{_admin.pv.hint.none}"
+     data-hint-akce="{_admin.pv.hint.akce}"
+     data-hint-bad-price="{_admin.pv.hint.badPrice}"
+     data-hint-bad-dates="{_admin.pv.hint.badDates}"
+     data-hint-no-akce-price="{_admin.pv.hint.noAkcePrice}"
+     data-hint-no-from="{_admin.pv.hint.noFrom}"
+     data-saved="{_admin.pv.saved}"
+     data-none-checked="{_admin.pv.noneChecked}"></div>
+<div class="pv-toast" id="pv-toast"></div>
+
+<div class="col-md-12 pl-page">
+    <div class="pl-head">
+        {* the layout prints the module name as the page title *}
+        <div class="pl-sub">{_admin.pl.subtitle}
+            <span class="pl-mobile">📱 {_admin.pl.mobileApp}: <a href="{link Mobil:default}" target="_blank">{link //Mobil:default}</a></span>
+        </div>
+        <span class="pl-flex"></span>
+        <label n:if="count($plBranchesPairs) > 1" class="pl-branch">
+            <span>{_admin.pl.branch}</span>
+            <select class="select-default" onchange="location.href = this.value">
+                <option n:foreach="$plBranchesPairs as $bid => $bname" value="{link branch! $bid}" n:attr="selected: $bid === $plBranchesId">{$bname}</option>
+            </select>
+        </label>
+        <a n:if="$plCanEdit" href="{link newList!}" class="pv-btn pv-btn-dark pl-new">+ {_admin.pl.newList}</a>
+        <div n:snippet="counts" class="pl-filters">
+            {foreach ['waiting', 'printed', 'all'] as $f}
+                <a href="{link this, filter => $f, list => NULL}" n:class="pl-filter, $filter === $f ? pl-on">{_"admin.pl.filter.$f"} <b>{$counts[$f]}</b> <small>· {$counts['labels'][$f]} {_admin.pl.labels}</small></a>
+            {/foreach}
+        </div>
+        <form method="get" action="{link this}" class="pl-date">
+            <input type="date" name="date" value="{$date}" onchange="this.form.submit()" aria-label="{_admin.vykup.date}">
+            <a n:if="$date" href="{link this, date => ''}" class="pl-alldays">{_admin.pl.allDays}</a>
+        </form>
+    </div>
+
+    <div class="pl-layout">
+        <div n:snippet="lists" class="pl-lists">
+            {foreach $cards as $c}
+                <a href="{link this, list => $c['id']}" n:class="pl-card, $sel && $sel['id'] === $c['id'] ? pl-card-on">
+                    <div class="pl-card-top">
+                        <span class="pl-avatar">{=mb_strtoupper(mb_substr($c['sender'], 0, 1))}</span>
+                        <div class="pl-card-who">
+                            <b>{$c['no']} · {$c['sender']}</b>
+                            <small>{$date ? $c['time'] : $c['date'] . ' ' . $c['time']}<span n:if="$c['device']"> · {$c['source'] === 'pc' ? '💻' : '📱'} {$c['device']}</span></small>
+                        </div>
+                        <span class="pl-flex"></span>
+                        <span class="pl-status pl-status-{$c['status']}">{=('admin.pl.status.' . $c['status'])|translate}</span>
+                    </div>
+                    <div n:if="$c['chips']" class="pl-chips">
+                        <span n:foreach="$c['chips'] as $chip" n:class="pl-chip, $chip['akce'] ? pl-chip-akce">{$chip['label']}</span>
+                    </div>
+                    <div class="pl-card-foot">{$c['count']} {_admin.pv.labels} · {$c['products']} {_admin.pl.products} · {$c['pages']} A4</div>
+                </a>
+            {/foreach}
+            <div n:if="!$cards" class="pl-empty">{_admin.pl.noLists}</div>
+        </div>
+
+        <div n:snippet="detail" class="pl-detail">
+            {if $sel}
+                <div class="pl-dhead">
+                    <div>
+                        <div class="pl-dtitle">{$sel['no']} · {$sel['sender']}</div>
+                        <div class="pl-dsub">
+                            {_admin.pl.sent} {$sel['date']} {$sel['time']} · {$sel['count']} {_admin.pv.labels} · {$sel['pages']} {_admin.pl.pages}
+                            <span n:if="$sel['printedAt']"> · {=sprintf(('admin.pl.printedAt'|translate), $sel['printedAt'])}</span>
+                        </div>
+                    </div>
+                    <span class="pl-flex"></span>
+                    <a n:if="$groups" href="#" class="pv-btn" onclick="$('#modal-plPreview').modal('show'); return false;">◉ {_admin.pl.preview}</a>
+                    <a n:if="$groups" href="{link pdf, id => $sel['id'], download => TRUE}" class="pv-btn">⤓ {_admin.pl.downloadPdf}</a>
+                    <a n:if="$groups" href="{link print, id => $sel['id']}" target="_blank" class="pv-btn pv-btn-teal pl-print" data-refresh="{link this}">🖨 {_admin.pl.print} · {$sel['pages']} A4</a>
+                </div>
+
+                {* add a label: EAN (scanner) or name with suggestions; template and count stay for the next one *}
+                {form addItemForm class => 'ajax pl-add', autocomplete => 'off'}
+                    {input list_id}
+                    {input products_id class => 'pl-add-id'}
+                    <span class="pl-add-label">{_admin.pl.addLabel}</span>
+                    {input product class => 'pl-add-product', placeholder => ('admin.pl.addPh'|translate), data-url => $presenter->link('search!')}
+                    {input type_id class => 'pl-add-sel select-default'}
+                    {input qty class => 'pl-add-qty', min => 1}
+                    {input product_label_headers_id class => 'pl-add-sel select-default'}
+                    <button n:name="add" class="pv-btn pv-btn-teal">+ {_admin.pl.add}</button>
+                {/form}
+
+                <div class="pl-groups">
+                    <section n:foreach="$groups as $g" class="pl-group">
+                        <div class="pl-ghead">
+                            <b>{$g['name']}</b>
+                            <span class="pl-dims">{$g['dims']} mm</span>
+                            <span n:if="$g['isAkce']" class="pl-akce">AKCE</span>
+                            <span class="pl-flex"></span>
+                            <span class="pl-gcount">{$g['count']} {_admin.pl.labels} · {$g['pages']} {_admin.pl.pages} ({$g['perPage']} {_admin.pl.labels}{_admin.pp.perA4})</span>
+                        </div>
+                        <div n:foreach="$g['rows'] as $r" class="pv-row pl-row" data-id="{$r['productsId']}">
+                            <div class="pl-rmain">
+                                <div class="pl-rname">
+                                    <b>{$r['name']}<span n:if="$r['edited']" class="pl-edited" title="{_admin.pl.editNote}">✎</span></b>
+                                    <small><span n:if="$r['ean']">EAN {$r['ean']}</span><span n:if="$r['weight']"> · {$r['weight']}</span></small>
+                                </div>
+                                <span class="pl-flex"></span>
+                                <select n:if="$plCanEdit" class="pv-hdr pl-hdr select-default" data-url="{link header! $r['id'], 999999}" aria-label="{_admin.pv.header}">
+                                    <option n:foreach="$headersPairs as $hid => $hname" value="{$hid}" n:attr="selected: (int)$hid === $r['headerId']">{$hname}</option>
+                                </select>
+                                <button type="button" n:class="pl-pricebox, $plCanEdit ? pv-open-price, $r['isAkceType'] ? pl-pricebox-akce" title="{_admin.pv.priceTitle}">
+                                    <small n:if="$r['ref'] !== NULL">{$r['refLabel'] === 'lowest30' ? ('admin.pl.lowest30'|translate) : ('admin.pl.regular'|translate)}: {$r['ref']|number:2,',',' '}</small>
+                                    <b>{if $r['sale'] !== NULL}{$r['sale']|number:2,',',' '} <span class="pl-unit pv-unit-txt">{$r['unit']}</span>{else}{_admin.pv.noPrice}{/if}</b>
+                                    <em>{if $r['dates']}Akce {$r['dates']}{else}✎ {_admin.pl.editPrice}{/if}</em>
+                                </button>
+                                <div class="pl-stepper">
+                                    <a n:if="$plCanEdit" href="{link qty! $r['id'], -1}" class="ajax" title="{_admin.pv.less}">−</a>
+                                    <span>{$r['qty']}</span>
+                                    <a n:if="$plCanEdit" href="{link qty! $r['id'], 1}" class="ajax" title="{_admin.pv.more}">+</a>
+                                </div>
+                                <a href="{link pdf, id => $sel['id'], itemId => $r['id'], one => TRUE}" target="_blank" class="pv-btn">◉ {_admin.pv.preview}</a>
+                                <a n:if="$plCanEdit" href="{link edit! $r['id']}" class="ajax-modal pv-btn pl-btn-edit" data-target="#modal-plItem">✎ {_admin.pv.edit}</a>
+                                <a n:if="$plCanEdit" href="{link remove! $r['id']}" class="ajax pl-x" title="{_admin.pl.remove}">×</a>
+                            </div>
+
+                            {* "Cena a akce": saves the product card (ProductPriceSaver), as in Produkty *}
+                            <div n:if="$plCanEdit" class="pv-panel pv-panel-price pl-panel-price" hidden>
+                                <div class="pv-box">
+                                    <div class="pv-box-head"><b>{_admin.pv.priceTitle}</b><span>{$r['name']} · {_admin.pl.priceNote}</span></div>
+                                    {var $price = $r['price']}
+                                    <div class="pv-pfields" data-products-id="{$r['productsId']}" data-item-id="{$price->id ?? ''}">
+                                        <label>{_admin.pv.priceUnit}
+                                            <select name="price_unit__{$r['productsId']}" class="pv-unit select-default">
+                                                <option n:foreach="\ProductsEntity::PRICE_UNITS as $unitOption" value="{$unitOption}" n:attr="selected: $unitOption === $r['unit']">{$unitOption}</option>
+                                            </select>
+                                        </label>
+                                        <label>{_admin.pv.basePrice}
+                                            <input type="number" step="0.01" name="price__{$r['productsId']}" value="{$price && $price->price ? $price->price : ''}" class="pv-num">
+                                        </label>
+                                        <label>{_admin.pv.akcePrice}
+                                            <input type="number" step="0.01" name="price_action__{$r['productsId']}" value="{$price && $price->price_action ? $price->price_action : ''}" placeholder="—" class="pv-num pv-num-akce">
+                                        </label>
+                                        <label class="calendar-today-overlay">{_admin.pv.akceFrom}
+                                            <input type="text" name="action_from__{$r['productsId']}" value="{$price && $price->action_from ? $price->action_from->format('d.m.Y') : ''}" placeholder="dd.mm.yyyy" class="date-picker pv-date" autocomplete="off">
+                                        </label>
+                                        <label class="calendar-today-overlay">{_admin.pv.akceTo}
+                                            <input type="text" name="action_to__{$r['productsId']}" value="{$price && $price->action_to ? $price->action_to->format('d.m.Y') : ''}" placeholder="dd.mm.yyyy" class="date-picker pv-date" autocomplete="off">
+                                        </label>
+                                    </div>
+                                    <div class="pv-pfoot">
+                                        <div class="pv-hint"></div>
+                                        <button type="button" class="pv-btn pv-btn-red pv-end-akce">{_admin.pv.endAkce}</button>
+                                        <button type="button" class="pv-btn pv-btn-dark pv-save-price">{_admin.pv.save}</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <div n:if="!$groups" class="pl-empty">{_admin.pl.noItems}</div>
+                </div>
+
+                <div class="pl-dfoot">
+                    <span class="pl-note">{_admin.pl.note}</span>
+                    <span class="pl-flex"></span>
+                    {if $plCanEdit}
+                        {if $sel['status'] === 'printed'}
+                            <a href="{link printed! $sel['id'], FALSE}" class="pv-btn">{_admin.pl.markWaiting}</a>
+                        {else}
+                            <a href="{link printed! $sel['id'], TRUE}" class="pv-btn">{_admin.pl.markPrinted}</a>
+                        {/if}
+                        <a href="{link deleteList! $sel['id']}" class="pv-btn pv-btn-red with-confirm" data-message="{_admin.pl.deleteConfirm}">{_admin.pl.delete}</a>
+                    {/if}
+                </div>
+            {else}
+                <div class="pl-empty pl-empty-big">{_admin.pl.noLists}</div>
+            {/if}
+        </div>
+    </div>
+</div>
+
+{* Náhled tisku v3 of the chosen list *}
+<div id="modal-plPreview" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog pp-dialog">
+        <div class="modal-content pp-content">
+            {snippet preview}
+                {if !empty($pp)}
+                    {include '../../__components/PrintPreview/printPreview.latte', pp => $pp}
+                {/if}
+            {/snippet}
+        </div>
+    </div>
+</div>
+
+{* ✎ Upravit: this print only *}
+<div id="modal-plItem" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div n:snippet="itemForm" class="modal-content pv-editor">
+            {form itemForm class => 'ajax ajax-modal-close'}
+                {var $ei = $editItem}
+                {var $eiType = $ei ? (int)$ei->type_id : 0}
+                {var $eiAkce = $eiType && \ProductLabelsEntity::isAkceType($eiType)}
+                <div class="pv-editor-head">
+                    <div class="pv-editor-title">
+                        <b>{_admin.pv.editorTitle} · {$typeNames[$eiType] ?? ''}</b>
+                        <span n:if="$ei">{\ProductLabelsEntity::TYPES_ARR[$eiType]['dims'] ?? ''} mm</span>
+                    </div>
+                    <button type="button" class="pv-editor-x" data-dismiss="modal" aria-label="{_admin.pv.close}">×</button>
+                </div>
+                <div n:if="$ei" class="pv-editor-body">
+                    <div class="pv-ed-shared pl-ed-note">{_admin.pl.editNote}</div>
+                    {input item_id}
+                    <div class="pv-ed-grid pv-ed-grid-head">
+                        <label>{_admin.pv.header}{input product_label_headers_id class => 'pv-input'}</label>
+                        <label>{_admin.pv.count}{input qty class => 'pv-input', min => 1}</label>
+                    </div>
+                    <label>{_admin.pv.name}{input name class => 'pv-input pv-input-strong'}</label>
+                    <div class="pl-ed-prices">
+                        <label>{$eiAkce ? ('admin.pl.lowestPrice30'|translate) : ('admin.pl.regularPrice'|translate)} [Kč]{input price class => 'pv-input', inputmode => decimal}</label>
+                        <label>{$eiAkce ? ('admin.pl.akcePrice'|translate) : ('admin.pl.ourPrice'|translate)} [Kč]{input price_action class => 'pv-input', inputmode => decimal}</label>
+                        <small>{_admin.pl.pricesThisPrint}</small>
+                    </div>
+                    <div class="pv-ed-grid">
+                        <label>{_admin.pv.sleva}
+                            {if $eiAkce}
+                                {input sale_percent class => 'pv-input', inputmode => numeric}
+                            {else}
+                                {input sale_percent class => 'pv-input pv-input-off', readonly => TRUE}
+                            {/if}
+                        </label>
+                        <label>{_admin.pv.priceUnit}{input price_unit class => 'pv-input'}</label>
+                        <label>{_admin.pv.moreSpecies}{input is_more_species class => 'pv-input'}</label>
+                        <label>{_admin.pv.origin}{input origin_countries_id class => 'pv-input'}</label>
+                    </div>
+                    <div class="pv-ed-note">{$eiAkce ? ('admin.pv.slevaNoteAkce'|translate|replace:'%s','…'|replace:'%%','%') : ('admin.pv.slevaNoteStd'|translate)}</div>
+                    <div class="pv-ed-checks">
+                        <label><input n:name="hide_validity" class="pv-tog-validity"> {_admin.pv.hideValidity}</label>
+                        <label><input n:name="hide_ingredients" class="pv-tog-ingredients"> {_admin.pv.hideIngredients}</label>
+                        <label><input n:name="thawed"> ❄ {_admin.pv.thawed}</label>
+                    </div>
+                    <label class="pv-ed-validity">{_admin.pv.validityText}{input sale_text class => 'pv-input'}</label>
+                    <label class="pv-ed-ingredients">{_admin.pv.ingredients}
+                        {input ingredients class => 'pv-input pv-textarea', rows => 3}
+                        <small>{_admin.pv.ingredientsHint}</small>
+                    </label>
+                    <label>{_admin.pv.note} 1{input note_1 class => 'pv-input'}</label>
+                    <label>{_admin.pv.note} 2{input note_2 class => 'pv-input'}</label>
+                    <label>{_admin.pv.note} 3{input note_3 class => 'pv-input'}</label>
+                </div>
+                <div class="pv-editor-foot">
+                    <a n:if="$ei" href="{link reset! (int)$ei->id}" class="ajax pv-ed-reset" data-dismiss="modal">{_admin.pv.reset}</a>
+                    <div class="pv-flex"></div>
+                    <a n:if="$ei" href="{link pdf, id => (int)$ei->print_lists_id, itemId => (int)$ei->id, one => TRUE}" target="_blank" class="pv-btn pv-btn-outline">◉ {_admin.pv.preview}</a>
+                    <a href="#" class="pv-btn" data-dismiss="modal">{_admin.pv.close}</a>
+                    <button n:name="save" class="pv-btn pv-btn-teal">{_admin.pv.saveChanges}</button>
+                </div>
+            {/form}
+        </div>
+    </div>
+</div>
+{/block}

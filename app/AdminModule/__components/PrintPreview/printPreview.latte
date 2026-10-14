@@ -1,0 +1,95 @@
+{* Náhled tisku v3 (predani-tisk-stitku "Nahled tisku v3"): the labels of one print, a card
+   per label, grouped per template (Akce last). Shared by the Produkty print queue and
+   Tisk z mobilu; the presenter builds $pp (groups, cards, links). Header / origin selects
+   call their link with 999999 replaced by the chosen id (custom.js .pp-hdr / .pp-origin). *}
+<div class="pp">
+    <div class="pp-head">
+        <a href="#" class="pp-btn" data-dismiss="modal">← {_admin.pp.back}</a>
+        <div class="pp-title"><b>{_admin.pp.title}</b> <span>{$pp['totalCount']} {_admin.pv.labels} · {$pp['totalPages']} {_admin.pl.pages}</span></div>
+        <span class="pp-flex"></span>
+        <a n:if="$pp['clearUrl']" href="{$pp['clearUrl']}" class="pp-btn pp-btn-red ajax with-confirm" data-message="{$pp['clearConfirm']}">🗑 {_admin.pp.clearAll}</a>
+        <a n:if="!empty($pp['sendUrl']) && $pp['groups']" href="{$pp['sendUrl']}" class="pp-btn" title="{_admin.pl.fromQueueHint}">📱 {_admin.pl.fromQueue}</a>
+        <a n:if="$pp['groups']" href="{$pp['viewAllUrl']}" target="_blank" class="pp-btn">◉ {_admin.pp.viewAll}</a>
+        <a n:if="$pp['groups']" href="{$pp['downloadAllUrl']}" target="_blank" class="pp-btn pp-btn-teal">⤓ {_admin.pp.downloadAll}</a>
+    </div>
+
+    <div class="pp-body">
+        {if !$pp['groups']}
+            <div class="pp-empty">
+                <b>{_admin.pp.empty}</b>
+                <span>{$pp['emptyHint'] ?? ('admin.pp.emptyHint'|translate)}</span>
+            </div>
+        {else}
+            <section n:foreach="$pp['groups'] as $g" n:class="pp-group, $g['isAkce'] ? pp-group-akce">
+                <div class="pp-ghead">
+                    <b>{$g['name']}</b>
+                    <span class="pp-dims">({$g['dims']})</span>
+                    <span n:if="$g['isAkce']" class="pp-akce">AKCE</span>
+                    <span class="pp-flex"></span>
+                    <span class="pp-gcount"><span class="pp-pill">{$g['count']} {_admin.pv.labels}</span> · <b>{$g['pages']}</b> {_admin.pl.pages} · {$g['perPage']}{_admin.pp.perA4}</span>
+                    <a href="{$g['viewUrl']}" target="_blank" class="pp-btn pp-btn-sm">◉ {_admin.pp.view}</a>
+                    <a href="{$g['pdfUrl']}" target="_blank" class="pp-btn pp-btn-sm">⤓ {=sprintf(('admin.pp.downloadType'|translate), $g['name'])}</a>
+                </div>
+                <div class="pp-cards">
+                    <div n:foreach="$g['cards'] as $c" class="pp-card">
+                        <div class="pp-ctop">
+                            <select class="pp-hdr select-default" data-url="{$c['headerUrl']}" aria-label="{_admin.pv.header}">
+                                <option n:foreach="$pp['headersPairs'] as $hid => $hname" value="{$hid}" n:attr="selected: (int)$hid === (int)$c['headerId']">{$hname}</option>
+                            </select>
+                            <span class="pp-flex"></span>
+                            <a href="{$c['decUrl']}" class="ajax pp-mini" title="{_admin.pv.less}">−</a>
+                            <span class="pp-qty">{$c['qty']}×</span>
+                            <a href="{$c['incUrl']}" class="ajax pp-mini" title="{_admin.pv.more}">+</a>
+                            <a href="{$c['removeUrl']}" class="ajax pp-mini pp-mini-x" title="{_admin.pl.remove}">×</a>
+                        </div>
+                        <div class="pp-name" title="{$c['name']}">{$c['name']}</div>
+                        <div class="pp-meta">
+                            <span n:if="$c['ean']">EAN {$c['ean']}</span>
+                            <span n:if="$c['weight']">{$c['weight']}</span>
+                            <label>{_admin.pp.origin}:
+                                <select class="pp-origin select-default" data-url="{$c['originUrl']}">
+                                    <option value="0">–</option>
+                                    <option n:foreach="$pp['countriesPairs'] as $cid => $cname" value="{$cid}" n:attr="selected: (int)$cid === (int)$c['originId']">{$cname}</option>
+                                </select>
+                            </label>
+                        </div>
+                        <div class="pp-price">
+                            <div class="pp-ref">
+                                {if $c['ref'] !== NULL}
+                                    <small>{$c['refLabel'] === 'lowest30' ? ('admin.pl.lowestPrice30'|translate) : ('admin.pl.regularPrice'|translate)}</small>
+                                    <b n:class="$c['refLabel'] === 'lowest30' ? pp-strike">{$c['ref']|number:2,',',' '} Kč</b>
+                                {/if}
+                            </div>
+                            <div class="pp-sale">
+                                {if $c['sale'] !== NULL}
+                                    <b n:class="$c['isAkceType'] ? pp-sale-akce">{$c['sale']|number:2,',',' '} {$c['unit']}</b>
+                                {else}
+                                    <span class="pp-noprice">{_admin.pv.noPrice}</span>
+                                {/if}
+                                <small n:if="$c['unitText']">{$c['unitText']}</small>
+                            </div>
+                        </div>
+                        <div n:if="$c['tags']" class="pp-tags">
+                            <span n:foreach="$c['tags'] as $tag" class="pp-tag pp-tag-{$tag['kind']}">{$tag['text']}</span>
+                        </div>
+                        <div class="pp-actions">
+                            <a href="{$c['editUrl']}" class="ajax-modal pp-btn pp-btn-sm pp-btn-edit" data-target="{$c['editTarget']}">✎ {_admin.pp.edit}</a>
+                            <a href="{$c['viewUrl']}" target="_blank" class="pp-btn pp-btn-sm">◉ {_admin.pp.view}</a>
+                            <a href="{$c['pdfUrl']}" target="_blank" class="pp-btn pp-btn-sm">⤓ {_admin.pp.download}</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        {/if}
+    </div>
+
+    <div class="pp-foot">
+        <div class="pp-chips">
+            <span n:foreach="$pp['groups'] as $g" n:class="pp-chip, $g['isAkce'] ? pp-chip-akce">{$g['name']} ×{$g['count']} · {$g['pages']} A4</span>
+        </div>
+        <span class="pp-flex"></span>
+        <a href="#" class="pp-btn" data-dismiss="modal">{_admin.pp.close}</a>
+        <a n:if="$pp['groups']" href="{$pp['viewAllUrl']}" target="_blank" class="pp-btn">◉ {_admin.pp.viewAll}</a>
+        <a n:if="$pp['groups']" href="{$pp['downloadAllUrl']}" target="_blank" class="pp-btn pp-btn-teal">⤓ {_admin.pp.downloadAll} · {$pp['totalCount']}</a>
+    </div>
+</div>

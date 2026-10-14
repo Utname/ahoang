@@ -222,89 +222,14 @@ trait ProductPricesTrait
 
 	public function handleUpdatePricesAll($itemId, $productsId, $price = null, $price_action = null, $action_from = null, $action_to = null, $branchId = null, $currencyId = null, $price_unit = null)
 	{
-		// "Cena za" of the "Cena a akce" panel (products.price_unit)
-		if ($price_unit !== null && in_array($price_unit, \ProductsEntity::PRICE_UNITS, TRUE)) {
-			$this->repository->getDatabase()->table('products')->where('id', (int)$productsId)->update(['price_unit' => $price_unit]);
-		}
-
-		// Resolve foreign keys (only used for insert); keep them untouched on update to avoid FK issues
-		$resolvedBranchId = (int)($branchId ?: ($this->session->filters[$this->getName()]['custom__branches'] ?? 0));
-		$resolvedCurrencyId = (int)$this->globalContainer->getDefaultCurrency()->id;
-		$resolvedProductId = (int)$productsId;
-		$resolvedProduct = $this->repository->findEntity($resolvedProductId);
-
-		$set = [];
-		$set['price'] = $price !== '' ? (float)$price : null;
-		$set['price_action'] = $price_action !== '' ? (float)$price_action : null;
-
-		// parse dates from d.m.Y to Y-m-d
-		$af = NULL; $at = NULL;
-		if ($action_from) {
-			$dt = \DateTime::createFromFormat('d.m.Y', $action_from);
-			$af = $dt ? $dt->format('Y-m-d') : NULL;
-		}
-		if ($action_to) {
-			$dt = \DateTime::createFromFormat('d.m.Y', $action_to);
-			$at = $dt ? $dt->format('Y-m-d') : NULL;
-		}
-		$set['action_from'] = $af;
-		$set['action_to'] = $at;
-
-		// compute is_action
-		$isAction = FALSE;
-		$today = date('Y-m-d');
-		if ($set['price'] && $set['price_action'] && $set['price_action'] > 0 && $set['price'] > $set['price_action'] && $set['action_from'] && $set['action_from'] <= $today && (!$set['action_to'] || $set['action_to'] >= $today)) {
-			$isAction = TRUE;
-		}
-		$set['is_action'] = $isAction;
-
-		$entity = null;
-		if ($itemId) {
-			$entity = $this->productPricesRepository->findEntity($itemId);
-		}
-		if (!$entity) {
-			$entity = $this->productPricesRepository->findEntityBy([
-				'products_id' => $resolvedProductId,
-				'branches_id' => $resolvedBranchId,
-				'currencies_id' => $resolvedCurrencyId,
-			]);
-		}
-
-		$logPrice = $isAction ? $set['price_action'] : $set['price'];
-		$this->service->logProductPrice($resolvedProductId, $resolvedBranchId, $resolvedCurrencyId, $logPrice, NULL, $isAction ? $set['action_from'] : NULL, $isAction ? $set['action_to'] : NULL);
-
-		if ($entity instanceof \ProductPricesEntity) {
-			// Only update mutable columns to avoid changing FK values
-			$entity->setValues($set);
-			$this->productPricesRepository->update($entity);
-		}
-		else {
-			// Validate FKs for insert
-			$insert = [
-				'branches_id' => $resolvedBranchId,
-				'currencies_id' => $resolvedCurrencyId,
-				'products_id' => $resolvedProductId,
-			] + $set;
-			$this->productPricesRepository->insert($insert);
-		}
-
-		// propagate base price to other branches like existing logic when setting price
-		if ($set['price'] !== null) {
-			foreach ($this->branches as $branch) {
-				if ($branch->id == $resolvedBranchId) { continue; }
-
-				$productBranchPrice = $resolvedProduct->getPrice($branch->id);
-				if (isset($productBranchPrice->is_valid_action) && $productBranchPrice->is_valid_action) { continue; }
-
-				$this->service->logProductPrice($resolvedProductId, $branch->id, $resolvedCurrencyId, $set['price']);
-
-				$this->productPricesRepository->findAll()->where([
-					'branches_id' => $branch->id,
-					'currencies_id' => $resolvedCurrencyId,
-					'products_id' => $resolvedProductId,
-				])->update(['price' => $set['price']]);
-			}
-		}
+		// the saving itself is shared with Tisk z mobilu (ProductPriceSaver)
+		$this->productPriceSaver->save(
+			(int)$productsId,
+			(int)($branchId ?: ($this->session->filters[$this->getName()]['custom__branches'] ?? 0)),
+			array_map(static fn($branch) => (int)$branch->id, $this->branches),
+			$itemId ? (int)$itemId : NULL,
+			$price, $price_action, $action_from, $action_to, $price_unit,
+		);
 
 		$this['productLabels-'.(int)$productsId]->redrawAll();
 

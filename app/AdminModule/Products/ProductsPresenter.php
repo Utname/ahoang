@@ -47,6 +47,9 @@ class ProductsPresenter extends BaseModulePresenter
 	/** @var \ProductsRepository @inject */
 	public $repository;
 
+	/** @var \ProductPriceSaver @inject */
+	public $productPriceSaver;
+
 	/** @var \ProductsService @inject */
 	public $service;
 
@@ -389,6 +392,7 @@ class ProductsPresenter extends BaseModulePresenter
 		$this->template->selectedProductsCount = $summary['selectedProductsCount'];
 		$this->template->printGroups = $summary['groups'];
 		$this->template->allPrintGroups = $summary['allGroups'];
+		$this->template->pp = $searchOnly ? NULL : $this->buildPrintPreview($summary);
 
 		// "Admin - Produkty v2": filter pills, and a search that finds one product
 		// opens its labels panel

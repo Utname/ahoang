@@ -80,6 +80,9 @@ action_from, action_to}} (custom.js → `ProductLabelsTrait::parsePriceOverrides
 - Multi-label PDFs (Náhled všech, queue print) are ONE document: templates share class names, so
   `renderProductLabelsPdf()` scopes each template's CSS (`scopeTemplateHtml()`). Keep it when changing
   that path; a single-label preview can look right while the combined one is broken.
+- Floated barcode bars get misplaced (a thin bar lands on the gap before it → phones read another
+  EAN): templates draw only the dark bars of `EanBarcodeHelper::getBars()`, absolutely positioned
+  at `left`, in a positioned container. Check a label's barcode by decoding the PDF's rectangles.
 - `max-height`/`overflow:hidden` do not clip text → long Složení is shrunk and `|truncate`d in the template.
 
 ## Výkup lahví (bottle/crate returns)
@@ -95,6 +98,39 @@ that prints itself), rules in `app/Model/Vykup/VykupService.php`, EAN-8 SVG in `
   storno never deletes, restore same day only. Permissions `Vykup_list` / `Vykup_edit` (staff, header).
 - Texts `admin.vykup.*`; the voucher itself is always Czech. The presenter has no repository, so it
   overrides `createComponentEditForm()` for `BaseModulePresenter::beforeRender()`.
+
+## Tisk z mobilu (print lists from the phone)
+Handoff `C:\Users\adsf\Downloads\predani-tisk-stitku\` (HUONG-DAN.md, html/, kod/). Its SQL/PHP
+propose new price tables – NOT used: prices stay in `product_prices` / `product_prices_log`.
+- `print_lists` / `print_list_items` (bin/migrate.php): a list per branch (M-001…, waiting/printed/
+  deleted = soft); an item = product + label type (TYPES_ARR) + qty + header + `overrides` JSON that
+  change only that print (never the product card, never the admin's label queue).
+- `app/Model/PrintLists/PrintListsService.php` (lists, items, PDF via `renderProductLabelsPdf()`);
+  `PrintListLabelEntity` = a transient ProductLabelsEntity (ActiveRow built from an array, product /
+  header / country given up front – no ref()). Typed sale price in ✎ = running action for that print.
+- `AdminModule/PrintLists` page: rows reuse the Produkty markup (.pv-row/.pv-pfields/.pv-hdr) so
+  "Cena a akce" runs on the same JS and saves the card through `ProductPriceSaver` (shared with
+  ProductPricesTrait). `print` action = PDF in an iframe + print dialog, marks the list printed.
+- Náhled tisku v3 = `__components/PrintPreview/printPreview.latte`, data `$pp` built by
+  `ProductLabelsTrait::buildPrintPreview()` (queue) and `PrintListsPresenter::printPreview()` (list);
+  card selects must have `select-default` (no select2). Menu badge: `MenuGenerator::setBadges()`.
+- Lists come from three places: the phone app (source mobile, M-…), "+ Nový seznam" on the PC page
+  (P-…, rows added by EAN/name autocomplete) and "Poslat do Tisk z mobilu" in Náhled tisku on Produkty
+  (`handleQueueToPrintList()` → `createFromQueue()`: label texts become overrides, queue counts → 0).
+- Phone app `/admin/mobil` (`AdminModule/Mobil`): standalone page, no admin layout, uses the
+  PrintLists permissions (`setActualModuleId('PrintLists')`). The presenter builds a JSON config
+  (types, headers, countries, units, urls, texts `admin.mob.*`); `www/js/admin/mobil.js` +
+  `www/css/mobil.css` (vanilla JS) do the rest. The queue lives in localStorage until "Odeslat"
+  (`handleSend`, raw JSON body → `PrintListsService::create()`). Other JSON signals: search, byCode,
+  products, savePrice (`ProductPriceSaver`), lists, stats, preview (`pdfFromItems()`, unsent queue).
+  Camera: `BarcodeDetector`, else ZXing from unpkg; it needs https (works on Railway, not on
+  http://localhost from a phone). Fake-camera test: Chromium `--use-file-for-fake-video-capture`.
+  Real phone locally: the dev server listens on `[::1]` only, so run a second one on
+  `127.0.0.1:8080`, then `adb reverse tcp:8080 tcp:8080` and open http://localhost:8080/admin/mobil
+  (localhost = secure, camera works); `adb forward tcp:9222 localabstract:chrome_devtools_remote`
+  lets Playwright `connectOverCDP` inspect the phone's Chrome. Scanning decodes only the part of
+  the frame shown in the box and needs the same code twice within 1.5 s.
+- Akce templates still print after the action ended (user's choice, same as Produkty).
 
 ## Run / test
 - Local: http://localhost, MariaDB db `website` user root/toor

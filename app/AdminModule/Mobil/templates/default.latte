@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="{=substr((string)$presenter->translator->getLocale(), 0, 2)}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>{_admin.mob.appTitle} · Fikko</title>
+<link rel="stylesheet" href="/css/mobil.css?v={=@filemtime(WWW_DIR . '/css/mobil.css')}">
+</head>
+<body>
+{* Phone app "Tisk štítků" (predani-tisk-stitku "Admin – tisk štítků mobil"). Screens are built
+   by /js/admin/mobil.js from the config below; the queue lives on the phone until it is sent. *}
+<div class="m-app" id="m-app">
+    <header class="m-top">
+        <button type="button" class="m-icon-btn" data-drawer aria-label="Menu">
+            <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+        <div class="m-titles">
+            <b id="m-title">{_admin.mob.scan}</b>
+            <small>{_admin.mob.branch} {$config['branch']['name']} · {$config['user']}</small>
+        </div>
+        <button type="button" class="m-icon-btn m-qbtn" data-go="queue" aria-label="{_admin.mob.queue}">
+            <svg viewBox="0 0 24 24"><path d="M7 9V4h10v5M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 14h10v6H7z"/></svg>
+            <span class="m-badge" id="m-qbadge" hidden>0</span>
+        </button>
+    </header>
+
+    <main class="m-main">
+        <section class="m-screen" data-screen="overview" hidden></section>
+
+        <section class="m-screen" data-screen="scan" hidden>
+            <div class="m-cam" id="m-cam" role="button" tabindex="0">
+                <video id="m-video" playsinline muted></video>
+                <span class="m-cam-tag"><i></i> {_admin.mob.camera}</span>
+                <div class="m-cam-frame"><span class="m-cam-line"></span></div>
+                <div class="m-cam-msg" id="m-cam-msg">{_admin.mob.cameraStart}</div>
+                <button type="button" class="m-cam-stop" id="m-cam-stop" hidden>{_admin.mob.cameraStop}</button>
+            </div>
+            <label class="m-card m-quick">
+                <span><b>{_admin.mob.quickMode}</b><small id="m-quick-hint"></small></span>
+                <input type="checkbox" id="m-quick"><i class="m-switch"></i>
+            </label>
+            <input type="search" class="m-search" id="m-search" placeholder="{_admin.mob.searchPh}" autocomplete="off" inputmode="search" enterkeyhint="search">
+            <div id="m-results"></div>
+        </section>
+
+        <section class="m-screen" data-screen="queue" hidden></section>
+        <section class="m-screen" data-screen="jobs" hidden></section>
+    </main>
+
+    <nav class="m-tabs">
+        <button type="button" data-go="scan"><svg viewBox="0 0 24 24"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M7 12h10"/></svg><span>{_admin.mob.scan}</span></button>
+        <button type="button" data-go="queue"><svg viewBox="0 0 24 24"><path d="M7 9V4h10v5M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 14h10v6H7z"/></svg><span>{_admin.mob.queue}</span><i class="m-badge" id="m-tbadge" hidden>0</i></button>
+        <button type="button" data-go="jobs"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg><span>{_admin.mob.sent}</span></button>
+    </nav>
+
+    <div class="m-drawer" id="m-drawer" hidden>
+        <div class="m-drawer-panel">
+            <div class="m-drawer-head"><b>{_admin.mob.appTitle}</b><small>{$config['branch']['name']} · {$config['user']}</small></div>
+            <button type="button" data-go="overview">{_admin.mob.overview}</button>
+            <button type="button" data-go="scan">{_admin.mob.scan}</button>
+            <button type="button" data-go="queue">{_admin.mob.queue}</button>
+            <button type="button" data-go="jobs">{_admin.mob.sent}</button>
+            <hr>
+            <a href="{$config['urls']['vykup']}">{_admin.mob.menuVykup}</a>
+            <a href="{$config['urls']['admin']}">{_admin.mob.menuAdmin}</a>
+            <a href="{$config['urls']['products_admin']}">{_admin.mob.menuProducts}</a>
+            {if count($config['branches']) > 1}
+                <hr>
+                <small class="m-drawer-label">{_admin.mob.branch}</small>
+                <a n:foreach="$config['branches'] as $b" href="{$b['url']}" n:class="$b['id'] === $config['branch']['id'] ? m-on">{$b['name']}</a>
+            {/if}
+            <hr>
+            <a href="{$config['urls']['signOut']}">{_admin.mob.signOut}</a>
+        </div>
+    </div>
+
+    <div class="m-sheet" id="m-sheet" hidden></div>
+    <div class="m-toast" id="m-toast" hidden></div>
+</div>
+
+<script type="application/json" id="m-config">{$config}</script>
+<script src="/js/admin/mobil.js?v={=@filemtime(WWW_DIR . '/js/admin/mobil.js')}"></script>
+</body>
+</html>

@@ -47,6 +47,17 @@ class MenuGenerator
 	 * @return Html
 	 * @throws InvalidLinkException
 	 */
+	/** @var array<string, int> menu key => count shown next to it */
+	protected array $badges = [];
+
+
+	/** @param array<string, int> $badges */
+	public function setBadges(array $badges): void
+	{
+		$this->badges = $badges;
+	}
+
+
 	public function generate(): Html
 	{
 		$wrapper = Html::el();
@@ -81,6 +92,14 @@ class MenuGenerator
 					Html::el('p')
 						->setText($this->getMenuName($keyLvl1))
 				);
+			// count next to the item, e.g. lists waiting in Tisk z mobilu
+			if (!empty($this->badges[$keyLvl1])) {
+				$a->addHtml(
+					Html::el('span')
+						->setAttribute('class', 'menu-badge')
+						->setText((string)$this->badges[$keyLvl1])
+				);
+			}
 			if(!empty($itemsLvl2)){
 				$topLi->setAttribute('class', 'droplink top-level');
 				$a->addHtml(

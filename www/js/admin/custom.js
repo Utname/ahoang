@@ -2253,3 +2253,48 @@ $(function () {
         }
     });
 });
+
+// Náhled tisku v3 (__components/PrintPreview): header / origin of a card call their link
+// with 999999 replaced by the chosen id. Tisk z mobilu: "Tisknout" opens the print tab and
+// this page then shows the list as printed.
+$(function () {
+    $('body').on('change', '.pp-hdr, .pp-origin', function () {
+        ajaxGet(String($(this).data('url')).replace('999999', $(this).val()));
+    });
+    // Tisk z mobilu: add row – suggestions (EAN start or name), the input stays focused for the
+    // next scan (a scanner types the EAN and Enter)
+    $('body').on('focus', '.pl-add-product', function () {
+        var $input = $(this);
+        if ($input.data('ui-autocomplete') || !$.fn.autocomplete) {
+            return;
+        }
+        $input.autocomplete({
+            source: String($input.data('url')),
+            minLength: 2,
+            select: function (event, ui) {
+                $input.closest('form').find('.pl-add-id').val(ui.item.id);
+            }
+        });
+    });
+    $('body').on('input', '.pl-add-product', function () {
+        $(this).closest('form').find('.pl-add-id').val('');
+    });
+    var plRefocus = false;
+    $('body').on('submit', 'form.pl-add', function () {
+        plRefocus = true;
+    });
+    $(document).ajaxComplete(function () {
+        if (plRefocus) {
+            plRefocus = false;
+            setTimeout(function () {
+                $('.pl-add-product').trigger('focus');
+            }, 50);
+        }
+    });
+    $('body').on('click', '.pl-print', function () {
+        var refresh = $(this).data('refresh');
+        setTimeout(function () {
+            location.href = refresh;
+        }, 1500);
+    });
+});
