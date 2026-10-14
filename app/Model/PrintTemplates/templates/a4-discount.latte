@@ -96,7 +96,7 @@
     }
 
     .barcode-bars { position: absolute; left: 14mm; top: 262.45mm; height: 8.5mm; }
-    .barcode-bars div { float: left; height: 8.5mm; }
+    .barcode-bars div { height: 8.5mm; }
     .barcode-ean { left: 14mm; top: 274.29mm; font-size: 2.9mm; letter-spacing: 0.14em; font-weight: 600; }
 
     .validity { left: 0; top: 281.96mm; width: 210mm; font-size: 3.6mm; font-weight: 600; letter-spacing: 0.02em; }
@@ -202,7 +202,7 @@
     <div n:if="$note3 || $note2" class="note3 nu" style="top:251.83mm">{$note3 ?: $note2}</div>
 
     <div n:if="$bars" class="barcode-bars">
-        <div n:foreach="$bars as $bar" style="background:{$bar['color']|noescape};width:{$bar['width']|noescape}"></div>
+        <div n:foreach="$bars as $bar" n:if="$bar['dark']" style="position:absolute;top:0;left:{$bar['left']|noescape};background:{$bar['color']|noescape};width:{$bar['width']|noescape}"></div>
     </div>
     <div n:if="$eanText" class="abs lh0 barcode-ean">EAN {$eanText}</div>
 

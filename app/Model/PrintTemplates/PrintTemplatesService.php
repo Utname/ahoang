@@ -505,8 +505,8 @@ class PrintTemplatesService
 
 	/**
 	 * Adds EAN-13 barcode bars directly above the human-readable EAN of the A4,
-	 * Vel.1 and Vel.3 labels. Bars are floated boxes (Dompdf's flexbox fails with
-	 * ~60 adjacent elements, see a5-discount.latte). Values in the markup come only
+	 * Vel.1 and Vel.3 labels. Dark bars are absolutely positioned (Dompdf misplaces
+	 * floated bars, see EanBarcodeHelper::getBars()). Values in the markup come only
 	 * from EanBarcodeHelper, never from user input.
 	 */
 	private function injectEanBarcode(string $html, string $ean, bool $isA4, bool $isVel1, bool $isVel3, bool $isSize2B = FALSE): string
@@ -548,7 +548,9 @@ class PrintTemplatesService
 
 		$bars = '';
 		foreach (EanBarcodeHelper::getBars($ean, $unit) as $bar) {
-			$bars .= '<div style="float:left;height:'.$barHeight.'mm;background:'.$bar['color'].';width:'.$bar['width'].'"></div>';
+			if ($bar['dark']) {
+				$bars .= '<div style="position:absolute;top:0;left:'.$bar['left'].';height:'.$barHeight.'mm;background:'.$bar['color'].';width:'.$bar['width'].'"></div>';
+			}
 		}
 		$barcode = '<div class="'.($isSize2B ? 'size2b-barcode' : 'ean-barcode').'">'.$bars.'</div>';
 
@@ -924,17 +926,18 @@ class PrintTemplatesService
 			return NULL;
 		}
 
+		// labels with their own dashed frame are cut along it: they touch, the next one
+		// overlapping the 0.4mm frame so the two frames make ONE line; frameless ones
+		// (Vel. 3) keep a gap with the dashed cut line of their design
+		$cut = !str_contains((string)$template->html_source, 'dashed');
 		$gap = match (TRUE) {
+			!$cut => -0.4,
 			$h >= 56 => 6.0,
 			$h <= 38 || ($w === 133.0 && $h <= 41) => 3.0,
 			default => 4.0,
 		};
 		// 8mm top margin, at least 5mm left at the bottom
 		$perPage = max(1, (int)floor((297 - 8 - 5 + $gap) / ($h + $gap)));
-
-		// labels with their own dashed frame are cut along it: no extra line between them;
-		// frameless ones (Vel. 3) get the dashed cut line of their design
-		$cut = !str_contains((string)$template->html_source, 'dashed');
 
 		return ['w' => $w, 'h' => $h, 'gap' => $gap, 'perPage' => $perPage, 'cut' => $cut];
 	}

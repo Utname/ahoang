@@ -55,7 +55,7 @@
     .our-label { font-size: 2.6mm; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 700; }
 
     .bars { position: absolute; left: 0; top: 45.73mm; height: 6mm; }
-    .bars div { float: left; height: 6mm; }
+    .bars div { height: 6mm; }
     .ean { left: 0; top: 54.36mm; font-size: 3mm; font-weight: 600; }
     .unit { left: 0; width: 182mm; top: 51.45mm; font-size: 2.8mm; }
     .note3 { left: 40.3mm; width: 100mm; top: 54.89mm; font-size: 2.8mm; }
@@ -146,7 +146,7 @@
     </table>
 
     <div n:if="$bars" class="bars">
-        <div n:foreach="$bars as $bar" style="background:{$bar['color']|noescape};width:{$bar['width']|noescape}"></div>
+        <div n:foreach="$bars as $bar" n:if="$bar['dark']" style="position:absolute;top:0;left:{$bar['left']|noescape};background:{$bar['color']|noescape};width:{$bar['width']|noescape}"></div>
     </div>
     <div class="abs lh0 ean">EAN: {$eanText}</div>
     <div n:if="$note3" class="abs lh0 nu4 center note3">{$note3}</div>

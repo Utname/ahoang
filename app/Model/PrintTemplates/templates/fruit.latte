@@ -153,6 +153,7 @@
     }
 
     .fikko-fruit .barcode-bars {
+        position: relative;
         width: 19mm;
         height: 4.5mm;
         margin: 0 auto;
@@ -227,7 +228,7 @@
 
     <div class="barcode-col">
         <div n:if="$bars" class="barcode-bars">
-            <div n:foreach="$bars as $bar" style="float:left;height:100%;background:{$bar['color']|noescape};width:{$bar['width']|noescape}"></div>
+            <div n:foreach="$bars as $bar" n:if="$bar['dark']" style="position:absolute;top:0;height:4.5mm;left:{$bar['left']|noescape};background:{$bar['color']|noescape};width:{$bar['width']|noescape}"></div>
         </div>
         <div class="barcode-ean">{$eanText ?: '2810001063137'}</div>
     </div>

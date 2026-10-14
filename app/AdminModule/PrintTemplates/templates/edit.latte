@@ -71,7 +71,7 @@
                                         <li><code>{l}$price->price_action{r}</code> — {_admin.terms.printTemplateTokenActionPrice}</li>
                                         <li><code>{l}$price->is_valid_action{r}</code> — {_admin.terms.printTemplateTokenIsAction}</li>
                                         <li><code>{l}$price->action_from|date:'d. m.'{r}</code> / <code>{l}$price->action_to|date:'d. m.'{r}</code> — {_admin.terms.printTemplateTokenActionDates}</li>
-                                        <li><code>{l}$eanText{r}</code>, <code>{l}foreach $bars as $bar{r}...{l}/foreach{r}</code> (<code>$bar['color']</code>, <code>$bar['width']</code>) — {_admin.terms.printTemplateTokenBarcode}</li>
+                                        <li><code>{l}$eanText{r}</code>, <code>{l}foreach $bars as $bar{r}...{l}/foreach{r}</code> (<code>$bar['color']</code>, <code>$bar['width']</code>, <code>$bar['left']</code>, <code>$bar['dark']</code> – draw dark bars only, <code>position:absolute</code>) — {_admin.terms.printTemplateTokenBarcode}</li>
                                     </ul>
                                 </div>
                             </div>

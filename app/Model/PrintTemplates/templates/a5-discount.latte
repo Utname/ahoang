@@ -69,7 +69,7 @@
 
     .note3 { position: absolute; overflow: hidden; text-align: center; }
     .bars { position: absolute; height: 10mm; }
-    .bars div { float: left; height: 10mm; }
+    .bars div { height: 10mm; }
     .ean { font-size: 2.9mm; letter-spacing: 0.14em; font-weight: 600; }
     .unit { font-size: 3.4mm; font-weight: 700; }
     .unit-val { font-size: 4.2mm; margin-left: 2.5mm; }
@@ -213,7 +213,7 @@
     {/if}
 
     <div n:if="$bars" class="bars" style="left:{$g['barsL']|noescape}mm;top:125.7mm">
-        <div n:foreach="$bars as $bar" style="background:{$bar['color']|noescape};width:{$bar['width']|noescape}"></div>
+        <div n:foreach="$bars as $bar" n:if="$bar['dark']" style="position:absolute;top:0;left:{$bar['left']|noescape};background:{$bar['color']|noescape};width:{$bar['width']|noescape}"></div>
     </div>
     <div n:if="$eanText" class="abs lh0 ean" style="left:{$g['barsL']|noescape}mm;top:{$g['eanB']|noescape}mm">EAN {$eanText}</div>
 

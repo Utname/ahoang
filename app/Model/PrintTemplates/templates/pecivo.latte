@@ -363,14 +363,15 @@
         line-height: 1;
     }
     .pecivo-barcode-bars {
+        position: relative;
+        width: 22.8mm; /* 95 modules × 0.24mm, bars are absolute */
         height: 4mm;
         margin-bottom: 0.15mm;
         display: block;
         overflow: hidden;
     }
     .pecivo-barcode-bars > div {
-        float: left;
-        height: 100%;
+        height: 4mm;
     }
     .pecivo-barcode-ean {
         clear: both;
@@ -555,7 +556,7 @@
                     <td class="pecivo-bottom-barcode-cell">
                         <div class="pecivo-barcode-container">
                             <div n:if="$bars" class="pecivo-barcode-bars">
-                                <div n:foreach="$bars as $bar" style="background:{$bar['color']|noescape};width:{$bar['width']|noescape}"></div>
+                                <div n:foreach="$bars as $bar" n:if="$bar['dark']" style="position:absolute;top:0;left:{$bar['left']|noescape};background:{$bar['color']|noescape};width:{$bar['width']|noescape}"></div>
                             </div>
                             <div class="pecivo-barcode-ean">{$eanText}</div>
                         </div>

@@ -58,7 +58,7 @@
 
     .unit { left: 0; width: 160.3mm; top: 32.79mm; font-size: 2.2mm; }
     .bars { position: absolute; left: 26.63mm; top: 33.93mm; height: 3.5mm; }
-    .bars div { float: left; height: 3.5mm; }
+    .bars div { height: 3.5mm; }
     .ean { left: 26.9mm; top: 39.14mm; font-size: 2mm; font-weight: 600; letter-spacing: 0.04em; }
     .note3 { left: 50mm; width: 87.2mm; top: 38.88mm; font-size: 2.2mm; }
 </style>
@@ -145,7 +145,7 @@
     <div n:if="$unit" class="abs lh0 nu4 right unit">cena za {$unit->unitWeight} {$unit->unitShort} = {$unit->price|number:2,',',' '} {$currencySymbol}</div>
 
     <div n:if="$bars" class="bars">
-        <div n:foreach="$bars as $bar" style="background:{$bar['color']|noescape};width:{$bar['width']|noescape}"></div>
+        <div n:foreach="$bars as $bar" n:if="$bar['dark']" style="position:absolute;top:0;left:{$bar['left']|noescape};background:{$bar['color']|noescape};width:{$bar['width']|noescape}"></div>
     </div>
     <div class="abs lh0 ean">EAN: {$eanText}</div>
     <div n:if="$note3 || $note2" class="abs lh0 nu4 center note3">{$note3 ?: $note2}</div>

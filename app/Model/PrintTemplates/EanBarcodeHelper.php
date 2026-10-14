@@ -47,8 +47,12 @@ class EanBarcodeHelper
 
 	/**
 	 * @param string $ean
+	 * Templates draw only the dark bars, absolutely positioned at `left`: Dompdf misplaces
+	 * some of ~60 floated bars (a 1-module bar landed on the white gap before it, so phones
+	 * read another EAN).
+	 *
 	 * @param float $unitMm width of one barcode module, in mm
-	 * @return array<int, array{color: string, width: string}>
+	 * @return array<int, array{color: string, width: string, left: string, dark: bool}>
 	 */
 	public static function getBars(string $ean, float $unitMm = 0.38): array
 	{
@@ -64,7 +68,9 @@ class EanBarcodeHelper
 			}
 			$bars[] = [
 				'color' => $bits[$i] === '1' ? '#111' : '#fff',
-				'width' => round($n * $unitMm, 2) . 'mm',
+				'width' => round($n * $unitMm, 3) . 'mm',
+				'left' => round($i * $unitMm, 3) . 'mm',
+				'dark' => $bits[$i] === '1',
 			];
 			$i += $n;
 		}
