@@ -126,6 +126,12 @@ propose new price tables – NOT used: prices stay in `product_prices` / `produc
   `www/css/mobil.css` (vanilla JS) do the rest. The queue lives in localStorage until "Odeslat"
   (`handleSend`, raw JSON body → `PrintListsService::create()`). Other JSON signals: search, byCode,
   products, savePrice (`ProductPriceSaver`), lists, stats, preview (`pdfFromItems()`, unsent queue).
+  An unknown scanned code opens "Nový produkt" (with the Products_create right): `handleCreateProduct` →
+  `ProductQuickCreator` (multipart POST: code/EAN, name in all languages, category, country, photo –
+  shrunk to 1600 px on the phone, upload limit 2 MB –, package/unit price basis, label notes, ingredients,
+  thawed, consumption, perex; price/action for the branch or all the admin's branches via
+  ProductPriceSaver); then the templates sheet (quick mode: 1 label at once). Railway has no volume for
+  www/files: uploaded photos are lost on the next deploy.
   Camera: `BarcodeDetector`, else ZXing from unpkg; it needs https (works on Railway, not on
   http://localhost from a phone). Fake-camera test: Chromium `--use-file-for-fake-video-capture`.
   Real phone locally: the dev server listens on `[::1]` only, so run a second one on

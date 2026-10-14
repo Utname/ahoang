@@ -37,6 +37,12 @@ class MobilPresenter extends BaseModulePresenter
 	/** @var \ImageFilter @inject */
 	public $imageFilter;
 
+	/** @var \ProductQuickCreator @inject */
+	public $productQuickCreator;
+
+	/** @var \CategoriesRepository @inject */
+	public $categoriesRepo;
+
 	/** texts of the app (admin.mob.*), translated for the admin's language */
 	private const TEXT_KEYS = [
 		'appTitle', 'overview', 'scan', 'queue', 'sent', 'queueTitle',
@@ -52,7 +58,9 @@ class MobilPresenter extends BaseModulePresenter
 		'from', 'to', 'unit', 'menuAdmin', 'menuProducts', 'menuVykup',
 		'branch', 'signOut', 'noRight', 'error', 'pcsPages', 'remove',
 		'statusRunning', 'statusPlanned', 'statusEnded', 'statusNone', 'groupStd', 'groupSpec',
-		'groupAkce',
+		'groupAkce', 'newTitle', 'newHint', 'newCode', 'newName', 'newPrice', 'newCreate', 'newCreated', 'newSaving',
+		'newBasic', 'newCategory', 'newPhoto', 'newPhotoTake', 'newPack', 'newWeight', 'newUnitPrice', 'newPrices', 'newPriceAction',
+		'newAllBranches', 'newLabel', 'newNote', 'newIngredients', 'newThawed', 'newConsumption', 'newPerex', 'newOptional',
 	];
 
 	/** @var array<int, string> */
@@ -133,15 +141,23 @@ class MobilPresenter extends BaseModulePresenter
 			'branches' => array_map(fn($id, $name) => ['id' => (int)$id, 'name' => $name, 'url' => $this->link('branch!', ['id' => $id])], array_keys($this->branchesPairs), $this->branchesPairs),
 			'user' => (string)($this->adminUser->name ?? ''),
 			'canSend' => $this->hasPermission('edit'),
+			// a scanned code that is not known can become a new product
+			'canCreate' => $this->aps->has('Products_create'),
 			'types' => $types,
 			'headers' => $headers,
 			'countries' => $countries,
 			'units' => \ProductsEntity::PRICE_UNITS,
+			// new product form (scanned code not known yet)
+			'categories' => array_map(fn($id, $name) => ['id' => (int)$id, 'name' => $name], array_keys($categories = $this->categoriesRepo->findAll()->where('pos_level > 0')->order('pos_left')->fetchPairs('id', 'name')), $categories),
+			'sizeUnits' => array_map(fn($id, $name) => ['id' => $id, 'name' => $name, 'short' => \ProductsEntity::UNITS_SHORT[$id] ?? $name], array_keys(\ProductsEntity::UNITS), \ProductsEntity::UNITS),
+			'consumptionTypes' => array_map(fn($id, $name) => ['id' => $id, 'name' => $name], array_keys($this->global['consumptionTypes'] ?? []), $this->global['consumptionTypes'] ?? []),
+			'branchCount' => count($this->branchesPairs),
 			'urls' => [
 				'search' => $this->link('search!'),
 				'byCode' => $this->link('byCode!'),
 				'products' => $this->link('products!'),
 				'savePrice' => $this->link('savePrice!'),
+				'createProduct' => $this->link('createProduct!'),
 				'send' => $this->link('send!'),
 				'lists' => $this->link('lists!'),
 				'stats' => $this->link('stats!'),
@@ -202,6 +218,28 @@ class MobilPresenter extends BaseModulePresenter
 		$priceRow = $this->productsRepo->findEntity($productsId)?->getPrice($this->branchesId);
 		$this->productPriceSaver->save($productsId, $this->branchesId, array_map('intval', array_keys($this->branchesPairs)), $priceRow?->id ? (int)$priceRow->id : NULL, $price, $price_action, $action_from, $action_to, $price_unit);
 		$this->sendJson(['ok' => TRUE, 'product' => $this->productInfo($productsId)]);
+	}
+
+
+	/** A new product for a scanned code that is not known (multipart POST: the form fields + photo). */
+	public function handleCreateProduct(): void
+	{
+		if (!$this->aps->has('Products_create')) {
+			$this->sendJson(['ok' => FALSE, 'error' => $this->trans('admin.mob.new.err.right')]);
+		}
+		$request = $this->getHttpRequest();
+		$data = (array)$request->getPost();
+		// the price for this branch, or for all branches of the admin (this one first)
+		$branchIds = !empty($data['all_branches'])
+			? array_merge([$this->branchesId], array_map('intval', array_keys($this->branchesPairs)))
+			: [$this->branchesId];
+		try {
+			$id = $this->productQuickCreator->create($data, $branchIds, $request->getFile('photo'));
+		}
+		catch (\InvalidArgumentException $e) {
+			$this->sendJson(['ok' => FALSE, 'error' => $this->trans($e->getMessage())]);
+		}
+		$this->sendJson(['ok' => TRUE, 'product' => $this->productInfo($id)]);
 	}
 
 

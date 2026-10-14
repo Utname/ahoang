@@ -369,6 +369,153 @@
         render();
     };
 
+    // ---------- new product (a scanned code that is not known yet) ----------
+    var newDraft = null;
+    var openNew = function (code) {
+        sheetDraft = null;
+        newDraft = { code: code };
+        var opt = function (v, label, sel) { return '<option value="' + esc(v) + '"' + (sel ? ' selected' : '') + '>' + esc(label) + '</option>'; };
+        var field = function (label, input, cls) { return '<label class="m-field' + (cls ? ' ' + cls : '') + '"><span>' + label + '</span>' + input + '</label>'; };
+        var optional = ' <i>' + esc(t.newOptional) + '</i>';
+        var section = function (title, body, open) { return '<details class="m-newsec"' + (open ? ' open' : '') + '><summary>' + esc(title) + '</summary><div class="m-newsec-body">' + body + '</div></details>'; };
+        var sizeOpts = cfg.sizeUnits.map(function (u) { return opt(u.id, u.short); }).join('');
+        var basic = field(esc(t.newName) + ' *', '<input name="name" required maxlength="250" enterkeyhint="next">')
+            + field(esc(t.newCode) + ' *', '<input name="code" required maxlength="32" value="' + esc(code) + '" inputmode="numeric">')
+            + '<div class="m-field-row">'
+            + field(esc(t.newCategory), '<select name="category">' + opt('', '—') + cfg.categories.map(function (c) { return opt(c.id, c.name); }).join('') + '</select>')
+            + field(esc(t.origin), '<select name="country">' + opt('', '—') + cfg.countries.map(function (c) { return opt(c.id, c.name); }).join('') + '</select>')
+            + '</div>'
+            + '<label class="m-photo"><input type="file" name="photo" accept="image/*" capture="environment" hidden>'
+            + '<span class="m-photo-box"><img alt="" hidden><b>📷 ' + esc(t.newPhotoTake) + '</b></span></label>';
+        var pack = '<div class="m-field-row">'
+            + field(esc(t.newWeight), '<input name="weight" inputmode="decimal" placeholder="500">')
+            + field('&nbsp;', '<select name="units_id">' + sizeOpts + '</select>')
+            + '</div><div class="m-field-row">'
+            + field(esc(t.newUnitPrice), '<input name="default_units_weight" inputmode="decimal" placeholder="100">')
+            + field('&nbsp;', '<select name="default_units_id">' + opt('', '—') + sizeOpts + '</select>')
+            + '</div>';
+        var prices = '<div class="m-field-row">'
+            + field(esc(t.newPrice), '<input name="price" inputmode="decimal" placeholder="0,00">')
+            + field(esc(t.unit), '<select name="price_unit">' + cfg.units.map(function (u, i) { return opt(u, u, !i); }).join('') + '</select>')
+            + '</div>'
+            + field(esc(t.newPriceAction) + optional, '<input name="price_action" inputmode="decimal" placeholder="0,00">')
+            + '<div class="m-field-row">'
+            + field(esc(t.from), '<input type="date" name="action_from">')
+            + field(esc(t.to), '<input type="date" name="action_to">')
+            + '</div>'
+            + (cfg.branchCount > 1 ? '<label class="m-check"><input type="checkbox" name="all_branches" value="1"><span>' + esc(t.newAllBranches) + '</span></label>' : '');
+        var label = [1, 2, 3].map(function (n) { return field(esc(fmt(t.newNote, n)), '<input name="label_note_' + n + '" maxlength="255">'); }).join('')
+            + field(esc(t.newIngredients), '<textarea name="ingredients" rows="3"></textarea>')
+            + '<div class="m-field-row">'
+            + field(esc(t.newConsumption), '<select name="consumption_types_id">' + opt('', '—') + cfg.consumptionTypes.map(function (c) { return opt(c.id, c.name); }).join('') + '</select>')
+            + '<label class="m-check m-check-inline"><input type="checkbox" name="rozmrazeno" value="1"><span>' + esc(t.newThawed) + '</span></label>'
+            + '</div>';
+        var desc = field(esc(t.newPerex) + optional, '<textarea name="perex" rows="3"></textarea>');
+        var el = $('#m-sheet');
+        el.innerHTML = '<div class="m-sheet-panel m-sheet-tall"><div class="m-sheet-head"><div><b>' + esc(t.newTitle) + '</b><small>' + esc(fmt(t.newHint, code)) + '</small></div>'
+            + '<button type="button" class="m-x" data-sheetclose>×</button></div>'
+            + '<form class="m-sheet-body m-newform" data-newproduct autocomplete="off">'
+            + section(t.newBasic, basic, true)
+            + section(fmt(t.newPrices, cfg.branch.name), prices, true)
+            + section(t.newPack, pack, false)
+            + section(t.newLabel, label, false)
+            + section(t.newPerex, desc, false)
+            + '<p class="m-newerror" hidden></p>'
+            + '<button type="submit" class="m-big m-big-teal">' + esc(t.newCreate) + '</button>'
+            + '</form></div>';
+        el.hidden = false;
+        if (navigator.vibrate) {
+            navigator.vibrate([30, 60, 30]);
+        }
+        setTimeout(function () { var i = el.querySelector('input[name=name]'); if (i) { i.focus(); } }, 120);
+    };
+    // phone photos are large (the server takes 2 MB): sent as a JPEG of at most 1600 px
+    var shrinkPhoto = function (file) {
+        return new Promise(function (resolve) {
+            if (!file || !file.size || !/^image\//.test(file.type)) {
+                resolve(null);
+                return;
+            }
+            var img = new Image();
+            var url = URL.createObjectURL(file);
+            img.onload = function () {
+                var k = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight));
+                var c = document.createElement('canvas');
+                c.width = Math.round(img.naturalWidth * k);
+                c.height = Math.round(img.naturalHeight * k);
+                c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+                URL.revokeObjectURL(url);
+                c.toBlob(function (blob) { resolve(blob); }, 'image/jpeg', 0.85);
+            };
+            img.onerror = function () { URL.revokeObjectURL(url); resolve(file.size < 1900000 ? file : null); };
+            img.src = url;
+        });
+    };
+    document.addEventListener('change', function (ev) {
+        if (ev.target.name !== 'photo' || !ev.target.closest('form[data-newproduct]')) {
+            return;
+        }
+        var file = ev.target.files && ev.target.files[0];
+        var box = ev.target.closest('.m-photo');
+        var img = box.querySelector('img');
+        if (file) {
+            img.src = URL.createObjectURL(file);
+            img.hidden = false;
+            box.classList.add('m-photo-on');
+        }
+    });
+    var createProduct = function (form) {
+        var btn = form.querySelector('button[type=submit]');
+        var err = form.querySelector('.m-newerror');
+        var fail = function (msg) {
+            err.textContent = msg || t.error;
+            err.hidden = false;
+            btn.disabled = false;
+            btn.textContent = t.newCreate;
+            // show the section with the problem
+            [].forEach.call(form.querySelectorAll('details'), function (d, i) { if (i < 2) { d.open = true; } });
+            err.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        };
+        btn.disabled = true;
+        btn.textContent = t.newSaving;
+        err.hidden = true;
+        var data = new FormData(form);
+        ['price', 'price_action', 'weight', 'default_units_weight'].forEach(function (k) {
+            data.set(k, String(data.get(k) || '').replace(',', '.').trim());
+        });
+        var photo = form.photo.files && form.photo.files[0];
+        data.delete('photo');
+        shrinkPhoto(photo).then(function (blob) {
+            if (blob) {
+                data.append('photo', blob, 'produkt.jpg');
+            }
+            return fetch(cfg.urls.createProduct, { method: 'POST', body: data, credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+        }).then(function (r) {
+            if (!r.ok) {
+                throw new Error(r.status);
+            }
+            return r.json();
+        }).then(function (r) {
+            if (!r.ok) {
+                fail(r.error);
+                return;
+            }
+            var p = remember(r.product);
+            newDraft = null;
+            touchRecent(p.id);
+            toast(fmt(t.newCreated, p.name));
+            if (state.quick) {
+                setCount(p.id, state.lastType, ((entry(p.id, state.lastType) || {}).qty || 0) + 1);
+                renderSheet();
+                render();
+            } else {
+                state.results = null;
+                render();
+                openSheet(p.id);
+            }
+        }).catch(function () { fail(t.error); });
+    };
+
     // ---------- scanning ----------
     var lastCode = '';
     var lastCodeAt = 0;
@@ -383,7 +530,11 @@
         lastCodeAt = now;
         ajax(withParams(cfg.urls.byCode, { code: code })).then(function (p) {
             if (!p) {
-                toast(fmt(t.notFound, code));
+                if (cfg.canCreate) {
+                    openNew(code);
+                } else {
+                    toast(fmt(t.notFound, code));
+                }
                 return;
             }
             if (navigator.vibrate) {
@@ -415,8 +566,8 @@
         if (!code) {
             return;
         }
-        // templates are being chosen: a new read would reopen the sheet and drop the counts
-        if (sheetDraft) {
+        // templates are being chosen / a product is being created: a new read would replace the form
+        if (sheetDraft || newDraft) {
             if (code === lastCode) {
                 lastCodeAt = now;
             }
@@ -594,6 +745,7 @@
             }
             if (ev.target.id === 'm-sheet') {
                 sheetDraft = null;
+                newDraft = null;
                 renderSheet();
             }
             return;
@@ -625,6 +777,7 @@
         }
         if (d.sheetclose !== undefined) {
             sheetDraft = null;
+            newDraft = null;
             renderSheet();
             return;
         }
@@ -782,6 +935,11 @@
 
     document.addEventListener('submit', function (ev) {
         var form = ev.target;
+        if (form.dataset && form.dataset.newproduct !== undefined) {
+            ev.preventDefault();
+            createProduct(form);
+            return;
+        }
         if (!form.dataset || !form.dataset.price) {
             return;
         }
