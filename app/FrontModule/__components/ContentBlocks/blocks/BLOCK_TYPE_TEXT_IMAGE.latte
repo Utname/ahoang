@@ -5,39 +5,26 @@
 {var $btnLink = $block->getValue('btnLink')}
 
 {var $images = $block->getContentImages('images')}
-{var $imagesParts = []}
-{for $i=0; $i<=count($images); $i++}
-    {var $imagesParts[$i] = array_splice($images, 0, !$i ? 3 : 2)}
-    {breakIf !count($imagesParts)}
-{/for}
 
-<div class="section text-img-section" id="o-spolecnosti">
-    <div class="container">
-        <div class="row">
-            <div class="col-12 col-lg-5 text-img-txt-col">
-                <div class="text-img-txt">
-                    <h2 n:if="$title" class="h-line">{$title}</h2>
-                    {($text ?? '')|noescape}
-                    <a n:if="$btnText && $btnLink" href="{$btnLink}" class="btn btn-primary">{$btnText}</a>
-                </div>
-            </div>
-            <div n:if="count($imagesParts)" class="col-12 col-lg-7 text-img-image-col">
-                <div n:foreach="$imagesParts as $imagesPartIter => $imagesPart" class="text-img-list">
-                    <div n:if="!$imagesPartIter && $image = reset($imagesPart)" class="text-img-big">
-                        <img src="{$image->file|image:textImageHeight}" alt="{$image->file|imageTitle}" class="img-fluid">
-                    </div>
-                    <div n:if="$imagesPartIter && $image = reset($imagesPart)" class="text-img-small-list">
-                        <div class="text-img-small text-img-small-left">
-                            <img src="{$image->file|image:textImageStandard}" alt="{$image->file|imageTitle}" class="img-fluid">
-                        </div>
-                    </div>
-                    <div class="text-img-small-list">
-                        <div n:foreach="$imagesPart as $image" n:if="!$iterator->first" class="text-img-small">
-                            <img src="{$image->file|image:textImageStandard}" alt="{$image->file|imageTitle}" class="img-fluid">
-                        </div>
-                    </div>
-                </div>
+{* "Landwind" feature row, reversed (images left, text right): the first paragraph is the lead,
+   the following ones become the check list, like "We invest in the world's potential". *}
+{var $paragraphs = array_values(array_filter(array_map('trim', array_map('strip_tags', preg_split('#</p>|<br\s*/?>#i', (string)$text)))))}
+{var $lead = array_shift($paragraphs)}
+
+<section class="lw-section lw-section-gray" id="o-spolecnosti">
+    <div class="lw-container lw-feature lw-feature-reverse">
+        <div class="lw-feature-text">
+            <h2 n:if="$title" class="lw-h2">{$title}</h2>
+            <p n:if="$lead" class="lw-lead">{$lead}</p>
+            <ul n:if="$paragraphs" class="lw-checklist">
+                <li n:foreach="$paragraphs as $paragraph">{$paragraph}</li>
+            </ul>
+            <a n:if="$btnText && $btnLink" href="{$btnLink}" class="lw-btn lw-btn-primary">{$btnText}</a>
+        </div>
+        <div n:if="count($images)" class="lw-shots">
+            <div n:foreach="array_slice($images, 0, 3) as $image" n:class="lw-shot, $iterator->first ? lw-shot-big">
+                <img loading="lazy" decoding="async" src="{$image->file|image:($iterator->first ? 'textImageHeight' : 'textImageStandard')}" alt="{$image->file|imageTitle}">
             </div>
         </div>
     </div>
-</div>
+</section>

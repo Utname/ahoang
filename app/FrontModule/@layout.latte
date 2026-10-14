@@ -15,6 +15,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="/css/front/custom-bootstrap.css">
     <link rel="stylesheet" href="/css/front/swiper-bundle.min.css" />
@@ -23,6 +24,8 @@
     <link rel="stylesheet" type="text/css" href="/css/front/style.css?_v={$antiCache}">
 
     <link rel="stylesheet" href="/css/front/custom.css?_v={$antiCache}">
+    {* "Landwind" look of the header, home blocks and footer *}
+    <link rel="stylesheet" href="/css/front/landwind.css?_v={=@filemtime(WWW_DIR . '/css/front/landwind.css')}">
 
 
     {*CORE CSS*}
@@ -37,7 +40,7 @@
     {/if}
 </head>
 
-<body>
+<body class="lw">
 
 {include '__inc/header/top.latte'}
 
@@ -63,8 +66,9 @@
 
 <script src="/js/front/lightbox.min.js"></script>
 <script src="/js/front/scrollup.min.js"></script>
-<script src="/js/front/script.js"></script>
-<script src="/js/front/custom.js"></script>
+<script src="/js/front/script.js?_v={=@filemtime(WWW_DIR . '/js/front/script.js')}"></script>
+<script src="/js/front/custom.js?_v={=@filemtime(WWW_DIR . '/js/front/custom.js')}"></script>
+<script src="/js/front/landwind.js?_v={=@filemtime(WWW_DIR . '/js/front/landwind.js')}"></script>
 <script async defer src="https://maps.googleapis.com/maps/api/js?key={settings('google_maps_api_key')}&callback=initMap&libraries=places"></script>
 
 {*SCRIPTS, CUSTOM CODES*}

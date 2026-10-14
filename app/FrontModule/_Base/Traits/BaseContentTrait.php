@@ -52,7 +52,16 @@ trait BaseContentTrait
         $this->template->addFunction('sliders', function() {
             return $this->getSliders();
         });
+
+        // footer column with all branches
+        $this->template->addFunction('footerBranches', function() {
+            $items = $this->footerBranchesRepository->findAllActive();
+            return $items ? $this->footerBranchesRepository->getEntities($items->order('pos_order')) : [];
+        });
     }
+
+    /** @var \BranchesRepository @inject */
+    public $footerBranchesRepository;
 
 
     /**

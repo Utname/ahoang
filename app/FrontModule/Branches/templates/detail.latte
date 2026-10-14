@@ -3,55 +3,57 @@
 {var $actionPage = page('products')}
 {var $branchesPage = page('branches')}
 
-<section class="product-list-section mt-2 mt-md-3 mb-2 mb-md-3">
-    <div class="container">
-        <div n:if="$item->image_detail" class="row mb-2 branches-list">
-            <div class="col-12 contact-text-col">
-                <img alt="{$item->image_detail|imageTitle}" src="{$item->image_detail|image:branchDetail}">
+{* branch detail in the "Landwind" feature layout: details left, photo right, then map and gallery *}
+<section class="lw-section lw-section-flush">
+    <div class="lw-container lw-feature">
+        <div class="lw-feature-text">
+            <h2 n:if="$item->name" class="lw-h2 lw-title-icon">
+                {$item->name}
+                <a n:if="$item->google_profile_url" href="{$item->google_profile_url}" target="_blank" class="google-icon">
+                    <img src="/images/front/google-icon.webp" alt="Google" />
+                </a>
+            </h2>
+            <p n:if="$item->street && $item->city && $item->zip" class="lw-lead">{$item->street}, {$item->city} {$item->zip}</p>
+            <div class="lw-info-card lw-branch-text">{($item->text ?? '')|noescape}</div>
+            <div class="lw-hero-btns">
+                <a n:if="$actionPage && $actionPage->full_url" href="{$actionPage->full_url}/{$item->slug}" class="lw-btn lw-btn-primary">Zobrazit akční nabídku</a>
+                <a href="{$branchesPage->full_url}" class="lw-btn lw-btn-light">← Zpět na seznam poboček</a>
             </div>
         </div>
-        <div class="row branches-list">
-            <div class="col-12 col-md-6 col-xl-5 contact-text-col">
-                <div>
-                    <div class="contact-text-item">
-                        <h4 n:if="$item->name">
-                            {$item->name}
-                            <a n:if="$item->google_profile_url" href="{$item->google_profile_url}" target="_blank" class="google-icon">
-                                <img src="/images/front/google-icon.webp" />
-                            </a>
-                        </h4>
-                        <p n:if="$item->street && $item->city && $item->zip">
-                            {$item->street},<br>{$item->city} {$item->zip}
-                        </p>
-                        {($item->text ?? $item->text)|noescape}
-                        <a href="{$actionPage->full_url}/{$item->slug}" class="btn btn-primary mt-1 mb-1">Zobrazit akční nabídku</a>
-                        {($item->detail_text ?? $item->detail_text)|noescape}
-                    </div>
-                </div>
+        <div n:if="$item->image_detail || $item->image" class="lw-shots">
+            <div class="lw-shot lw-shot-big">
+                <img loading="lazy" decoding="async" n:if="$item->image_detail" src="{$item->image_detail|image:branchDetail}" alt="{$item->name}">
+                <img loading="lazy" decoding="async" n:if="!$item->image_detail" src="{$item->image|image:branch}" alt="{$item->name}">
             </div>
+        </div>
+    </div>
+</section>
+
+<section n:if="$item->detail_text" class="lw-section lw-section-flush">
+    <div class="lw-container"><div class="lw-article">
+        {$item->detail_text|noescape}
+    </div></div>
+</section>
+
+<section n:if="$item->google_maps_link || ($item->lng && $item->lat)" class="lw-section lw-section-flush">
+    <div class="lw-container">
+        <div class="lw-map-frame">
             {if $item->google_maps_link}
-                <div class="col-12 col-md-6 col-xl-7 contact-text-col">
-                    <iframe width="100%" height="550" style="border:0" loading="lazy" allowfullscreen src="{$item->getGoogleIframeSrc()}"></iframe>
-                </div>
-            {elseif $item->lng && $item->lat}
-                <div class="col-12 col-md-6 col-xl-7 contact-text-col">
-                    <iframe width="100%" height="550" style="border:0" loading="lazy" allowfullscreen src="https://www.google.com/maps/embed/v1/place?q={$item->lat}%2C{$item->lng}&key=AIzaSyBwogBHWqId4gPaF5Mw92ckzFkcvz2k4bs"></iframe>
-                </div>
+                <iframe width="100%" height="460" style="border:0" loading="lazy" allowfullscreen src="{$item->getGoogleIframeSrc()}"></iframe>
+            {else}
+                <iframe width="100%" height="460" style="border:0" loading="lazy" allowfullscreen src="https://www.google.com/maps/embed/v1/place?q={$item->lat}%2C{$item->lng}&key=AIzaSyBwogBHWqId4gPaF5Mw92ckzFkcvz2k4bs"></iframe>
             {/if}
         </div>
-        {var $branchImages = $item->getImages()}
-        <div n:if="count($branchImages)" class="row mt-1">
-            <div n:foreach="$branchImages as $branchImage" class="col-6 col-sm-4 col-lg-3 col-xl-2 product-item-col">
+    </div>
+</section>
 
-                <div class="product-item">
-                    <a href="{$branchImage->file|image:original}" data-lightbox="image-branch" class="product-item-img full photo-popup">
-                        <img src="{$branchImage->file|image:branchImage}" class="img-fluid" alt="">
-                    </a>
-                </div>
-            </div>
-        </div>
-        <div class="mt-2">
-            <a href="{$branchesPage->full_url}" class="btn btn-primary"><i class="fa fa-arrow-left" style="margin-right: 7px;"></i>Zpět na seznam poboček</a>
+{var $branchImages = $item->getImages()}
+<section n:if="count($branchImages)" class="lw-section lw-section-gray">
+    <div class="lw-container">
+        <div class="lw-gallery">
+            <a n:foreach="$branchImages as $branchImage" href="{$branchImage->file|image:original}" data-lightbox="image-branch" class="lw-shot">
+                <img loading="lazy" decoding="async" src="{$branchImage->file|image:branchImage}" alt="{$item->name}">
+            </a>
         </div>
     </div>
 </section>

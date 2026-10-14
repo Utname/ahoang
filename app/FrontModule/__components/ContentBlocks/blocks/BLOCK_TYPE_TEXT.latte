@@ -1,5 +1,118 @@
-<section n:if="$text = $block->getValue('text')" class="product-list-section mt-2 mt-md-3 mb-2 mb-md-3">
-    <div class="container">
-        {($text ?? '')|noescape}
+{* Text pages (Spolupráce, Kariéra, Hledáme prostory, …). The editor text is turned into "Landwind"
+   blocks by \ArticleLayout: intro, text sections, feature cards, check lists, job cards and a contact
+   call-to-action. Unstructured text stays one readable article column. *}
+{var $text = (string)$block->getValue('text')}
+{var $layout = \ArticleLayout::build($text)}
+
+{if trim(strip_tags($text)) === ''}
+{elseif !\ArticleLayout::isStructured($layout)}
+<section class="lw-section lw-section-flush">
+    <div class="lw-container"><div class="lw-article">
+        {$text|noescape}
+    </div></div>
+</section>
+{else}
+
+<section n:if="$layout['intro']" class="lw-intro">
+    <div class="lw-container">
+        <p n:foreach="$layout['intro'] as $introText" n:class="$iterator->first ? 'lw-intro-lead' : 'lw-intro-text'">{$introText}</p>
     </div>
 </section>
+
+{var $band = 0}
+{foreach $layout['blocks'] as $b}
+    {var $band = $band + 1}
+    {var $gray = $band % 2 === 0}
+
+    {if $b['type'] === 'jobs'}
+        <section n:class="lw-section, $gray ? lw-section-gray">
+            <div class="lw-container">
+                <div class="lw-jobs">
+                    <article n:foreach="$b['items'] as $job" class="lw-job">
+                        <div class="lw-job-head">
+                            <span class="lw-job-icon"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.95 22.95 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clip-rule="evenodd"/><path d="M2 13.69V16a2 2 0 002 2h12a2 2 0 002-2v-2.31A24.97 24.97 0 0110 15c-2.8 0-5.5-.46-8-1.31z"/></svg></span>
+                            <div>
+                                <h3>{$job['title']}</h3>
+                                <p n:if="$job['subtitle']" class="lw-job-place"><svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 2a6 6 0 00-6 6c0 4.25 6 10 6 10s6-5.75 6-10a6 6 0 00-6-6zm0 8.5A2.5 2.5 0 1010 5.5a2.5 2.5 0 000 5z" clip-rule="evenodd"/></svg>{$job['subtitle']}</p>
+                            </div>
+                        </div>
+                        <p n:foreach="$job['paras'] as $para" class="lw-job-text">{$para}</p>
+                        <div n:foreach="$job['groups'] as $group" class="lw-job-group">
+                            <h4>{$group['label']}</h4>
+                            <ul class="lw-ticks">
+                                <li n:foreach="$group['items'] as $groupItem">{$groupItem}</li>
+                            </ul>
+                        </div>
+                        <div n:if="$job['phones'] || $job['emails']" class="lw-job-actions">
+                            <a n:foreach="$job['phones'] as $phone" href="tel:{\ArticleLayout::tel($phone)}" class="lw-btn lw-btn-primary">{$phone}</a>
+                            <a n:foreach="$job['emails'] as $email" href="mailto:{$email}" class="lw-btn lw-btn-light">{$email}</a>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+    {elseif $b['type'] === 'features'}
+        <section n:class="lw-section, $gray ? lw-section-gray">
+            <div class="lw-container">
+                <div class="lw-heading">
+                    <h2 class="lw-h2">{$b['title']}</h2>
+                    <p n:foreach="$b['paras'] as $para" class="lw-lead">{$para}</p>
+                </div>
+                <div n:class="lw-feats, count($b['features']) % 4 === 0 ? lw-feats-4">
+                    <div n:foreach="$b['features'] as $feature" class="lw-feat">
+                        <span class="lw-feat-num">{$iterator->counter}</span>
+                        <h3>{$feature['title']}</h3>
+                        <p>{$feature['text']}</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    {elseif $b['type'] === 'list'}
+        <section n:class="lw-section, $gray ? lw-section-gray">
+            <div class="lw-container">
+                <div class="lw-heading">
+                    <h2 class="lw-h2">{$b['title']}</h2>
+                </div>
+                <div class="lw-tiles">
+                    <div n:foreach="$b['list'] as $listItem" class="lw-tile">{$listItem}</div>
+                </div>
+                <div n:if="$b['paras']" class="lw-heading lw-after">
+                    <p n:foreach="$b['paras'] as $para" class="lw-lead">{$para}</p>
+                </div>
+            </div>
+        </section>
+
+    {elseif $b['type'] === 'contact'}
+        <section class="lw-section">
+            <div class="lw-container">
+                <div class="lw-contact-cta">
+                    <div class="lw-contact-cta-text">
+                        <h2>{$b['title']}</h2>
+                        <p n:foreach="$b['paras'] as $para">{$para}</p>
+                    </div>
+                    <div class="lw-contact-cta-btns">
+                        <a n:foreach="$b['phones'] as $phone" href="tel:{\ArticleLayout::tel($phone)}" class="lw-btn lw-btn-primary">
+                            <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path d="M2 3a1 1 0 011-1h2.15a1 1 0 01.99.84l.74 4.43a1 1 0 01-.54 1.06l-1.55.77a11.04 11.04 0 006.1 6.1l.77-1.55a1 1 0 011.06-.54l4.43.74a1 1 0 01.84.99V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/></svg>{$phone}
+                        </a>
+                        <a n:foreach="$b['emails'] as $email" href="mailto:{$email}" class="lw-btn lw-btn-light">
+                            <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/></svg>{$email}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    {else}
+        <section n:class="lw-section, $gray ? lw-section-gray">
+            <div class="lw-container lw-split">
+                <h2 class="lw-h2">{$b['title']}</h2>
+                <div class="lw-split-text">
+                    <p n:foreach="$b['paras'] as $para">{$para}</p>
+                </div>
+            </div>
+        </section>
+    {/if}
+{/foreach}
+{/if}

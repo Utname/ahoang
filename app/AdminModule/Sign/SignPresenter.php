@@ -17,9 +17,16 @@ class SignPresenter extends BasePresenter
 	/**
 	 * @throws \Nette\Application\AbortException
 	 */
-	public function actionIn(): void
+	public function actionIn(?string $back = NULL): void
 	{
+		// "Přihlásit" on the website: back to that page afterwards (a path of this site only)
+		if ($back !== NULL && preg_match('#^/(?![/\\\\])[^\s]*$#', $back)) {
+			$this->session->requestedUrlBeforeLogin = $back;
+		}
 		if ($this->getAdminUser()) {
+			if ($back !== NULL && isset($this->session->requestedUrlBeforeLogin) && $this->session->requestedUrlBeforeLogin === $back) {
+				$this->redirectUrl($back);
+			}
 			$this->redirect('Homepage:');
 		}
 	}
@@ -69,7 +76,9 @@ class SignPresenter extends BasePresenter
 
 			$this->flashMessage($this->trans('admin.login.success'), 'success');
 			if(isset($this->session->requestedUrlBeforeLogin) && !is_null($this->session->requestedUrlBeforeLogin) && $this->session->requestedUrlBeforeLogin){
-				$this->redirectUrl($this->session->requestedUrlBeforeLogin);
+				$url = $this->session->requestedUrlBeforeLogin;
+				$this->session->requestedUrlBeforeLogin = NULL; // used once
+				$this->redirectUrl($url);
 			}
 			else{
 				$this->redirect('Homepage:');

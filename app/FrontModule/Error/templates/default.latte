@@ -2,8 +2,14 @@
 
 {block content}
 
-<section class="product-list-section mt-2 mt-md-3 mb-2 mb-md-3">
-    <div class="container">
-        {content('error', 'text') ? content('error', 'text') : '<p></p>'|noescape}
+{* error page in the "Landwind" style: centred message and a way back home *}
+<section class="lw-section lw-error">
+    <div class="lw-container">
+        <div class="lw-article lw-error-text">
+            {content('error', 'text') ? content('error', 'text') : '<p></p>'|noescape}
+        </div>
+        <div class="lw-error-btns">
+            <a href="{page('home')->full_url}" class="lw-btn lw-btn-primary">Fikko market</a>
+        </div>
     </div>
 </section>

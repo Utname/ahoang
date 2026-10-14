@@ -1,13 +1,21 @@
 $(document).ready(function () {
 
-  $('.header-menu-toggle').click(function () {
-    $(this).toggleClass('open');
-    $(".header-menu").toggleClass("opening");
-    $('.header-wrapper').toggleClass("open");
-    setTimeout(function () {
-      $(".header-menu").toggleClass("open");
-    }, 100);
+  // fixed "Landwind" navbar: mobile menu toggle, shadow once the page is scrolled
+  var closeMenu = function () {
+    $('.lw-toggle').attr('aria-expanded', 'false');
+    $('.lw-menu').removeClass('lw-open');
+  };
+  $('.lw-toggle').on('click', function () {
+    var open = $(this).attr('aria-expanded') !== 'true';
+    $(this).attr('aria-expanded', open ? 'true' : 'false');
+    $('.lw-menu').toggleClass('lw-open', open);
   });
+  $('.lw-menu').on('click', 'a', closeMenu);
+  var headerShadow = function () {
+    $('#lw-header').toggleClass('lw-scrolled', $(window).scrollTop() > 4);
+  };
+  $(window).on('scroll', headerShadow);
+  headerShadow();
 
   // Add smooth scrolling to all links
   $(".scroll-item").on('click', function (event) {
@@ -21,15 +29,11 @@ $(document).ready(function () {
 
         // Using jQuery's animate() method to add smooth page scroll
         // The optional number (800) specifies the number of milliseconds it takes to scroll to the specified area
-        if ($('.header-menu-toggle').is(':hidden')) {
-            var scrollValue = $(hash).offset().top;
+        if (!$(hash).length) {
+            return;
         }
-        else {
-            $('.header-menu-toggle').removeClass('open');
-            $('.header-menu').removeClass("opening");
-            $(".header-menu").removeClass("open");
-            var scrollValue = $(hash).offset().top - 90;
-        }
+        closeMenu();
+        var scrollValue = $(hash).offset().top - ($('#lw-header').outerHeight() || 0);
         $('html, body').animate({
             scrollTop: scrollValue
         }, 800, function () {

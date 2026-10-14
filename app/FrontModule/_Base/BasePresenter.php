@@ -10,6 +10,7 @@ use App\FrontModule\Traits\BaseLinksTrait;
 use App\FrontModule\Traits\BaseLocalizationTrait;
 use App\FrontModule\Traits\BaseMetaInfoTrait;
 use App\FrontModule\Traits\BaseNewsletterTrait;
+use App\FrontModule\Traits\BaseStaffLoginTrait;
 use Nette\Application\BadRequestException;
 use Nette\Application\UI\Presenter;
 use Nette\Database\Explorer;
@@ -26,6 +27,7 @@ class BasePresenter extends Presenter
 	use BaseNewsletterTrait;
 	use BaseLinksTrait;
 	use BaseIndexBannersTrait;
+	use BaseStaffLoginTrait;
 
 	/** @var string */
 	public $slug;
@@ -79,6 +81,7 @@ class BasePresenter extends Presenter
 		$this->processMetaTags();
 		$this->processBreadcrumbs();
 		$this->processNewsletter();
+		$this->processStaffLogin();
 	}
 
 

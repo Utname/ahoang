@@ -135,6 +135,28 @@ propose new price tables – NOT used: prices stay in `product_prices` / `produc
   the frame shown in the box and needs the same code twice within 1.5 s.
 - Akce templates still print after the action ended (user's choice, same as Produkty).
 
+## Front (public web)
+Look of the template `C:\FreeBlancer\landwind` (Tailwind/Flowbite "Landwind") in Fikko orange, written as
+plain CSS `www/css/front/landwind.css` (classes `lw-*`, no build step) on top of the old Bootstrap/style.css.
+Header (`__inc/header/top.latte`: fixed navbar, home slider as hero), footer, and the content blocks
+CATEGORIES / TEXT_IMAGE / FORM_WITH_BRANCHES / MAP / TEXT use it, home blocks follow the template's sections
+(feature rows with check lists, stats, pricing cards = branches, CTA = contact form). Sub-pages: page title
+from BreadcrumbsControl (`lw-page-head`), texts in `lw-article` (inside `lw-container`), Branches list/detail
+and Error rebuilt; product/Akce lists and blog (pages switched off) only restyled in CSS (`body.lw …`).
+TEXT blocks go through `app/Model/Front/ArticleLayout.php`: the editor HTML becomes intro, title+text
+sections, feature cards ("Label: text" lines), check-list tiles, job cards (bold title + "Požadujeme:" /
+"Benefity:" groups, phone/e-mail → buttons) and a contact block; unstructured text stays `lw-article`.
+Content pages show their meta image next to the title (Breadcrumbs), not as the header band.
+Motion: `www/js/front/landwind.js` + the motion part of landwind.css (scroll reveal: text from the left,
+images from the right, cards pop in turn, list rows slide; hero entrance; `data-count` count-up; card tilt
++ light sweep). It runs also with prefers-reduced-motion (the user's Windows has "Show animations" off):
+`html.lw-calm` keeps the entrances, drops loops/tilt. Side entrances widen the page → sections clip overflow-x. Header language picker = languages active + in menu (admin Jazyky; flags in
+`www/images/front/flags/<id>.svg`). Staff login on the website: `BaseStaffLoginTrait` reads the admin session
+("adminModule"), "Přihlásit" → `/admin/sign/in?back=<path>` (Sign:in keeps a same-site path), `staffSignOut!`.
+The navbar uses `/images/front/logo-color.png` (the admin logo is white text for dark backgrounds).
+JS hooks: `.lw-toggle`/`.lw-menu` (script.js), section scrolling subtracts `#lw-header` height (custom.js).
+`getMenuBlocksItems()` grows with every call – dedupe when listing it twice.
+
 ## Run / test
 - Local: http://localhost, MariaDB db `website` user root/toor
   (`C:\Program Files\MariaDB 12.3\bin\mysql.exe`). Clear cache: `rm -rf /c/FreeBlancer/ahoang/temp/cache/*`.

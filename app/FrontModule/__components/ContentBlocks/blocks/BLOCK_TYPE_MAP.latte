@@ -2,22 +2,18 @@
 {var $titleBranches = $block->getValue('titleBranches')}
 {var $branches = $branchesIds ? getBranches($branchesIds) : getBranches([])}
 
-
-<section class="map-section">
-	<div class="map-all">
-		<div class="container">
-			<div class="map-select-box">
-				<h4 n:if="$titleBranches" >{$titleBranches}</h4>
-				<div n:if="$branches" class="dropdown">
-					<button n:if="$firstBranch = reset($branches)" type="button" class="btn dropdown-toggle" data-toggle="dropdown">
-						{$firstBranch->name}
-					</button>
-					<div class="dropdown-menu">
-						<a n:foreach="$branches as $branch" n:class="$iterator->first ? 'd-none', 'dropdown-item'" data-id="{$branch->id}" data-lng="{$branch->lng}" data-lat="{$branch->lat}" data-street="{$branch->street}" data-city="{$branch->city}" data-zip="{$branch->zip}" href="#p{$branch->id}">{$branch->name}</a>
-					</div>
-				</div>
+{* "Landwind": full-width map with the branch picker in a floating card (classes used by js/front/custom.js) *}
+<section class="map-section lw-map">
+	<div class="map-inner" id="searchMap"></div>
+	<div class="lw-map-card map-select-box">
+		<h4 n:if="$titleBranches">{$titleBranches}</h4>
+		<div n:if="$branches" class="dropdown">
+			<button n:if="$firstBranch = reset($branches)" type="button" class="btn dropdown-toggle" data-toggle="dropdown">
+				{$firstBranch->name}
+			</button>
+			<div class="dropdown-menu">
+				<a n:foreach="$branches as $branch" n:class="$iterator->first ? 'd-none', 'dropdown-item'" data-id="{$branch->id}" data-lng="{$branch->lng}" data-lat="{$branch->lat}" data-street="{$branch->street}" data-city="{$branch->city}" data-zip="{$branch->zip}" href="#p{$branch->id}">{$branch->name}</a>
 			</div>
 		</div>
-		<div class="map-inner" id="searchMap"></div>
 	</div>
 </section>

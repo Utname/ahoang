@@ -1,30 +1,23 @@
 {block content}
 {var $branchesPage = page('branches')}
 
-<section class="product-list-section mt-2 mt-md-3 mb-2 mb-md-3">
-	<div class="container">
-		<div class="row branches-list">
-			<div n:foreach="$items as $branch" class="col-12 col-sm-6 col-md-4 col-lg-3 contact-text-col">
-				<div class="contact-text">
-					<div class="contact-text-item">
-						<h4 n:if="$branch->name">
-							<a href="{$branchesPage->full_url}/{$branch->getUrl()}">{$branch->name}</a>
-							<a n:if="$branch->google_profile_url" href="{$branch->google_profile_url}" target="_blank" class="google-icon">
-								<img src="/images/front/google-icon.webp" />
-							</a>
-						</h4>
-						<div class="branch-image">
-							<img n:if="$branch->image" src="{$branch->image|image:branch}">
-						</div>
-						<p n:if="$branch->street && $branch->city && $branch->zip">
-							{$branch->street},<br>{$branch->city} {$branch->zip}
-						</p>
-						{($branch->text ?? $branch->text)|noescape}
-						<a href="{$branchesPage->full_url}/{$branch->getUrl()}" class="btn btn-primary m-t-20">
-							{content('branches', 'detail')}
-						</a>
-					</div>
-				</div>
+{* branch list as the "Landwind" pricing cards (same look as on the home page) *}
+<section class="lw-section lw-section-flush">
+	<div class="lw-container">
+		<div class="lw-grid lw-grid-3">
+			<div n:foreach="$items as $branch" class="lw-price-card">
+				<a n:if="$branch->image" href="{$branchesPage->full_url}/{$branch->getUrl()}" class="lw-price-img">
+					<img loading="lazy" decoding="async" src="{$branch->image|image:branch}" alt="{$branch->name}">
+				</a>
+				<h3 n:if="$branch->name" class="lw-price-title">
+					{$branch->name}
+					<a n:if="$branch->google_profile_url" href="{$branch->google_profile_url}" target="_blank" class="google-icon">
+						<img src="/images/front/google-icon.webp" alt="Google" />
+					</a>
+				</h3>
+				<p n:if="$branch->street && $branch->city && $branch->zip" class="lw-price-desc">{$branch->street}, {$branch->city} {$branch->zip}</p>
+				<div class="lw-branch-text">{($branch->text ?? '')|noescape}</div>
+				<a href="{$branchesPage->full_url}/{$branch->getUrl()}" class="lw-btn lw-btn-primary lw-btn-block">{content('branches', 'detail')}</a>
 			</div>
 		</div>
 	</div>

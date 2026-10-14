@@ -1,11 +1,22 @@
-<section n:if="$text = $control->getTitle()" class="product-list-section mt-2 mt-md-3 mb-2 mb-md-3">
-    <div class="container">
-        <h1>{$text}</h1>
+{* page header in the "Landwind" style: kicker and large title, the page image on the right
+   (content pages; the header no longer draws its image band for them) *}
+{var $pageEntity = $presenter->getName() === 'Front:Content' && isset($presenter->getTemplate()->page) ? $presenter->getTemplate()->page : NULL}
+{var $pageImage = $pageEntity && $pageEntity->meta_image ? $pageEntity->meta_image : NULL}
+
+<section n:if="$title = $control->getTitle()" n:class="lw-page-head, $pageImage ? lw-page-head-hero">
+    <div n:class="lw-container, $pageImage ? lw-page-head-grid">
+        <div>
+            <span class="lw-kicker">Fikko market</span>
+            <h1 class="lw-page-title">{$title}</h1>
+        </div>
+        <div n:if="$pageImage" class="lw-page-head-img">
+            <img src="{$pageImage|image:header}" alt="{$title}">
+        </div>
     </div>
 </section>
 
-<section n:if="$text = $control->getText()" class="product-list-section mt-2 mt-md-3 mb-2 mb-md-3">
-    <div class="container">
+<section n:if="$text = $control->getText()" class="lw-section lw-section-flush">
+    <div class="lw-container"><div class="lw-article">
         {$text|noescape}
-    </div>
+    </div></div>
 </section>
