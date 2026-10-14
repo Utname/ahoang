@@ -328,14 +328,15 @@ $(function () {
         } else {
             url.searchParams.set('priceOverrides', JSON.stringify(overrides));
         }
-        // open label PDFs fitted to the width: at 100 % a small label's barcode is ~1 screen
-        // pixel per bar and a phone cannot scan it from the screen (the PDF itself is unchanged)
-        url.hash = 'view=FitH';
+        url.hash = pdfViewZoom;
         this.href = url.toString();
     });
+    // label PDFs open a little larger than 100 % (the PDF itself is unchanged); at 100 % a small
+    // label's barcode is ~1 screen pixel per bar and a phone can hardly scan it from the screen
+    var pdfViewZoom = 'zoom=115';
     $("body").on('mousedown click', "a[href*='/print-lists/pdf']", function () {
         var url = new URL(this.href, window.location.href);
-        url.hash = 'view=FitH';
+        url.hash = pdfViewZoom;
         this.href = url.toString();
     });
 

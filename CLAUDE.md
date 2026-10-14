@@ -84,7 +84,8 @@ action_from, action_to}} (custom.js → `ProductLabelsTrait::parsePriceOverrides
   EAN): templates draw only the dark bars of `EanBarcodeHelper::getBars()`, absolutely positioned
   at `left`, in a positioned container. Check a label's barcode by decoding the PDF's rectangles.
   Bar module (`renderHtml()` 'bars'): keep ≥ 0.26 mm (EAN minimum) with ~3 mm free beside the bars.
-  On a screen at 100 % a module is ~1 px and phones misread it: preview links open `#view=FitH` (custom.js).
+  On a screen at 100 % a module is ~1 px and phones misread it: preview links open `#zoom=115`
+  (`pdfViewZoom` in custom.js; the user chose 115 % over fit-to-width).
 - `max-height`/`overflow:hidden` do not clip text → long Složení is shrunk and `|truncate`d in the template.
 
 ## Výkup lahví (bottle/crate returns)
