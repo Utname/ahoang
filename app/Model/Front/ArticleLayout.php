@@ -84,6 +84,35 @@ class ArticleLayout
 	}
 
 
+	/**
+	 * Repairs phone / e-mail links typed wrongly in the editor ("http://mailto:x@y", "//775776888",
+	 * "tel:+420 775 …") so they call or write instead of opening a broken page; no new tab for them.
+	 */
+	public static function fixLinks(?string $html): string
+	{
+		return preg_replace_callback('#<a\b([^>]*)>#i', static function (array $m): string {
+			$attrs = $m[1];
+			if (!preg_match('#\bhref\s*=\s*(["\'])(.*?)\1#is', $attrs, $h)) {
+				return $m[0];
+			}
+			$href = trim(html_entity_decode($h[2]));
+			$new = NULL;
+			if (preg_match('#^(?:https?:)?(?://)?\s*mailto:\s*(.+)$#i', $href, $x)) {
+				$new = 'mailto:' . trim($x[1]);
+			}
+			elseif (preg_match('#^(?:tel:|(?:https?:)?//)?\s*(\+?[\d ]{8,})/?$#i', $href, $x)) {
+				$new = 'tel:' . self::tel($x[1]);
+			}
+			if ($new === NULL) {
+				return $m[0];
+			}
+			$attrs = str_replace($h[0], 'href="' . htmlspecialchars($new, ENT_QUOTES) . '"', $attrs);
+			$attrs = preg_replace('#\s*\btarget\s*=\s*(["\'])_blank\1#i', '', $attrs);
+			return '<a' . $attrs . '>';
+		}, (string)$html) ?? (string)$html;
+	}
+
+
 	/** True when the structure is worth the rich layout (otherwise the plain article is shown). */
 	public static function isStructured(array $layout): bool
 	{

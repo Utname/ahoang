@@ -62,7 +62,7 @@
 					</a>
 				</h3>
 				<p n:if="$branch->street && $branch->city && $branch->zip" class="lw-price-desc">{$branch->street}, {$branch->city} {$branch->zip}</p>
-				<div class="lw-branch-text">{($branch->text ?? '')|noescape}</div>
+				<div class="lw-branch-text">{=\ArticleLayout::fixLinks($branch->text)|noescape}</div>
 				<a href="{$branchesPage->full_url}/{$branch->getUrl()}" class="lw-btn lw-btn-primary lw-btn-block">{content('branches', 'detail') ?: $branch->name}</a>
 			</div>
 		</div>

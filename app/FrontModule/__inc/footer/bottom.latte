@@ -26,7 +26,7 @@
             </div>
             <div>
                 <h4 class="lw-footer-title">{content('footer','textTitle') ?: 'Kontakt'}</h4>
-                <div n:if="$text = content('footer','text')" class="lw-footer-text">{$text|noescape}</div>
+                <div n:if="$text = content('footer','text')" class="lw-footer-text">{=\ArticleLayout::fixLinks($text)|noescape}</div>
             </div>
             <div>
                 <h4 class="lw-footer-title">Menu</h4>

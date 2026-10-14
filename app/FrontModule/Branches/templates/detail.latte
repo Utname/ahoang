@@ -14,7 +14,7 @@
                 </a>
             </h2>
             <p n:if="$item->street && $item->city && $item->zip" class="lw-lead">{$item->street}, {$item->city} {$item->zip}</p>
-            <div class="lw-info-card lw-branch-text">{($item->text ?? '')|noescape}</div>
+            <div class="lw-info-card lw-branch-text">{=\ArticleLayout::fixLinks($item->text)|noescape}</div>
             <div class="lw-hero-btns">
                 <a n:if="$actionPage && $actionPage->full_url" href="{$actionPage->full_url}/{$item->slug}" class="lw-btn lw-btn-primary">Zobrazit akční nabídku</a>
                 <a href="{$branchesPage->full_url}" class="lw-btn lw-btn-light">← Zpět na seznam poboček</a>
@@ -31,7 +31,7 @@
 
 <section n:if="$item->detail_text" class="lw-section lw-section-flush">
     <div class="lw-container"><div class="lw-article">
-        {$item->detail_text|noescape}
+        {=\ArticleLayout::fixLinks($item->detail_text)|noescape}
     </div></div>
 </section>
 

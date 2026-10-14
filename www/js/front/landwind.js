@@ -4,6 +4,25 @@
    - cards tilt towards the mouse and get a light sweep (CSS), the hero comes in on load
    Runs also with "reduce motion" (Windows "Show animations" off): then the moves are short and small
    (CSS), tilt and floating are off. Without IntersectionObserver everything is just shown. */
+// Buttons that jump to a section of the page ("#block-8") are hidden while that section is not on
+// the page (switched off in the admin) – otherwise they do nothing when clicked.
+(function () {
+    'use strict';
+    var hideDead = function () {
+        [].forEach.call(document.querySelectorAll('.lw-btn[href^="#"], .lw-hero-btns a[href^="#"]'), function (a) {
+            var id = decodeURIComponent(a.getAttribute('href').slice(1));
+            if (id && !document.getElementById(id)) {
+                a.style.display = 'none';
+            }
+        });
+    };
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', hideDead);
+    } else {
+        hideDead();
+    }
+})();
+
 (function () {
     'use strict';
     var root = document.documentElement;

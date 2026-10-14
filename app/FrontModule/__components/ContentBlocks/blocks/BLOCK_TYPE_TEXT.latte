@@ -8,7 +8,7 @@
 {elseif !\ArticleLayout::isStructured($layout)}
 <section class="lw-section lw-section-flush">
     <div class="lw-container"><div class="lw-article">
-        {$text|noescape}
+        {=\ArticleLayout::fixLinks($text)|noescape}
     </div></div>
 </section>
 {else}
