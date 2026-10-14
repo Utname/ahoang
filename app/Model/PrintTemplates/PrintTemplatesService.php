@@ -416,9 +416,10 @@ class PrintTemplatesService
 				$isA4 => EanBarcodeHelper::getBars($ean, 0.38),
 				str_contains($template->html_source, 'fikko-vel3') => EanBarcodeHelper::getBars($ean, 0.33),
 				$isSize2BAkce => EanBarcodeHelper::getBars($ean, 0.33),
-				$isPecivo => EanBarcodeHelper::getBars($ean, 0.24),
+				// EAN-13 bar module: 0.33 mm nominal, scanners need at least ~0.26 mm
+				$isPecivo => EanBarcodeHelper::getBars($ean, 0.26),
 				$isSize2 => EanBarcodeHelper::getBars($ean, 0.28),
-				$isVel1 => EanBarcodeHelper::getBars($ean, 0.28),
+				$isVel1 => EanBarcodeHelper::getBars($ean, 0.33),
 				$isA5 => EanBarcodeHelper::getBars($ean, 0.42),
 				$isFruit => EanBarcodeHelper::getBars($ean, 0.20),
 				default => [],

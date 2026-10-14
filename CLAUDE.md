@@ -83,6 +83,8 @@ action_from, action_to}} (custom.js → `ProductLabelsTrait::parsePriceOverrides
 - Floated barcode bars get misplaced (a thin bar lands on the gap before it → phones read another
   EAN): templates draw only the dark bars of `EanBarcodeHelper::getBars()`, absolutely positioned
   at `left`, in a positioned container. Check a label's barcode by decoding the PDF's rectangles.
+  Bar module (`renderHtml()` 'bars'): keep ≥ 0.26 mm (EAN minimum) with ~3 mm free beside the bars.
+  On a screen at 100 % a module is ~1 px and phones misread it: preview links open `#view=FitH` (custom.js).
 - `max-height`/`overflow:hidden` do not clip text → long Složení is shrunk and `|truncate`d in the template.
 
 ## Výkup lahví (bottle/crate returns)
