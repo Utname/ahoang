@@ -4957,6 +4957,99 @@ body.mosaic-login-page main.page-content {
 .pv-editor-foot { border-radius: 0 0 16px 16px; }
 .pv-missing { font-size: 11px; font-weight: 700; color: #b45309; line-height: 1.25; white-space: normal; }
 
+/* Phones: the design has no phone layout, so every row becomes a card (same markup, so the
+   ajax snippets and custom.js keep working). Row cells: checkbox, .pv-prod, the two buttons of
+   the :price snippet (Cena, Akce), .pv-chips of the :chips snippet, .pv-actions.
+   Inputs are 16px so iOS does not zoom the page on focus. */
+@media (max-width: 767px) {
+	.pv-page > .panel-body { padding: 8px; }
+	.pv-toolbar { gap: 6px 8px; margin-bottom: 8px; }
+	.pv-toolbar-field { font-size: 10px; gap: 2px; }
+	.pv-head { gap: 6px; margin: 0 0 8px; }
+	.pv-countline { font-size: 12px; }
+	.pv-pills { flex-wrap: nowrap; overflow-x: auto; width: 100%; scrollbar-width: none; }
+	.pv-pills::-webkit-scrollbar { display: none; }
+	.pv-pill { flex: none; height: 28px; padding: 0 10px; font-size: 12px; }
+	.pv-search { flex: 1 1 100%; max-width: none; }
+	/* Pobočka · Kategorie · Aktivní in one line */
+	.pv-toolbar-field { flex: 1 1 0; min-width: 0; }
+	.pv-toolbar-field > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+	.pv-page .pv-live-search, .pv-toolbar-field .form-control { font-size: 16px; }
+	.pv-countline { flex: 1 1 100%; }
+
+	.pv-table { background: transparent; border: none; box-shadow: none; border-radius: 0; overflow: visible; }
+	.pv-table-inner { min-width: 0; }
+	.pv-grid-head { grid-template-columns: 22px minmax(0, 1fr); padding: 2px 10px; margin-bottom: 6px; background: #fff; border: 1px solid #e6eaf0; border-radius: 12px; }
+	.pv-grid-head > div:nth-child(n+3) { display: none; }
+	.pv-rows { display: flex; flex-direction: column; gap: 8px; }
+	.pv-row { border: 1px solid #e6eaf0; border-radius: 14px; box-shadow: 0 1px 2px rgba(15,23,42,.05); overflow: hidden; }
+	.pv-row .pv-grid { grid-template-columns: 22px minmax(0, 1fr) minmax(0, 1fr) auto; grid-template-areas: "chk prod prod act" "price price akce akce" "chips chips chips chips"; gap: 8px; padding: 10px; align-items: start; }
+	.pv-row .pv-grid > div:first-child { grid-area: chk; padding-top: 10px; }
+	.pv-row .pv-prod { grid-area: prod; align-items: flex-start; }
+	.pv-row [id$="-price"] > .pv-cellbtn:first-child { grid-area: price; }
+	.pv-row [id$="-price"] > .pv-cellbtn:last-child { grid-area: akce; }
+	.pv-row [id$="-chips"] > .pv-chips { grid-area: chips; }
+	.pv-row .pv-actions { grid-area: act; }
+	/* ◉ is Náhled všech in Štítky, ✎ = the product name link */
+	.pv-row .pv-actions > a.pv-iconbtn { display: none; }
+	.pv-prod { gap: 8px; }
+	.pv-thumb { width: 38px; height: 38px; border-radius: 8px; }
+	.pv-name, .pv-name:hover { font-size: 13.5px; line-height: 1.25; }
+	.pv-ean { font-size: 11px; word-break: break-all; }
+	.pv-row .pv-cellbtn { margin: 0; width: 100%; height: 100%; min-height: 44px; justify-content: center; gap: 2px; padding: 5px 8px; border-color: #e6eaf0; background: #f8fafc; }
+	.pv-main b { font-size: 14.5px; }
+	.pv-iconbtn { width: 32px; height: 32px; }
+	.pv-status { font-size: 10.5px; padding: 1px 7px; }
+	.pv-range, .pv-strike { font-size: 11px; }
+
+	.pv-chips { gap: 6px; }
+	.pv-chips .pv-chip { flex: 1 1 236px; width: auto; max-width: 100%; row-gap: 6px; }
+	.pv-chip-badge { height: auto; align-self: stretch; }
+	.pv-page select.pv-hdr { height: 30px !important; line-height: 28px !important; font-size: 13px !important; }
+	.pv-mini { height: 30px; min-width: 34px; line-height: 28px; font-size: 14px; }
+	.pv-labels-btn { flex: 1 1 100%; height: 32px; font-size: 12.5px; }
+
+	.pv-panel { padding: 0 8px 8px; }
+	.pv-panel-price { padding-left: 8px; }
+	.pv-box-head span { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+	.pv-box-head { padding: 10px 12px; }
+	.pv-box-head b { white-space: nowrap; }
+	.pv-pfields { padding: 12px; gap: 10px; }
+	.pv-pfields label { flex: 1 1 calc(50% - 5px); min-width: 0; }
+	.pv-pfields label:first-child { flex-basis: 100%; }
+	.pv-pfields .pv-unit, .pv-pfields .pv-num, .pv-pfields .pv-date { width: 100%; font-size: 16px; height: 42px; }
+	.pv-pfoot { padding: 0 12px 12px; }
+	.pv-hint { flex: 1 1 100%; min-width: 0; max-width: none; }
+	.pv-pfoot .pv-btn { flex: 1 1 auto; justify-content: center; height: 42px; }
+
+	.pv-lpanel { padding: 10px; }
+	.pv-lpanel-title { flex: 1 1 100%; }
+	.pv-lpanel-head .pv-btn { flex: 1 1 40%; justify-content: center; height: 38px; }
+	.pv-lpanel-head .pv-btn-dark { flex-basis: 100%; }
+	.pv-group-head { justify-content: flex-start; }
+	.pv-cards { grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); justify-content: stretch; }
+	.pv-card { padding: 8px 10px; gap: 6px; }
+	.pv-stepper a, .pv-stepper .pv-off { width: 38px; height: 34px; line-height: 34px; font-size: 18px; }
+	.pv-stepper-n { width: 30px; font-size: 15px; }
+	.pv-page select.pv-hdr-card { height: 34px !important; line-height: 32px !important; font-size: 13px !important; }
+	.pv-card-actions { font-size: 12.5px; }
+	.pv-card-actions a, .pv-card-actions .pv-off { padding: 4px; }
+
+	.pv-bar-wrap { bottom: 8px; }
+	.pv-bar { padding: 10px 12px; gap: 8px; }
+	.pv-bar-sum { flex: 1 1 100%; }
+	.pv-bar-chips, .pv-bar > .pv-flex { display: none; }
+	.pv-bar-checked { flex: 1 1 100%; }
+	.pv-bar-checked select { flex: 1; min-width: 0; }
+	.pv-bar-btn, .pv-bar-go { flex: 1 1 auto; justify-content: center; }
+	.pv-toast { left: 12px; right: 12px; max-width: none; }
+
+	.pv-editor-head, .pv-editor-body, .pv-editor-foot { padding-left: 14px; padding-right: 14px; }
+	.pv-ed-grid-head { grid-template-columns: minmax(0, 1fr) 90px; }
+	.pv-ed-unitprice, .pv-ed-validity { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+	.pv-input { font-size: 16px; }
+}
+
 /* ==========================================================================
    Výkup lahví (design_handoff_fikko/Vykup lahvi.dc.html), AdminModule/Vykup
    ========================================================================== */
@@ -5094,6 +5187,13 @@ body.mosaic-login-page main.page-content {
 	.vk-prijem { grid-template-columns: minmax(0, 1fr); }
 	.vk-two-staff { grid-template-columns: minmax(0, 1fr); }
 }
+@media (max-width: 767px) {
+	.vk-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+	.vk-kpi { padding: 12px 14px; }
+	.vk-kpi b { font-size: 22px; }
+	.vk-page .vk-search { width: 100%; }
+	.vk-page .vk-input { font-size: 16px; }
+}
 
 /* ==========================================================================
    Menu badge (e.g. lists waiting in Tisk z mobilu)
@@ -5194,6 +5294,31 @@ body.mosaic-login-page main.page-content {
     .pl-lists { flex-direction: row; flex-wrap: wrap; }
     .pl-card { flex: 1 1 260px; }
 }
+/* phones: the lists are a strip to swipe (the chosen one is scrolled into view by custom.js),
+   so the open list follows right under it */
+@media (max-width: 767px) {
+    .pl-title { font-size: 20px; }
+    .pl-head > .pl-flex { display: none; }
+    .pl-branch { flex: 1 1 100%; }
+    .pl-branch select { flex: 1; min-width: 0; font-size: 16px; }
+    .pl-filters { display: flex; width: 100%; }
+    .pl-filter { flex: 1; padding: 9px 8px; }
+    .pl-date input { font-size: 16px; }
+    .pl-lists { flex-wrap: nowrap; overflow-x: auto; scroll-snap-type: x mandatory; gap: 10px; padding-bottom: 6px; margin: 0 -12px; padding-left: 12px; padding-right: 12px; scrollbar-width: none; }
+    .pl-lists::-webkit-scrollbar { display: none; }
+    .pl-card { flex: 0 0 82%; scroll-snap-align: center; }
+    .pl-lists .pl-empty { flex: 1 1 100%; }
+    .pl-dhead, .pl-add, .pl-dfoot { padding-left: 12px; padding-right: 12px; }
+    .pl-dhead .pv-btn, .pl-dfoot .pv-btn { flex: 1 1 auto; justify-content: center; }
+    .pl-add .pl-add-product, .pl-add .pl-add-sel, .pl-add .pl-add-qty { font-size: 16px; }
+    .pl-add .pl-add-product { flex-basis: 100%; }
+    .pl-add .pl-add-sel { flex: 1 1 40%; max-width: none; }
+    .pl-groups { padding: 10px; gap: 10px; }
+    .pl-ghead { flex-wrap: wrap; padding: 8px 10px; gap: 4px 10px; }
+    .pl-row { padding: 10px; }
+    .pl-rname { min-width: 0; flex-basis: 100%; }
+    .pl-row select.pl-hdr { flex: 1 1 100%; max-width: none; font-size: 16px; }
+}
 
 /* ==========================================================================
    Náhled tisku v3 (__components/PrintPreview, Produkty queue + Tisk z mobilu)
@@ -5261,4 +5386,214 @@ body.mosaic-login-page main.page-content {
     .pp-dialog { width: 100%; margin: 0; }
     .pp { max-height: 100vh; }
     .pp-head, .pp-foot, .pp-body { padding-left: 12px; padding-right: 12px; }
+}
+
+/* ==========================================================================
+   Phones: list tables (every "mosaic-table-compact" list page). There is no phone design,
+   so each row becomes a card: cells stacked with their column name (data-label, set by
+   custom.js tableLabels()), the ☰ actions and the bulk checkbox in the top right corner,
+   the filter row as a small form above the cards. Inputs are 16px (no iOS zoom).
+   ========================================================================== */
+@media (max-width: 767px) {
+	.mosaic-list-table-wrap { border: none !important; background: transparent !important; padding: 0 !important; }
+	.mosaic-table-compact, .mosaic-table-compact > thead, .mosaic-table-compact > tbody,
+	.mosaic-table-compact > thead > tr, .mosaic-table-compact > tbody > tr,
+	.mosaic-table-compact > thead > tr > td, .mosaic-table-compact > tbody > tr > td { display: block; width: auto !important; }
+	.mosaic-table-compact { background: transparent !important; margin: 0 !important; }
+	.mosaic-table-compact [class^="w-"], .mosaic-table-compact [class*=" w-"] { width: auto !important; min-width: 0 !important; max-width: 100%; }
+	.mosaic-table-compact > thead > tr:not(.filters) { display: none; }
+
+	.mosaic-table-compact > thead > tr.filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 6px; padding: 8px; margin-bottom: 8px; border: 1px solid #e2e8f0; border-radius: 12px; }
+	.mosaic-table-compact > thead > tr.filters > td { flex: 1 1 calc(50% - 4px); min-width: 0; padding: 0 !important; border: none !important; }
+	.mosaic-table-compact > thead > tr.filters > td:not(:has(input, select, button)) { display: none; }
+	.mosaic-table-compact > thead > tr.filters > td:has(.bulk-head-checkbox), .mosaic-table-compact > thead > tr.filters > td:has(> .btn) { flex: 0 0 auto; }
+	.mosaic-table-compact > thead > tr.filters > td:has(> .btn) .btn { width: 40px !important; height: 36px; }
+	.mosaic-table-compact > thead > tr.filters > td[data-label]:not([data-label=""])::before { content: attr(data-label); display: block; margin-bottom: 3px; font-size: 10.5px; font-weight: 700; color: #8794a5; text-transform: uppercase; letter-spacing: .03em; }
+	.mosaic-table-compact > thead > tr.filters .form-control { width: 100% !important; height: 36px !important; font-size: 16px !important; }
+
+	table.mosaic-table-compact > tbody > tr { position: relative; margin-bottom: 6px; padding: 8px 10px; background: #fff !important; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 1px 2px rgba(15,23,42,.04); }
+	table.mosaic-table-compact > tbody > tr > td { display: flex; align-items: center; gap: 8px; padding: 2px 0 !important; font-size: 12.5px; border: none !important; text-align: left !important; min-width: 0; overflow-wrap: anywhere; }
+	.panel .mosaic-list-table-wrap table.mosaic-table-compact > tbody > tr > td { border: none !important; }
+	table.mosaic-table-compact > tbody > tr > td:empty { display: none; }
+	table.mosaic-table-compact > tbody > tr > td[data-label]:not([data-label=""])::before { content: attr(data-label); flex: 0 0 36%; overflow-wrap: normal; font-size: 10.5px; font-weight: 700; color: #8794a5; text-transform: uppercase; letter-spacing: .03em; }
+	table.mosaic-table-compact > tbody > tr > td.mt-title { font-size: 14px; padding: 2px 80px 4px 0 !important; min-height: 34px; }
+	table.mosaic-table-compact > tbody > tr > td.mt-title::before { display: none; }
+	table.mosaic-table-compact > tbody > tr > td.actions { position: absolute; top: 6px; right: 6px; padding: 0 !important; }
+	table.mosaic-table-compact > tbody > tr > td.actions::before { display: none; }
+	table.mosaic-table-compact > tbody > tr > td:has(> .bulk-checkbox:only-child) { position: absolute; top: 12px; right: 46px; padding: 0 !important; }
+	table.mosaic-table-compact > tbody > tr > td:has(> .bulk-checkbox:only-child)::before { display: none; }
+	.mosaic-table-compact .mosaic-row-actions-btn { width: 34px !important; height: 32px !important; }
+	/* other small tables (edit forms, modals) scroll sideways inside their box */
+	table.table-compact:not(.mosaic-table-compact) { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+}
+
+/* ==========================================================================
+   Phones: compact admin frame - smaller header, title, gaps and type so more of a page fits
+   on one screen
+   ========================================================================== */
+@media (max-width: 767px) {
+	body { font-size: 13px; }
+	body.page-header-fixed.page-sidebar-fixed .navbar.mosaic-navbar, .navbar.mosaic-navbar { height: 52px !important; min-height: 52px !important; }
+	.page-header-fixed .navbar .logo-box, .page-header-fixed .navbar .mosaic-logo-box { width: 52px !important; height: 52px !important; }
+	.navbar .topmenu-outer, .navbar .mosaic-topmenu-outer { margin-left: 52px !important; height: 52px !important; }
+	.mosaic-top-menu { height: 52px !important; padding: 0 10px !important; }
+	.mosaic-logo-badge { transform: scale(.85); }
+	.mosaic-user-info { display: none !important; }
+	.page-sidebar, .page-sidebar.mosaic-sidebar, .mosaic-sidebar, .sidebar { top: 52px !important; }
+	body.page-sidebar-fixed.page-header-fixed .page-inner, .page-sidebar-fixed.page-header-fixed .page-inner, .page-inner { padding-top: 52px !important; padding-bottom: 6px !important; }
+
+	.page-inner > .page-title, .page-inner .page-title { padding: 10px 10px 0 !important; gap: 6px 8px !important; }
+	.page-inner > .page-title h3, .page-inner .page-title h3 { font-size: 16px !important; line-height: 1.3 !important; }
+	.page-inner .page-title .buttons, .page-inner .page-title .buttons > div { gap: 6px !important; }
+	.page-title .buttons .btn, .page-title .mosaic-topbtn { padding: 5px 10px !important; font-size: 12px !important; border-radius: 7px !important; margin: 0 !important; }
+	.page-title .mosaic-topbtn-primary { padding: 5px 12px !important; }
+	.page-inner #main-wrapper { padding: 8px 8px 10px !important; margin: 0 !important; }
+	.page-footer { padding: 8px 10px !important; font-size: 11px !important; }
+
+	.panel { margin-bottom: 8px !important; }
+	.mosaic-list-panel .panel-body, .panel .panel-body { padding: 8px !important; }
+	.form-group { margin-bottom: 10px; }
+	.control-label, .form-group > label, .panel-body label { font-size: 12px; margin-bottom: 3px; }
+	textarea.form-control { height: auto; }
+	.nav-tabs > li > a { padding: 7px 10px !important; font-size: 12.5px !important; }
+	.modal-dialog { margin: 8px !important; }
+	.modal-body { padding: 12px !important; }
+
+	/* Nástěnka: metric cards two by two */
+	.mosaic-dashboard { gap: 10px !important; }
+	.mosaic-banner { padding: 16px !important; border-radius: 14px !important; }
+	.mosaic-banner-text h1, .mosaic-banner-text h2, .mosaic-banner-text h3 { font-size: 19px !important; margin-bottom: 4px !important; }
+	.mosaic-banner-text p { font-size: 12.5px !important; }
+	.mosaic-metrics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; }
+	.mosaic-metric-card, .mosaic-dashboard .mosaic-card { padding: 12px !important; border-radius: 12px !important; }
+	.mosaic-card-header-clean, .mosaic-card-body-clean, .mosaic-card-footer-clean, .mosaic-card-content { padding-left: 0 !important; padding-right: 0 !important; }
+	.mosaic-card-header-clean, .mosaic-card-body-clean { padding-top: 0 !important; padding-bottom: 0 !important; }
+	.mosaic-card-footer-clean { padding-bottom: 0 !important; }
+	.mosaic-card-title-row { margin-bottom: 8px !important; padding-bottom: 8px !important; }
+	.mosaic-card-heading { font-size: 14px !important; }
+	.mosaic-metric-card .mosaic-card-header-clean { flex-wrap: wrap; gap: 6px; margin-bottom: 8px !important; }
+	.mosaic-metric-card .mosaic-icon-box { width: 32px !important; height: 32px !important; font-size: 14px !important; border-radius: 9px !important; }
+	.mosaic-metric-card .mosaic-badge { font-size: 10px !important; padding: 2px 6px !important; }
+	.mosaic-metric-title { font-size: 10.5px !important; }
+	.mosaic-metric-value { font-size: 20px !important; }
+	.mosaic-metric-card .mosaic-card-footer-clean { margin-top: 8px !important; padding-top: 8px !important; font-size: 11.5px !important; }
+
+	/* Tisk z mobilu, Výkup */
+	.pl-head { gap: 8px; margin-bottom: 10px; }
+	.pl-sub { font-size: 12px; }
+	.pl-card { padding: 10px 10px 8px; }
+	.pl-dhead { padding: 10px 12px; }
+	.pl-dtitle { font-size: 16px; }
+	.pl-row { padding: 8px; }
+	.pl-rname b { font-size: 13.5px; }
+	.vk-page { gap: 10px; }
+	.vk-card { padding: 12px; gap: 10px; }
+	.vk-title { font-size: 18px; }
+}
+
+/* ==========================================================================
+   Phones, denser: inputs 32px (iOS does not zoom: @layout.latte adds maximum-scale on iOS),
+   smaller cards and icons, two short fields per line in modals
+   ========================================================================== */
+@media (max-width: 767px) {
+	body .form-control, body input[type="text"].form-control, body input[type="search"].form-control, body input[type="password"].form-control,
+	body input[type="email"].form-control, body input[type="number"].form-control, body select.form-control {
+		height: 32px !important; padding: 4px 9px !important; font-size: 13px !important; border-radius: 7px !important;
+	}
+	body textarea.form-control { min-height: 64px !important; font-size: 13px !important; padding: 6px 9px !important; }
+	body .form-control-bigger, body input[type="text"].form-control-bigger { font-size: 14px !important; padding: 4px 9px !important; }
+	body .mosaic-list-search-box input[type="text"].form-control, body .mosaic-list-search-box input.form-control { padding-left: 32px !important; height: 34px !important; }
+	.mosaic-list-search-box .search-icon { left: 11px; font-size: 13px; }
+	.mosaic-list-search-box { min-width: 0; }
+	body .select2-container--default .select2-selection--single { height: 32px !important; border-radius: 7px !important; }
+	body .select2-container--default .select2-selection--single .select2-selection__rendered { line-height: 30px !important; font-size: 12.5px !important; }
+	body .select2-container--default .select2-selection--single .select2-selection__arrow { height: 30px !important; }
+	.pv-page .pv-live-search, .pv-toolbar-field .form-control, .mosaic-table-compact > thead > tr.filters .form-control,
+	.pv-pfields input, .pv-pfields select, .pv-input, .pl-add .pl-add-product, .pl-add .pl-add-sel, .pl-add .pl-add-qty,
+	.pl-row select.pl-hdr, .pl-branch select, .pl-date input, .vk-page .vk-input, .pv-bar select { font-size: 13px !important; }
+	.mosaic-table-compact > thead > tr.filters .form-control { height: 32px !important; }
+	.mosaic-table-compact > thead > tr.filters > td:has(> .btn) .btn { width: 36px !important; height: 32px; padding: 0 !important; }
+	.pv-pfields .pv-unit, .pv-pfields .pv-num, .pv-pfields .pv-date { height: 34px; }
+	.pv-input { height: 34px; }
+	.pl-add .pl-add-product, .pl-add .pl-add-sel, .pl-add .pl-add-qty, .pl-hdr, .pl-branch select, .pl-date input { height: 32px; }
+	.form-group { margin-bottom: 8px; }
+	.control-label, .form-group > label, .panel-body label, .modal-body label { font-size: 11.5px; margin-bottom: 2px; }
+	.modal-body h4, .panel-body h4 { font-size: 13.5px !important; margin: 8px 0 6px !important; padding-bottom: 4px !important; }
+	.modal-body { margin-top: 0 !important; }
+	.modal .form-group, .panel-body .form-group { margin-bottom: 8px !important; }
+	.modal .form-group label, .panel-body .form-group label { margin-bottom: 3px !important; font-size: 11.5px !important; }
+
+	/* modals and edit forms: short fields two per line */
+	.modal .row > [class~="col-sm-3"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .modal .row > [class~="col-sm-4"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .modal .row > [class~="col-sm-5"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .modal .row > [class~="col-sm-6"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .modal .row > [class~="col-md-3"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .modal .row > [class~="col-md-4"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .modal .row > [class~="col-md-5"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .modal .row > [class~="col-md-6"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .modal .row > [class~="col-lg-3"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .modal .row > [class~="col-lg-4"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .modal .row > [class~="col-lg-5"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .modal .row > [class~="col-lg-6"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .page-inner form .row > [class~="col-sm-3"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .page-inner form .row > [class~="col-sm-4"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .page-inner form .row > [class~="col-sm-5"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .page-inner form .row > [class~="col-sm-6"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .page-inner form .row > [class~="col-md-3"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .page-inner form .row > [class~="col-md-4"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .page-inner form .row > [class~="col-md-5"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .page-inner form .row > [class~="col-md-6"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .page-inner form .row > [class~="col-lg-3"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .page-inner form .row > [class~="col-lg-4"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .page-inner form .row > [class~="col-lg-5"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .page-inner form .row > [class~="col-lg-6"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)) { float: left; width: 50%; }
+	/* the field next to a full-width name (URL) takes the whole line too */
+	.modal .row > [class*="col-"]:has(.form-control-bigger) + [class*="col-"], .page-inner form .row > [class*="col-"]:has(.form-control-bigger) + [class*="col-"] { width: 100%; }
+	.modal .row, .page-inner form .row { margin-left: -4px; margin-right: -4px; }
+	.modal .row > [class*="col-"], .page-inner form .row > [class*="col-"] { padding-left: 4px; padding-right: 4px; }
+	.modal-header { padding: 10px 12px !important; }
+	.modal-header h4, .modal-title { font-size: 15px !important; }
+	.modal-footer { padding: 8px 12px !important; gap: 6px; }
+	.modal-footer .btn { padding: 6px 10px !important; font-size: 12.5px !important; }
+
+	/* Produkty cards */
+	.pv-row .pv-grid { gap: 6px; padding: 8px; }
+	.pv-row .pv-grid > div:first-child { padding-top: 8px; }
+	.pv-thumb { width: 34px; height: 34px; font-size: 13px; }
+	.pv-name, .pv-name:hover { font-size: 13px; }
+	.pv-ean { font-size: 10.5px; }
+	.pv-iconbtn { width: 28px; height: 28px; font-size: 12px; border-radius: 7px; }
+	.pv-row .pv-cellbtn { min-height: 40px; padding: 4px 8px; border-radius: 8px; }
+	.pv-main b { font-size: 13.5px; }
+	.pv-pct { font-size: 10px; }
+	.pv-chips .pv-chip { padding: 5px 6px; column-gap: 6px; row-gap: 4px; border-radius: 8px; }
+	.pv-chip-badge { min-width: 50px; border-radius: 7px; }
+	.pv-chip-l { font-size: 9.5px; }
+	.pv-chip-n { font-size: 13px; }
+	.pv-page select.pv-hdr { height: 26px !important; line-height: 24px !important; font-size: 12px !important; }
+	.pv-mini { height: 26px; min-width: 28px; line-height: 24px; font-size: 12.5px; }
+	.pv-labels-btn { height: 30px; font-size: 12px; }
+	.pv-lpanel { padding: 8px; }
+	.pv-lpanel-head .pv-btn { height: 32px; font-size: 12px; }
+	.pv-card { padding: 6px 8px; gap: 5px; }
+	.pv-card-name b { font-size: 12.5px; }
+	.pv-card-name small { font-size: 10.5px; }
+	.pv-stepper a, .pv-stepper .pv-off { width: 32px; height: 28px; line-height: 28px; font-size: 16px; }
+	.pv-stepper-n { width: 26px; font-size: 13px; }
+	.pv-page select.pv-hdr-card { height: 28px !important; line-height: 26px !important; font-size: 12px !important; }
+	.pv-card-actions { font-size: 11.5px; padding-top: 4px; }
+	.pv-pfields { padding: 8px; gap: 8px; }
+	.pv-pfields label { font-size: 10.5px; gap: 3px; }
+	.pv-pfoot { padding: 0 8px 8px; gap: 6px; }
+	.pv-pfoot .pv-btn { height: 34px; font-size: 12px; }
+	.pv-hint { font-size: 11.5px; }
+	.pv-box-head { padding: 8px 10px; }
+	.pv-editor-head, .pv-editor-body, .pv-editor-foot { padding: 10px 12px; }
+	.pv-editor-body { gap: 10px; }
+	.pv-editor-body label { font-size: 11.5px; gap: 3px; }
+	.pv-editor-title b { font-size: 14px; }
+	.pv-editor-title span { font-size: 11.5px; }
+	.pv-ed-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+	.pv-ed-checks label { min-height: 32px !important; font-size: 12.5px !important; }
+	.pv-editor-foot .pv-btn { height: 34px; font-size: 12.5px; padding: 0 12px; }
+
+	/* list cards */
+	table.mosaic-table-compact > tbody > tr { padding: 6px 8px; border-radius: 10px; margin-bottom: 5px; }
+	table.mosaic-table-compact > tbody > tr > td { font-size: 12px; padding: 1px 0 !important; }
+	table.mosaic-table-compact > tbody > tr > td[data-label]:not([data-label=""])::before { font-size: 9.5px; }
+	table.mosaic-table-compact > tbody > tr > td.mt-title { font-size: 13px; min-height: 30px; padding: 1px 76px 3px 0 !important; }
+	table.mosaic-table-compact > tbody > tr > td.actions { top: 5px; right: 5px; }
+	table.mosaic-table-compact > tbody > tr > td:has(> .bulk-checkbox:only-child) { top: 10px; right: 40px; }
+	.mosaic-table-compact .mosaic-row-actions-btn { width: 30px !important; height: 28px !important; }
+	.mosaic-table-compact > thead > tr.filters { padding: 6px; gap: 5px; }
+
+	/* Tisk z mobilu */
+	.pl-card { padding: 8px; }
+	.pl-avatar { width: 26px; height: 26px; font-size: 11px; }
+	.pl-card-who b { font-size: 13px; }
+	.pl-chip { font-size: 11px; padding: 1px 6px; }
+	.pl-card-foot { font-size: 11.5px; margin-top: 6px; }
+	.pl-pricebox { min-width: 90px; padding: 3px 7px; }
+	.pl-pricebox b { font-size: 13.5px; }
+	.pl-stepper { height: 30px; }
+	.pl-stepper a { width: 30px; }
+	.pl-x { width: 30px; height: 30px; }
 }

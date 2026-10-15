@@ -2306,4 +2306,45 @@ $(function () {
             location.href = refresh;
         }, 1500);
     });
+
+    // phones: list tables become cards (custom.css "Phones: list tables"), so every cell gets
+    // the name of its column (an icon-only header gives its tooltip) and the first named cell
+    // of a row is its title
+    var tableLabels = function () {
+        $('table.mosaic-table-compact').each(function () {
+            var heads = [];
+            $(this).find('> thead > tr:first > th').each(function () {
+                var $th = $(this);
+                var $tip = $th.find('[title], [data-original-title]').first();
+                var name = $.trim($th.text()) || $tip.attr('data-original-title') || $tip.attr('title') || '';
+                for (var i = 0; i < (parseInt($th.attr('colspan'), 10) || 1); i++) {
+                    heads.push(name);
+                }
+            });
+            $(this).find('> thead > tr.filters, > tbody > tr').each(function () {
+                var titled = false;
+                $(this).children('td').each(function (i) {
+                    if (!this.hasAttribute('data-label')) {
+                        this.setAttribute('data-label', heads[i] || '');
+                    }
+                    if (!titled && heads[i] && !$(this).hasClass('actions') && $.trim($(this).text())) {
+                        titled = true;
+                        $(this).addClass('mt-title');
+                    }
+                });
+            });
+        });
+    };
+    tableLabels();
+    $(document).ajaxComplete(function () {
+        setTimeout(tableLabels, 0);
+    });
+
+    // Tisk z mobilu on a phone: the list cards are a swipe strip, show the chosen one
+    var $plOn = $('.pl-lists .pl-card-on');
+    if ($plOn.length && window.matchMedia('(max-width: 767px)').matches) {
+        var strip = $plOn.parent()[0];
+        var card = $plOn[0].getBoundingClientRect();
+        strip.scrollLeft += card.left - strip.getBoundingClientRect().left - (strip.clientWidth - card.width) / 2;
+    }
 });

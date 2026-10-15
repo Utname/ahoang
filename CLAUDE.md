@@ -9,7 +9,18 @@ Nette 3 + Latte 3 + PHP 8.2 admin/e-shop for a Czech grocery chain. Most work is
 - Product list = design "Admin - Produkty v2": each row is `__components/ProductLabels/ProductLabelsControl`
   with three snippets (`:price` Cena/Akce cells, `:chips` Štítky k tisku, `:panel` Možnosti tisku);
   its `render()` outputs all three for ajax redraws (`redrawAll()`). Styles `.pv-*` in custom.css,
-  behaviour at the end of custom.js, texts `admin.pv.*`
+  behaviour at the end of custom.js, texts `admin.pv.*`. Phones (≤767px, no design for it): CSS only
+  (`@media` after `.pv-missing`) turns each row into a card via grid areas – the cells are found by
+  position (`[id$="-price"] > .pv-cellbtn:first-child/last-child`), so keep that markup order
+- Phones in the rest of the admin (end of custom.css): every `mosaic-table-compact` list becomes cards –
+  custom.js `tableLabels()` copies the header text (or icon tooltip) to each cell's `data-label` and marks
+  the first named cell `mt-title`; `td.actions` and the bulk checkbox sit in the card's top right.
+  Other `table-compact` tables scroll sideways. Tisk z mobilu: list cards are a swipe strip on phones.
+  The last block of custom.css compacts the whole frame on phones (52px header, smaller type/gaps);
+  old theme rules use `!important` + `table.table` selectors, so overrides need the same weight.
+  Inputs are 32px/13px: @layout.latte adds `maximum-scale=1` on iOS only (else iOS zooms into inputs
+  under 16px). Modals and edit forms keep col-*-3..6 at 50% (two short fields per line) unless the
+  column holds a nested row, textarea, editor, input-group/button or the big name input
 - Search while typing: the filters form goes by ajax, `ProductsPresenter` onFilterChange redraws only
   `productCount` + `productList` (`recountPaginator`: the paginator was created before the list).
   Name filter looks EAN/codes up first (indexes from `bin/migrate.php`); 8+ digits = EAN prefix only.
