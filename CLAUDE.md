@@ -20,7 +20,15 @@ Nette 3 + Latte 3 + PHP 8.2 admin/e-shop for a Czech grocery chain. Most work is
   old theme rules use `!important` + `table.table` selectors, so overrides need the same weight.
   Inputs are 32px/13px: @layout.latte adds `maximum-scale=1` on iOS only (else iOS zooms into inputs
   under 16px). Modals and edit forms keep col-*-3..6 at 50% (two short fields per line) unless the
-  column holds a nested row, textarea, editor, input-group/button or the big name input
+  column holds a nested row, textarea, editor, input-group/button or the big name input.
+  Modal footers (`.modal-footer`, its `.btns`, `.pv-editor-foot`, `.pp-foot`) wrap on phones – a single
+  flex line pushed "Uložit" off the screen. CKEditor is 4.4.7, which disables itself on Android
+  (`isCompatible`); `initWSW()` forces it on, otherwise Android shows raw HTML in the editors.
+  Sidebar ≤991px (off-canvas, modern.js MOBILE_BREAKPOINT): sub-menus open in place (no hover flyouts,
+  modern.js skips placing them), backdrop `.page-sidebar.visible ~ .page-inner::after`, a tap outside closes.
+  The loaded Font Awesome is "6 Pro" (plugins/fontawesome) – "6 Free"/"5 Pro" light in CSS draw boxes.
+  Phone audit (Playwright, Galaxy S8 360px + iPhone 13): every menu page, first edit page + tabs,
+  modals, front pages, /admin/mobil – check overflow, controls cut by a non-scrolling parent, tiny taps
 - Search while typing: the filters form goes by ajax, `ProductsPresenter` onFilterChange redraws only
   `productCount` + `productList` (`recountPaginator`: the paginator was created before the list).
   Name filter looks EAN/codes up first (indexes from `bin/migrate.php`); 8+ digits = EAN prefix only.
@@ -173,6 +181,11 @@ images from the right, cards pop in turn, list rows slide; hero entrance; `data-
 The navbar uses `/images/front/logo-color.png` (the admin logo is white text for dark backgrounds).
 JS hooks: `.lw-toggle`/`.lw-menu` (script.js), section scrolling subtracts `#lw-header` height (custom.js).
 `getMenuBlocksItems()` grows with every call – dedupe when listing it twice.
+Phones (≤639px): the last block of landwind.css – denser sections, smaller type, the home branch cards
+(`.lw-branch-strip`) are a strip to swipe. `ArticleLayout::fixLinks()` also drops blank `<p>&nbsp;</p>`.
+The VI|CS Google Translate script in the front/login layouts has a Latte comment inside
+`n:syntax="off"` → "Unexpected token '*'" in the console; fixing it would switch on the
+auto-translation to Vietnamese for every first visit (also live) – ask before touching it.
 
 ## Run / test
 - Local: http://localhost, MariaDB db `website` user root/toor

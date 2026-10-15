@@ -87,9 +87,11 @@ class ArticleLayout
 	/**
 	 * Repairs phone / e-mail links typed wrongly in the editor ("http://mailto:x@y", "//775776888",
 	 * "tel:+420 775 …") so they call or write instead of opening a broken page; no new tab for them.
+	 * Blank paragraphs (only spaces / &nbsp; / <br>) are dropped: they left gaps in the branch cards.
 	 */
 	public static function fixLinks(?string $html): string
 	{
+		$html = preg_replace('#<p\b[^>]*>(?:\s|&nbsp;|&\#160;|\xC2\xA0|<br\s*/?>)*</p>#iu', '', (string)$html) ?? (string)$html;
 		return preg_replace_callback('#<a\b([^>]*)>#i', static function (array $m): string {
 			$attrs = $m[1];
 			if (!preg_match('#\bhref\s*=\s*(["\'])(.*?)\1#is', $attrs, $h)) {

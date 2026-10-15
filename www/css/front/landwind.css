@@ -279,7 +279,9 @@ body.lw a { transition: color .15s, background-color .15s, box-shadow .15s; }
 @media (min-width: 768px) { .lw-page-head { padding-top: 64px; } .lw-page-title { font-size: 48px; } }
 .lw-section-flush { padding-top: 32px; }
 @media (min-width: 1024px) { .lw-section-flush { padding-top: 40px; } }
-.lw-title-icon { display: flex; align-items: center; gap: 10px; }
+/* block, not flex: the animated underline (::after) stays under the title, not beside the icon */
+.lw-title-icon { display: block; }
+.lw-title-icon .google-icon { display: inline-flex; margin-left: 8px; vertical-align: middle; }
 .lw-title-icon .google-icon img { width: 26px; height: 26px; }
 
 /* article column for text pages (template typography: light grey text, bold dark headings) */
@@ -586,3 +588,61 @@ html.lw-calm .lw-reveal.lw-done:hover { transform: translateY(-3px); }
 /* entrances from the side must not widen the page (mobile: the menu button left the screen) */
 html.lw-motion, html.lw-motion body.lw, body.lw .lw-section, body.lw .lw-page-head, body.lw .lw-intro, body.lw .lw-hero, body.lw .lw-footer { overflow-x: hidden; }
 @supports (overflow: clip) { html.lw-motion, html.lw-motion body.lw, body.lw .lw-section, body.lw .lw-page-head, body.lw .lw-intro, body.lw .lw-hero, body.lw .lw-footer { overflow-x: clip; } }
+
+/* ---------- phones: denser sections, smaller type, the home branch cards as a strip to swipe ---------- */
+@media (max-width: 639px) {
+    .lw-section { padding: 40px 0; }
+    .lw-section-tight { padding-top: 28px; }
+    .lw-section-flush { padding-top: 20px; }
+    .lw-h2 { font-size: 24px; margin-bottom: 10px; }
+    .lw-lead { font-size: 15px; }
+    .lw-heading { margin-bottom: 20px; }
+    .lw-kicker { font-size: 13px; margin-bottom: 4px; }
+
+    .lw-hero-grid { gap: 20px; padding-top: 20px; padding-bottom: 20px; }
+    .lw-hero-title { font-size: 27px; line-height: 1.12; margin-bottom: 10px; }
+    .lw-hero-text { font-size: 14.5px; line-height: 1.6; margin-bottom: 16px; }
+    .lw-hero-text p { margin-bottom: 8px; }
+    .lw-hero-img img { height: 200px; border-radius: 12px; }
+    .lw-hero-controls { padding-bottom: 16px; }
+
+    .lw-feature { gap: 20px; }
+    .lw-checklist li { font-size: 15px; }
+    .lw-shots { gap: 10px; }
+    .lw-shot img { height: 130px; }
+    .lw-shot-big img { height: 190px; }
+
+    .lw-stats { gap: 20px; }
+    .lw-stat-grid { grid-template-columns: 1fr 1fr; gap: 16px; }
+    .lw-stat-icon, .lw-stat-icon svg { width: 30px; height: 30px; margin-bottom: 6px; }
+    .lw-stat h3 { font-size: 20px; }
+    .lw-stat p { font-size: 13.5px; }
+
+    .lw-branch-strip { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px; margin: 0 -16px; padding: 4px 16px 12px; scrollbar-width: none; }
+    .lw-branch-strip::-webkit-scrollbar { display: none; }
+    .lw-branch-strip > .lw-price-card { flex: 0 0 84%; scroll-snap-align: center; }
+    .lw-price-card { padding: 16px; }
+    .lw-price-img { margin: -4px -4px 12px; }
+    .lw-price-img img { height: 140px; }
+    .lw-price-title { font-size: 18px; margin-bottom: 4px; }
+    .lw-price-title .google-icon { display: inline-flex; padding: 8px; margin: -8px; }
+    .lw-price-desc { font-size: 14px; margin-bottom: 12px; }
+    .lw-price-card .lw-branch-text { padding-top: 12px; margin-bottom: 14px; font-size: 13.5px; }
+
+    .lw-form-card { padding: 20px 16px; }
+    .lw-page-head { padding-top: 28px; }
+    .lw-page-title { font-size: 28px; }
+    .lw-intro { padding-top: 24px; }
+    .lw-intro-lead { font-size: 18px; }
+    .lw-intro-text { font-size: 15.5px; }
+    .lw-article { font-size: 15.5px; line-height: 1.7; }
+    .lw-article h1 { font-size: 26px; } .lw-article h2 { font-size: 23px; } .lw-article h3 { font-size: 19px; }
+    .lw-article h1, .lw-article h2, .lw-article h3, .lw-article h4 { margin: 28px 0 12px; }
+    .lw-feat { padding: 20px 16px; }
+
+    footer.lw-footer { margin-top: 56px; }
+    .lw-footer-cta { padding: 24px 20px; }
+    footer.lw-footer .lw-footer-cta h3 { font-size: 22px; }
+}
+/* branch texts: blank paragraphs are dropped by ArticleLayout::fixLinks(), tighter lines */
+.lw-branch-text p { margin: 0 0 4px; }

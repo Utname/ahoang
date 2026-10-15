@@ -943,6 +943,11 @@ var initDatepickers = function () {
 }
 
 var initWSW = function () {
+    // CKEditor 4.4 turns itself off on Android (old browsers), leaving raw HTML in the textareas;
+    // today's Android Chrome edits fine
+    if (window.CKEDITOR) {
+        CKEDITOR.env.isCompatible = true;
+    }
     $(".wsw").each(function (index, value) {
         var textarea = $(this);
         var id = textarea.attr('id');

@@ -50,7 +50,8 @@
 {* 2) branches as the template's pricing cards: centred head, details, full-width button *}
 <section n:if="$branches" class="lw-section lw-section-gray lw-section-tight">
 	<div class="lw-container">
-		<div class="lw-grid lw-grid-3">
+		{* phones: a strip to swipe (landwind.css .lw-branch-strip) *}
+		<div class="lw-grid lw-grid-3 lw-branch-strip">
 			<div n:foreach="$branches as $branch" class="lw-price-card">
 				<a n:if="$branch->image" href="{$branchesPage->full_url}/{$branch->getUrl()}" class="lw-price-img">
 					<img loading="lazy" decoding="async" src="{$branch->image|image:branch}" alt="{$branch->name}">

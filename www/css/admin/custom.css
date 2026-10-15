@@ -3003,7 +3003,8 @@ input, select, textarea, button {
 /* Arrow icon for droplinks */
 .menu.accordion-menu > li.droplink > a::after {
     content: '\f054' !important;
-    font-family: 'Font Awesome 6 Free' !important;
+    /* the loaded Font Awesome is "6 Pro" (plugins/fontawesome); "6 Free" drew an empty box */
+    font-family: 'Font Awesome 6 Pro' !important;
     font-weight: 900 !important;
     font-size: 9px !important;
     margin-left: auto !important;
@@ -5524,15 +5525,32 @@ body.mosaic-login-page main.page-content {
 	.modal .form-group label, .panel-body .form-group label { margin-bottom: 3px !important; font-size: 11.5px !important; }
 
 	/* modals and edit forms: short fields two per line */
-	.modal .row > [class~="col-sm-3"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .modal .row > [class~="col-sm-4"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .modal .row > [class~="col-sm-5"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .modal .row > [class~="col-sm-6"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .modal .row > [class~="col-md-3"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .modal .row > [class~="col-md-4"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .modal .row > [class~="col-md-5"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .modal .row > [class~="col-md-6"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .modal .row > [class~="col-lg-3"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .modal .row > [class~="col-lg-4"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .modal .row > [class~="col-lg-5"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .modal .row > [class~="col-lg-6"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .page-inner form .row > [class~="col-sm-3"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .page-inner form .row > [class~="col-sm-4"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .page-inner form .row > [class~="col-sm-5"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .page-inner form .row > [class~="col-sm-6"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .page-inner form .row > [class~="col-md-3"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .page-inner form .row > [class~="col-md-4"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .page-inner form .row > [class~="col-md-5"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .page-inner form .row > [class~="col-md-6"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .page-inner form .row > [class~="col-lg-3"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .page-inner form .row > [class~="col-lg-4"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .page-inner form .row > [class~="col-lg-5"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .page-inner form .row > [class~="col-lg-6"]:not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)) { float: left; width: 50%; }
+	.modal .row > [class~="col-sm-3"]:not(:only-child):not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .modal .row > [class~="col-sm-4"]:not(:only-child):not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .modal .row > [class~="col-sm-5"]:not(:only-child):not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .modal .row > [class~="col-sm-6"]:not(:only-child):not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .modal .row > [class~="col-md-3"]:not(:only-child):not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .modal .row > [class~="col-md-4"]:not(:only-child):not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .modal .row > [class~="col-md-5"]:not(:only-child):not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .modal .row > [class~="col-md-6"]:not(:only-child):not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .modal .row > [class~="col-lg-3"]:not(:only-child):not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .modal .row > [class~="col-lg-4"]:not(:only-child):not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .modal .row > [class~="col-lg-5"]:not(:only-child):not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .modal .row > [class~="col-lg-6"]:not(:only-child):not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .page-inner form .row > [class~="col-sm-3"]:not(:only-child):not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .page-inner form .row > [class~="col-sm-4"]:not(:only-child):not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .page-inner form .row > [class~="col-sm-5"]:not(:only-child):not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .page-inner form .row > [class~="col-sm-6"]:not(:only-child):not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .page-inner form .row > [class~="col-md-3"]:not(:only-child):not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .page-inner form .row > [class~="col-md-4"]:not(:only-child):not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .page-inner form .row > [class~="col-md-5"]:not(:only-child):not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .page-inner form .row > [class~="col-md-6"]:not(:only-child):not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .page-inner form .row > [class~="col-lg-3"]:not(:only-child):not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .page-inner form .row > [class~="col-lg-4"]:not(:only-child):not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .page-inner form .row > [class~="col-lg-5"]:not(:only-child):not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)), .page-inner form .row > [class~="col-lg-6"]:not(:only-child):not(:has(.row, textarea, .wsw, .input-group, .btn, .form-control-bigger)) { float: left; width: 50%; }
 	/* the field next to a full-width name (URL) takes the whole line too */
 	.modal .row > [class*="col-"]:has(.form-control-bigger) + [class*="col-"], .page-inner form .row > [class*="col-"]:has(.form-control-bigger) + [class*="col-"] { width: 100%; }
 	.modal .row, .page-inner form .row { margin-left: -4px; margin-right: -4px; }
 	.modal .row > [class*="col-"], .page-inner form .row > [class*="col-"] { padding-left: 4px; padding-right: 4px; }
 	.modal-header { padding: 10px 12px !important; }
 	.modal-header h4, .modal-title { font-size: 15px !important; }
-	.modal-footer { padding: 8px 12px !important; gap: 6px; }
-	.modal-footer .btn { padding: 6px 10px !important; font-size: 12.5px !important; }
+	/* footer buttons wrap and share the width (a single line pushed "Uložit" off the screen) */
+	.modal-footer { padding: 8px 10px !important; gap: 6px !important; flex-wrap: wrap !important; justify-content: stretch !important; }
+	.modal-footer > .btn, .modal-footer > a, .modal-footer > button, .modal-footer > .pv-btn, .modal-footer > .pp-btn { flex: 1 1 auto; justify-content: center !important; text-align: center; margin: 0 !important; float: none !important; }
+	.modal-footer .btn { padding: 7px 10px !important; font-size: 12.5px !important; }
+	.modal-footer > .btns { flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: 6px; padding-top: 0; border: none; }
+	.modal-footer > .btns > .btn, .modal-footer > .btns > a, .modal-footer > .btns > button { flex: 1 1 auto; float: none !important; margin: 0 !important; justify-content: center !important; text-align: center; }
+	.pv-editor-foot { gap: 6px; }
+	.pv-editor-foot .pv-btn { flex: 1 1 auto; justify-content: center; }
+	.pv-editor-foot .pv-flex { display: none; }
+	.modal-header .close { order: 2; margin-left: auto !important; width: 34px; height: 34px; font-size: 24px !important; line-height: 1; padding: 0; }
+	.pp-dialog { width: auto !important; margin: 8px !important; }
+	.pp { max-height: calc(100vh - 16px); }
+	.pp-head, .pp-foot { padding: 10px !important; gap: 6px; }
+	.pp-foot .pp-chips, .pp-foot > .pp-flex { display: none; }
+	.pp-foot .pp-btn, .pp-head .pp-btn { flex: 1 1 auto; justify-content: center; padding: 7px 10px; font-size: 12.5px; }
+	.pp-title b { font-size: 15px; }
+	.pp-body { padding: 10px !important; gap: 10px; }
+	.pp-cards { grid-template-columns: minmax(0, 1fr); padding: 10px; gap: 10px; }
+	.modal-footer > .pull-left, .modal-footer > .pull-right { float: none !important; display: flex; flex-wrap: wrap; gap: 6px; flex: 1 1 100%; }
 
 	/* Produkty cards */
 	.pv-row .pv-grid { gap: 6px; padding: 8px; }
@@ -5585,6 +5603,10 @@ body.mosaic-login-page main.page-content {
 	.mosaic-table-compact .mosaic-row-actions-btn { width: 30px !important; height: 28px !important; }
 	.mosaic-table-compact > thead > tr.filters { padding: 6px; gap: 5px; }
 
+	/* icon-only links (on/off switches, tree +/move, price history…) get a finger-sized hit area */
+	.page-inner td a:has(> i:only-child), .modal td a:has(> i:only-child) { display: inline-flex; align-items: center; justify-content: center; min-width: 32px; min-height: 32px; margin: -6px 0; }
+	.pv-eye a { width: 100%; height: 100%; align-items: center; justify-content: center; }
+
 	/* Tisk z mobilu */
 	.pl-card { padding: 8px; }
 	.pl-avatar { width: 26px; height: 26px; font-size: 11px; }
@@ -5596,4 +5618,55 @@ body.mosaic-login-page main.page-content {
 	.pl-stepper { height: 30px; }
 	.pl-stepper a { width: 30px; }
 	.pl-x { width: 30px; height: 30px; }
+}
+
+/* ==========================================================================
+   Sub-menu arrows (span.arrow): "Font Awesome 5 Pro" light drew a box; the loaded set is FA 6 Pro
+   ========================================================================== */
+.menu.accordion-menu li > a > .arrow:before,
+.menu.accordion-menu > li > a > .arrow:before {
+	content: "\f105" !important; font-family: "Font Awesome 6 Pro" !important; font-weight: 900 !important; font-size: 10px !important;
+	float: none !important; display: inline-block !important; width: auto !important; margin: 0 !important; transition: transform .15s;
+}
+.menu.accordion-menu li.open > a > .arrow:before { transform: rotate(90deg) !important; }
+
+/* ==========================================================================
+   Off-canvas sidebar (phones, tablets - modern.js MOBILE_BREAKPOINT): sub-menus open in place
+   (the hover flyouts went off the screen), dimmed backdrop (a tap on it closes the menu, modern.js),
+   the menu scrolls when it is taller than the screen
+   ========================================================================== */
+@media (max-width: 991px) {
+	.page-sidebar.mosaic-sidebar, .hover-menu .page-sidebar { width: min(280px, 86vw) !important; overflow-y: auto !important; overflow-x: hidden !important; box-shadow: 12px 0 30px rgba(15, 23, 42, .35); }
+	.page-sidebar.mosaic-sidebar:not(.visible) { box-shadow: none; }
+	.page-sidebar.visible ~ .page-inner::after { content: ''; position: fixed; inset: 0; z-index: 850; background: rgba(15, 23, 42, .45); }
+	body.hover-menu .page-sidebar .menu.accordion-menu li > ul.sub-menu,
+	body.hover-menu .page-sidebar .menu.accordion-menu ul.sub-menu li > ul.sub-menu {
+		position: static !important; width: auto !important; max-height: none !important; margin: 2px 0 6px !important;
+		padding: 2px 0 2px 30px !important; background: transparent !important; border: none !important; border-radius: 0 !important;
+		box-shadow: none !important; overflow: visible !important; display: none !important;
+	}
+	body.hover-menu .page-sidebar .menu.accordion-menu li > ul.sub-menu::before { display: none !important; }
+	body.hover-menu .page-sidebar .menu.accordion-menu li.open > ul.sub-menu,
+	body.hover-menu .page-sidebar .menu.accordion-menu ul.sub-menu li.open > ul.sub-menu { display: block !important; }
+	.page-sidebar .page-sidebar-inner, .page-sidebar .menu.accordion-menu { width: 100% !important; }
+	.page-sidebar .menu.accordion-menu ul.sub-menu li a { padding: 9px 12px !important; white-space: normal !important; }
+	.page-sidebar .menu.accordion-menu ul.sub-menu li a p { white-space: normal !important; }
+	.page-sidebar .menu.accordion-menu > li > a { padding-top: 11px !important; padding-bottom: 11px !important; }
+}
+
+/* off-canvas sidebar: the logo box is centred while closed; while open it is as wide as the sidebar
+   (one dark column from the top), with the name and a × that closes the menu */
+.navbar .mosaic-logo-box .mosaic-sidebar-close { display: none !important; }
+@media (max-width: 991px) {
+	.page-header-fixed .navbar .mosaic-logo-box .mosaic-logo-link { width: 100%; justify-content: center; }
+	.mosaic-logo-badge { margin: 0 !important; }
+	body:has(.page-sidebar.visible) .page-header-fixed .navbar .mosaic-logo-box,
+	body:has(.page-sidebar.visible) .navbar .mosaic-logo-box { width: min(280px, 86vw) !important; padding: 0 8px 0 12px !important; justify-content: space-between !important; transition: width .2s; }
+	body:has(.page-sidebar.visible) .navbar .mosaic-logo-box .mosaic-logo-link { width: auto; justify-content: flex-start; gap: 10px; }
+	body:has(.page-sidebar.visible) .navbar .mosaic-logo-box .mosaic-logo-text-group { display: flex !important; }
+	body:has(.page-sidebar.visible) .navbar .mosaic-logo-box .mosaic-sidebar-close {
+		display: inline-flex !important; align-items: center; justify-content: center; width: 36px; height: 36px; padding: 0;
+		border: 1px solid #1e293b; border-radius: 9px; background: transparent; color: #cbd5e1; font-size: 22px; line-height: 1; cursor: pointer;
+	}
+	.page-sidebar.mosaic-sidebar { border-top: 1px solid #1e293b; }
 }

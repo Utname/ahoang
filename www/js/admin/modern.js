@@ -43,6 +43,14 @@ $(document).ready(function () {
             hidden.addClass('visible');
         }
     });
+    // a tap outside the open off-canvas sidebar (its dimmed backdrop) closes it
+    $(document).on('click', function (e) {
+        if (window.innerWidth <= MOBILE_BREAKPOINT && $('.sidebar').hasClass('visible')
+            && !$(e.target).closest('.sidebar, .push-sidebar').length) {
+            $('.sidebar').removeClass('visible');
+            e.preventDefault();
+        }
+    });
 
     // Desktop collapse/expand of the sidebar, remembered across reloads. The
     // toggle button has both "push-sidebar" and "mosaic-sidebar-toggle", so
@@ -166,7 +174,8 @@ $(document).ready(function () {
     if ($('body').hasClass('hover-menu')) {
         $(document).on('mouseenter', '.sidebar .accordion-menu li.droplink', function () {
             var flyout = this.querySelector(':scope > ul.sub-menu');
-            if (!flyout) {
+            // off-canvas sidebar (phones, tablets): sub-menus open in place (custom.css)
+            if (!flyout || window.innerWidth <= MOBILE_BREAKPOINT) {
                 return;
             }
             var rect = this.getBoundingClientRect();
