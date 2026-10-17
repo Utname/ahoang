@@ -61,6 +61,8 @@ class MobilPresenter extends BaseModulePresenter
 		'groupAkce', 'newTitle', 'newHint', 'newCode', 'newName', 'newPrice', 'newCreate', 'newCreated', 'newSaving',
 		'newBasic', 'newCategory', 'newPhoto', 'newPhotoTake', 'newPack', 'newWeight', 'newUnitPrice', 'newPrices', 'newPriceAction',
 		'newAllBranches', 'newLabel', 'newNote', 'newIngredients', 'newThawed', 'newConsumption', 'newPerex', 'newOptional',
+		'products', 'filterAll', 'filterRunning', 'filterPlanned', 'filterToPrint', 'prodSummary', 'more', 'edit',
+		'printQueue', 'discount', 'scanEan',
 	];
 
 	/** @var array<int, string> */
@@ -156,6 +158,9 @@ class MobilPresenter extends BaseModulePresenter
 				'search' => $this->link('search!'),
 				'byCode' => $this->link('byCode!'),
 				'products' => $this->link('products!'),
+				'list' => $this->link('list!'),
+				// "✎ Upravit" on a product card: the admin product card (999999 = the product id)
+				'productEdit' => $this->link('Products:edit', ['id' => 999999]),
 				'savePrice' => $this->link('savePrice!'),
 				'createProduct' => $this->link('createProduct!'),
 				'send' => $this->link('send!'),
@@ -206,6 +211,45 @@ class MobilPresenter extends BaseModulePresenter
 			}
 		}
 		$this->sendJson($out);
+	}
+
+
+	/** Produkty: the branch's priced products, 20 at a time – all / running action / planned action, by name or EAN. */
+	public function handleList(string $filter = 'all', string $term = '', int $offset = 0): void
+	{
+		$today = \PrintListsService::now()->format('Y-m-d');
+		$where = ['pp.branches_id = ?'];
+		$params = [$this->branchesId];
+		if ($filter === 'running') {
+			$where[] = 'pp.price_action > 0 AND pp.price > pp.price_action AND pp.action_from IS NOT NULL AND pp.action_from <= ? AND (pp.action_to IS NULL OR pp.action_to >= ?)';
+			array_push($params, $today, $today);
+		}
+		elseif ($filter === 'planned') {
+			$where[] = 'pp.price_action > 0 AND pp.action_from > ?';
+			$params[] = $today;
+		}
+		$term = trim($term);
+		if (preg_match('/^\d{3,}$/', $term)) {
+			$where[] = '(p.code_ean LIKE ? OR p.id IN (SELECT products_id FROM product_codes WHERE value LIKE ?))';
+			array_push($params, $term . '%', $term . '%');
+		}
+		elseif ($term !== '') {
+			foreach (array_filter(explode(' ', $term)) as $part) {
+				$where[] = 'm.name LIKE ?';
+				$params[] = '%' . $part . '%';
+			}
+		}
+		$from = 'FROM product_prices pp JOIN products p ON p.id = pp.products_id JOIN products_mld m ON m.products_id = p.id AND m.languages_id = ? WHERE ' . implode(' AND ', $where);
+		$total = (int)$this->database->query('SELECT COUNT(DISTINCT p.id) ' . $from, 'cs', ...$params)->fetchField();
+		$offset = max(0, $offset);
+		$ids = $this->database->query('SELECT p.id, MIN(m.name) name ' . $from . ' GROUP BY p.id ORDER BY name LIMIT 20 OFFSET ?', 'cs', ...[...$params, $offset])->fetchPairs(NULL, 'id');
+		$items = [];
+		foreach ($ids as $id) {
+			if ($info = $this->productInfo((int)$id)) {
+				$items[] = $info;
+			}
+		}
+		$this->sendJson(['total' => $total, 'items' => $items, 'next' => $offset + 20 < $total ? $offset + 20 : NULL]);
 	}
 
 

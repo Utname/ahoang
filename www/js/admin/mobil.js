@@ -40,7 +40,9 @@
         products: {},      // id → info from the server
         results: null,     // search results (ids) or null = recent
         priceOpen: null,   // product id with the price panel open
-        sending: false
+        sending: false,
+        // Produkty: filter (all / running / planned / toprint), search, loaded ids, total, next offset
+        prod: { filter: 'all', term: '', ids: [], total: 0, next: null, loading: false, seq: 0 }
     };
 
     // ---------- helpers ----------
@@ -146,12 +148,14 @@
     };
 
     // ---------- navigation ----------
-    var titles = { overview: t.overview, scan: t.scan, queue: t.queueTitle, jobs: t.sent };
+    var titles = { overview: t.overview, products: t.products, scan: t.scan, queue: t.queueTitle, jobs: t.sent };
     var go = function (screen) {
         state.screen = screen;
         store.save();
         document.querySelectorAll('.m-screen').forEach(function (s) { s.hidden = s.getAttribute('data-screen') !== screen; });
-        document.querySelectorAll('.m-tabs button').forEach(function (b) { b.classList.toggle('m-on', b.getAttribute('data-go') === screen); });
+        document.querySelectorAll('.m-tabs button, .m-drawer [data-go]').forEach(function (b) { b.classList.toggle('m-on', b.getAttribute('data-go') === screen); });
+        // as in the design, the Scan / Fronta / Odesláno tabs belong to the label part only
+        document.getElementById('m-app').classList.toggle('m-notabs', screen === 'overview' || screen === 'products');
         $('#m-title').textContent = titles[screen];
         $('#m-drawer').hidden = true;
         if (screen !== 'scan') {
@@ -160,51 +164,58 @@
         render();
     };
 
-    // ---------- product card (scan results / recent) ----------
+    // ---------- product card (Produkty, scan results / recent) – "Admin – tisk štítků mobil" ----------
+    var editUrl = function (pid) { return cfg.urls.productEdit.replace('999999', pid); };
+    // the price box: regular price + 30-day low on the left, the action price (or our price) on the right;
+    // a tap opens "Cena a akce"
     var priceBlock = function (p) {
         var akce = p.action != null;
-        var html = '<div class="m-price">';
-        html += '<div class="m-price-l"><small>' + esc(t.regular) + '</small><b>' + kc(p.base) + ' Kč</b>'
-            + (akce && p.ref30 ? '<small>' + esc(t.lowest30) + ': ' + kc(p.ref30) + ' Kč</small>' : '') + '</div>';
-        if (akce) {
-            html += '<div class="m-price-r"><small>' + (p.pct ? '<em>−' + p.pct + ' %</em> ' : '') + esc(t.akcePrice) + '</small>'
-                + '<b class="m-red">' + kc(p.action) + ' <span>' + esc(p.unit) + '</span></b><small>' + esc(p.dates) + '</small></div>';
-        } else {
-            html += '<div class="m-price-r"><small>' + esc(t.ourPrice) + '</small><b>' + kc(p.base) + ' <span>' + esc(p.unit) + '</span></b><small>' + esc(t.noAkce) + '</small></div>';
-        }
-        html += '</div>';
-        if (p.unitText) {
-            html += '<div class="m-unitprice">' + esc(p.unitText) + '</div>';
-        }
-        return html;
+        var open = state.priceOpen === p.id;
+        var tag = cfg.canSend ? 'button type="button" data-priceopen="' + p.id + '"' : 'div';
+        return '<' + tag + ' class="m-price' + (open ? ' m-price-open' : '') + '">'
+            + '<span class="m-price-l"><small>' + esc(t.regular) + (cfg.canSend ? ' <em>✎ ' + esc(open ? t.cancel : t.editPrice) + '</em>' : '') + '</small>'
+            + '<b>' + kc(p.base) + ' Kč</b>'
+            + (akce && p.ref30 ? '<small>' + esc(t.lowest30) + ': ' + kc(p.ref30) + ' Kč</small>' : '') + '</span>'
+            + '<span class="m-price-r"><small>' + (akce && p.pct ? '<i>−' + p.pct + ' %</i> ' : '') + esc(akce ? t.akcePrice : t.ourPrice) + '</small>'
+            + '<b class="' + (akce ? 'm-red' : 'm-teal') + '">' + kc(akce ? p.action : p.base) + ' <span>' + esc(p.unit) + '</span></b>'
+            + '<small>' + esc(akce ? p.dates : t.noAkce) + '</small></span>'
+            + '</' + tag.split(' ')[0] + '>'
+            + (p.unitText ? '<div class="m-unitprice">' + esc(p.unitText) + '</div>' : '');
+    };
+    var pctOf = function (base, akce) {
+        base = parseFloat(String(base || '').replace(',', '.'));
+        akce = parseFloat(String(akce || '').replace(',', '.'));
+        return base > 0 && akce > 0 && akce < base ? '−' + Math.floor((base - akce) / base * 100) + ' %' : '—';
     };
     var pricePanel = function (p) {
         var iso = function (d) { var m = String(d || '').match(/^(\d{2})\.(\d{2})\.(\d{4})$/); return m ? m[3] + '-' + m[2] + '-' + m[1] : ''; };
-        return '<form class="m-pricepanel" data-price="' + p.id + '">'
+        var ref = p.ref30 || p.base;
+        return '<form class="m-pricepanel" data-price="' + p.id + '" data-ref="' + (p.ref30 || '') + '">'
+            + '<label>' + esc(t.regular) + ' (Kč)<input name="base" inputmode="decimal" value="' + (p.base != null ? p.base : '') + '"></label>'
             + '<label>' + esc(t.unit) + '<select name="unit">' + cfg.units.map(function (u) { return '<option' + (u === p.unit ? ' selected' : '') + '>' + esc(u) + '</option>'; }).join('') + '</select></label>'
-            + '<label>' + esc(t.regular) + '<input name="base" inputmode="decimal" value="' + (p.base != null ? p.base : '') + '"></label>'
-            + '<label>' + esc(t.akcePrice) + '<input name="akce" inputmode="decimal" value="' + (p.action != null ? p.action : '') + '" placeholder="—"></label>'
+            + '<label class="m-pp-akce">' + esc(t.akcePrice) + ' (Kč)<input name="akce" inputmode="decimal" value="' + (p.action != null ? p.action : '') + '" placeholder="' + esc(t.noAkce) + '"></label>'
+            + '<label>' + esc(t.discount) + '<output class="m-pp-pct">' + pctOf(ref, p.action) + '</output></label>'
             + '<label>' + esc(t.from) + '<input type="date" name="from" value="' + iso(p.from) + '"></label>'
             + '<label>' + esc(t.to) + '<input type="date" name="to" value="' + iso(p.to) + '"></label>'
-            + '<small>' + esc(t.priceNote) + '</small>'
-            + '<div class="m-row"><button type="button" class="m-btn m-btn-red" data-endakce="' + p.id + '">' + esc(t.endAkce) + '</button>'
-            + '<span class="m-flex"></span><button type="button" class="m-btn" data-priceclose>' + esc(t.cancel) + '</button>'
-            + '<button type="submit" class="m-btn m-btn-dark">' + esc(t.save) + '</button></div></form>';
+            + '<small>' + (p.ref30 ? esc(t.lowest30) + ': <b>' + kc(p.ref30) + ' Kč</b> · ' : '') + esc(t.priceNote) + '</small>'
+            + '<button type="button" class="m-btn m-btn-red" data-endakce="' + p.id + '">' + esc(t.endAkce) + '</button>'
+            + '<button type="submit" class="m-btn m-btn-dark">' + esc(t.save) + '</button></form>';
     };
     var productCard = function (p) {
-        var chips = state.queue.filter(function (e) { return e.pid === p.id; }).map(function (e) {
+        var mine = state.queue.filter(function (e) { return e.pid === p.id; });
+        var chips = mine.map(function (e) {
             return '<span class="m-chip' + (typeById[e.type].akce ? ' m-chip-akce' : '') + '">' + esc(typeById[e.type].name) + ' × ' + e.qty + '</span>';
         }).join('');
-        var n = state.queue.filter(function (e) { return e.pid === p.id; }).reduce(function (a, e) { return a + e.qty; }, 0);
-        return '<div class="m-card m-product">'
-            + '<div class="m-prod-top"><div class="m-thumb"' + (p.image ? ' style="background-image:url(\'' + esc(p.image) + '\')"' : '') + '>' + (p.image ? '' : '📷') + '</div>'
-            + '<div class="m-prod-name"><b>' + esc(p.name) + '</b><small>' + esc([p.ean ? 'EAN ' + p.ean : '', p.weight, p.origin].filter(Boolean).join(' · ')) + '</small></div>'
-            + '<span class="m-status m-status-' + p.status + '">' + esc(statusText[p.status] || '') + '</span></div>'
+        var n = mine.reduce(function (a, e) { return a + e.qty; }, 0);
+        return '<div class="m-card m-product' + (n ? ' m-product-on' : '') + '">'
+            + '<div class="m-prod-top"><div class="m-thumb"' + (p.image ? ' style="background-image:url(\'' + esc(p.image) + '\')"' : '') + '>' + (p.image ? '' : '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="15" rx="2.5"/><circle cx="9" cy="10.5" r="1.6"/><path d="m21 16-4.5-4.5L7 20"/></svg>') + '</div>'
+            + '<div class="m-prod-name"><a href="' + editUrl(p.id) + '">' + esc(p.name) + ' <i>›</i></a><small>' + esc([p.ean ? 'EAN ' + p.ean : '', p.weight, p.origin].filter(Boolean).join(' · ')) + '</small></div>'
+            + '<div class="m-prod-side"><span class="m-status m-status-' + p.status + '">' + esc(statusText[p.status] || '') + '</span>'
+            + '<a class="m-editbtn" href="' + editUrl(p.id) + '">✎ ' + esc(t.edit) + '</a></div></div>'
             + priceBlock(p)
-            + (cfg.canSend ? '<button type="button" class="m-link" data-priceopen="' + p.id + '">✎ ' + esc(t.editPrice) + '</button>' : '')
             + (state.priceOpen === p.id ? pricePanel(p) : '')
             + '<div class="m-prod-foot"><div class="m-chips">' + (chips || '<span class="m-muted">' + esc(t.noLabels) + '</span>') + '</div>'
-            + '<button type="button" class="m-btn m-btn-outline" data-sheet="' + p.id + '">🖨 ' + esc(t.labels) + (n ? ' · ' + n : '') + ' ▾</button></div>'
+            + '<button type="button" class="m-btn m-btn-outline m-labelsbtn" data-sheet="' + p.id + '"><svg viewBox="0 0 24 24"><path d="M7 9V4h10v5M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 14h10v6H7z"/></svg>' + esc(t.labels) + (n ? ' · ' + n : '') + ' ▾</button></div>'
             + '</div>';
     };
 
@@ -218,7 +229,7 @@
             + '<div class="m-card m-kpi"><small>' + esc(t.kpiVykup) + '</small><b id="m-k-vykup">…</b></div>'
             + '</div><div class="m-label">' + esc(t.quickActions) + '</div>'
             + '<button type="button" class="m-big m-big-dark" data-go="scan">' + esc(t.scanBtn) + '</button>'
-            + '<button type="button" class="m-big" data-go="scan" data-focus-search>' + esc(t.productsBtn) + '</button>';
+            + '<button type="button" class="m-big" data-go="products">' + esc(t.productsBtn) + '</button>';
         ajax(cfg.urls.stats).then(function (s) {
             $('#m-k-akce').textContent = s.akce;
             $('#m-k-wait').textContent = s.waiting;
@@ -305,9 +316,81 @@
         }).catch(function () { el.innerHTML = '<div class="m-card m-empty">' + esc(t.error) + '</div>'; });
     };
 
+    // Produkty: search (+ scan button), filters, summary, cards, "load more", print button
+    var renderProducts = function () {
+        var el = $('[data-screen="products"]');
+        if (!el.firstChild) {
+            el.innerHTML = '<div class="m-psearch"><input type="search" class="m-search" id="m-psearch" placeholder="' + esc(t.searchPh) + '" autocomplete="off" inputmode="search" enterkeyhint="search">'
+                + '<button type="button" class="m-psearch-scan" data-go="scan" aria-label="' + esc(t.scanEan) + '"><svg viewBox="0 0 24 24"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M7 12h10"/></svg></button></div>'
+                + '<div class="m-pills">' + [['all', t.filterAll], ['running', t.filterRunning], ['planned', t.filterPlanned], ['toprint', t.filterToPrint]].map(function (f) {
+                    return '<button type="button" data-pfilter="' + f[0] + '">' + esc(f[1]) + '</button>';
+                }).join('') + '</div><div class="m-psummary" id="m-psummary"></div><div id="m-plist"></div>';
+            loadList(false);
+        }
+        el.querySelectorAll('[data-pfilter]').forEach(function (b) { b.classList.toggle('m-on', b.getAttribute('data-pfilter') === state.prod.filter); });
+        var list = state.prod.ids.map(function (id) { return state.products[id]; }).filter(Boolean);
+        var html = list.map(productCard).join('');
+        if (!list.length && !state.prod.loading) {
+            html = '<div class="m-card m-empty">' + esc(state.prod.filter === 'toprint' ? t.queueEmpty : t.noResults) + '</div>';
+        }
+        if (state.prod.loading) {
+            html += '<div class="m-card m-empty">…</div>';
+        } else if (state.prod.next != null) {
+            html += '<button type="button" class="m-btn m-btn-outline m-wide" data-pmore>' + esc(t.more) + '</button>';
+        }
+        if (queueCount()) {
+            html += '<button type="button" class="m-big m-big-teal m-stickybtn" data-go="queue">' + esc(fmt(t.printQueue, queueCount())) + '</button>';
+        }
+        $('#m-plist').innerHTML = html;
+        $('#m-psummary').textContent = fmt(t.prodSummary, state.prod.total, state.prod.akce == null ? '…' : state.prod.akce, queueCount());
+    };
+    var loadList = function (more) {
+        var pr = state.prod;
+        var seq = ++pr.seq;
+        pr.loading = true;
+        if (!more) {
+            pr.ids = [];
+            pr.next = null;
+        }
+        if (pr.akce == null) {
+            ajax(cfg.urls.stats).then(function (s) { pr.akce = s.akce; if (state.screen === 'products') { renderProducts(); } }).catch(function () {});
+        }
+        var done = function () {
+            if (seq === pr.seq) {
+                pr.loading = false;
+                if (state.screen === 'products') {
+                    renderProducts();
+                }
+            }
+        };
+        if (pr.filter === 'toprint') {
+            // the labels waiting on this phone
+            var ids = state.queue.map(function (e) { return e.pid; }).filter(function (id, i, a) { return a.indexOf(id) === i; });
+            loadProducts(ids).then(function () {
+                if (seq !== pr.seq) { return; }
+                var term = pr.term.toLowerCase();
+                pr.ids = ids.filter(function (id) { var p = state.products[id]; return p && (!term || (p.name + ' ' + p.ean).toLowerCase().indexOf(term) >= 0); });
+                pr.total = pr.ids.length;
+                done();
+            }).catch(done);
+            return;
+        }
+        ajax(withParams(cfg.urls.list, { filter: pr.filter, term: pr.term, offset: more ? pr.next : 0 })).then(function (r) {
+            if (seq !== pr.seq) { return; }
+            r.items.forEach(remember);
+            pr.ids = pr.ids.concat(r.items.map(function (p) { return p.id; }));
+            pr.total = r.total;
+            pr.next = r.next;
+            done();
+        }).catch(function () { toast(t.error); done(); });
+        if (state.screen === 'products') {
+            renderProducts();
+        }
+    };
+
     var render = function () {
         badges();
-        ({ overview: renderOverview, scan: renderScan, queue: renderQueue, jobs: renderJobs })[state.screen]();
+        ({ overview: renderOverview, products: renderProducts, scan: renderScan, queue: renderQueue, jobs: renderJobs })[state.screen]();
     };
 
     // ---------- the template sheet ----------
@@ -793,12 +876,22 @@
         }
         if (d.priceopen) {
             state.priceOpen = state.priceOpen === parseInt(d.priceopen, 10) ? null : parseInt(d.priceopen, 10);
-            renderScan();
+            render();
             return;
         }
         if (d.priceclose !== undefined) {
             state.priceOpen = null;
-            renderScan();
+            render();
+            return;
+        }
+        if (d.pfilter) {
+            state.prod.filter = d.pfilter;
+            state.priceOpen = null;
+            loadList(false);
+            return;
+        }
+        if (d.pmore !== undefined) {
+            loadList(true);
             return;
         }
         if (d.endakce) {
@@ -901,7 +994,25 @@
         }
     });
 
+    var listTimer;
     document.addEventListener('input', function (ev) {
+        if (ev.target.id === 'm-psearch') {
+            clearTimeout(listTimer);
+            var pterm = ev.target.value.trim();
+            listTimer = setTimeout(function () {
+                state.prod.term = pterm;
+                loadList(false);
+            }, 300);
+            return;
+        }
+        // "Cena a akce": the discount follows the typed prices (from the 30-day low when there is one)
+        var pform = ev.target.form;
+        if (pform && pform.dataset && pform.dataset.price) {
+            var out = pform.querySelector('.m-pp-pct');
+            if (out) {
+                out.textContent = pctOf(pform.dataset.ref || pform.base.value, pform.akce.value);
+            }
+        }
         if (ev.target.id === 'm-search') {
             clearTimeout(searchTimer);
             var term = ev.target.value;

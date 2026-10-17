@@ -5670,3 +5670,49 @@ body.mosaic-login-page main.page-content {
 	}
 	.page-sidebar.mosaic-sidebar { border-top: 1px solid #1e293b; }
 }
+
+/* ==========================================================================
+   Produkty on phones = the product card of the phone app design ("Admin – tisk štítků mobil"
+   Produkty, also /admin/mobil): name ›, "EAN · weight · country", status + ✎ Upravit on the right,
+   one price box (Běžná cena · 30 dní | −% Akční cena · dates) that opens "Cena a akce",
+   small label chips + "Štítky · n ▾". The extra parts (.pv-mprice, .pv-mside, …) exist only for phones.
+   ========================================================================== */
+.pv-mprice, .pv-mside, .pv-mmeta, .pv-mgo, .pv-labels-n { display: none; }
+@media (max-width: 767px) {
+	.pv-row .pv-grid { grid-template-columns: 22px minmax(0, 1fr) minmax(0, 1fr) auto; grid-template-areas: "chk prod prod side" "price price price price" "chips chips chips act"; gap: 10px 8px; padding: 12px 12px 10px; }
+	.pv-row { border-width: 2px; }
+	.pv-row .pv-grid > div:first-child { padding-top: 16px; }
+	.pv-row [id$="-price"] > .pv-cellbtn:not(.pv-mprice) { display: none; }
+	.pv-row .pv-mprice, .pv-row .pv-mmeta, .pv-row .pv-mgo, .pv-row .pv-labels-n { display: inline; }
+	.pv-row .pv-mside { grid-area: side; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+	.pv-mside .pv-status { padding: 3px 9px; font-size: 11px; white-space: nowrap; }
+	.pv-medit, .pv-medit:hover, .pv-medit:focus { display: inline-flex; align-items: center; height: 34px; padding: 0 10px; border: 1px solid #99f6e4; border-radius: 9px; background: #f0fdfa; color: #0f766e; font-size: 12.5px; font-weight: 800; white-space: nowrap; text-decoration: none; }
+	.pv-thumb { width: 52px; height: 52px; border-radius: 10px; }
+	.pv-name, .pv-name:hover { font-size: 14.5px; font-weight: 800; line-height: 1.3; }
+	.pv-mgo { font-style: normal; font-size: 13px; color: #0f766e; }
+	.pv-ean { font-size: 11.5px; word-break: normal; overflow-wrap: anywhere; }
+
+	.pv-row .pv-mprice { grid-area: price; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; min-height: 0; height: auto; margin: 0; padding: 8px 10px; border: 1px solid #eef1f5; border-radius: 10px; background: #fafbfc; text-align: left; }
+	.pv-row.pv-open-price-on .pv-mprice { border-color: #99f6e4; background: #f0fdfa; }
+	.pv-mp-l, .pv-mp-r { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+	.pv-mp-r { align-items: flex-end; text-align: right; }
+	.pv-mprice small { font-size: 9px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
+	.pv-mprice small em { margin-left: 4px; color: #0f766e; font-size: 10.5px; font-weight: 800; font-style: normal; text-transform: none; letter-spacing: 0; }
+	.pv-mprice small i { margin-right: 3px; padding: 1px 5px; border-radius: 4px; background: #fee2e2; color: #b91c1c; font-size: 11px; font-weight: 800; font-style: normal; letter-spacing: 0; }
+	.pv-mprice small.pv-mp-note { font-size: 9.5px; font-weight: 500; text-transform: none; letter-spacing: 0; }
+	.pv-mp-l b { font-size: 17px; font-weight: 800; color: #17202b; font-variant-numeric: tabular-nums; }
+	.pv-mp-r b { font-size: 24px; line-height: 1; font-weight: 900; font-style: italic; color: #0d9488; white-space: nowrap; font-variant-numeric: tabular-nums; }
+	.pv-mp-r b.pv-mp-akce { color: #dc2626; }
+	.pv-mp-r b span { font-size: 12px; }
+
+	/* label chips: small coloured pills (counts, header and ✎ ◉ stay in "Štítky") */
+	.pv-row [id$="-chips"] > .pv-chips { align-items: center; gap: 6px; }
+	.pv-chips .pv-chip { display: inline-flex; flex: none; width: auto; padding: 0; border: none; background: none; }
+	.pv-chips .pv-chip .pv-hdr, .pv-chips .pv-chip .pv-chip-btns { display: none !important; }
+	.pv-chips .pv-chip-badge { flex-direction: row; gap: 4px; min-width: 0; height: auto; padding: 3px 8px; border-radius: 7px; }
+	.pv-chips .pv-chip-l { font-size: 11.5px; }
+	.pv-chips .pv-chip-n { margin: 0; font-size: 11.5px; }
+	.pv-chips .pv-labels-btn { flex: 0 0 auto; margin-left: auto; height: 40px; padding: 0 12px; border-radius: 10px; font-size: 13px; font-weight: 800; }
+	.pv-row .pv-actions { grid-area: act; align-self: center; gap: 6px; }
+	.pv-row .pv-actions .pv-iconbtn { width: 40px; height: 40px; border-radius: 10px; }
+}

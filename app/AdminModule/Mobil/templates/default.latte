@@ -29,6 +29,7 @@
 
     <main class="m-main">
         <section class="m-screen" data-screen="overview" hidden></section>
+        <section class="m-screen" data-screen="products" hidden></section>
 
         <section class="m-screen" data-screen="scan" hidden>
             <div class="m-cam" id="m-cam" role="button" tabindex="0">
@@ -60,6 +61,7 @@
         <div class="m-drawer-panel">
             <div class="m-drawer-head"><b>{_admin.mob.appTitle}</b><small>{$config['branch']['name']} · {$config['user']}</small></div>
             <button type="button" data-go="overview">{_admin.mob.overview}</button>
+            <button type="button" data-go="products">{_admin.mob.products}</button>
             <button type="button" data-go="scan">{_admin.mob.scan}</button>
             <button type="button" data-go="queue">{_admin.mob.queue}</button>
             <button type="button" data-go="jobs">{_admin.mob.sent}</button>

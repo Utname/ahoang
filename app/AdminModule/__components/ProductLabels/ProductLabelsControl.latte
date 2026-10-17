@@ -40,6 +40,31 @@
                 <span class="pv-missing">{_admin.pv.missingFrom}</span>
             {/if}
         </button>
+        {* phones (custom.css "Phones"): one price box and status + Upravit as in the phone app design
+           ("Admin – tisk štítků mobil" Produkty); hidden on wider screens *}
+        {var $hasAction = $price && $price->price !== NULL && (float)$price->price_action > 0}
+        {var $ref30 = $hasAction ? $item->getRefPrice($branchesId) : NULL}
+        {var $pctBase = $ref30 ?: ($price ? (float)$price->price : 0)}
+        <button type="button" class="pv-cellbtn pv-open-price pv-mprice" data-id="{$item->id}">
+            {if !$price || $price->price === NULL}
+                <span class="pv-mp-l"><small>{_admin.pv.basePrice} <em>✎ {_admin.pv.editPrice}</em></small><b class="pv-muted">{_admin.pv.noPrice}</b></span>
+            {else}
+                <span class="pv-mp-l">
+                    <small>{_admin.pv.basePrice} <em>✎ {_admin.pv.editPrice}</em></small>
+                    <b>{$price->price|number:2,',',' '} Kč</b>
+                    <small n:if="$ref30" class="pv-mp-note">{_admin.pv.min30}: {$ref30|number:2,',',' '} Kč</small>
+                </span>
+                <span class="pv-mp-r">
+                    <small><i n:if="$hasAction && $pctBase > (float)$price->price_action">−{=floor(($pctBase - (float)$price->price_action) / $pctBase * 100)} %</i> {$hasAction ? ('admin.pv.akcePrice'|translate) : ('admin.pv.ourPrice'|translate)}</small>
+                    <b n:class="$hasAction ? pv-mp-akce">{$hasAction ? ($price->price_action|number:2,',',' ') : ($price->price|number:2,',',' ')} <span>{$unit}</span></b>
+                    <small class="pv-mp-note">{if $price->action_from || $price->action_to}{$price->action_from ? ($price->action_from|date:'d.m.') : '…'} – {$price->action_to ? ($price->action_to|date:'d.m.') : '…'}{else}{_"admin.pv.status.$status"}{/if}</small>
+                </span>
+            {/if}
+        </button>
+        <div class="pv-mside">
+            <span class="pv-status pv-st-{$status}">{_"admin.pv.status.$status"}</span>
+            <a href="{plink edit $item->id}" class="pv-medit">✎ {_admin.pv.edit}</a>
+        </div>
     {/if}
 {/snippet}
 {/if}
@@ -85,7 +110,7 @@
                     </span>
                 {/foreach}
             {/foreach}
-            <button n:if="$price" type="button" class="pv-labels-btn pv-open-labels" data-id="{$item->id}">{_admin.pv.labelsBtn} ▾</button>
+            <button n:if="$price" type="button" class="pv-labels-btn pv-open-labels" data-id="{$item->id}">{_admin.pv.labelsBtn}<span n:if="array_sum($counts)" class="pv-labels-n"> · {array_sum($counts)}</span> ▾</button>
         </div>
     {/if}
 {/snippet}

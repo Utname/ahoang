@@ -145,6 +145,12 @@ propose new price tables – NOT used: prices stay in `product_prices` / `produc
   `www/css/mobil.css` (vanilla JS) do the rest. The queue lives in localStorage until "Odeslat"
   (`handleSend`, raw JSON body → `PrintListsService::create()`). Other JSON signals: search, byCode,
   products, savePrice (`ProductPriceSaver`), lists, stats, preview (`pdfFromItems()`, unsent queue).
+  Produkty screen (design "Produkty"): `handleList` = the branch's priced products 20 at a time
+  (filter all/running/planned + name/EAN; "K tisku" = the phone queue, client side); the product card
+  (`productCard()`, also used by Scan results) = name ›, status + ✎ Upravit (admin product card),
+  price box that opens "Cena a akce" (Sleva live from the 30-day low), chips + "Štítky · n ▾".
+  The bottom tabs show only on Scan/Fronta/Odesláno (as in the design). Admin Produkty on phones
+  shows the same card (`.pv-mprice`/`.pv-mside` in ProductLabelsControl :price, hidden on desktop).
   An unknown scanned code opens "Nový produkt" (with the Products_create right): `handleCreateProduct` →
   `ProductQuickCreator` (multipart POST: code/EAN, name in all languages, category, country, photo –
   shrunk to 1600 px on the phone, upload limit 2 MB –, package/unit price basis, label notes, ingredients,

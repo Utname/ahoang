@@ -120,9 +120,12 @@
                                             {/if}
                                         </div>
                                         <div class="pv-prod-text">
-                                            <a n:href="edit $item->id" class="pv-name">{$item->name}</a>
+                                            <a n:href="edit $item->id" class="pv-name">{$item->name}<i class="pv-mgo"> ›</i></a>
+                                            {* phones: "EAN · 250 ml · Německo" as in the phone app design *}
+                                            {var $mCountry = $item->getCountry()}
+                                            {var $mMeta = array_filter([(float)$item->weight > 0 && isset(\ProductsEntity::UNITS_SHORT[(int)$item->units_id]) ? rtrim(rtrim(number_format((float)$item->weight, 2, ',', ''), '0'), ',') . ' ' . \ProductsEntity::UNITS_SHORT[(int)$item->units_id] : '', $mCountry ? $mCountry->name : ''])}
                                             <span class="pv-ean">
-                                                {if $item->code_ean}EAN {$item->code_ean}{/if}
+                                                {if $item->code_ean}EAN {$item->code_ean}{/if}<span n:if="$mMeta" class="pv-mmeta"> · {implode(' · ', $mMeta)}</span>
                                                 <span n:if="!$item->is_active" class="pv-inactive">{_admin.pv.inactive}</span>
                                             </span>
                                         </div>
