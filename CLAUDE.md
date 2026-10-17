@@ -149,6 +149,12 @@ propose new price tables – NOT used: prices stay in `product_prices` / `produc
   (filter all/running/planned + name/EAN; "K tisku" = the phone queue, client side); the product card
   (`productCard()`, also used by Scan results) = name ›, status + ✎ Upravit (admin product card),
   price box that opens "Cena a akce" (Sleva live from the 30-day low), chips + "Štítky · n ▾".
+  "✎ Upravit" / the name opens Detail produktu (design "Mobil – detail produktu", with Products_edit):
+  `handleDetail` / `handleSaveProduct` (multipart) → `ProductQuickEditor` – categories, name (cs), code,
+  active (all languages), photo (becomes the main one), content, origin, the branch price (ProductPriceSaver
+  only when it changed – every save writes a price-log row), notes, Složení, allergens = the closing
+  "Obsahuje alergeny: …." sentence of `ingredients` (no column), thawed, nutrition values, perex, SEO.
+  Signal params must not be called `id` (the route takes it) → `productsId`.
   The bottom tabs show only on Scan/Fronta/Odesláno (as in the design). Admin Produkty on phones
   shows the same card (`.pv-mprice`/`.pv-mside` in ProductLabelsControl :price, hidden on desktop).
   An unknown scanned code opens "Nový produkt" (with the Products_create right): `handleCreateProduct` →

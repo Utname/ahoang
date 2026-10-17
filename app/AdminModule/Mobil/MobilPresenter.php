@@ -43,6 +43,9 @@ class MobilPresenter extends BaseModulePresenter
 	/** @var \CategoriesRepository @inject */
 	public $categoriesRepo;
 
+	/** @var \ProductQuickEditor @inject */
+	public $productQuickEditor;
+
 	/** texts of the app (admin.mob.*), translated for the admin's language */
 	private const TEXT_KEYS = [
 		'appTitle', 'overview', 'scan', 'queue', 'sent', 'queueTitle',
@@ -63,6 +66,9 @@ class MobilPresenter extends BaseModulePresenter
 		'newAllBranches', 'newLabel', 'newNote', 'newIngredients', 'newThawed', 'newConsumption', 'newPerex', 'newOptional',
 		'products', 'filterAll', 'filterRunning', 'filterPlanned', 'filterToPrint', 'prodSummary', 'more', 'edit',
 		'printQueue', 'discount', 'scanEan',
+		'dtBack', 'dtUnsaved', 'dtSaved', 'dtCategories', 'dtChange', 'dtDone', 'dtNone', 'dtActive', 'dtCode', 'dtCodeBad',
+		'dtPhoto', 'dtContent', 'dtPrice', 'dtLabel', 'dtAllergens', 'dtAllergensNote', 'dtNutrition', 'dtNutritionRef',
+		'dtPerex', 'dtSeo', 'dtMetaTitle', 'dtMetaDesc', 'dtSlug', 'dtWarnPrice', 'dtWarnDates', 'dtLeave', 'dtSaving',
 	];
 
 	/** @var array<int, string> */
@@ -145,6 +151,9 @@ class MobilPresenter extends BaseModulePresenter
 			'canSend' => $this->hasPermission('edit'),
 			// a scanned code that is not known can become a new product
 			'canCreate' => $this->aps->has('Products_create'),
+			// the product detail screen saves the product card
+			'canEditProduct' => $this->aps->has('Products_edit'),
+			'allergens' => \ProductQuickEditor::ALLERGENS,
 			'types' => $types,
 			'headers' => $headers,
 			'countries' => $countries,
@@ -159,6 +168,8 @@ class MobilPresenter extends BaseModulePresenter
 				'byCode' => $this->link('byCode!'),
 				'products' => $this->link('products!'),
 				'list' => $this->link('list!'),
+				'detail' => $this->link('detail!'),
+				'saveProduct' => $this->link('saveProduct!'),
 				// "✎ Upravit" on a product card: the admin product card (999999 = the product id)
 				'productEdit' => $this->link('Products:edit', ['id' => 999999]),
 				'savePrice' => $this->link('savePrice!'),
@@ -250,6 +261,30 @@ class MobilPresenter extends BaseModulePresenter
 			}
 		}
 		$this->sendJson(['total' => $total, 'items' => $items, 'next' => $offset + 20 < $total ? $offset + 20 : NULL]);
+	}
+
+
+	/** Detail produktu: what the screen edits (the product card, the price of this branch). */
+	public function handleDetail(int $productsId = 0): void
+	{
+		$this->sendJson($this->productQuickEditor->detail($productsId, $this->branchesId));
+	}
+
+
+	/** Detail produktu "Uložit" (multipart POST: the fields + an optional photo). */
+	public function handleSaveProduct(int $productsId = 0): void
+	{
+		if (!$this->aps->has('Products_edit')) {
+			$this->sendJson(['ok' => FALSE, 'error' => $this->trans('admin.mob.noRight')]);
+		}
+		$request = $this->getHttpRequest();
+		try {
+			$this->productQuickEditor->save($productsId, (array)$request->getPost(), $this->branchesId, array_map('intval', array_keys($this->branchesPairs)), $request->getFile('photo'));
+		}
+		catch (\InvalidArgumentException $e) {
+			$this->sendJson(['ok' => FALSE, 'error' => $this->trans($e->getMessage())]);
+		}
+		$this->sendJson(['ok' => TRUE, 'product' => $this->productInfo($productsId), 'detail' => $this->productQuickEditor->detail($productsId, $this->branchesId)]);
 	}
 
 

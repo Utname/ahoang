@@ -78,6 +78,7 @@ services:
 	- ProductPriceSaver
 	- PrintListsService
 	- ProductQuickCreator
+	- ProductQuickEditor
 	- ProductPricesService
 	- ProductsService
 	- PricesService

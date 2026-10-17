@@ -209,9 +209,9 @@
         var n = mine.reduce(function (a, e) { return a + e.qty; }, 0);
         return '<div class="m-card m-product' + (n ? ' m-product-on' : '') + '">'
             + '<div class="m-prod-top"><div class="m-thumb"' + (p.image ? ' style="background-image:url(\'' + esc(p.image) + '\')"' : '') + '>' + (p.image ? '' : '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="15" rx="2.5"/><circle cx="9" cy="10.5" r="1.6"/><path d="m21 16-4.5-4.5L7 20"/></svg>') + '</div>'
-            + '<div class="m-prod-name"><a href="' + editUrl(p.id) + '">' + esc(p.name) + ' <i>›</i></a><small>' + esc([p.ean ? 'EAN ' + p.ean : '', p.weight, p.origin].filter(Boolean).join(' · ')) + '</small></div>'
+            + '<div class="m-prod-name"><a href="' + editUrl(p.id) + '" data-detail="' + p.id + '">' + esc(p.name) + ' <i>›</i></a><small>' + esc([p.ean ? 'EAN ' + p.ean : '', p.weight, p.origin].filter(Boolean).join(' · ')) + '</small></div>'
             + '<div class="m-prod-side"><span class="m-status m-status-' + p.status + '">' + esc(statusText[p.status] || '') + '</span>'
-            + '<a class="m-editbtn" href="' + editUrl(p.id) + '">✎ ' + esc(t.edit) + '</a></div></div>'
+            + '<a class="m-editbtn" href="' + editUrl(p.id) + '" data-detail="' + p.id + '">✎ ' + esc(t.edit) + '</a></div></div>'
             + priceBlock(p)
             + (state.priceOpen === p.id ? pricePanel(p) : '')
             + '<div class="m-prod-foot"><div class="m-chips">' + (chips || '<span class="m-muted">' + esc(t.noLabels) + '</span>') + '</div>'
@@ -535,7 +535,15 @@
         });
     };
     document.addEventListener('change', function (ev) {
-        if (ev.target.name !== 'photo' || !ev.target.closest('form[data-newproduct]')) {
+        if (ev.target.closest && ev.target.closest('#m-dt-form')) {
+            detailDirty();
+            detailChecks();
+            if (ev.target.name === 'categories[]') {
+                var names = [].slice.call(ev.target.form.querySelectorAll('input[name="categories[]"]:checked')).map(function (c) { return c.nextElementSibling.textContent; });
+                $('#m-detail .m-dt-cats').innerHTML = names.length ? names.map(function (n) { return '<span class="m-dt-tag">' + esc(n) + '</span>'; }).join('') : '<span class="m-muted">' + esc(t.dtNone) + '</span>';
+            }
+        }
+        if (ev.target.name !== 'photo' || !ev.target.closest('form[data-newproduct], form[data-detail]')) {
             return;
         }
         var file = ev.target.files && ev.target.files[0];
@@ -596,6 +604,189 @@
                 render();
                 openSheet(p.id);
             }
+        }).catch(function () { fail(t.error); });
+    };
+
+    // ---------- product detail ("Mobil – detail produktu"): the product card, saved by saveProduct ----------
+    var detail = null;   // {id, data (server), dirty, catOpen, saving}
+    // EAN-8 / EAN-13 check digit; other codes (the shop's own) are not checked
+    var eanOk = function (code) {
+        var d = String(code || '').trim();
+        if (!/^(\d{8}|\d{13})$/.test(d)) {
+            return true;
+        }
+        var n = d.length;
+        var sum = 0;
+        for (var i = 0; i < n - 1; i++) { sum += +d[i] * ((n - 1 - i) % 2 ? 3 : 1); }
+        return (10 - sum % 10) % 10 === +d[n - 1];
+    };
+    var openDetail = function (pid) {
+        detail = { id: pid, data: null, dirty: false, catOpen: false, saving: false };
+        var el = $('#m-detail');
+        el.innerHTML = '<div class="m-dt-head"><button type="button" class="m-dt-back" data-dtclose>' + esc(t.dtBack) + '</button><div class="m-dt-title"><b>…</b></div></div><div class="m-dt-body"><div class="m-card m-empty">…</div></div>';
+        el.hidden = false;
+        document.body.classList.add('m-noscroll');
+        ajax(withParams(cfg.urls.detail, { productsId: pid })).then(function (d) {
+            if (!detail || detail.id !== pid) {
+                return;
+            }
+            if (!d) {
+                closeDetail(true);
+                toast(t.notFound);
+                return;
+            }
+            detail.data = d;
+            renderDetail();
+        }).catch(function () { closeDetail(true); toast(t.error); });
+    };
+    var closeDetail = function (force) {
+        if (!force && detail && detail.dirty && !window.confirm(t.dtLeave)) {
+            return;
+        }
+        detail = null;
+        $('#m-detail').hidden = true;
+        $('#m-detail').innerHTML = '';
+        document.body.classList.remove('m-noscroll');
+    };
+    var dtHead = function () {
+        return '<div class="m-dt-head"><button type="button" class="m-dt-back" data-dtclose>' + esc(t.dtBack) + '</button>'
+            + '<div class="m-dt-title"><b id="m-dt-name">' + esc(detail.data.name) + '</b><small id="m-dt-state" class="' + (detail.dirty ? 'm-dt-dirty' : '') + '">' + esc(detail.dirty ? t.dtUnsaved : t.dtSaved) + '</small></div>'
+            + '<button type="button" class="m-icon-btn m-dt-print" data-dtprint aria-label="' + esc(t.labels) + '"><svg viewBox="0 0 24 24"><path d="M7 9V4h10v5M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 14h10v6H7z"/></svg></button>'
+            + (cfg.canEditProduct ? '<button type="submit" form="m-dt-form" class="m-dt-save"' + (detail.saving ? ' disabled' : '') + '>' + esc(detail.saving ? t.dtSaving : t.save) + '</button>' : '')
+            + '</div>';
+    };
+    var renderDetail = function () {
+        var d = detail.data;
+        var p = state.products[d.id] || {};
+        var opt = function (v, label, sel) { return '<option value="' + esc(v) + '"' + (sel ? ' selected' : '') + '>' + esc(label) + '</option>'; };
+        var chip = function (name, value, on, label) { return '<label class="m-dt-chip"><input type="checkbox" name="' + name + '" value="' + esc(value) + '"' + (on ? ' checked' : '') + '><span>' + esc(label) + '</span></label>'; };
+        var catNames = cfg.categories.filter(function (c) { return d.categories.indexOf(c.id) >= 0; }).map(function (c) { return c.name; });
+        var html = dtHead() + '<form class="m-dt-body" id="m-dt-form" data-detail="' + d.id + '" autocomplete="off">';
+        // categories: the chosen ones, all of them after "Změnit"
+        html += '<div class="m-card m-dt-card"><div class="m-dt-row"><span class="m-dt-label">' + esc(t.dtCategories) + '</span>'
+            + '<div class="m-dt-cats">' + (catNames.length ? catNames.map(function (n) { return '<span class="m-dt-tag">' + esc(n) + '</span>'; }).join('') : '<span class="m-muted">' + esc(t.dtNone) + '</span>') + '</div>'
+            + '<button type="button" class="m-dt-link" data-dtcats>' + esc(detail.catOpen ? t.dtDone : t.dtChange) + '</button></div>'
+            + '<div class="m-dt-chips"' + (detail.catOpen ? '' : ' hidden') + '>' + cfg.categories.map(function (c) { return chip('categories[]', c.id, d.categories.indexOf(c.id) >= 0, c.name); }).join('') + '</div></div>';
+        // main data
+        html += '<div class="m-card m-dt-card">'
+            + '<label class="m-field"><span>' + esc(t.newName) + '</span><input name="name" value="' + esc(d.name) + '" maxlength="250"></label>'
+            + '<div class="m-field-row"><label class="m-field"><span>' + esc(t.dtCode) + '</span><input name="code" value="' + esc(d.code) + '" inputmode="numeric" maxlength="32"></label>'
+            + '<label class="m-check m-check-inline"><input type="checkbox" name="active" value="1"' + (d.active ? ' checked' : '') + '><span>' + esc(t.dtActive) + '</span></label></div>'
+            + '<p class="m-dt-warn" id="m-dt-ean"' + (eanOk(d.code) ? ' hidden' : '') + '>' + esc(t.dtCodeBad) + '</p>'
+            + '<label class="m-photo"><input type="file" name="photo" accept="image/*" capture="environment" hidden>'
+            + '<span class="m-photo-box"><img alt=""' + (p.image ? ' src="' + esc(p.image) + '"' : ' hidden') + '><b>📷 ' + esc(t.dtPhoto) + '</b></span></label>'
+            + '<div class="m-field-row"><label class="m-field"><span>' + esc(t.dtContent) + '</span><input name="weight" value="' + esc(d.weight) + '" inputmode="decimal"></label>'
+            + '<label class="m-field"><span>&nbsp;</span><select name="units_id">' + cfg.sizeUnits.map(function (u) { return opt(u.id, u.short, u.id === d.unitsId); }).join('') + '</select></label></div>'
+            + '<label class="m-field"><span>' + esc(t.origin) + '</span><select name="country">' + opt('', '—') + cfg.countries.map(function (c) { return opt(c.id, c.name, c.id === d.country); }).join('') + '</select></label>'
+            + '</div>';
+        // price of this branch
+        html += '<div class="m-card m-dt-card m-dt-price" data-ref="' + (p.ref30 || '') + '"><div class="m-dt-row"><b class="m-dt-h">' + esc(t.dtPrice) + '</b><span class="m-muted">📍 ' + esc(cfg.branch.name) + '</span><span class="m-flex"></span>'
+            + '<span class="m-status m-status-' + (p.status || 'none') + '">' + esc(statusText[p.status] || statusText.none) + '</span></div>'
+            + '<div class="m-dt-units">' + cfg.units.map(function (u) { return '<label class="m-dt-chip"><input type="radio" name="price_unit" value="' + esc(u) + '"' + (u === d.priceUnit ? ' checked' : '') + '><span>' + esc(u) + '</span></label>'; }).join('') + '</div>'
+            + '<div class="m-field-row m-field-row-even"><label class="m-field"><span>' + esc(t.regular) + '</span><input name="price" value="' + (d.base != null ? d.base : '') + '" inputmode="decimal"></label>'
+            + '<label class="m-field m-dt-akce"><span>' + esc(t.akcePrice) + ' <i class="m-dt-pct" id="m-dt-pct"></i></span><input name="price_action" value="' + (d.action != null ? d.action : '') + '" inputmode="decimal" placeholder="—"></label></div>'
+            + (p.ref30 ? '<small class="m-muted">' + esc(t.lowest30) + ': ' + kc(p.ref30) + ' Kč</small>' : '')
+            + '<div class="m-field-row m-field-row-even"><label class="m-field"><span>' + esc(t.from) + '</span><input type="date" name="action_from" value="' + esc(d.from || '') + '"></label>'
+            + '<label class="m-field"><span>' + esc(t.to) + '</span><input type="date" name="action_to" value="' + esc(d.to || '') + '"></label></div>'
+            + '<p class="m-dt-warn" id="m-dt-pwarn" hidden></p>'
+            + '<button type="button" class="m-btn m-btn-red" data-dtendakce>' + esc(t.endAkce) + '</button></div>';
+        // on the label
+        html += '<div class="m-card m-dt-card"><b class="m-dt-h">' + esc(t.dtLabel) + '</b>'
+            + [0, 1, 2].map(function (i) { return '<label class="m-field"><span>' + esc(fmt(t.newNote, i + 1)) + '</span><input name="label_note_' + (i + 1) + '" value="' + esc(d.notes[i]) + '" maxlength="255"></label>'; }).join('')
+            + '<label class="m-field"><span>' + esc(t.newIngredients) + '</span><textarea name="ingredients" rows="4">' + esc(d.ingredients) + '</textarea></label>'
+            + '<div class="m-field"><span>' + esc(t.dtAllergens) + ' <i>' + esc(t.dtAllergensNote) + '</i></span><div class="m-dt-chips">'
+            + cfg.allergens.map(function (a, i) { return chip('allergens[]', a, d.allergens.indexOf(a) >= 0, (i + 1) + '. ' + a); }).join('') + '</div></div>'
+            + '<label class="m-check"><input type="checkbox" name="rozmrazeno" value="1"' + (d.thawed ? ' checked' : '') + '><span>❄ ' + esc(t.newThawed) + '</span></label></div>';
+        // more: nutrition, e-shop description, SEO
+        var filled = d.nutrition.filter(function (n) { return n.value !== ''; }).length;
+        html += '<details class="m-newsec"><summary>' + esc(t.dtNutrition) + ' <small>' + filled + '/' + d.nutrition.length + '</small></summary><div class="m-newsec-body">'
+            + '<small class="m-muted">' + esc(fmt(t.dtNutritionRef, d.nutritionRef)) + '</small>'
+            + d.nutrition.map(function (n) { return '<label class="m-dt-nutri' + (/^z toho/i.test(n.name) ? ' m-dt-sub' : '') + '"><span>' + esc(n.name) + '</span><input name="nutrition[' + n.id + ']" value="' + esc(n.value) + '" inputmode="decimal"><i>' + esc(n.unit) + '</i></label>'; }).join('')
+            + '</div></details>'
+            + '<details class="m-newsec"><summary>' + esc(t.dtPerex) + ' <small>' + (d.perex ? '✓' : '') + '</small></summary><div class="m-newsec-body">'
+            + '<label class="m-field"><textarea name="perex" rows="4">' + esc(d.perex) + '</textarea></label></div></details>'
+            + '<details class="m-newsec"><summary>' + esc(t.dtSeo) + '</summary><div class="m-newsec-body">'
+            + '<label class="m-field"><span>' + esc(t.dtMetaTitle) + '</span><input name="meta_title" value="' + esc(d.metaTitle) + '" maxlength="255"></label>'
+            + '<label class="m-field"><span>' + esc(t.dtMetaDesc) + '</span><textarea name="meta_desc" rows="3">' + esc(d.metaDesc) + '</textarea></label>'
+            + '<small class="m-muted">' + esc(t.dtSlug) + ': /' + esc(d.slug) + '</small></div></details>'
+            + '<p class="m-newerror" hidden></p></form>';
+        $('#m-detail').innerHTML = html;
+        detailChecks();
+    };
+    // live checks: EAN check digit, action price below the regular one, dates in order, the discount
+    var detailChecks = function () {
+        var f = $('#m-dt-form');
+        if (!f) {
+            return;
+        }
+        var num = function (v) { return parseFloat(String(v || '').replace(',', '.')); };
+        $('#m-dt-ean').hidden = eanOk(f.code.value);
+        var base = num(f.price.value);
+        var akce = num(f.price_action.value);
+        var ref = num(f.closest('form').querySelector('.m-dt-price').dataset.ref) || base;
+        var warn = '';
+        if (akce > 0 && base > 0 && akce >= base) {
+            warn = t.dtWarnPrice;
+        } else if (f.action_from.value && f.action_to.value && f.action_to.value < f.action_from.value) {
+            warn = t.dtWarnDates;
+        }
+        var w = $('#m-dt-pwarn');
+        w.textContent = warn;
+        w.hidden = !warn;
+        $('#m-dt-pct').textContent = akce > 0 && ref > akce ? '−' + Math.floor((ref - akce) / ref * 100) + ' %' : '';
+    };
+    var detailDirty = function () {
+        if (!detail || detail.dirty) {
+            return;
+        }
+        detail.dirty = true;
+        var s = $('#m-dt-state');
+        if (s) {
+            s.textContent = t.dtUnsaved;
+            s.classList.add('m-dt-dirty');
+        }
+    };
+    var saveDetail = function (form) {
+        if (!detail || detail.saving) {
+            return;
+        }
+        var err = form.querySelector('.m-newerror');
+        var fail = function (msg) {
+            detail.saving = false;
+            err.textContent = msg || t.error;
+            err.hidden = false;
+            var btn = $('.m-dt-save');
+            if (btn) { btn.disabled = false; btn.textContent = t.save; }
+            err.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        };
+        detail.saving = true;
+        err.hidden = true;
+        var btn = $('.m-dt-save');
+        if (btn) { btn.disabled = true; btn.textContent = t.dtSaving; }
+        var data = new FormData(form);
+        ['price', 'price_action', 'weight'].forEach(function (k) { data.set(k, String(data.get(k) || '').replace(',', '.').trim()); });
+        var photo = form.photo.files && form.photo.files[0];
+        data.delete('photo');
+        var pid = detail.id;
+        shrinkPhoto(photo).then(function (blob) {
+            if (blob) {
+                data.append('photo', blob, 'produkt.jpg');
+            }
+            return fetch(withParams(cfg.urls.saveProduct, { productsId: pid }), { method: 'POST', body: data, credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+        }).then(function (r) {
+            if (!r.ok) {
+                throw new Error(r.status);
+            }
+            return r.json();
+        }).then(function (r) {
+            if (!r.ok) {
+                fail(r.error);
+                return;
+            }
+            remember(r.product);
+            toast(t.dtSaved + ' · ' + r.product.name);
+            closeDetail(true);
+            render();
         }).catch(function () { fail(t.error); });
     };
 
@@ -847,6 +1038,34 @@
             $('#m-drawer').hidden = false;
             return;
         }
+        if (d.detail && cfg.canEditProduct) {
+            ev.preventDefault();
+            openDetail(parseInt(d.detail, 10));
+            return;
+        }
+        if (d.dtclose !== undefined) {
+            closeDetail(false);
+            return;
+        }
+        if (d.dtcats !== undefined && detail) {
+            detail.catOpen = !detail.catOpen;
+            $('#m-detail .m-dt-chips').hidden = !detail.catOpen;
+            b.textContent = detail.catOpen ? t.dtDone : t.dtChange;
+            return;
+        }
+        if (d.dtprint !== undefined && detail) {
+            openSheet(detail.id);
+            return;
+        }
+        if (d.dtendakce !== undefined) {
+            var df = $('#m-dt-form');
+            df.price_action.value = '';
+            df.action_from.value = '';
+            df.action_to.value = '';
+            detailDirty();
+            detailChecks();
+            return;
+        }
         if (d.go) {
             go(d.go);
             if (d.focusSearch !== undefined) {
@@ -996,6 +1215,14 @@
 
     var listTimer;
     document.addEventListener('input', function (ev) {
+        if (ev.target.closest && ev.target.closest('#m-dt-form')) {
+            detailDirty();
+            detailChecks();
+            if (ev.target.name === 'name') {
+                $('#m-dt-name').textContent = ev.target.value;
+            }
+            return;
+        }
         if (ev.target.id === 'm-psearch') {
             clearTimeout(listTimer);
             var pterm = ev.target.value.trim();
@@ -1049,6 +1276,11 @@
         if (form.dataset && form.dataset.newproduct !== undefined) {
             ev.preventDefault();
             createProduct(form);
+            return;
+        }
+        if (form.dataset && form.dataset.detail) {
+            ev.preventDefault();
+            saveDetail(form);
             return;
         }
         if (!form.dataset || !form.dataset.price) {
