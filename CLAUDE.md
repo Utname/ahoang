@@ -29,11 +29,37 @@ Nette 3 + Latte 3 + PHP 8.2 admin/e-shop for a Czech grocery chain. Most work is
   The loaded Font Awesome is "6 Pro" (plugins/fontawesome) – "6 Free"/"5 Pro" light in CSS draw boxes.
   Phone audit (Playwright, Galaxy S8 360px + iPhone 13): every menu page, first edit page + tabs,
   modals, front pages, /admin/mobil – check overflow, controls cut by a non-scrolling parent, tiny taps
+- Product card = design "Admin - Detail produktu" as a large modal on Produkty (`#modal-productDetail`):
+  `.pd-open[data-pd]` links (name, ✎, phone "Upravit", "Nový produkt" = 0; a scanned unknown EAN too –
+  the multi-sale flow keeps the old `productsForm` modal) → `www/js/admin/product-detail.js` (vanilla JS,
+  styles `.pd-*`, texts `admin.pd.*`) ↔ `Traits/ProductDetailTrait.php` (detailData!, detailSave!,
+  detailRefresh! redraws the list) → `ProductQuickEditor` (shared with the phone app's detail): prices of
+  all the admin's branches, one row each, saved alone (`prices[branchId][…]`, no copying of the regular
+  price), only rows that changed. Branch rows (`.pd-prow`) use fixed columns (≥768px: 30px 1fr 128px 392px,
+  inputs at the row top) so every row's inputs line up; phones: price + status/× then from – to. Složení gets "Obsahuje alergeny: …." and "Výživové údaje na 100 g: …"
+  lines (design buildSlozeni(); labels print Složení, not the nutrition table). An action needs a regular
+  price. The old 4-tab edit page stays ("Pokročilé úpravy": parameters, more photos, codes…).
 - Search while typing: the filters form goes by ajax, `ProductsPresenter` onFilterChange redraws only
   `productCount` + `productList` (`recountPaginator`: the paginator was created before the list).
   Name filter looks EAN/codes up first (indexes from `bin/migrate.php`); 8+ digits = EAN prefix only.
   The `:panel` part is rendered only for an open row; others load it on first open
   (`.pv-lazy`, `handleLoadPanel`) – it was ~90 % of the list HTML.
+  The print bar (`printSummary` snippet) sits above the list; `#snippet--printSummary` is sticky under
+  the navbar (72px, phones 58px). It needs `overflow: clip` on `.page-inner` / `.panel.pv-page`
+  (custom.css) – their theme `overflow: hidden` turns them into scroll boxes and kills sticky.
+  The bar is one line (≥1200px; 768–1199 the chips get a 2nd row): sum | chips in ONE row that scrolls
+  sideways (wheel → sideways in custom.js, fade at the right) | buttons. Phones hide the chips.
+  Price history = the "Historie cen" modal first (`handleShowPricesLog` → `loadPricesLog()`: one product,
+  `ids` or `all`; many products: grouped by product name, newest first in each, the first 500 rows + a note), its Export CSV at the top has every row
+  (`sendPricesLogCsv()`: product, EAN, branch + the modal columns, `;`, BOM, Czech decimals). Openers
+  (custom.js capture listener rewrites the ajax-modal href): the row's old "Historie cen" link in the price
+  panel (`.pv-log-open`: its row ticked → every ticked product, else that product), "Historie cen (n)"
+  in the bar (ticked); the head link "– vše" was removed (user), `all` still works in the handler. Exports use the
+  branch of the filter (must be in `branchesPairs`); deleting a row keeps the modal's product set.
+- The whole admin: the navbar hides while scrolling down and comes back on scrolling up (end of
+  custom.js → `body.nav-hidden`, CSS before the sidebar-scrollbar rules); not while the phone menu or a
+  modal is open, and focus in the navbar (Ctrl+K) shows it. Desktop sidebar then starts at top 0,
+  sticky bars use top 8px. The sidebar has no scrollbars (it still scrolls).
 - `app/Model/ProductLabels/ProductLabelsService.php` – `generatePdf()`: queue → PDF; new HTML
   templates via Dompdf, otherwise the legacy TCPDF layouts in the same file
 - `app/Model/PrintTemplates/PrintTemplatesService.php` – `renderHtml()` (price/discount logic,
@@ -55,18 +81,27 @@ After editing a template run `php bin/sync-print-templates.php [name ...]` local
 | a4-discount | 1 A4, 10 A4 Akce | 210×297 | A4 / A4 Akce |
 | a5-discount | 2 A5, 11 A5 Akce | 210×148.5 | A5 / A5 Akce |
 | vel1 | 3 | 164×41 | vel. 1 |
-| vel2 | 4 | 133×41 | vel. 2 |
-| vel3 | 5, 12 Vel. 3 Akce | 182×56 | vel. 3 / vel. 3 Akce |
-| vel2b-akce | 6 Vel. 2B Akce, 14 Vel. 2 B, 16 Vel. 2B Složení (167×52) | 133×52 | vel. 2B Akce / velikost 2B / vel. 2B Slozeni |
-| vel2-akce | 7 Vel. 2 Akce, 15 Vel. 2 Složení (167×38) | 133×38 | vel. 2 Akce / vel. 2 Slozeni |
+| vel2 | 4, 7 Vel. 2 Akce (133×38), 15 Vel. 2 Složení (167×38), 16 Vel. 2B Složení (167×52) | 133×41 | vel. 2 / vel. 2 Akce / vel. 2 Slozeni / vel. 2B Slozeni |
+| vel3 | 5, 12 Vel. 3 Akce | 210×56 | vel. 3 / vel. 3 Akce |
+| vel2b-akce | 6 Vel. 2B Akce, 14 Vel. 2 B | 133×52 | vel. 2B Akce / velikost 2B |
 | pecivo | 8 | 150×41 | Pecivo |
 | fruit | 9 | 50×35 | Etiketa ovoce vaha (32 per A4 sheet) |
 
-Type 13 Vel. 1 B has no design yet: listed but locked (`isLockedType()`). A 167 mm row renders
-the same file with a Složení column (template picks it by `width_mm`). Sheet stacking for every
+Type 13 Vel. 1 B has no design yet: listed but locked (`isLockedType()`). vel2.latte is one layout
+for the vel. 2 family: height from `height_mm` (price row moves by half the difference, bottom rows
+by all of it), a 167 mm row adds the Složení column, AKCE_30 shows the struck 30-day low.
+Handoff 19.10.2026 (`C:\Users\adsf\Downloads\Fikko-predani\`, 00-CTI-NEJDRIV.md; supersedes the older
+ones): name bold, origin = flag + "ZEMĚ PŮVODU" + country with "Více druhů" right after it,
+Poznámka 1/2/3 + Více druhů in **Sriracha bold** (Dompdf family `Sriracha`: sriracha.ttf, bold =
+srirachablack.ttf, registered in `createDompdf()`), logo and flags in colour. Vel. 3 follows the design
+markup, 210 × 56 (its size table says 182 – the user chose the design): strips across the sheet,
+5mm from the top, touching, each with a dashed bottom cut line (`sheetLayout()` left/top, 5 per A4);
+the sync script also writes `width_mm`/`height_mm` of the rows.
+Cut-fruit label last line = `BranchesEntity::labelLine()` (setting vykup_company · branch name,
+street, zip city from branches_mld cs); Poznámka 3 replaces it; no "Balí". Sheet stacking for every
 size comes from `PrintTemplatesService::sheetLayout()`. `bin/migrate.php` adds the new columns
 (products.rozmrazeno, products.price_unit, product_labels.ingredients/price_unit); entrypoint runs it.
-Designs: `C:\Users\adsf\Downloads\design_handoff_fikko\` – `CACH-LAM-CODE.md` is authoritative.
+Older designs: `C:\Users\adsf\Downloads\design_handoff_fikko\` – `CACH-LAM-CODE.md`.
 The mapping table in `QUY-TAC-THIET-KE-MAU-IN.md` is outdated.
 
 ## Label type rule (CACH-LAM-CODE.md §3)
@@ -76,13 +111,21 @@ The mapping table in `QUY-TAC-THIET-KE-MAU-IN.md` is outdated.
 - **ZÁKLAD**: only "Naše cena"
 - The chosen template decides (`renderHtml()`, group in TYPES_ARR): **akce** templates print AKCE_30
   whenever there is an action price (30-day low, or the regular price when there is none – the
-  user chooses this), **std** templates never AKCE (SROVNÁNÍ only within the action dates), **spec**
-  apply the rule automatically within the dates. Label `sale_percent` 0 = computed; >0 = typed in ✎.
+  user chooses this), **std** templates never AKCE (SROVNÁNÍ only while the action runs), **spec**
+  apply the rule automatically while it runs. Label `sale_percent` 0 = computed; >0 = typed in ✎.
+- **Dates are optional** (user, 20.10.2026): an action price lower than the regular one runs without
+  dates; dates that are set still apply (future "od" = planned, past "do" = ended).
+  `ProductPricesEntity::actionState()` / `actionRunningSql()` serve the labels and the label tools
+  (statuses, filters, phone app, ProductPriceSaver `is_action`, price log); entities carry
+  `is_label_action`. The **website keeps `is_valid_action`** (needs "od"); ~780 rows have an action
+  price without dates, so ask before switching the shop to the new rule.
 - "Běžná cena" (SROVNÁNÍ) = the regular price saved/typed in the row (`product_prices.price`), never
   `getPriceWithLog()`'s log reference (the shop's own earlier price) – that one is only the 30-day low.
 - Header (`product_label_headers`) is shared by the product's labels: A4/A5/Vel.3 title bar, narrow templates print it
   word by word in the brand column. Akce templates start with "Akce !!!", others "Fikko Cena".
 - Texts printed on labels stay Czech in every admin language.
+- A4 comparison label (design A4): the last line between two rules says "Platnost do <to> nebo do vyprodání
+  zásob" (no "Akce" – the design's own word, user's choice); A4 Akce keeps "Akce platí do …" without rules.
 
 Print links send unsaved row values as `priceOverrides` JSON {productId: {price, price_action,
 action_from, action_to}} (custom.js → `ProductLabelsTrait::parsePriceOverrides()`); nothing is saved.
@@ -93,7 +136,9 @@ action_from, action_to}} (custom.js → `ProductLabelsTrait::parsePriceOverrides
 - `line-height: 0` puts the baseline at the block top → used to place text exactly.
 - Latte strips `data:` URIs in `src` → use `|nocheck`; decimals in `style` get escaped →
   `{=round($x, 3)|noescape}`; no `<`/`>` inside CSS comments (breaks the style block).
-- `brush-20.png` renders white in large boxes → `ribbonBadgeBrushDataUri`.
+- `brush-20.png` once rendered white/half height in large boxes (inline data URIs) → the navy
+  `ribbonBadgeBrushDataUri`; since images go to files (`externalizeDataUris()`) the black brush renders right,
+  so A5 uses `brushDataUri` again (design: black). A5 comparison has no Platnost line (design).
 - Country flags (countries.image) are square icons with transparent bands: `countryFlagImages()` trims
   them — `flagIconDataUri` square for round flags, `flagRectDataUri` for rectangles.
 - Multi-label PDFs (Náhled všech, queue print) are ONE document: templates share class names, so
@@ -105,6 +150,10 @@ action_from, action_to}} (custom.js → `ProductLabelsTrait::parsePriceOverrides
   Bar module (`renderHtml()` 'bars'): keep ≥ 0.26 mm (EAN minimum) with ~3 mm free beside the bars.
   On a screen at 100 % a module is ~1 px and phones misread it: preview links open `#zoom=115`
   (`pdfViewZoom` in custom.js; the user chose 115 % over fit-to-width).
+- Big queues: templates embed images as data: URIs (~0.3 MB/label) – `externalizeDataUris()` writes each
+  once to `temp/label-img/<md5>` and the HTML refers to the plain absolute path (Dompdf does not read
+  `file:///C:/…` on Windows). Dompdf still needs ~1–1.5 MB per label: `raiseLimits()` raises memory_limit
+  (160 MB + 1.5 MB/label, max 2 GB) and the time limit for `renderProductLabelsPdf()` (86 labels ≈ 180 MB).
 - `max-height`/`overflow:hidden` do not clip text → long Složení is shrunk and `|truncate`d in the template.
 
 ## Výkup lahví (bottle/crate returns)
@@ -155,6 +204,12 @@ propose new price tables – NOT used: prices stay in `product_prices` / `produc
   only when it changed – every save writes a price-log row), notes, Složení, allergens = the closing
   "Obsahuje alergeny: …." sentence of `ingredients` (no column), thawed, nutrition values, perex, SEO.
   Signal params must not be called `id` (the route takes it) → `productsId`.
+  The template sheet (`openSheet()`, "Štítky ▾" / after a scan) = "Možnosti tisku": Hromadná úprava,
+  Náhled všech, ❄ Rozmrazeno, groups std/spec/akce (akce warns without an action price), per template
+  −/+, Hlavička, ✎ Upravit / ◉ Náhled / ⤓ PDF. ✎ = the design's "Štítek · A4" editor (header + copies of
+  that template; texts = OVERRIDE_KEYS shared by the product's templates, only this print). `sheetDraft`
+  {counts, hdr, ov, edit}; saveSheet() writes header + ov to every queue entry of the product.
+  productInfo carries `labelNotes`, `ingredientsText`, `validity` (action types filled with the dates).
   The bottom tabs show only on Scan/Fronta/Odesláno (as in the design). Admin Produkty on phones
   shows the same card (`.pv-mprice`/`.pv-mside` in ProductLabelsControl :price, hidden on desktop).
   An unknown scanned code opens "Nový produkt" (with the Products_create right): `handleCreateProduct` →

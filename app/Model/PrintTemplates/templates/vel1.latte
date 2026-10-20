@@ -1,6 +1,7 @@
 <style>
-    /* Vel.1 label, 164 x 41mm. Measured against "vel. 1.dc.html" printed from
-       Chromium; numbers are mm from the card's inner (inside-border) corner.
+    /* Vel.1 label, 164 x 41mm. Measured against "vel. 1.dc.html" (handoff 19.10.2026)
+       printed from Chromium; numbers are mm from the card's inner (inside-border) corner.
+       The name / origin / notes rows and the bottom row are the ones of vel2.latte.
        - Dompdf ignores box-sizing and draws the 0.4mm border outside
          width/height, so the box is 163.2 x 40.2 to come out 164 x 41.
        - No flexbox/grid in Dompdf: blocks are absolutely positioned.
@@ -24,6 +25,7 @@
     .lh0 { line-height: 0; }
     .nu { font-family: Nunito, sans-serif; font-weight: 900; font-style: italic; }
     .nu4 { font-family: Nunito, sans-serif; font-weight: 400; font-style: italic; }
+    .sri { font-family: Sriracha, cursive; font-weight: bold; font-style: normal; }
     .center { text-align: center; }
     .right { text-align: right; }
     .rel { position: relative; }
@@ -33,11 +35,11 @@
     .logo-divider { position: absolute; left: 1.5mm; top: 14.1mm; width: 20.6mm; border-top: 0.3mm dashed #111; }
     .brand { left: 0; width: 23.6mm; font-size: 5.8mm; }
 
-    .name { left: 27mm; width: 133.2mm; top: 3.42mm; font-size: 3.4mm; font-weight: 400; }
-    .flag { position: absolute; left: 26.8mm; top: 5.1mm; width: 5.5mm; height: 5.5mm; border: 0.25mm solid #111; border-radius: 50%; }
-    .origin-label { left: 34.4mm; top: 6.6mm; font-size: 1.9mm; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; }
-    .origin-name { left: 34.4mm; top: 10.04mm; font-size: 2.9mm; font-weight: 800; }
-    .meta { top: 8.45mm; font-size: 2.4mm; }
+    .name { left: 27mm; width: 133.2mm; top: 5.02mm; font-weight: bold; }
+    .flag { position: absolute; left: 26.8mm; top: 6.72mm; width: 4.5mm; height: 4.5mm; border: 0.25mm solid #111; border-radius: 50%; }
+    .origin-label { left: 33.11mm; top: 8.15mm; font-size: 1.6mm; letter-spacing: 0.08em; text-transform: uppercase; font-weight: bold; }
+    .origin-name { left: 33.11mm; top: 10.71mm; font-size: 2.4mm; font-weight: bold; }
+    .meta { top: 9.92mm; font-size: 3.2mm; }
 
     .base-label { font-size: 2.2mm; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 700; }
     .base-val { font-size: 6.5mm; }
@@ -56,11 +58,11 @@
     .price-table { border-collapse: collapse; }
     .price-table td { padding: 0; vertical-align: top; white-space: nowrap; }
 
-    .unit { left: 0; width: 160.3mm; top: 32.79mm; font-size: 2.2mm; }
+    .unit { left: 0; width: 160.3mm; top: 32.53mm; font-size: 2.7mm; }
     .bars { position: absolute; left: 26.63mm; top: 33.93mm; height: 3.5mm; }
     .bars div { height: 3.5mm; }
     .ean { left: 26.9mm; top: 39.14mm; font-size: 2mm; font-weight: 600; letter-spacing: 0.04em; }
-    .note3 { left: 50mm; width: 87.2mm; top: 38.88mm; font-size: 2.2mm; }
+    .note3 { left: 43.6mm; width: 100mm; font-size: 2.9mm; }
 </style>
 
 {var $compare = $basePrice > $finalPrice}
@@ -81,6 +83,23 @@
 {var $ourL = $compare ? 98.7 : 93.6 - $groupW / 2}
 {var $saveValText = $savingText . ' ' . $currencySymbol}
 {var $saveW = 3 + 15.2 + 1 + mb_strlen($saveValText) * 0.536 * 4.5 + 1 + 20.2 + 3}
+{var $moreSpecies = $label && $label->is_more_species}
+{* product name: bold 3.9mm on one line, smaller for a long name (DejaVu Bold ~0.66em per character) *}
+{var $nameLen = max(1, mb_strlen($labelName))}
+{var $nameFs = max(2.8, min(3.9, 132.5 / ($nameLen * 0.66)))}
+{* origin, then "Více druhů" 2.5mm after it; Poznámka 1 centred, pushed right when the left part is wide *}
+{var $originW = $country ? max(14.6, mb_strlen((string)$country->name) * 0.621 * 2.4) : 0}
+{var $speciesL = $country ? 33.11 + $originW + 3.7 : 26.8}
+{var $metaEnd = $moreSpecies ? $speciesL + 15.8 : ($country ? 33.11 + $originW : 26.6)}
+{var $n1W = $note1 ? mb_strlen((string)$note1) * 0.54 * 3.2 : 0}
+{var $n1L = max($metaEnd + 3, 93.55 - $n1W / 2)}
+{var $n1Fs = $n1W && $n1L + $n1W > 160 ? max(2.2, 3.2 * (160 - $n1L) / $n1W) : 3.2}
+{var $n1C = $n1L + $n1W * $n1Fs / 3.2 / 2}
+{* Poznámka 3: centred, at most two balanced lines *}
+{var $n3 = trim((string)($note3 ?: $note2))}
+{var $n3Lines = $n3 === '' ? [] : (mb_strlen($n3) * 0.54 * 2.9 <= 80 ? [$n3] : (explode("\n", wordwrap($n3, (int)max(12, ceil(mb_strlen($n3) / 2) + 3), "\n", TRUE))))}
+{* a third line joins the second one *}
+{if count($n3Lines) > 2}{var $n3Lines = [$n3Lines[0], implode(' ', array_slice($n3Lines, 1))]}{/if}
 
 <div class="fikko-vel1">
     <div class="logo-col">
@@ -91,15 +110,15 @@
         <div n:foreach="$headerWords as $i => $word" class="abs lh0 nu center brand" style="font-size:{=round($bFs, 3)|noescape}mm;top:{=round(20.36 + $i * 6.08 * $bFs / 5.8, 3)|noescape}mm">{$word}</div>
     </div>
 
-    <div class="abs lh0 center name">{$labelName|truncate:60}</div>
+    <div class="abs lh0 center name" style="font-size:{=round($nameFs, 3)|noescape}mm">{$labelName|truncate:(int)floor(132.5 / ($nameFs * 0.66))}</div>
 
     {if $country}
         <img n:if="$flagIconDataUri" class="flag" src="{$flagIconDataUri|nocheck}" alt="">
         <div class="abs lh0 origin-label">Země původu</div>
         <div class="abs lh0 origin-name">{$country->name}</div>
     {/if}
-    <div n:if="$note1" class="abs lh0 nu4 center meta" style="left:43.55mm;width:100mm">{$note1}</div>
-    <div n:if="$label && $label->is_more_species" class="abs lh0 nu4 right meta" style="left:60.3mm;width:100mm">Více druhů</div>
+    <div n:if="$moreSpecies" class="abs lh0 sri meta" style="left:{=round($speciesL, 3)|noescape}mm">Více druhů</div>
+    <div n:if="$note1" class="abs lh0 sri center meta" style="left:{=round($n1C - 50, 3)|noescape}mm;width:100mm;font-size:{=round($n1Fs, 3)|noescape}mm">{$note1}</div>
 
     {* Vel.1's reference only has the plain "Běžná cena" comparison (no 30-day
        box, %, or strike): this size always renders a discount as a comparison
@@ -148,5 +167,5 @@
         <div n:foreach="$bars as $bar" n:if="$bar['dark']" style="position:absolute;top:0;left:{$bar['left']|noescape};background:{$bar['color']|noescape};width:{$bar['width']|noescape}"></div>
     </div>
     <div class="abs lh0 ean">EAN: {$eanText}</div>
-    <div n:if="$note3 || $note2" class="abs lh0 nu4 center note3">{$note3 ?: $note2}</div>
+    <div n:foreach="$n3Lines as $i => $line" class="abs lh0 sri center note3" style="top:{=round(38.65 - (count($n3Lines) - 1 - $i) * 3.34, 3)|noescape}mm">{$line}</div>
 </div>

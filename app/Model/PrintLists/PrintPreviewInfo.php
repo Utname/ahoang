@@ -34,12 +34,17 @@ final class PrintPreviewInfo
 		$weight = $product && (float)$product->weight > 0 && isset(ProductsEntity::UNITS_SHORT[(int)$product->units_id])
 			? rtrim(rtrim(number_format((float)$product->weight, 2, ',', ''), '0'), ',') . ' ' . ProductsEntity::UNITS_SHORT[(int)$product->units_id]
 			: '';
-		$dates = $price && $price->action_from && $action !== NULL
-			? $price->action_from->format('d.m.') . '–' . ($price->action_to ? $price->action_to->format('d.m.') : '…')
+		$dates = $price && ($price->action_from || $price->action_to) && $action !== NULL
+			? ($price->action_from ? $price->action_from->format('d.m.') : '…') . '–' . ($price->action_to ? $price->action_to->format('d.m.') : '…')
 			: '';
 		$tags = [];
 		if ($dates && $isAkceType) {
 			$tags[] = ['text' => 'Akce ' . $dates, 'kind' => 'akce'];
+		}
+		elseif ($isAkceType && $action !== NULL && $running) {
+			// an action without dates runs (ProductPricesEntity::actionState()); the label prints
+			// "Akce platí do vyprodání zásob"
+			$tags[] = ['text' => 'Akce do vyprodání', 'kind' => 'akce'];
 		}
 		if (!empty($o['is_more_species'])) {
 			$tags[] = ['text' => 'Více druhů', 'kind' => 'muted'];

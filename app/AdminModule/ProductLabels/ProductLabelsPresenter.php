@@ -500,6 +500,9 @@ class ProductLabelsPresenter extends BaseModulePresenter
 	public function actionBarcodeFruit($id = NULL)
 	{
 		$this->template->type = $id;
+		// last line of the label: company · branch, address of the branch in the filter (Nastavení → Pobočky)
+		$branch = $this->branchesRepo->findEntity($this->session->filters[$this->getName()]['custom__branches'] ?? NULL);
+		$this->template->branchLine = $branch ? \BranchesEntity::labelLine($this->branchesRepo->getDatabase(), (int)$branch->id) : '';
 	}
 
 

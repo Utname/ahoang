@@ -302,3 +302,37 @@ body.m-noscroll { overflow: hidden; }
 .m-dt-nutri i { font-style: normal; color: #8794a5; font-size: 12px; }
 .m-detail .m-newsec > summary small { margin-left: auto; margin-right: 8px; color: #8794a5; font-weight: 700; }
 .m-detail .m-photo-box img { width: 56px; height: 56px; }
+
+/* ---------- template sheet as "Možnosti tisku" (counts, header, ✎ Upravit / ◉ Náhled / ⤓ PDF per template) ---------- */
+.m-sh-tools { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.m-sh-tools .m-btn { height: 42px; padding: 0 8px; border-radius: 10px; font-size: 13px; }
+.m-sh-thawed { min-height: 36px; font-size: 13.5px; }
+.m-sh-thawed input { width: 20px; height: 20px; }
+.m-sh-group { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; padding: 6px 2px 0; }
+.m-sh-group b { font-size: 11.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #17202b; }
+.m-sh-group small { font-size: 11px; color: #8794a5; }
+.m-sh-group small.m-sh-warn, .m-sh-group .m-sh-warn { color: #b45309; font-weight: 700; }
+.m-sheet .m-size { flex-direction: column; align-items: stretch; gap: 7px; padding: 8px 8px 6px 10px; border-radius: 11px; }
+.m-sheet .m-size > div { flex: none; display: block; }
+.m-sheet .m-size .m-size-top { display: flex; flex-direction: row; align-items: center; gap: 6px; text-align: left; }
+.m-sheet .m-size .m-size-top > div { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.m-sheet .m-size .m-size-top b { font-size: 13.5px; white-space: nowrap; }
+.m-sheet .m-size .m-size-top small { font-size: 11px; white-space: nowrap; }
+.m-size-akce .m-size-top b { color: #b91c1c; }
+.m-sh-hdr { height: 38px; padding: 0 8px; border: 1px solid #d9e0e8; border-radius: 9px; background: #fff; color: #0f766e; font-size: 14px; font-weight: 700; }
+.m-size-akce .m-sh-hdr { color: #b91c1c; }
+.m-sheet .m-size .m-sh-warn-line { display: block; padding: 5px 8px; border-radius: 7px; background: #fef3c7; color: #92400e; font-size: 11.5px; font-weight: 700; line-height: 1.3; }
+.m-sheet .m-size .m-sh-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+.m-sh-actions button { height: 34px; border: none; background: transparent; color: #334155; font-size: 12.5px; font-weight: 800; white-space: nowrap; }
+.m-sh-actions button:first-child { color: #0f766e; }
+.m-sh-actions button:disabled { color: #94a3b8; }
+
+/* label editor of a template ("Štítek · A4") */
+.m-lb .m-info { margin: 0; font-size: 12.5px; }
+.m-lb .m-field input:disabled { background: #f1f5f9; color: #94a3b8; }
+.m-lb .m-field textarea { min-height: 70px; }
+.m-lb-checks { display: flex; flex-wrap: wrap; gap: 6px 18px; padding: 6px 12px; border: 1px solid #eef1f5; border-radius: 10px; background: #fafbfc; }
+.m-lb-checks .m-check { min-height: 36px; font-size: 13.5px; }
+.m-lb-foot { display: flex; flex-wrap: wrap; gap: 6px; padding-top: 8px; border-top: 1px solid #e6eaf0; }
+.m-lb-foot .m-btn { flex: 1 1 auto; height: 42px; padding: 0 10px; border-radius: 10px; font-size: 13px; }
+.m-btn-teal { background: #14b8a6; border-color: #14b8a6; color: #042f2e; }

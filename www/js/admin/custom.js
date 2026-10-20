@@ -2063,9 +2063,9 @@ $(function () {
             } else if (from && to && to < from) {
                 key = 'hint-bad-dates';
                 warn = true;
-            } else if (!from) {
-                // saving is allowed, but without "od" the action does not run
-                $row.find('.pv-hint').text(text('hint-no-from')).addClass('pv-warn-text');
+            } else if (!from && !to) {
+                // without dates the action runs at once, until it is ended
+                $row.find('.pv-hint').text(text('hint-no-from')).removeClass('pv-warn-text');
                 return true;
             } else {
                 key = 'hint-akce';
@@ -2163,6 +2163,15 @@ $(function () {
         toast($(this).data('msg'), true);
     });
 
+    // print bar: its chips are one row that scrolls sideways – the mouse wheel scrolls it too
+    document.addEventListener('wheel', function (e) {
+        var chips = e.target.closest && e.target.closest('.pv-bar-chips');
+        if (chips && chips.scrollWidth > chips.clientWidth && Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+            chips.scrollLeft += e.deltaY;
+            e.preventDefault();
+        }
+    }, { passive: false });
+
     // print bar: shown with queued labels or ticked products
     var checkedIds = function () {
         return $('.pv-row .bulk-checkbox:checked').map(function () {
@@ -2208,6 +2217,34 @@ $(function () {
             toast(payload && payload.pvToast);
         });
     });
+    // "Historie cen" modal (ajax-modal reads the href on click): the row's link shows every ticked product
+    // when its row is ticked, else only its product; the bar button the ticked ones. (The head link "– vše"
+    // is always every product of the branch, its own href.) The modal then offers Export CSV.
+    document.addEventListener('click', function (e) {
+        var a = e.target.closest && e.target.closest('.pv-log-open, .pv-log-export');
+        if (!a) {
+            return;
+        }
+        var ids = checkedIds().map(String);
+        if (a.classList.contains('pv-log-open')) {
+            var url = new URL(a.href, window.location.href);
+            url.searchParams.delete('ids');
+            if (ids.length > 1 && ids.indexOf(String(a.getAttribute('data-id'))) !== -1) {
+                url.searchParams.set('ids', ids.join(','));
+            }
+            a.href = url.toString();
+            return;
+        }
+        if (!ids.length) {
+            e.preventDefault();
+            e.stopPropagation();
+            toast(text('none-checked'), true);
+            return;
+        }
+        var sel = new URL(String(a.getAttribute('data-url')), window.location.href);
+        sel.searchParams.set('ids', ids.join(','));
+        a.href = sel.toString();
+    }, true);
     $(document).ajaxComplete(function () {
         setTimeout(syncBar, 0);
     });
@@ -2353,3 +2390,34 @@ $(function () {
         strip.scrollLeft += card.left - strip.getBoundingClientRect().left - (strip.clientWidth - card.width) / 2;
     }
 });
+
+// the header hides while scrolling down and comes back on scrolling up (custom.css: body.nav-hidden);
+// it stays while the phone menu or a modal is open and when something in it gets the focus (Ctrl+K)
+(function () {
+    var lastY = window.scrollY, ticking = false;
+    var update = function () {
+        ticking = false;
+        var y = window.scrollY, body = document.body;
+        if (y < 80 || document.querySelector('.page-sidebar.visible') || body.classList.contains('modal-open')) {
+            body.classList.remove('nav-hidden');
+            lastY = y;
+            return;
+        }
+        if (Math.abs(y - lastY) < 8) {
+            return;
+        }
+        body.classList.toggle('nav-hidden', y > lastY);
+        lastY = y;
+    };
+    window.addEventListener('scroll', function () {
+        if (!ticking) {
+            ticking = true;
+            window.requestAnimationFrame(update);
+        }
+    }, { passive: true });
+    document.addEventListener('focusin', function (e) {
+        if (e.target.closest && e.target.closest('.navbar')) {
+            document.body.classList.remove('nav-hidden');
+        }
+    });
+})();

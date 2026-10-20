@@ -128,8 +128,8 @@
     {var $countryName = (string)($itemData->productCountry ?? '')}
     {var $storageVal = !empty($itemData->note2) ? $itemData->note2 : '2–6 °C'}
     {var $storageText = str_starts_with($storageVal, 'Skladujte') ? $storageVal : 'Skladujte při ' . $storageVal}
-    {var $packerVal = !empty($itemData->note3) ? $itemData->note3 : 'Fikko Market · adresa provozovny'}
-    {var $packerText = str_starts_with($packerVal, 'Balí') ? $packerVal : 'Balí: ' . $packerVal}
+    {* last line (handoff 19.10.2026): company · branch, address of the admin's branch (Nastavení → Pobočky), no "Balí" *}
+    {var $packerText = !empty($itemData->note3) ? $itemData->note3 : ($branchLine ?? '')}
     {capture $card}
         <section class="fikko-fruit" data-label-root="1" data-label="Etiketa 50×35">
             <div class="head">

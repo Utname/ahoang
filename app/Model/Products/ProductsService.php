@@ -112,7 +112,7 @@ class ProductsService
 			if (is_null($originPrice)) {
 				$originPriceObj = $product->getPrice($branchesId);
 				$originPrice = 0;
-				if (isset($originPriceObj->price_action) && isset($originPriceObj->is_valid_action) && $originPriceObj->is_valid_action) {
+				if (isset($originPriceObj->price_action) && (!empty($originPriceObj->is_valid_action) || !empty($originPriceObj->is_label_action))) {
 					$originPrice = $originPriceObj->price_action;
 				}
 				elseif (isset($originPriceObj->price)) {

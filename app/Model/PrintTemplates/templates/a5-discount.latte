@@ -34,10 +34,9 @@
     .flow { position: absolute; left: 0; width: 210mm; }
     .middle { position: relative; width: 210mm; height: 100mm; }
     .name { font-size: 5.6mm; font-weight: 400; line-height: 0.898; max-height: 12.88mm; overflow: hidden; text-align: center; }
-    .sub { font-family: Nunito, sans-serif; font-style: italic; font-weight: 400; font-size: 6mm; }
-    /* "Platnost 1. 8. – 31. 8.": right end of the Více druhů row ("A5 bez povodni cen") */
-    .platnost-label { font-size: 2.6mm; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 700; opacity: 0.65; }
-    .platnost-val { font-size: 3.6mm; font-weight: 800; margin-left: 2mm; }
+    /* Více druhů / Poznámka 1 / 3: Sriracha bold (handoff 19.10.2026) */
+    .sub { font-family: Sriracha, cursive; font-style: normal; font-weight: bold; font-size: 5mm; }
+    .sri { font-family: Sriracha, cursive; font-weight: bold; font-style: normal; }
 
     .ribbon { position: absolute; width: 50mm; height: 18mm; transform: rotate(-1.2deg); }
     .ribbon img { position: absolute; left: 0; top: 0; width: 50mm; height: 18mm; }
@@ -91,13 +90,14 @@
         'logoW' => 18.45, 'logoH' => 16.99, 'logoL' => 11.13, 'logoT' => 10.53,
         'titleB' => 21.08, 'pad' => 8,
         'nameTop' => 30.22, 'midTop' => 36.66,
-        'subB' => 43.84, 'note1B' => 50.19, 'note1Fs' => 4.5,
-        'flagL' => 8, 'flagT' => 77.3, 'originX' => 21.7, 'originLB' => 81.14, 'originNB' => 85.38, 'originOp' => 1,
-        'ingrLB' => 92.52, 'ingrL' => 8, 'ingrW' => 66, 'ingrFs' => 3.175, 'ingrLh' => 0.937, 'ingrTop' => 93.97, 'ingrMax' => 26.67,
-        'colC' => 140, 'fsI' => 38, 'fsD' => 17, 'fsU' => 7.5, 'priceB' => 97.55, 'decRel' => -10.85, 'curRel' => -2.12, 'gapI' => 0.4,
-        'saveT' => 102.95, 'saveH' => 11.9, 'padX' => 6, 'pigS' => 5.5, 'pigGap' => 2.5, 'copyFs' => 4, 'valFs' => 7.5, 'valGap' => 2, 'textRel' => 7.95,
-        'note3B' => 121.09, 'note3Fs' => 4.5, 'note3Lines' => 1,
-        'barsL' => 8, 'eanB' => 138.82, 'unitR' => 202, 'unitB' => 133.79,
+        'subB' => 42.78, 'note1B' => 48.8, 'note1Fs' => 4.5,
+        'flagL' => 8, 'flagT' => 75.65, 'originX' => 21.7, 'originLB' => 79.49, 'originNB' => 83.73, 'originOp' => 1,
+        'ingrLB' => 90.87, 'ingrL' => 8, 'ingrW' => 66, 'ingrFs' => 3.175, 'ingrLh' => 0.937, 'ingrTop' => 92.32, 'ingrMax' => 26.67,
+        'colC' => 140, 'fsI' => 38, 'fsD' => 17, 'fsU' => 7.5, 'priceB' => 95.9, 'decRel' => -10.85, 'curRel' => -2.12, 'gapI' => 0.4,
+        'saveT' => 101.3, 'saveH' => 11.9, 'padX' => 6, 'pigS' => 5.5, 'pigGap' => 2.5, 'copyFs' => 4, 'valFs' => 7.5, 'valGap' => 2, 'textRel' => 7.95,
+        'note3B' => 119.7, 'note3Fs' => 4.5, 'note3Lines' => 1,
+        'barsL' => 8, 'eanB' => 137.17, 'unitR' => 202, 'unitB' => 132.14,
+        'ribbonT' => 55.55, 'lowT' => 60.97, 'barsT' => 124.05, 'validB' => 143.26,
     ]}
 {else}
     {var $g = [
@@ -105,13 +105,14 @@
         'logoW' => 18.48, 'logoH' => 17.02, 'logoL' => 12.2, 'logoT' => 2.66,
         'titleB' => 13.14, 'pad' => 9,
         'nameTop' => 20.69, 'midTop' => 27.13,
-        'subB' => 34.31, 'note1B' => 41.19, 'note1Fs' => 5,
-        'flagL' => 9, 'flagT' => 48.2, 'originX' => 22.7, 'originLB' => 52.30, 'originNB' => 56.54, 'originOp' => 0.65,
-        'ingrLB' => 67.65, 'ingrL' => 9, 'ingrW' => 58, 'ingrFs' => 3.528, 'ingrLh' => 0.976, 'ingrTop' => 68.62, 'ingrMax' => 44.1,
-        'colC' => 132, 'fsI' => 40, 'fsD' => 16, 'fsU' => 8, 'priceB' => 93.58, 'decRel' => -12.17, 'curRel' => -3.71, 'gapI' => 0.8,
-        'saveT' => 98.4, 'saveH' => 15.5, 'padX' => 7, 'pigS' => 7.5, 'pigGap' => 3, 'copyFs' => 4.6, 'valFs' => 10.5, 'valGap' => 1.5, 'textRel' => 10.5,
-        'note3B' => 122.42, 'note3Fs' => 5, 'note3Lines' => 2,
+        'subB' => 33.51, 'note1B' => 40.08, 'note1Fs' => 5,
+        'flagL' => 9, 'flagT' => 47.1, 'originX' => 22.7, 'originLB' => 51.2, 'originNB' => 55.44, 'originOp' => 0.65,
+        'ingrLB' => 66.55, 'ingrL' => 9, 'ingrW' => 58, 'ingrFs' => 3.528, 'ingrLh' => 0.976, 'ingrTop' => 67.52, 'ingrMax' => 44.1,
+        'colC' => 132, 'fsI' => 40, 'fsD' => 16, 'fsU' => 8, 'priceB' => 93.03, 'decRel' => -12.17, 'curRel' => -3.71, 'gapI' => 0.8,
+        'saveT' => 97.85, 'saveH' => 15.5, 'padX' => 7, 'pigS' => 7.5, 'pigGap' => 3, 'copyFs' => 4.6, 'valFs' => 10.5, 'valGap' => 1.5, 'textRel' => 10.5,
+        'note3B' => 122.68, 'note3Fs' => 5, 'note3Lines' => 2,
         'barsL' => 9, 'eanB' => 138.82, 'unitR' => 201, 'unitB' => 137.76,
+        'ribbonT' => 57.2, 'lowT' => 62.62, 'barsT' => 125.7, 'validB' => 144.91, 'regB' => 55.46, 'ourB' => 62.07,
     ]}
 {/if}
 {* Positions inside .middle are relative to where it starts for a one-line
@@ -148,11 +149,10 @@
         <div class="name" style="margin-left:{$g['pad']|noescape}mm;width:{=210 - 2 * $g['pad']|noescape}mm">{$labelName}</div>
         <div class="middle">
             <div n:if="$label && $label->is_more_species" class="abs lh0 center sub" style="left:0;width:210mm;top:{=round($g['subB'] - $m, 3)|noescape}mm">Více druhů</div>
-            <div n:if="!$akce && $validityRange" class="abs lh0 right" style="left:0;width:{=210 - $g['pad']|noescape}mm;top:{=round($g['subB'] - $m, 3)|noescape}mm"><span class="platnost-label">Platnost</span><span class="platnost-val">{$validityRange}</span></div>
-            <div n:if="$note1" class="abs lh0 nu center" style="left:0;width:210mm;font-size:{$g['note1Fs']|noescape}mm;top:{=round($g['note1B'] - $m, 3)|noescape}mm">{$note1}</div>
+            <div n:if="$note1" class="abs lh0 sri center" style="left:0;width:210mm;font-size:{$g['note1Fs']|noescape}mm;top:{=round($g['note1B'] - $m, 3)|noescape}mm">{$note1}</div>
 
-            <div n:if="$akce && $hasSaleRibbon" class="ribbon" style="left:8mm;top:{=round(57.2 - $m, 3)|noescape}mm">
-                <img src="{$ribbonBadgeBrushDataUri|nocheck}" alt="">
+            <div n:if="$akce && $hasSaleRibbon" class="ribbon" style="left:8mm;top:{=round($g['ribbonT'] - $m, 3)|noescape}mm">
+                <img src="{$brushDataUri|nocheck}" alt="">
                 <div class="abs lh0 nu center ribbon-text">-{$salePercent|number:0}%</div>
             </div>
 
@@ -168,7 +168,7 @@
             {/if}
 
             {* AKCE_30: "Nejnižší cena za 30 dní" + struck 30-day price. *}
-            <table n:if="$akce" class="abs" style="left:8mm;width:{=round($lowRight - 8, 3)|noescape}mm;top:{=round(62.62 - $m, 3)|noescape}mm;border-collapse:collapse" cellpadding="0" cellspacing="0">
+            <table n:if="$akce" class="abs" style="left:8mm;width:{=round($lowRight - 8, 3)|noescape}mm;top:{=round($g['lowT'] - $m, 3)|noescape}mm;border-collapse:collapse" cellpadding="0" cellspacing="0">
                 <tr>
                     <td></td>
                     <td style="width:1%;padding:0 2.5mm 0 0;vertical-align:top;text-align:right;white-space:nowrap">
@@ -181,8 +181,8 @@
                 </tr>
             </table>
             {* SROVNANI: "Běžná cena" + regular price, never struck (CACH-LAM-CODE §3). *}
-            <div n:if="$isCompare" class="abs lh0 right" style="left:0;width:191.6mm;top:{=round(56.01 - $m, 3)|noescape}mm"><span class="regular-label">Běžná cena</span><span class="nu regular-val">{$basePriceText}&nbsp;{$currencySymbol}</span></div>
-            <div n:if="!$akce" class="abs lh0 center our-label" style="left:50mm;width:120mm;top:{=round(62.62 - $m, 3)|noescape}mm">Naše cena</div>
+            <div n:if="$isCompare" class="abs lh0 right" style="left:0;width:191.6mm;top:{=round($g['regB'] - $m, 3)|noescape}mm"><span class="regular-label">Běžná cena</span><span class="nu regular-val">{$basePriceText}&nbsp;{$currencySymbol}</span></div>
+            <div n:if="!$akce" class="abs lh0 center our-label" style="left:50mm;width:120mm;top:{=round($g['ourB'] - $m, 3)|noescape}mm">Naše cena</div>
 
             <div class="abs" style="left:{=round($g['colC'] - 105, 3)|noescape}mm;width:210mm;top:{=round($g['priceB'] - $m, 3)|noescape}mm">
                 <table class="price-table" cellpadding="0" cellspacing="0">
@@ -197,7 +197,7 @@
             </div>
 
             <div n:if="$showSave" class="save" style="left:{=round($g['colC'] - $saveW / 2, 3)|noescape}mm;top:{=round($g['saveT'] - $m, 3)|noescape}mm;width:{=round($saveW, 3)|noescape}mm;height:{$g['saveH']|noescape}mm">
-                <img class="save-brush" src="{$ribbonBadgeBrushDataUri|nocheck}" style="width:{=round($saveW, 3)|noescape}mm;height:{$g['saveH']|noescape}mm" alt="">
+                <img class="save-brush" src="{$brushDataUri|nocheck}" style="width:{=round($saveW, 3)|noescape}mm;height:{$g['saveH']|noescape}mm" alt="">
                 <img class="save-pig" src="{$pigFaceIconDataUri|nocheck}" style="left:{$g['padX']|noescape}mm;top:{=round(($g['saveH'] - $g['pigS']) / 2, 3)|noescape}mm;width:{$g['pigS']|noescape}mm;height:{$g['pigS']|noescape}mm" alt="">
                 <div class="abs lh0 save-text" style="left:{=round($g['padX'] + $g['pigS'] + $g['pigGap'], 3)|noescape}mm;top:{$g['textRel']|noescape}mm"><span class="save-copy" style="font-size:{$g['copyFs']|noescape}mm">Ušetříte</span><span class="nu" style="font-size:{$g['valFs']|noescape}mm;margin-left:{$g['valGap']|noescape}mm">{$saveValText}</span><span n:if="$isCompare" class="save-suffix" style="font-size:3.9mm;margin-left:1.5mm">oproti běžné ceně</span></div>
             </div>
@@ -206,13 +206,13 @@
 
     {if $note3 || $note2}
         {if $g['note3Lines'] > 1}
-            <div class="note3 nu" style="left:30mm;width:150mm;font-size:{$g['note3Fs']|noescape}mm;line-height:{$note3Lh|noescape};max-height:11.5mm;top:{=round($g['note3B'] - 1.2 * $note3Lh * $g['note3Fs'], 3)|noescape}mm">{$note3 ?: $note2}</div>
+            <div class="note3 sri" style="left:30mm;width:150mm;font-size:{$g['note3Fs']|noescape}mm;line-height:{$note3Lh|noescape};max-height:11.5mm;top:{=round($g['note3B'] - 1.2 * $note3Lh * $g['note3Fs'], 3)|noescape}mm">{$note3 ?: $note2}</div>
         {else}
-            <div class="abs lh0 nu center" style="left:30mm;width:150mm;font-size:{$g['note3Fs']|noescape}mm;top:{$g['note3B']|noescape}mm">{$note3 ?: $note2}</div>
+            <div class="abs lh0 sri center" style="left:30mm;width:150mm;font-size:{$g['note3Fs']|noescape}mm;top:{$g['note3B']|noescape}mm">{$note3 ?: $note2}</div>
         {/if}
     {/if}
 
-    <div n:if="$bars" class="bars" style="left:{$g['barsL']|noescape}mm;top:125.7mm">
+    <div n:if="$bars" class="bars" style="left:{$g['barsL']|noescape}mm;top:{$g['barsT']|noescape}mm">
         <div n:foreach="$bars as $bar" n:if="$bar['dark']" style="position:absolute;top:0;left:{$bar['left']|noescape};background:{$bar['color']|noescape};width:{$bar['width']|noescape}"></div>
     </div>
     <div n:if="$eanText" class="abs lh0 ean" style="left:{$g['barsL']|noescape}mm;top:{$g['eanB']|noescape}mm">EAN {$eanText}</div>
@@ -220,5 +220,5 @@
     <div n:if="$unit" class="abs lh0 right unit" style="left:0;width:{$g['unitR']|noescape}mm;top:{$g['unitB']|noescape}mm">Cena za {$unit->unitWeight} {$unit->unitShort}<span class="nu unit-val">{$unit->price|number:2,',',' '}&nbsp;{$currencySymbol}</span></div>
 
     {* "Akce platí do" only on AKCE_30 (CACH-LAM-CODE §3). *}
-    <div n:if="!$hideValidity && ($akce || ($validityCustom && !$validityRange))" class="abs lh0 center validity" style="left:0;width:210mm;top:144.91mm">{if $validityCustom}{$validityText}{elseif $validityUntil}Akce platí do <b>{$validityUntil}</b> nebo do vyprodání zásob{else}Akce platí do vyprodání zásob{/if}</div>
+    <div n:if="!$hideValidity && ($akce || $validityCustom)" class="abs lh0 center validity" style="left:0;width:210mm;top:{$g['validB']|noescape}mm">{if $validityCustom}{$validityText}{elseif $validityUntil}Akce platí do <b>{$validityUntil}</b> nebo do vyprodání zásob{else}Akce platí do vyprodání zásob{/if}</div>
 </div>

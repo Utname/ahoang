@@ -41,7 +41,7 @@ class PrintTemplatesService
 	public function findTemplateForProduct(string $templateName, ProductsEntity $product, int $branchesId): ?PrintTemplatesEntity
 	{
 		$price = $product->getPriceWithLog($branchesId);
-		$hasDiscount = $price && !empty($price->is_valid_action);
+		$hasDiscount = $price && !empty($price->is_label_action);
 
 		$wantedVariant = $hasDiscount ? PrintTemplatesEntity::VARIANT_DISCOUNT : PrintTemplatesEntity::VARIANT_NO_DISCOUNT;
 
@@ -73,7 +73,7 @@ class PrintTemplatesService
 	public function findTemplateForProductLabel(ProductLabelsEntity $label, ProductsEntity $product, int $branchesId): ?PrintTemplatesEntity
 	{
 		$price = $product->getPriceWithLog($branchesId);
-		$wantedVariant = $price && !empty($price->is_valid_action)
+		$wantedVariant = $price && !empty($price->is_label_action)
 			? PrintTemplatesEntity::VARIANT_DISCOUNT
 			: PrintTemplatesEntity::VARIANT_NO_DISCOUNT;
 		$hasExplicitMapping = in_array('product_label_type_id', $this->repository->getColumnNames(), TRUE);
@@ -115,7 +115,7 @@ class PrintTemplatesService
 			ProductLabelsEntity::TYPE_A5 => ['width_mm' => 210, 'height_mm' => 148.5],
 			ProductLabelsEntity::TYPE_SIZE_1 => ['width_mm' => 164, 'height_mm' => 41],
 			ProductLabelsEntity::TYPE_SIZE_2 => ['width_mm' => 133, 'height_mm' => 41],
-			ProductLabelsEntity::TYPE_SIZE_3 => ['width_mm' => 182, 'height_mm' => 56],
+			ProductLabelsEntity::TYPE_SIZE_3 => ['width_mm' => 210, 'height_mm' => 56],
 			ProductLabelsEntity::TYPE_SIZE_2B => ['width_mm' => 133, 'height_mm' => 52],
 			ProductLabelsEntity::TYPE_SIZE_2_AKCE => ['width_mm' => 133, 'height_mm' => 38],
 			ProductLabelsEntity::TYPE_PECIVO => ['width_mm' => 150, 'height_mm' => 41],
@@ -163,7 +163,7 @@ class PrintTemplatesService
 			self::PRESET_VEL3 => [
 				'name' => 'Fikko Cena Vel.3',
 				'labelTypeId' => ProductLabelsEntity::TYPE_SIZE_3,
-				'widthMm' => 182,
+				'widthMm' => 210,
 				'heightMm' => 56,
 				'sourceFile' => 'vel3.latte',
 			],
@@ -186,7 +186,8 @@ class PrintTemplatesService
 				'labelTypeId' => ProductLabelsEntity::TYPE_SIZE_2_AKCE,
 				'widthMm' => 133,
 				'heightMm' => 38,
-				'sourceFile' => 'vel2-akce.latte',
+				// the vel. 2 family shares vel2.latte (height from the row)
+				'sourceFile' => 'vel2.latte',
 			],
 			self::PRESET_PECIVO => [
 				'name' => 'Fikko Cena – tem dải',
@@ -274,12 +275,13 @@ class PrintTemplatesService
 		// With typed-but-unsaved prices ($priceOverride) the queued label's stored
 		// sale_percent is stale, so the discount is worked out from the new prices.
 		$usesStoredLabelDiscount = !$priceOverride && $label && (float)$label->sale_percent > 0 && $price && (float)$price->price_action > 0;
-		$isDiscounted = ($price && !empty($price->is_valid_action)) || $usesStoredLabelDiscount;
+		$isDiscounted = ($price && !empty($price->is_label_action)) || $usesStoredLabelDiscount;
 		// The chosen template decides the layout ("Admin - Produkty v2"): an Akce
 		// template prints -% and the 30-day low whenever there is an action price,
-		// a std template ("Naše cena, bez %") never does and compares only during
-		// the action dates; the special ones apply the 30-day rule automatically, also
-		// only during the action dates. Types outside TYPES_ARR keep the old rule.
+		// a std template ("Naše cena, bez %") never does and compares only while the
+		// action runs; the special ones apply the 30-day rule automatically, also only
+		// while it runs. Without dates an action price runs; dates that are set still
+		// limit it. Types outside TYPES_ARR keep the old rule.
 		$labelTypeId = (int)($label?->type_id ?: ($template->product_label_type_id ?? 0));
 		$typeGroup = ProductLabelsEntity::TYPES_ARR[$labelTypeId]['group'] ?? NULL;
 		if ($typeGroup === ProductLabelsEntity::GROUP_AKCE) {
@@ -287,7 +289,7 @@ class PrintTemplatesService
 		}
 		elseif ($typeGroup !== NULL) {
 			$usesStoredLabelDiscount = FALSE;
-			$isDiscounted = $price && !empty($price->is_valid_action);
+			$isDiscounted = $price && !empty($price->is_label_action);
 			$hasPriceAction = $isDiscounted;
 		}
 		$finalPrice = ($isDiscounted || $hasPriceAction) ? (float)$price->price_action : (float)($price->price ?? 0);
@@ -419,12 +421,16 @@ class PrintTemplatesService
 				// EAN-13 bar module: 0.33 mm nominal, scanners need at least ~0.26 mm
 				$isPecivo => EanBarcodeHelper::getBars($ean, 0.26),
 				$isSize2 => EanBarcodeHelper::getBars($ean, 0.28),
+				// vel. 2 Složení / vel. 2B Složení (vel2.latte with the Složení column)
+				(float)$template->width_mm === 167.0 => EanBarcodeHelper::getBars($ean, 0.28),
 				$isVel1 => EanBarcodeHelper::getBars($ean, 0.33),
 				$isA5 => EanBarcodeHelper::getBars($ean, 0.42),
 				$isFruit => EanBarcodeHelper::getBars($ean, 0.20),
 				default => [],
 			},
 			'template' => $template,
+			// last line of the cut-fruit label: company · branch, address (Nastavení → Pobočky)
+			'branchLine' => $isFruit ? \BranchesEntity::labelLine($this->repository->getDatabase(), $branchesId) : '',
 			'logoDataUri' => $this->imageAsDataUri(WWW_DIR . '/images/fikko-logo-color.png', 'image/png'),
 			'brushDataUri' => $this->imageAsDataUri(WWW_DIR . '/images/brush-20.png', 'image/png'),
 			// Dompdf renders the near-black brush-20.png at half height (or white) in large
@@ -499,6 +505,7 @@ class PrintTemplatesService
 			&& $price->action_from->format('Y-m-d') <= $today
 			&& (!$price->action_to || $price->action_to->format('Y-m-d') >= $today)
 		);
+		$price->is_label_action = \ProductPricesEntity::actionState($price->price, $price->price_action, $price->action_from, $price->action_to, $today) === 'running';
 
 		return $price;
 	}
@@ -764,13 +771,13 @@ class PrintTemplatesService
 	 */
 	public function renderPdf(PrintTemplatesEntity $template, ProductsEntity $product, int $branchesId, ?ProductLabelsEntity $label = NULL, ?array $priceOverride = NULL): string
 	{
-		$html = $this->renderHtml($template, $product, $branchesId, $label, $priceOverride);
+		$html = $this->externalizeDataUris($this->renderHtml($template, $product, $branchesId, $label, $priceOverride));
 		$layout = $this->sheetLayout($template);
 		if ($layout === 'a5') {
 			return $this->renderDompdf($this->renderA5Page($html), 210, 297)->output();
 		}
 		if (is_array($layout)) {
-			return $this->renderDompdf($this->renderStackedSheet([$html], $layout['w'], $layout['h'], 8.0, 8.0, $layout['gap'], $layout['cut']), 210, 297)->output();
+			return $this->renderDompdf($this->renderStackedSheet([$html], $layout['w'], $layout['h'], $layout['left'] ?? 8.0, $layout['top'] ?? 8.0, $layout['gap'], $layout['cut']), 210, 297)->output();
 		}
 
 		$dompdf = $this->renderDompdf(
@@ -791,6 +798,9 @@ class PrintTemplatesService
 		if (!$jobs) {
 			throw new \InvalidArgumentException('At least one print job is required.');
 		}
+		// Dompdf needs ~1 MB per label (layout of its blocks and barcode bars): the default 128M ran out
+		// at ~80 labels. Raise the limits for this request only, by the size of the queue.
+		$this->raiseLimits(count($jobs));
 
 		$pages = [];
 		$queueKey = NULL;
@@ -799,8 +809,9 @@ class PrintTemplatesService
 		// All labels share one Dompdf document, and the templates reuse class names
 		// (.name, .brand, .save …) with different positions: each template's CSS is
 		// scoped to its own wrapper so a later template cannot restyle an earlier one.
+		// images go to files (externalizeDataUris()): 80+ labels with their logos/brushes inline ran out of memory
 		$render = fn(array $j): string => $this->scopeTemplateHtml(
-			$this->renderHtml($j['template'], $j['label']->getProduct(), $branchesId, $j['label'], $j['priceOverride'] ?? NULL),
+			$this->externalizeDataUris($this->renderHtml($j['template'], $j['label']->getProduct(), $branchesId, $j['label'], $j['priceOverride'] ?? NULL)),
 			'pt-t'.(int)$j['template']->id,
 		);
 
@@ -814,7 +825,7 @@ class PrintTemplatesService
 				}
 				elseif (is_array($layout)) {
 					foreach (array_chunk($queueJobs, $layout['perPage']) as $chunk) {
-						$pages[] = $this->renderStackedSheet(array_map($render, $chunk), $layout['w'], $layout['h'], 8.0, 8.0, $layout['gap'], $layout['cut']);
+						$pages[] = $this->renderStackedSheet(array_map($render, $chunk), $layout['w'], $layout['h'], $layout['left'] ?? 8.0, $layout['top'] ?? 8.0, $layout['gap'], $layout['cut']);
 					}
 				}
 				else {
@@ -923,6 +934,11 @@ class PrintTemplatesService
 
 		$w = (float)$template->width_mm;
 		$h = (float)$template->height_mm;
+		// Vel. 3 (210 × 56, handoff 19.10.2026): strips across the whole sheet, 5mm from the top,
+		// touching; each draws its own dashed cut line at the bottom
+		if ($w >= 200 && $h > 0 && $h < 100) {
+			return ['w' => $w, 'h' => $h, 'gap' => 0.0, 'perPage' => max(1, (int)floor((297 - 5) / $h)), 'cut' => FALSE, 'left' => 0.0, 'top' => 5.0];
+		}
 		if ($w >= 200 || $w < 100 || $h <= 0) {
 			return NULL;
 		}
@@ -1070,6 +1086,51 @@ class PrintTemplatesService
 	}
 
 
+	/**
+	 * The templates embed their images as data: URIs (logo, brush, flags…), ~0.3 MB per label: a queue
+	 * of 80+ labels made a 30 MB document and Dompdf's HTML parser ran out of memory. Each image is
+	 * written once to temp/label-img/<hash> and the label refers to the file (inside Dompdf's chroot),
+	 * so the document stays small and Dompdf loads every image only once.
+	 */
+	private function raiseLimits(int $labels): void
+	{
+		$needMb = min(2048, 160 + (int)ceil($labels * 1.5));
+		$limit = trim((string)ini_get('memory_limit'));
+		$current = match (strtoupper(substr($limit, -1))) {
+			'G' => (int)$limit * 1024,
+			'M' => (int)$limit,
+			'K' => (int)ceil((int)$limit / 1024),
+			default => (int)ceil((int)$limit / 1048576),
+		};
+		if ($limit !== '-1' && $current < $needMb) {
+			@ini_set('memory_limit', $needMb . 'M');
+		}
+		@set_time_limit(max(120, $labels));
+	}
+
+
+	private function externalizeDataUris(string $html): string
+	{
+		$dir = dirname(__DIR__, 3) . '/temp/label-img';
+		if (!is_dir($dir) && !@mkdir($dir, 0777, TRUE) && !is_dir($dir)) {
+			return $html;
+		}
+
+		return preg_replace_callback('#data:image/(png|jpe?g|gif);base64,([A-Za-z0-9+/=]{200,})#', static function (array $m) use ($dir): string {
+			$file = $dir . '/' . md5($m[2]) . '.' . ($m[1] === 'jpeg' ? 'jpg' : $m[1]);
+			if (!is_file($file)) {
+				$data = base64_decode($m[2], TRUE);
+				if ($data === FALSE || @file_put_contents($file, $data, LOCK_EX) === FALSE) {
+					return $m[0];
+				}
+			}
+
+			// a plain absolute path (Dompdf does not read "file:///C:/…" on Windows; "/app/…" on Railway)
+			return str_replace('\\', '/', $file);
+		}, $html) ?? $html;
+	}
+
+
 	private function renderDompdf(string $html, float $widthMm, float $heightMm): Dompdf
 	{
 		$dompdf = $this->createDompdf();
@@ -1149,6 +1210,11 @@ class PrintTemplatesService
 		// missing rarer Czech letters like "ů" (renders as "?"), same class of bug as the Helvetica fix above.
 		$nunitoRegularItalic = dirname(__DIR__, 3) . '/www/pdf/Nunito-RegularItalic.ttf';
 		$fontMetrics->registerFont(['family' => 'Nunito', 'weight' => 'normal', 'style' => 'italic'], $nunitoRegularItalic);
+
+		// Poznámka 1/2/3 and "Více druhů" (handoff 19.10.2026): Sriracha bold. Google ships only the
+		// regular cut (browsers fake the bold); srirachablack.ttf is the heavier cut the TCPDF labels used.
+		$fontMetrics->registerFont(['family' => 'Sriracha', 'weight' => 'normal', 'style' => 'normal'], $projectDir . '/www/pdf/sriracha.ttf');
+		$fontMetrics->registerFont(['family' => 'Sriracha', 'weight' => 'bold', 'style' => 'normal'], $projectDir . '/www/pdf/srirachablack.ttf');
 
 		return $dompdf;
 	}

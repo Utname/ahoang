@@ -11,6 +11,23 @@ class BranchesEntity extends BaseEntity
 
 
 	/**
+	 * Last line of the cut-fruit label (handoff 19.10.2026): "company · branch, street, zip city"
+	 * from Nastavení → Pobočky (Czech texts) and the company of the settings (vykup_company, Výkup lahví).
+	 */
+	public static function labelLine(\Nette\Database\Explorer $db, int $branchesId): string
+	{
+		$company = trim((string)($db->table('settings')->where('id', 'vykup_company')->fetchField('value') ?: 'Fikko market s.r.o.'));
+		$branch = $db->table('branches_mld')->where('branches_id', $branchesId)->where('languages_id', 'cs')->fetch();
+		if (!$branch) {
+			return $company;
+		}
+		$address = implode(', ', array_filter([trim((string)$branch->street), trim(trim((string)$branch->zip) . ' ' . trim((string)$branch->city))]));
+
+		return $company . ' · ' . implode(', ', array_filter([trim((string)$branch->name), $address]));
+	}
+
+
+	/**
 	 * @param int|NULL $categoriesId
 	 * @return array
 	 */

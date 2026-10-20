@@ -24,7 +24,7 @@
         </button>
         <button type="button" class="pv-cellbtn pv-open-price" data-id="{$item->id}">
             <span class="pv-status pv-st-{$status}">{_"admin.pv.status.$status"}</span>
-            {* the typed action price also when the action is not running (no "od" date, planned, ended) *}
+            {* the typed action price also when the action is not running (planned, ended) *}
             <span n:if="!$running && $price && (float)$price->price_action > 0" class="pv-akce-line">{$price->price_action|number:2,',',' '} <span class="pv-unit-txt">{$unit}</span></span>
             <span class="pv-range">
                 {if $price && ($price->action_from || $price->action_to)}
@@ -34,10 +34,9 @@
                     {_admin.pv.setAkce}
                 {/if}
             </span>
+            {* without dates an action price runs (ProductPricesEntity::actionState()) *}
             {if $status === \App\AdminModule\Presenters\ProductLabelsControl::STATUS_NONE && $price && ($price->action_from || $price->action_to)}
-                <span class="pv-missing">{(float)$price->price_action <= 0 ? ('admin.pv.missingAkcePrice'|translate) : ((float)$price->price_action >= (float)$price->price ? ('admin.pv.hint.badPrice'|translate) : ('admin.pv.missingFrom'|translate))}</span>
-            {elseif $price && (float)$price->price_action > 0 && !$price->action_from && !$price->action_to}
-                <span class="pv-missing">{_admin.pv.missingFrom}</span>
+                <span class="pv-missing">{(float)$price->price_action <= 0 ? ('admin.pv.missingAkcePrice'|translate) : ('admin.pv.hint.badPrice'|translate)}</span>
             {/if}
         </button>
         {* phones (custom.css "Phones"): one price box and status + Upravit as in the phone app design
@@ -63,7 +62,7 @@
         </button>
         <div class="pv-mside">
             <span class="pv-status pv-st-{$status}">{_"admin.pv.status.$status"}</span>
-            <a href="{plink edit $item->id}" class="pv-medit">✎ {_admin.pv.edit}</a>
+            <a href="{plink edit $item->id}" class="pv-medit pd-open" data-pd="{$item->id}">✎ {_admin.pv.edit}</a>
         </div>
     {/if}
 {/snippet}

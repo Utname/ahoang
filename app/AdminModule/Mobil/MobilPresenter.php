@@ -46,6 +46,9 @@ class MobilPresenter extends BaseModulePresenter
 	/** @var \ProductQuickEditor @inject */
 	public $productQuickEditor;
 
+	/** @var \ProductLabelActionTypesRepository @inject */
+	public $actionTypesRepo;
+
 	/** texts of the app (admin.mob.*), translated for the admin's language */
 	private const TEXT_KEYS = [
 		'appTitle', 'overview', 'scan', 'queue', 'sent', 'queueTitle',
@@ -69,6 +72,9 @@ class MobilPresenter extends BaseModulePresenter
 		'dtBack', 'dtUnsaved', 'dtSaved', 'dtCategories', 'dtChange', 'dtDone', 'dtNone', 'dtActive', 'dtCode', 'dtCodeBad',
 		'dtPhoto', 'dtContent', 'dtPrice', 'dtLabel', 'dtAllergens', 'dtAllergensNote', 'dtNutrition', 'dtNutritionRef',
 		'dtPerex', 'dtSeo', 'dtMetaTitle', 'dtMetaDesc', 'dtSlug', 'dtWarnPrice', 'dtWarnDates', 'dtLeave', 'dtSaving',
+		'shBulk', 'shThawedAll', 'shStdNote', 'shSpecNote', 'shAkceNote', 'shAkceMissing', 'shPdf', 'lbTitle', 'lbNote', 'lbHeader',
+		'lbThis', 'lbQty', 'lbPct', 'lbPctNote', 'lbLikeProduct', 'lbHideValidity', 'lbHideIngredients', 'lbValidity', 'lbValidityText',
+		'lbChoose', 'lbIngredientsNote', 'lbUnitPrice', 'lbReset', 'lbClose', 'lbSave', 'lbSaved', 'lbBulkTitle', 'lbBulkNote', 'yes', 'no',
 	];
 
 	/** @var array<int, string> */
@@ -232,11 +238,11 @@ class MobilPresenter extends BaseModulePresenter
 		$where = ['pp.branches_id = ?'];
 		$params = [$this->branchesId];
 		if ($filter === 'running') {
-			$where[] = 'pp.price_action > 0 AND pp.price > pp.price_action AND pp.action_from IS NOT NULL AND pp.action_from <= ? AND (pp.action_to IS NULL OR pp.action_to >= ?)';
+			$where[] = \ProductPricesEntity::actionRunningSql('pp.');
 			array_push($params, $today, $today);
 		}
 		elseif ($filter === 'planned') {
-			$where[] = 'pp.price_action > 0 AND pp.action_from > ?';
+			$where[] = 'pp.price_action > 0 AND pp.price > pp.price_action AND pp.action_from > ?';
 			$params[] = $today;
 		}
 		$term = trim($term);
@@ -381,7 +387,7 @@ class MobilPresenter extends BaseModulePresenter
 		$today = \PrintListsService::now()->format('Y-m-d');
 		$running = (int)$this->database->table('product_prices')
 			->where('branches_id', $this->branchesId)
-			->where('price_action > 0 AND price > price_action AND action_from IS NOT NULL AND action_from <= ? AND (action_to IS NULL OR action_to >= ?)', $today, $today)
+			->where(\ProductPricesEntity::actionRunningSql(), $today, $today)
 			->count('DISTINCT products_id');
 		$vykup = NULL;
 		try {
@@ -471,6 +477,11 @@ class MobilPresenter extends BaseModulePresenter
 			'unit' => $product->getPriceUnit(),
 			'unitText' => $info['unitText'],
 			'ingredients' => trim((string)($product->ingredients ?? '')) !== '',
+			// the label editor of the template sheet: the product's own texts (placeholders) and the
+			// "Akce platí do…" choices filled with this product's dates
+			'labelNotes' => [(string)$product->label_note_1, (string)$product->label_note_2, (string)$product->label_note_3],
+			'ingredientsText' => (string)($product->ingredients ?? ''),
+			'validity' => array_values(array_map(static fn($t) => $t->getFormattedValue($price ?: NULL), $this->actionTypesRepo->findAllEntities('id'))),
 			'thawed' => $product->isRozmrazeno(),
 		];
 	}

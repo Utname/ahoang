@@ -161,6 +161,8 @@ class ProductsEntity extends BaseEntity
 			foreach ($this->getRow()->related('product_prices') as $row) {
 				$this->prices[$row->branches_id][$row->products_id] = ProductPricesRepository::getEntity($row);
 				$this->prices[$row->branches_id][$row->products_id]->is_valid_action = FALSE;
+				// labels: an action price runs also without dates (ProductPricesEntity::actionState())
+				$this->prices[$row->branches_id][$row->products_id]->is_label_action = ProductPricesEntity::actionState($row->price, $row->price_action, $row->action_from, $row->action_to) === 'running';
 				if ($row->action_from && $row->price_action && $row->price && $row->price > $row->price_action && ($row->action_from->format('Y-m-d') <= date('Y-m-d') && (!$row->action_to || ($row->action_to && $row->action_to->format('Y-m-d') >= date('Y-m-d'))))) {
 					$this->prices[$row->branches_id][$row->products_id]->is_valid_action = TRUE;
 				}
@@ -188,6 +190,7 @@ class ProductsEntity extends BaseEntity
 			foreach ($this->getRow()->related('product_prices') as $row) {
 				$this->pricesLog[$row->branches_id][$row->products_id] = ProductPricesRepository::getEntity($row);
 				$this->pricesLog[$row->branches_id][$row->products_id]->is_valid_action = FALSE;
+				$this->pricesLog[$row->branches_id][$row->products_id]->is_label_action = ProductPricesEntity::actionState($row->price, $row->price_action, $row->action_from, $row->action_to) === 'running';
 				if ($row->action_from && $row->price_action && $row->price && $row->price > $row->price_action && ($row->action_from->format('Y-m-d') <= date('Y-m-d') && (!$row->action_to || ($row->action_to && $row->action_to->format('Y-m-d') >= date('Y-m-d'))))) {
 					$this->pricesLog[$row->branches_id][$row->products_id]->is_valid_action = TRUE;
 
@@ -236,12 +239,22 @@ class ProductsEntity extends BaseEntity
 		$price = $this->getPrice($branchId);
 		$priceWithLog = $this->getPriceWithLog($branchId);
 
-		if (!$price || !$priceWithLog || !$priceWithLog->is_valid_action) {
+		if (!$price || !$priceWithLog || (!$priceWithLog->is_valid_action && empty($priceWithLog->is_label_action))) {
 			return null;
 		}
 
 		$basePrice = (float)$price->price;
 		$refPrice = (float)$priceWithLog->price;
+		if (!$priceWithLog->is_valid_action) {
+			// an action without dates (labels): getPriceWithLog() swaps the reference in
+			// only for the website rule, so read it from the log here
+			$refPrice = (float)($this->getRow()->related('product_prices_log')
+				->where('price_ref > ?', 0)
+				->where('branches_id', $branchId)
+				->order('datetime DESC')
+				->limit(1)
+				->fetchField('price_ref') ?: 0);
+		}
 
 		if ($refPrice > 0 && abs($refPrice - $basePrice) > 0.01) {
 			return $refPrice;

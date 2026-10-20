@@ -1,14 +1,19 @@
 <style>
-    /* Vel.2 label, 133 x 41mm. Measured against "vel. 2.dc.html" printed from
-       Chromium; numbers are mm from the card's inner (inside-border) corner.
+    /* Vel.2 family (handoff 19.10.2026): "vel. 2" 133 x 41, "vel. 2 Akce" 133 x 38,
+       "vel. 2 Slozeni" 167 x 38 and "vel. 2B Slozeni" 167 x 52 share one layout;
+       the height comes from the template row, a 167 mm row adds the Složení column,
+       an AKCE_30 label shows the struck 30-day low instead of "Běžná cena".
+       Measured against the .dc.html files printed from Chromium; numbers are mm
+       from the card's inner (inside-border) corner, for the 41 mm height.
        - Dompdf ignores box-sizing and draws the 0.4mm border outside
-         width/height, so the box is 132.2 x 40.2 to come out 133 x 41.
+         width/height, so the box is 0.8mm smaller than the label.
        - No flexbox/grid in Dompdf: blocks are absolutely positioned.
        - Single-line text uses line-height 0, where Dompdf puts the baseline
          exactly at the block's top, so each top below is a reference baseline.
-       - The reference price row is a 1fr | divider | 1fr grid: the comparison
-         group is right-aligned against the divider, "Naše cena" starts just
-         right of it. */
+       - The price row sits in the middle of the free height (moves by half the
+         height difference), the bottom rows stick to the bottom edge.
+       - The price row is a 1fr | divider | 1fr grid: the comparison group is
+         right-aligned against the divider, "Naše cena" starts just right of it. */
     .fikko-vel2 {
         position: relative;
         width: 132.2mm;
@@ -23,45 +28,62 @@
     .lh0 { line-height: 0; }
     .nu { font-family: Nunito, sans-serif; font-weight: 900; font-style: italic; }
     .nu4 { font-family: Nunito, sans-serif; font-weight: 400; font-style: italic; }
+    .sri { font-family: Sriracha, cursive; font-weight: bold; font-style: normal; }
     .center { text-align: center; }
     .right { text-align: right; }
     .rel { position: relative; }
 
-    .logo-col { position: absolute; left: 0; top: 0; width: 23.6mm; height: 40.2mm; border-right: 0.4mm dashed #111; }
+    .logo-col { position: absolute; left: 0; top: 0; width: 23.6mm; border-right: 0.4mm dashed #111; }
     .logo { position: absolute; left: 6.77mm; top: 2.31mm; width: 10.55mm; height: 9.72mm; }
     .logo-divider { position: absolute; left: 1.5mm; top: 14.1mm; width: 20.6mm; border-top: 0.3mm dashed #111; }
-    .brand { left: 0; width: 23.6mm; font-size: 5.8mm; }
+    .brand { left: 0; width: 23.6mm; }
 
-    .name { left: 27mm; width: 102.3mm; top: 3.69mm; font-size: 3.4mm; font-weight: 400; }
-    .flag { position: absolute; left: 26.8mm; top: 5.37mm; width: 5.5mm; height: 5.5mm; border: 0.25mm solid #111; border-radius: 50%; }
-    .origin-label { left: 34.4mm; top: 7.13mm; font-size: 1.9mm; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; }
-    .origin-name { left: 34.4mm; top: 10.3mm; font-size: 2.9mm; font-weight: 800; }
-    .meta { top: 8.98mm; font-size: 2.4mm; }
+    .name { left: 27mm; width: 102.3mm; top: 5.02mm; font-weight: bold; }
+    .flag { position: absolute; left: 26.8mm; top: 6.72mm; width: 4.5mm; height: 4.5mm; border: 0.25mm solid #111; border-radius: 50%; }
+    .origin-label { left: 33.11mm; top: 8.15mm; font-size: 1.6mm; letter-spacing: 0.08em; text-transform: uppercase; font-weight: bold; }
+    .origin-name { left: 33.11mm; top: 10.71mm; font-size: 2.4mm; font-weight: bold; }
+    .meta { top: 9.92mm; font-size: 3.2mm; }
 
-    .base-label { font-size: 2.2mm; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 700; }
+    .base-label { font-size: 2.2mm; letter-spacing: 0.06em; text-transform: uppercase; font-weight: bold; }
+    .low-label { font-size: 2mm; letter-spacing: 0.04em; text-transform: uppercase; font-weight: bold; }
     .base-val { font-size: 6.5mm; }
     .base-cur { font-size: 4mm; }
     .strike { position: absolute; left: -3.5%; width: 107%; top: -2.54mm; height: 0.55mm; background: #111; border-radius: 0.28mm; transform: rotate(-7deg); }
 
-    .save { position: absolute; top: 21.54mm; height: 6.1mm; transform: rotate(-1.2deg); }
-    .save-brush { position: absolute; left: 0; top: 0; height: 6.1mm; }
-    .save-text { left: 2.5mm; top: 3.84mm; color: #fff; }
-    .save-copy { font-size: 2mm; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 700; }
-    .save-val { font-size: 4.2mm; margin-left: 1mm; }
-    .save-suffix { font-size: 1.8mm; font-weight: 600; margin-left: 1mm; }
+    .save { position: absolute; height: 6.9mm; transform: rotate(-1.2deg); }
+    .save-brush { position: absolute; left: 0; top: 0; height: 6.9mm; }
+    .save-text { top: 5.0mm; color: #fff; }
+    .save-copy { letter-spacing: 0.08em; text-transform: uppercase; font-weight: bold; }
+    .save-suffix { font-weight: bold; }
 
-    .divider { position: absolute; left: 77.8mm; top: 13.03mm; width: 0.3mm; height: 14.8mm; background: #111; }
+    .divider { position: absolute; left: 78.07mm; width: 0.3mm; height: 14.8mm; background: #111; }
 
-    .our-label { font-size: 2.2mm; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 700; }
+    .our-label { font-size: 2.2mm; letter-spacing: 0.06em; text-transform: uppercase; font-weight: bold; }
 
-    .unit { left: 0; width: 129.3mm; top: 31.2mm; font-size: 2.2mm; }
-    .bars { position: absolute; left: 26.8mm; top: 32.62mm; height: 4.5mm; }
-    .bars div { height: 4.5mm; }
-    .ean { left: 26.9mm; top: 38.88mm; font-size: 2mm; font-weight: 600; letter-spacing: 0.04em; }
-    .note3 { left: 28.1mm; width: 100mm; top: 34.91mm; font-size: 2.2mm; }
+    .unit { left: 0; width: 129.3mm; font-size: 2.7mm; }
+    .bars { position: absolute; left: 26.8mm; height: 3.5mm; }
+    .bars div { height: 3.5mm; }
+    .ean { left: 26.9mm; font-size: 2mm; font-weight: bold; letter-spacing: 0.04em; }
+    .note3 { left: 28.1mm; width: 100mm; font-size: 2.9mm; }
+
+    /* "vel. 2 Slozeni" / "vel. 2B Slozeni": a 34mm Složení column on the right
+       (padding 1.5 x 2mm, title then text 0.8mm below) */
+    .slozeni-col { position: absolute; left: 132.2mm; top: 0; width: 33.6mm; border-left: 0.4mm dashed #111; overflow: hidden; }
+    .slozeni-label { left: 2mm; top: 3.48mm; font-size: 2.2mm; letter-spacing: 0.08em; text-transform: uppercase; font-weight: bold; }
+    .slozeni-text { position: absolute; left: 2mm; top: 4.85mm; width: 29.6mm; line-height: 1.25; overflow: hidden; }
 </style>
 
+{var $H = (float)($template->height_mm ?: 41)}
+{var $Hi = $H - 0.8}
+{* the price row moves by half the height difference, the bottom rows by all of it *}
+{var $dy = ($H - 41) / 2}
+{var $dyB = $H - 41}
+{var $slozeni = (float)$template->width_mm >= 160}
 {var $compare = $basePrice > $finalPrice}
+{var $akce = $compare && $isAkce30}
+{* the AKCE_30 group sits 1.5mm lower (vel. 2 Akce.dc.html); the price row ends 3mm left of the badge *}
+{var $ay = $akce ? 1.5 : 0}
+{var $moreSpecies = $label && $label->is_more_species}
 {var $digits = strlen(str_replace(' ', '', $finalPriceMajor))}
 {* "Naše cena" group: label + integer (19mm) + ",90" / "Kč / 1 ks" column.
    Its width is estimated from the Dompdf font metrics; the price shrinks
@@ -71,70 +93,98 @@
 {* unit column: ",90" or the chosen "Cena za" text (0.453em per character), whichever is wider *}
 {var $unitTxt = $priceUnitText ?: $currencySymbol . ' / 1 ks'}
 {var $unitColW = max(14.8, mb_strlen($unitTxt) * 0.453 * 3.6)}
-{var $ourAvail = $compare ? 47 : 100}
+{var $ourAvail = $compare ? 47.3 : 100}
 {var $ps = min(1, ($ourAvail - 8.3) / ($intEm * 19 + 1 + $unitColW))}
 {var $fsI = round(19 * $ps, 3)}
 {var $fsD = round(8.5 * $ps, 3)}
 {var $fsU = round(3.6 * $ps, 3)}
 {var $groupW = 8.3 + ($intEm * 19 + 1 + $unitColW) * $ps}
-{var $ourL = $compare ? 81.7 : 78.15 - $groupW / 2}
+{var $ourL = $compare ? 80.93 : 77.9 - $groupW / 2}
+{* the comparison group ends 2.5mm before the divider; the badge ("Ušetříte 10 Kč oproti
+   běžné ceně", as Vel. 1) stops 1.4mm short of the logo column and shrinks to fit *}
+{var $cmpR = 75.63}
 {var $saveValText = $savingText . ' ' . $currencySymbol}
-{var $saveW = 2.5 + 11.8 + 1 + mb_strlen($saveValText) * 0.536 * 4.2 + ($isAkce30 ? 0 : 1 + 18.2) + 2.5}
-{* A wider badge (e.g. "300 Kč" + "oproti běžné ceně") would cross the logo column:
-   it stops 1mm short of it (74.4 - 25) and its text shrinks to fit. *}
-{var $ss = $saveW > 49.4 ? (49.4 - 5) / ($saveW - 5) : 1}
-{var $saveW = min($saveW, 49.4)}
+{var $savePad = 2.5}
+{var $saveW = $savePad + 15.2 + 1 + mb_strlen($saveValText) * 0.536 * 4.5 + ($akce ? 0 : 1 + 20.2) + $savePad}
+{var $ss = $saveW > $cmpR - 25 ? ($cmpR - 25 - 2 * $savePad) / ($saveW - 2 * $savePad) : 1}
+{var $saveW = min($saveW, $cmpR - 25)}
+{* product name: bold 3.9mm on one line, smaller for a long name (DejaVu Bold ~0.635em per character) *}
+{var $nameLen = max(1, mb_strlen($labelName))}
+{var $nameFs = max(2.8, min(3.9, 101.5 / ($nameLen * 0.66)))}
+{* origin, then "Více druhů" 2.5mm after it (flag 4.5 + gap 1.2); Poznámka 1 centred,
+   pushed right when the left part is wide (1fr auto 1fr grid) *}
+{var $originW = $country ? max(14.6, mb_strlen((string)$country->name) * 0.621 * 2.4) : 0}
+{var $speciesL = $country ? 33.11 + $originW + 3.7 : 26.8}
+{var $metaEnd = $moreSpecies ? $speciesL + 15.8 : ($country ? 33.11 + $originW : 26.6)}
+{var $n1W = $note1 ? mb_strlen((string)$note1) * 0.54 * 3.2 : 0}
+{var $n1L = max($metaEnd + 3, 77.9 - $n1W / 2)}
+{var $n1Fs = $n1W && $n1L + $n1W > 129.2 ? max(2.2, 3.2 * (129.2 - $n1L) / $n1W) : 3.2}
+{var $n1C = $n1L + $n1W * $n1Fs / 3.2 / 2}
+{* Poznámka 3: centred between EAN and the right edge, at most two balanced lines *}
+{var $n3 = trim((string)($note3 ?: $note2))}
+{var $n3Lines = $n3 === '' ? [] : (mb_strlen($n3) * 0.54 * 2.9 <= 54 ? [$n3] : (explode("\n", wordwrap($n3, (int)max(12, ceil(mb_strlen($n3) / 2) + 3), "\n", TRUE))))}
+{* a third line joins the second one *}
+{if count($n3Lines) > 2}{var $n3Lines = [$n3Lines[0], implode(' ', array_slice($n3Lines, 1))]}{/if}
+{* Složení text: 2.3mm, shrinking to 1.5mm, then cut to what fits; Dompdf does not clip
+   overflow. Capacity ~0.6em per character, ~85% of each line used after wrapping. *}
+{var $ingrH = $Hi - 4.85 - 1.5}
+{var $ingrFs = 2.3}
+{var $ingrCap = (int)(floor(29.6 / ($ingrFs * 0.6)) * floor($ingrH / ($ingrFs * 1.25)) * 0.85)}
+{while $ingrFs > 1.55 && $ingrCap < mb_strlen($ingredients)}
+    {var $ingrFs = $ingrFs - 0.1}
+    {var $ingrCap = (int)(floor(29.6 / ($ingrFs * 0.6)) * floor($ingrH / ($ingrFs * 1.25)) * 0.85)}
+{/while}
 
-<div class="fikko-vel2">
-    <div class="logo-col">
+<div class="fikko-vel2" style="height:{=round($Hi, 3)|noescape}mm{if $slozeni};width:166.2mm{/if}">
+    <div class="logo-col" style="height:{=round($Hi, 3)|noescape}mm">
         <img class="logo" src="{$logoDataUri|nocheck}" alt="Fikko market">
         <div class="logo-divider"></div>
-        {* label header word by word ("Fikko / Cena"), top-aligned like the reference, shrunk to the 21.5mm column *}
-        {var $bFs = min(5.8, 21.5 / ($headerWordMax * 0.68))}
-        <div n:foreach="$headerWords as $i => $word" class="abs lh0 nu center brand" style="font-size:{=round($bFs, 3)|noescape}mm;top:{=round(20.36 + $i * 6.08 * $bFs / 5.8, 3)|noescape}mm">{$word}</div>
+        {* label header word by word ("Fikko / Cena", "Mega / Super / Cena"), top-aligned like the
+           reference, three words at 4.4mm, shrunk to the 21.5mm column *}
+        {var $bFs = min(count($headerWords) > 2 ? 4.4 : 5.8, 21.5 / ($headerWordMax * 0.68))}
+        <div n:foreach="$headerWords as $i => $word" class="abs lh0 nu center brand" style="font-size:{=round($bFs, 3)|noescape}mm;top:{=round(14.1 + 1.15 * $bFs + $i * 1.048 * $bFs, 3)|noescape}mm">{$word}</div>
     </div>
 
-    <div class="abs lh0 center name">{$labelName|truncate:58}</div>
+    <div class="abs lh0 center name" style="font-size:{=round($nameFs, 3)|noescape}mm">{$labelName|truncate:(int)floor(101.5 / ($nameFs * 0.66))}</div>
 
     {if $country}
         <img n:if="$flagIconDataUri" class="flag" src="{$flagIconDataUri|nocheck}" alt="">
         <div class="abs lh0 origin-label">Země původu</div>
         <div class="abs lh0 origin-name">{$country->name}</div>
     {/if}
-    <div n:if="$note1" class="abs lh0 nu4 center meta" style="left:28.05mm;width:100mm">{$note1}</div>
-    <div n:if="$label && $label->is_more_species" class="abs lh0 nu4 right meta" style="left:29.3mm;width:100mm">Více druhů</div>
+    <div n:if="$moreSpecies" class="abs lh0 sri meta" style="left:{=round($speciesL, 3)|noescape}mm">Více druhů</div>
+    <div n:if="$note1" class="abs lh0 sri center meta" style="left:{=round($n1C - 50, 3)|noescape}mm;width:100mm;font-size:{=round($n1Fs, 3)|noescape}mm">{$note1}</div>
 
-    {* AKCE_30 keeps this layout but shows the 30-day lowest price struck
-       through instead of "Běžná cena", without the divider and the
-       "oproti běžné ceně" suffix (CACH-LAM-CODE section 3). *}
+    {* SROVNÁNÍ: "Běžná cena" + Ušetříte … oproti běžné ceně; AKCE_30: the 30-day low struck
+       through, Ušetříte without the suffix (CACH-LAM-CODE section 3) *}
     {if $compare}
-        <table class="abs" style="left:0;width:74.4mm;top:15.33mm;border-collapse:collapse" cellpadding="0" cellspacing="0">
+        <table class="abs" style="left:0;width:{=round($cmpR - 3, 3)|noescape}mm;top:{=round(16.51 + $dy + $ay, 3)|noescape}mm;border-collapse:collapse" cellpadding="0" cellspacing="0">
             <tr>
                 <td></td>
                 <td style="width:1%;padding:0 1.5mm 0 0;vertical-align:top;text-align:right;white-space:nowrap">
-                    {if $isAkce30}
-                        <div class="lh0 base-label">Nejnižší cena</div>
-                        <div class="lh0 base-label rel" style="top:2.38mm">za 30 dní</div>
+                    {if $akce}
+                        <div class="lh0 low-label">Nejnižší cena</div>
+                        <div class="lh0 low-label rel" style="top:2.3mm">za 30 dní</div>
                     {else}
                         <div class="lh0 base-label">Běžná</div>
                         <div class="lh0 base-label rel" style="top:2.38mm">cena</div>
                     {/if}
                 </td>
                 <td style="width:1%;padding:0;vertical-align:top;white-space:nowrap">
-                    <div class="lh0 nu base-val rel" style="top:2.64mm">{$isAkce30 ? $lowestPrice30Text : $basePriceText}&nbsp;<span class="base-cur">{$currencySymbol}</span><div n:if="$isAkce30" class="strike"></div></div>
+                    <div class="lh0 nu base-val rel" style="top:2.64mm">{$akce ? $lowestPrice30Text : $basePriceText}&nbsp;<span class="base-cur">{$currencySymbol}</span><div n:if="$akce" class="strike"></div></div>
                 </td>
             </tr>
         </table>
 
-        <div n:if="$saving > 0" class="save" style="left:{=round(74.4 - $saveW, 3)|noescape}mm;width:{=round($saveW, 3)|noescape}mm">
+        <div n:if="$saving > 0" class="save" style="left:{=round($cmpR - $saveW, 3)|noescape}mm;top:{=round(22.27 + $dy + $ay, 3)|noescape}mm;width:{=round($saveW, 3)|noescape}mm">
             <img class="save-brush" src="{$brushDataUri|nocheck}" style="width:{=round($saveW, 3)|noescape}mm" alt="">
-            <div class="abs lh0 save-text"><span class="save-copy" style="font-size:{=round(2 * $ss, 3)|noescape}mm">Ušetříte</span><span class="nu save-val" style="font-size:{=round(4.2 * $ss, 3)|noescape}mm;margin-left:{=round($ss, 3)|noescape}mm">{$saveValText}</span><span n:if="!$isAkce30" class="save-suffix" style="font-size:{=round(1.8 * $ss, 3)|noescape}mm;margin-left:{=round($ss, 3)|noescape}mm">oproti běžné ceně</span></div>
+            <div class="abs lh0 save-text" style="left:{$savePad|noescape}mm"><span class="save-copy" style="font-size:{=round(2.3 * $ss, 3)|noescape}mm">Ušetříte</span><span class="nu" style="font-size:{=round(4.5 * $ss, 3)|noescape}mm;margin-left:{=round($ss, 3)|noescape}mm">{$saveValText}</span><span n:if="!$akce" class="save-suffix" style="font-size:{=round(2 * $ss, 3)|noescape}mm;margin-left:{=round($ss, 3)|noescape}mm">oproti běžné ceně</span></div>
         </div>
 
-        <div n:if="!$isAkce30" class="divider"></div>
+        <div class="divider" style="top:{=round(14.38 + $dy, 3)|noescape}mm"></div>
     {/if}
 
-    <table class="abs" style="left:{=round($ourL, 3)|noescape}mm;top:19.3mm;border-collapse:collapse" cellpadding="0" cellspacing="0">
+    <table class="abs" style="left:{=round($ourL, 3)|noescape}mm;top:{=round(20.63 + $dy, 3)|noescape}mm;border-collapse:collapse" cellpadding="0" cellspacing="0">
         <tr>
             <td style="padding:0 1.5mm 0 0;vertical-align:top;text-align:right;white-space:nowrap">
                 <div class="lh0 our-label">Naše</div>
@@ -150,11 +200,19 @@
         </tr>
     </table>
 
-    <div n:if="$unit" class="abs lh0 nu4 right unit">cena za {$unit->unitWeight} {$unit->unitShort} = {$unit->price|number:2,',',' '} {$currencySymbol}</div>
+    <div n:if="$unit" class="abs lh0 nu4 right unit" style="top:{=round(32.53 + $dyB, 3)|noescape}mm">cena za {$unit->unitWeight} {$unit->unitShort} = {$unit->price|number:2,',',' '} {$currencySymbol}</div>
 
-    <div n:if="$bars" class="bars">
+    <div n:if="$bars" class="bars" style="top:{=round(33.81 + $dyB, 3)|noescape}mm">
         <div n:foreach="$bars as $bar" n:if="$bar['dark']" style="position:absolute;top:0;left:{$bar['left']|noescape};background:{$bar['color']|noescape};width:{$bar['width']|noescape}"></div>
     </div>
-    <div class="abs lh0 ean">EAN: {$eanText}</div>
-    <div n:if="$note3 || $note2" class="abs lh0 nu4 center note3">{$note3 ?: $note2}</div>
+    <div class="abs lh0 ean" style="top:{=round(39.07 + $dyB, 3)|noescape}mm">EAN: {$eanText}</div>
+    <div n:foreach="$n3Lines as $i => $line" class="abs lh0 sri center note3" style="top:{=round(38.65 + $dyB - (count($n3Lines) - 1 - $i) * 3.34, 3)|noescape}mm">{$line}</div>
+
+    <div n:if="$slozeni" class="slozeni-col" style="height:{=round($Hi, 3)|noescape}mm">
+        {* empty or hidden ingredients leave the column blank, title included (CACH-LAM-CODE.md) *}
+        {if !$hideIngredients && $ingredients !== ''}
+            <div class="abs lh0 slozeni-label">Složení</div>
+            <div class="slozeni-text" style="font-size:{=round($ingrFs, 3)|noescape}mm;height:{=round($ingrH, 3)|noescape}mm">{$ingredients|truncate:$ingrCap}</div>
+        {/if}
+    </div>
 </div>

@@ -708,47 +708,31 @@ trait ProductPricesTrait
 
 
 	/**
-	 * Show prices log modal for a product in the given branch and currency
-	 * @param int $productsId
+	 * "Historie cen" modal: one product ($productsId), the ticked products ($ids "1,2,3") or every
+	 * product of the branch ($all = 1); the list first, the CSV export from its button (custom.js picks
+	 * ids: a ticked row shows every ticked product). With many products only the newest 500 rows are listed.
 	 * @param int|null $branchesId Explicit branch id (optional); if null, current filter branch is used
 	 */
-	public function handleShowPricesLog(int $productsId, ?int $branchesId = null): void
+	public function handleShowPricesLog(int $productsId = 0, ?int $branchesId = NULL, string $ids = '', int $all = 0): void
 	{
-		$branchId = (int)($branchesId ?? ($this->session->filters[$this->getName()]['custom__branches'] ?? 0));
-		$currencyId = (int)$this->globalContainer->getDefaultCurrency()->id;
-
-		$this->template->priceChanges = \ProductPricesLogRepository::getEntities($this->productPricesLogRepo->findAll()
-			->where('products_id', $productsId)
-			->where('branches_id', $branchId)
-			->where('currencies_id', $currencyId)
-			->order('datetime DESC'));
-
-		$this->template->priceLogProductsId = $productsId;
-		$this->template->priceLogBranchesId = $branchId;
-
+		$this->loadPricesLog($productsId, $branchesId, $ids, $all);
 		$this->redrawControl('modalWrapper');
 		$this->redrawControl('pricesLog');
 	}
 
+
 	/**
-	 * Delete a single price log entry and refresh the modal content
+	 * Delete a single price log entry and refresh the modal content (same products as before)
 	 * @param int $logId product_prices_log.id
 	 */
-	public function handleDeletePriceLog(int $logId): void
+	public function handleDeletePriceLog(int $logId, int $productsId = 0, string $ids = '', int $all = 0): void
 	{
 		$row = $this->database->table('product_prices_log')->get($logId);
 		if ($row) {
-			$productsId = (int)$row->products_id;
+			$productsId = $productsId ?: (!$ids && !$all ? (int)$row->products_id : 0);
 			$branchesId = (int)$row->branches_id;
-			$currenciesId = (int)$row->currencies_id;
-
 			$this->database->table('product_prices_log')->where('id', $logId)->delete();
-
-			$this->template->priceChanges = \ProductPricesLogRepository::getEntities($this->productPricesLogRepo->findAll()
-				->where('products_id', $productsId)
-				->where('branches_id', $branchesId)
-				->where('currencies_id', $currenciesId)
-				->order('datetime DESC'));
+			$this->loadPricesLog($productsId, $branchesId, $ids, $all);
 		}
 
 		$this->redrawControl('modalWrapper');
@@ -756,46 +740,132 @@ trait ProductPricesTrait
 	}
 
 
+	private function loadPricesLog(int $productsId, ?int $branchesId, string $ids, int $all): void
+	{
+		$branchId = (int)($branchesId ?? ($this->session->filters[$this->getName()]['custom__branches'] ?? 0));
+		$currencyId = (int)$this->globalContainer->getDefaultCurrency()->id;
+		$productIds = $all ? NULL : array_values(array_unique(array_filter(array_map('intval', $ids !== '' ? explode(',', $ids) : [$productsId]))));
+		$selection = $this->productPricesLogRepo->findAll()
+			->where('branches_id', $branchId)
+			->where('currencies_id', $currencyId)
+			->order('datetime DESC, id DESC');
+		if (!$all) {
+			$selection->where('products_id', $productIds ?: [0]);
+		}
+		$multi = $all || count($productIds ?? []) > 1;
+		$total = $multi ? (clone $selection)->count('*') : NULL;
+		// many products: grouped by product (name A–Z), newest change first in each, as the CSV
+		if ($multi) {
+			$orderIds = $this->database->query('SELECT l.id FROM product_prices_log l'
+				. ' LEFT JOIN products_mld pm ON pm.products_id = l.products_id AND pm.languages_id = ?'
+				. ' WHERE l.branches_id = ? AND l.currencies_id = ?' . ($all ? '' : ' AND l.products_id IN (?)')
+				. ' ORDER BY pm.name, l.products_id, l.datetime DESC, l.id DESC LIMIT 500',
+				...array_merge(['cs', $branchId, $currencyId], $all ? [] : [$productIds ?: [0]]))->fetchPairs(NULL, 'id');
+			$byId = [];
+			foreach (\ProductPricesLogRepository::getEntities($this->productPricesLogRepo->findAll()->where('id', $orderIds ?: [0])) as $entity) {
+				$byId[(int)$entity->id] = $entity;
+			}
+			$changes = array_values(array_filter(array_map(static fn($id) => $byId[(int)$id] ?? NULL, $orderIds)));
+		}
+		else {
+			$changes = \ProductPricesLogRepository::getEntities($selection);
+		}
+
+		$names = [];
+		if ($multi && $changes) {
+			$shown = array_values(array_unique(array_map(static fn($c) => (int)$c->products_id, $changes)));
+			foreach ($this->database->query('SELECT p.id, p.code_ean, pm.name FROM products p LEFT JOIN products_mld pm ON pm.products_id = p.id AND pm.languages_id = ? WHERE p.id IN (?)', 'cs', $shown) as $r) {
+				$names[(int)$r->id] = ['name' => (string)$r->name, 'ean' => (string)$r->code_ean];
+			}
+		}
+
+		$this->template->priceChanges = $changes;
+		$this->template->priceLogProductsId = !$multi ? (int)($productIds[0] ?? 0) : 0;
+		$this->template->priceLogIds = !$all && $multi ? implode(',', $productIds) : '';
+		$this->template->priceLogAll = $all ? 1 : 0;
+		$this->template->priceLogMulti = $multi;
+		$this->template->priceLogTotal = $total;
+		$this->template->priceLogCount = $all ? NULL : count($productIds ?? []);
+		$this->template->priceLogNames = $names;
+		$this->template->priceLogBranchesId = $branchId;
+		$this->template->priceLogBranchName = (string)($this->database->table('branches_mld')->where('branches_id', $branchId)->where('languages_id', 'cs')->fetchField('name') ?: '');
+		$this->template->priceLogProductName = !$multi && $productIds ? (string)($this->database->table('products_mld')->where('products_id', $productIds[0])->where('languages_id', 'cs')->fetchField('name') ?: '') : '';
+	}
+
+
 	/**
-	 * Export price log entries to CSV (XLS-compatible)
+	 * Export price log entries to CSV (XLS-compatible) – one product, from the "Historie cen" modal
 	 */
 	public function handleExportPricesLog(int $productsId, int $branchesId): void
 	{
-		$currencyId = (int)$this->globalContainer->getDefaultCurrency()->id;
-
-		$rows = \ProductPricesLogRepository::getEntities($this->productPricesLogRepo->findAll()
-			->where('products_id', $productsId)
-			->where('branches_id', $branchesId)
-			->where('currencies_id', $currencyId)
-			->order('datetime DESC'));
-
 		$product = $this->repository->find($productsId);
-		$productName = $product ? Strings::webalize($product->name) : $productsId;
+		$this->sendPricesLogCsv([$productsId], $branchesId, 'historie-cen-' . ($product ? $product->name : $productsId));
+	}
 
-		$lines = [];
-		$lines[] = ['Datum', 'Původní cena', 'Nová cena', 'Sleva %', 'Referenční cena', 'Akce od', 'Akce do'];
 
-		foreach ($rows as $row) {
-			$lines[] = [
-				$row->datetime ? $row->datetime->format('d.m.Y H:i:s') : '',
-				$row->price_origin ?? '',
-				$row->price_new ?? '',
-				$row->price_ref ? $row->getDiscountPercent() : '',
-				$row->price_ref ?? '',
-				$row->action_from ? $row->action_from->format('d.m.Y') : '',
-				$row->action_to ? $row->action_to->format('d.m.Y') : '',
-			];
+	/**
+	 * Price history of the products ticked in the list ($ids "1,2,3") or of every product ($all = 1),
+	 * for the branch of the list filter (one of the admin's branches) – Produkty print bar / head.
+	 */
+	public function handleExportPricesLogMany(string $ids = '', int $all = 0): void
+	{
+		$branchId = (int)($this->session->filters[$this->getName()]['custom__branches'] ?? 0);
+		if (!$branchId || !isset($this->branchesPairs[$branchId])) {
+			$this->error('Branch not allowed', 403);
 		}
+		$productIds = $all ? NULL : array_values(array_unique(array_filter(array_map('intval', explode(',', $ids)))));
+		if ($productIds === []) {
+			$this->flashMessage($this->trans('admin.pv.noneChecked'), 'warning');
+			$this->redirect('this');
+		}
+		$branch = $this->database->table('branches_mld')->where('branches_id', $branchId)->where('languages_id', 'cs')->fetch();
+		$this->sendPricesLogCsv($productIds, $branchId, 'historie-cen-' . ($all ? 'vse' : count($productIds) . '-produktu') . '-' . ($branch ? $branch->name : $branchId) . '-' . date('Y-m-d'));
+	}
 
-		$filename = Strings::webalize('historie-cen-' . $productName) . '.csv';
 
-		header('Content-Type: application/csv');
-		header('Content-Disposition: attachment; filename="' . $filename . '";');
+	/**
+	 * CSV (";", UTF-8 BOM, Czech decimals) of product_prices_log for the products (NULL = all) of a branch:
+	 * product, EAN, branch, then the columns of the "Historie cen" modal. Newest first per product.
+	 * @param int[]|null $productIds
+	 */
+	private function sendPricesLogCsv(?array $productIds, int $branchId, string $name): void
+	{
+		$currencyId = (int)$this->globalContainer->getDefaultCurrency()->id;
+		$branchName = (string)($this->database->table('branches_mld')->where('branches_id', $branchId)->where('languages_id', 'cs')->fetchField('name') ?: $branchId);
+		$sql = 'SELECT l.*, p.code_ean, pm.name FROM product_prices_log l'
+			. ' JOIN products p ON p.id = l.products_id'
+			. ' LEFT JOIN products_mld pm ON pm.products_id = l.products_id AND pm.languages_id = ?'
+			. ' WHERE l.branches_id = ? AND l.currencies_id = ?'
+			. ($productIds !== NULL ? ' AND l.products_id IN (?)' : '')
+			. ' ORDER BY pm.name, l.products_id, l.datetime DESC, l.id DESC';
+		$params = ['cs', $branchId, $currencyId];
+		if ($productIds !== NULL) {
+			$params[] = $productIds;
+		}
+		$rows = $this->database->query($sql, ...$params);
+
+		$price = static fn($v): string => $v !== NULL && (float)$v > 0 ? number_format((float)$v, 2, ',', '') : '';
+		header('Content-Type: text/csv; charset=utf-8');
+		header('Content-Disposition: attachment; filename="' . Strings::webalize($name) . '.csv";');
 		$f = fopen('php://output', 'w');
 		fprintf($f, chr(0xEF) . chr(0xBB) . chr(0xBF));
-		foreach ($lines as $line) {
-			fputcsv($f, $line, ';');
+		fputcsv($f, ['Produkt', 'EAN', 'Pobočka', 'Datum', 'Původní cena', 'Nová cena', 'Sleva %', 'Referenční cena', 'Akce od', 'Akce do'], ';');
+		foreach ($rows as $row) {
+			$ref = (float)($row->price_ref ?? 0);
+			fputcsv($f, [
+				(string)($row->name ?? ''),
+				(string)($row->code_ean ?? ''),
+				$branchName,
+				$row->datetime ? $row->datetime->format('d.m.Y H:i:s') : '',
+				$price($row->price_origin),
+				number_format((float)$row->price_new, 2, ',', ''),
+				$ref > 0 ? (string)round(100 - (float)$row->price_new / $ref * 100) : '',
+				$price($row->price_ref),
+				$row->action_from ? $row->action_from->format('d.m.Y') : '',
+				$row->action_to ? $row->action_to->format('d.m.Y') : '',
+			], ';');
 		}
+		fclose($f);
 		exit;
 	}
 }

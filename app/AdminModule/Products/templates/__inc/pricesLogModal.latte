@@ -1,4 +1,5 @@
-{* Modal: Price history log *}
+{* Modal: Price history log – one product, the ticked products or every product of the branch
+   (ProductPricesTrait::loadPricesLog()); the list first, then "Export CSV" of the same products *}
 
 <div id="modal-pricesLog" class="modal fade">
 	<div class="modal-dialog modal-lg">
@@ -11,9 +12,44 @@
 			</div>
 
 			<div class="modal-body clearfix" n:snippet="pricesLog">
-				<table n:ifset="$priceChanges" class="table table-striped table-hover table-compact">
+				{ifset $priceChanges}
+					{* what the list shows (the product, "n produktů" or all products, the branch) and the export –
+					   at the top, the list can be long; the export has every row *}
+					<div class="pl-log-head">
+						<p class="pl-log-scope">
+							{if !empty($priceLogAll)}
+								<b>{_admin.pv.logAllProducts}</b>
+							{elseif !empty($priceLogMulti)}
+								<b>{=str_replace('%n', $priceLogCount, 'admin.pv.logProducts'|translate)}</b>
+							{else}
+								<b>{$priceLogProductName}</b>
+							{/if}
+							<span n:if="!empty($priceLogBranchName)"> · {$priceLogBranchName}</span>
+						</p>
+						<span n:if="$priceChanges">
+							{if !empty($priceLogMulti)}
+								<a n:href="exportPricesLogMany! ids => $priceLogIds, all => $priceLogAll" class="btn btn-primary btn-addon pl-log-csv">
+									<i class="far fa-download"></i> Export CSV
+								</a>
+							{else}
+								<a n:href="exportPricesLog! productsId => $priceLogProductsId, branchesId => $priceLogBranchesId" class="btn btn-primary btn-addon pl-log-csv">
+									<i class="far fa-download"></i> Export CSV
+								</a>
+							{/if}
+						</span>
+					</div>
+					<p n:if="!empty($priceLogMulti) && $priceLogTotal > count($priceChanges)" class="pl-log-note">
+						{=str_replace(['%shown', '%total'], [count($priceChanges), $priceLogTotal], 'admin.pv.logShown'|translate)}
+					</p>
+				{/ifset}
+				{* the rows scroll inside the modal; the head above and the column titles stay (custom.css) *}
+				<div n:ifset="$priceChanges" class="pl-log-scroll">
+				<table class="table table-striped table-hover table-compact">
 					<thead>
 					<tr>
+						<th n:if="!empty($priceLogMulti)">
+							Produkt
+						</th>
 						<th>
 							{_admin.terms.datetime}
 						</th>
@@ -40,7 +76,19 @@
 					</tr>
 					</thead>
 					<tbody>
-					<tr n:foreach="$priceChanges as $priceChange">
+					<tr n:if="!$priceChanges">
+						<td colspan="9" class="text-center">{_admin.pv.logEmpty}</td>
+					</tr>
+					{* many products come grouped by product: its name on the group's first row only *}
+					{var $prevProduct = NULL}
+					<tr n:foreach="$priceChanges as $priceChange" n:class="!empty($priceLogMulti) && $prevProduct !== (int)$priceChange->products_id ? pl-log-group">
+						<td n:if="!empty($priceLogMulti)">
+							{if $prevProduct !== (int)$priceChange->products_id}
+								{$priceLogNames[(int)$priceChange->products_id]['name'] ?? $priceChange->products_id}
+								<small n:if="!empty($priceLogNames[(int)$priceChange->products_id]['ean'])" class="pl-log-ean">{$priceLogNames[(int)$priceChange->products_id]['ean']}</small>
+							{/if}
+							{do $prevProduct = (int)$priceChange->products_id}
+						</td>
 						<td>
 							{$priceChange->datetime?->format('d.m.Y H:i:s')}
 						</td>
@@ -65,19 +113,15 @@
 							{$priceChange->action_to?->format('d.m.Y')}
 						</td>
 						<td class="text-center">
-							<a n:href="deletePriceLog! logId => $priceChange->id" class="ajax with-confirm" data-message="Opravdu chcete smazat tento záznam?" title="Smazat záznam">
+							<a n:href="deletePriceLog! logId => $priceChange->id, productsId => $priceLogProductsId ?? 0, ids => $priceLogIds ?? '', all => $priceLogAll ?? 0" class="ajax with-confirm" data-message="Opravdu chcete smazat tento záznam?" title="Smazat záznam">
 								<i class="fa fa-trash"></i>
 							</a>
 						</td>
 					</tr>
 					</tbody>
 				</table>
-
-				<div n:if="isset($priceLogProductsId, $priceLogBranchesId) && isset($priceChanges) && $priceChanges" class="text-right" style="margin-top: 10px;">
-					<a n:href="exportPricesLog! productsId => $priceLogProductsId, branchesId => $priceLogBranchesId" class="btn btn-primary btn-addon">
-						<i class="far fa-download"></i> Export CSV
-					</a>
 				</div>
+
 			</div>
 
 			<div class="modal-footer">

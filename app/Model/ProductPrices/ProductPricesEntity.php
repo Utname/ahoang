@@ -108,6 +108,47 @@ class ProductPricesEntity extends BaseEntity
 
 
 	/**
+	 * State of an action price for the labels and the label tools: an action price lower
+	 * than the regular one is enough, the dates are optional (no "od" = runs at once, no
+	 * "do" = until it is ended); dates that are set still apply. The website keeps
+	 * is_valid_action, which needs "od".
+	 *
+	 * @param \DateTimeInterface|string|null $from
+	 * @param \DateTimeInterface|string|null $to
+	 * @return string none | planned | running | ended
+	 */
+	public static function actionState($price, $priceAction, $from, $to, ?string $today = NULL): string
+	{
+		if (!(float)$priceAction || !(float)$price || (float)$priceAction >= (float)$price) {
+			return 'none';
+		}
+		$today ??= date('Y-m-d');
+		$day = static fn($d) => $d instanceof \DateTimeInterface ? $d->format('Y-m-d') : ($d ? date('Y-m-d', strtotime((string)$d)) : NULL);
+		$from = $day($from);
+		$to = $day($to);
+		if ($to && $to < $today) {
+			return 'ended';
+		}
+		if ($from && $from > $today) {
+			return 'planned';
+		}
+
+		return 'running';
+	}
+
+
+	/**
+	 * SQL condition of a running action (actionState() 'running') on a product_prices row;
+	 * $alias with the dot ("pp."), two `?` for today.
+	 */
+	public static function actionRunningSql(string $alias = ''): string
+	{
+		return "{$alias}price_action > 0 AND {$alias}price > {$alias}price_action"
+			. " AND ({$alias}action_from IS NULL OR {$alias}action_from <= ?) AND ({$alias}action_to IS NULL OR {$alias}action_to >= ?)";
+	}
+
+
+	/**
 	 * @return bool
 	 */
 	public function isAction(): bool

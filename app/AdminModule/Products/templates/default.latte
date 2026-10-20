@@ -26,7 +26,8 @@
                 </li>
             </ul>
         </div>
-        <a n:if="$aps->has('create')" n:href="product!" class="btn mosaic-topbtn mosaic-topbtn-primary ajax-modal" data-target="#modal-productsForm" style="padding:7px 18px;">
+        {* the new product opens the Detail produktu modal (product-detail.js) *}
+        <a n:if="$aps->has('create')" href="#" class="btn mosaic-topbtn mosaic-topbtn-primary pd-open" data-pd="0" style="padding:7px 18px;">
             <i class="fa fa-plus m-r-xxs"></i> {_'admin.terms.newProduct'}
         </a>
     </div>
@@ -92,6 +93,32 @@
                 </div>
             </div>
 
+            {* the print bar floats at the top of the list (sticky under the navbar, custom.css) *}
+            {snippet printSummary}
+                <div class="pv-bar-wrap" data-labels="{$totalLabels ?? 0}" n:attr="hidden: empty($totalLabels)">
+                    <div class="pv-bar">
+                        <span class="pv-bar-sum"><b>{$selectedProductsCount ?? 0}</b> {_admin.pv.products} · <b class="pv-bar-labels">{$totalLabels ?? 0} {_admin.pv.labels}</b></span>
+                        <div class="pv-bar-chips">
+                            <span n:foreach="$printGroups as $group" class="pv-bar-chip">{$group['name']} ×{$group['count']} · {$group['pages']} A4</span>
+                        </div>
+                        <div class="pv-flex"></div>
+                        <span class="pv-bar-checked" hidden>
+                            <select class="pv-default-tpl select-default" title="{_admin.pv.defaultTemplate}">
+                                {foreach \ProductLabelsEntity::TYPES_ARR as $typeId => $def}
+                                    {continueIf $def['group'] === \ProductLabelsEntity::GROUP_AKCE || \ProductLabelsEntity::isLockedType($typeId)}
+                                    <option value="{$typeId}">{$global['productLabelTypes'][$typeId]}</option>
+                                {/foreach}
+                            </select>
+                            <button type="button" class="pv-bar-btn pv-bulk-add" data-url="{link bulkAddLabels!}">+ {_admin.pv.toChecked} (<span class="pv-checked-n">0</span>)</button>
+                            {* price history of the ticked products (modal, then Export CSV), branch of the filter *}
+                            <a href="{link showPricesLog!}" class="pv-bar-btn pv-log-export ajax-modal" data-target="#modal-pricesLog" data-url="{link showPricesLog!}" title="{_admin.pv.logExportTitle}"><i class="far fa-clock m-r-xxs"></i> {_admin.pv.logExport} (<span class="pv-checked-n">0</span>)</a>
+                        </span>
+                        <a n:href="clearAllPrintCounts!" class="pv-bar-btn ajax with-confirm" data-message="{_admin.terms.reallyRemoveLabels}">{_admin.pv.clear}</a>
+                        <a href="#" class="pv-bar-go" onclick="$('#modal-printPreview').modal('show'); return false;">{_admin.pv.previewPrint} →</a>
+                    </div>
+                </div>
+            {/snippet}
+
             {snippet productList}
             <div class="pv-table">
                 <div class="pv-table-inner">
@@ -120,7 +147,7 @@
                                             {/if}
                                         </div>
                                         <div class="pv-prod-text">
-                                            <a n:href="edit $item->id" class="pv-name">{$item->name}<i class="pv-mgo"> ›</i></a>
+                                            <a n:href="edit $item->id" class="pv-name pd-open" data-pd="{$item->id}">{$item->name}<i class="pv-mgo"> ›</i></a>
                                             {* phones: "EAN · 250 ml · Německo" as in the phone app design *}
                                             {var $mCountry = $item->getCountry()}
                                             {var $mMeta = array_filter([(float)$item->weight > 0 && isset(\ProductsEntity::UNITS_SHORT[(int)$item->units_id]) ? rtrim(rtrim(number_format((float)$item->weight, 2, ',', ''), '0'), ',') . ' ' . \ProductsEntity::UNITS_SHORT[(int)$item->units_id] : '', $mCountry ? $mCountry->name : ''])}
@@ -134,7 +161,7 @@
                                     {control "productLabels-$item->id":chips}
                                     <div class="pv-actions">
                                         <a n:if="$price" n:href="downloadProductAllLabelsPdf! $item->id, 0" target="_blank" class="pv-iconbtn pv-teal" title="{_admin.pv.previewAll}">◉</a>
-                                        <a n:href="edit $item->id" class="pv-iconbtn" title="{_admin.ui.edit}">✎</a>
+                                        <a n:href="edit $item->id" class="pv-iconbtn pd-open" data-pd="{$item->id}" title="{_admin.ui.edit}">✎</a>
                                         <span class="pv-iconbtn pv-eye">{include APP_DIR.'/AdminModule/__inc/boolSwitch.latte', 'item' => $item, 'param' => 'is_active', 'isEye' => TRUE}</span>
                                         <div class="dropdown">
                                             <a class="dropdown-toggle pv-iconbtn" data-toggle="dropdown" href="#" title="{_admin.ui.actions}">⋯</a>
@@ -169,7 +196,7 @@
                                         </div>
                                         <div class="pv-pfoot">
                                             <div class="pv-hint"></div>
-                                            <a n:href="showPricesLog! $item->id, $branchesId" class="ajax-modal pv-btn" data-target="#modal-pricesLog"><i class="far fa-clock m-r-xxs"></i> {_admin.ui.priceHistory}</a>
+                                            <a n:href="showPricesLog! $item->id, $branchesId" class="ajax-modal pv-btn pv-log-open" data-id="{$item->id}" data-target="#modal-pricesLog" title="{_admin.pv.logOpenTitle}"><i class="far fa-clock m-r-xxs"></i> {_admin.ui.priceHistory}</a>
                                             <button type="button" class="pv-btn pv-btn-red pv-end-akce">{_admin.pv.endAkce}</button>
                                             <button type="button" class="pv-btn pv-btn-dark pv-save-price">{_admin.pv.save}</button>
                                         </div>
@@ -197,28 +224,6 @@
             {control paginator}
             {/snippet}
 
-            {snippet printSummary}
-                <div class="pv-bar-wrap" data-labels="{$totalLabels ?? 0}" n:attr="hidden: empty($totalLabels)">
-                    <div class="pv-bar">
-                        <span class="pv-bar-sum"><b>{$selectedProductsCount ?? 0}</b> {_admin.pv.products} · <b class="pv-bar-labels">{$totalLabels ?? 0} {_admin.pv.labels}</b></span>
-                        <div class="pv-bar-chips">
-                            <span n:foreach="$printGroups as $group" class="pv-bar-chip">{$group['name']} ×{$group['count']} · {$group['pages']} A4</span>
-                        </div>
-                        <div class="pv-flex"></div>
-                        <span class="pv-bar-checked" hidden>
-                            <select class="pv-default-tpl select-default" title="{_admin.pv.defaultTemplate}">
-                                {foreach \ProductLabelsEntity::TYPES_ARR as $typeId => $def}
-                                    {continueIf $def['group'] === \ProductLabelsEntity::GROUP_AKCE || \ProductLabelsEntity::isLockedType($typeId)}
-                                    <option value="{$typeId}">{$global['productLabelTypes'][$typeId]}</option>
-                                {/foreach}
-                            </select>
-                            <button type="button" class="pv-bar-btn pv-bulk-add" data-url="{link bulkAddLabels!}">+ {_admin.pv.toChecked} (<span class="pv-checked-n">0</span>)</button>
-                        </span>
-                        <a n:href="clearAllPrintCounts!" class="pv-bar-btn ajax with-confirm" data-message="{_admin.terms.reallyRemoveLabels}">{_admin.pv.clear}</a>
-                        <a href="#" class="pv-bar-go" onclick="$('#modal-printPreview').modal('show'); return false;">{_admin.pv.previewPrint} →</a>
-                    </div>
-                </div>
-            {/snippet}
         </div>
     </div>
 </div>
@@ -783,7 +788,14 @@
 </div>
 
 {snippet javascripts}
-    <script n:if="!empty($newProductModal)">
+    {* a scanned unknown EAN: Detail produktu with the code; the multi-sale flow keeps its own form *}
+    <script n:if="!empty($newProductModal) && empty($newProductModalIsMultiSale)">
+        (function (code) {
+            var open = function () { window.pdOpen(0, code); };
+            window.pdOpen ? open() : document.addEventListener('DOMContentLoaded', open);
+        })({$newProductModalEan ?? ''});
+    </script>
+    <script n:if="!empty($newProductModal) && !empty($newProductModalIsMultiSale)">
         $(function() {
 	        ajaxGet("?do=product{if !empty($newProductModalEan)}&ean={$newProductModalEan|noescape}{/if}{if !empty($newProductModalIsMultiSale)}&isMultiSale={$newProductModalIsMultiSale|noescape}{/if}", function() {
 		        $("#modal-productsForm").modal('show');
@@ -794,6 +806,14 @@
 	    window.open('/admin/products/edit/{$editProductWindowId}?ct=1', '_blank');
     </script>
 {/snippet}
+
+{* "Admin - Detail produktu" (design_handoff_fikko): built by /js/admin/product-detail.js, data from
+   ProductDetailTrait (detailData! / detailSave!), styles .pd-* in custom.css *}
+<div id="modal-productDetail" class="modal fade pd-modal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog pd-dialog"><div class="modal-content pd-content" id="pd-root"></div></div>
+</div>
+<script type="application/json" id="pd-config">{$presenter->productDetailConfig()}</script>
+<script src="/js/admin/product-detail.js?v={=@filemtime(WWW_DIR . '/js/admin/product-detail.js')}" defer></script>
 
 <div id="modal-printPreview" class="modal fade" tabindex="-1" role="dialog">
     <div class="modal-dialog pp-dialog">

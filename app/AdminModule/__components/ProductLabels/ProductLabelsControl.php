@@ -125,18 +125,17 @@ class ProductLabelsControl extends \Nette\Application\UI\Control
 	 */
 	public static function getActionStatus(?\ProductPricesEntity $price): string
 	{
-		if (!$price || !(float)$price->price_action || (float)$price->price_action >= (float)$price->price || !$price->action_from) {
+		if (!$price) {
 			return self::STATUS_NONE;
 		}
-		$today = date('Y-m-d');
-		if ($price->action_to && $price->action_to->format('Y-m-d') < $today) {
-			return self::STATUS_ENDED;
-		}
-		if ($price->action_from->format('Y-m-d') > $today) {
-			return self::STATUS_PLANNED;
-		}
 
-		return self::STATUS_RUNNING;
+		// the dates are optional: an action price alone runs
+		return match (\ProductPricesEntity::actionState($price->price, $price->price_action, $price->action_from, $price->action_to)) {
+			'running' => self::STATUS_RUNNING,
+			'planned' => self::STATUS_PLANNED,
+			'ended' => self::STATUS_ENDED,
+			default => self::STATUS_NONE,
+		};
 	}
 
 

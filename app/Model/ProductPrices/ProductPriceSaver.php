@@ -41,9 +41,8 @@ final class ProductPriceSaver
 		$set['action_from'] = $this->isoDate($actionFrom);
 		$set['action_to'] = $this->isoDate($actionTo);
 
-		$today = date('Y-m-d');
-		$set['is_action'] = $set['price'] && $set['price_action'] && $set['price_action'] > 0 && $set['price'] > $set['price_action']
-			&& $set['action_from'] && $set['action_from'] <= $today && (!$set['action_to'] || $set['action_to'] >= $today);
+		// the dates are optional: an action price without them runs (ProductPricesEntity::actionState())
+		$set['is_action'] = ProductPricesEntity::actionState($set['price'], $set['price_action'], $set['action_from'], $set['action_to']) === 'running';
 
 		$entity = $itemId ? $this->productPricesRepo->findEntity($itemId) : NULL;
 		if (!$entity) {
@@ -77,7 +76,7 @@ final class ProductPriceSaver
 					continue;
 				}
 				$branchPrice = $product->getPrice((int)$otherBranchId);
-				if (isset($branchPrice->is_valid_action) && $branchPrice->is_valid_action) {
+				if (!empty($branchPrice->is_valid_action) || !empty($branchPrice->is_label_action)) {
 					continue;
 				}
 				$this->productsService->logProductPrice($productsId, (int)$otherBranchId, $currencyId, $set['price']);

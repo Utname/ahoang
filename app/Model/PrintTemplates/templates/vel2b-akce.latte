@@ -1,6 +1,6 @@
 <style>
-    /* Vel.2B label, 133 x 52mm. Measured against "vel. 2B Akce.dc.html" printed
-       from Chromium; numbers are mm from the card's inner (inside-border) corner.
+    /* Vel.2B label, 133 x 52mm. Measured against "vel. 2B Akce.dc.html" (handoff
+       19.10.2026: bold 3.9mm name, origin row 1.5mm lower) printed from Chromium; numbers are mm from the card's inner (inside-border) corner.
        - Dompdf ignores box-sizing and draws the 0.4mm border outside
          width/height, so the box is 132.2 x 51.2 to come out 133 x 52.
        - No flexbox/grid in Dompdf: blocks are absolutely positioned.
@@ -12,8 +12,7 @@
          "Běžná cena" and no strike, a plain price keeps "Naše cena" flush right.
        - The comparison is "velikost 2B.dc.html" (Vel. 2 B, type 14): one-line
          "Běžná cena" on the price's baseline.
-       - Also renders "Vel. 2B Složení" (167 x 52, type 16): the same label plus
-         the Složení column, chosen by the template width. */
+       - "Vel. 2B Složení" (167 x 52) has the vel. 2 layout now (vel2.latte). */
     .fikko-vel2b-akce {
         position: relative;
         width: 132.2mm;
@@ -27,6 +26,7 @@
     .abs { position: absolute; white-space: nowrap; }
     .lh0 { line-height: 0; }
     .nu { font-family: Nunito, sans-serif; font-weight: 900; font-style: italic; }
+    .sri { font-family: Sriracha, cursive; font-weight: bold; font-style: normal; }
     .center { text-align: center; }
     .right { text-align: right; }
     .rel { position: relative; }
@@ -36,9 +36,9 @@
     .logo-divider { position: absolute; left: 1.5mm; top: 14.1mm; width: 20.6mm; border-top: 0.3mm dashed #111; }
     .brand { left: 0; width: 23.6mm; font-size: 6mm; }
 
-    .name { left: 26mm; width: 104.2mm; top: 3.95mm; font-size: 3.2mm; font-weight: 400; }
-    .note1 { left: 28.1mm; width: 100mm; top: 7.39mm; font-size: 2.6mm; }
-    .species { left: 25.9mm; top: 7.39mm; font-size: 2.6mm; }
+    .name { left: 26mm; width: 104.2mm; top: 4.74mm; font-weight: bold; }
+    .note1 { left: 28.1mm; width: 100mm; top: 8.16mm; font-size: 2.6mm; }
+    .species { left: 25.9mm; top: 8.16mm; font-size: 2.6mm; }
     .origin { font-size: 2.2mm; }
     .flag { position: absolute; left: 41.62mm; width: 7.5mm; height: 7.5mm; border: 0.2mm solid #111; border-radius: 50%; }
 
@@ -46,7 +46,7 @@
     .base-val { font-size: 5.5mm; }
     .strike { position: absolute; left: -4%; width: 108%; top: -1.94mm; height: 0.6mm; background: #111; border-radius: 0.3mm; transform: rotate(-5.5deg); }
 
-    .save { position: absolute; top: 26.56mm; height: 6.9mm; transform: rotate(-1.2deg); }
+    .save { position: absolute; top: 26.95mm; height: 6.9mm; transform: rotate(-1.2deg); }
     .save-brush { position: absolute; left: 0; top: 0; height: 6.9mm; }
     .save-text { left: 2.8mm; top: 4.78mm; color: #fff; }
     .save-copy { font-size: 2.4mm; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; }
@@ -60,12 +60,6 @@
     .bars div { height: 6mm; }
     .ean { left: 25.9mm; top: 49.19mm; font-size: 2.2mm; font-weight: 600; }
     .note3 { left: 0; width: 90.3mm; top: 46.81mm; font-size: 2.6mm; }
-
-    /* "vel. 2B Slozeni.dc.html" (167 x 52): 34mm Složení column on the right
-       (padding 1.5 x 2mm, title then text 0.8mm below). */
-    .slozeni-col { position: absolute; left: 132.2mm; top: 0; width: 33.6mm; height: 51.2mm; border-left: 0.4mm dashed #111; overflow: hidden; }
-    .slozeni-label { left: 2mm; top: 3.55mm; font-size: 2.2mm; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; }
-    .slozeni-text { position: absolute; left: 2mm; top: 4.85mm; width: 29.6mm; line-height: 1.25; overflow: hidden; }
 </style>
 
 {var $compare = $basePrice > $finalPrice}
@@ -95,18 +89,10 @@
 {/if}
 {var $moreSpecies = $label && $label->is_more_species}
 {var $oy = $moreSpecies ? 0 : -3.26}
+{* product name: bold 3.9mm on one line, smaller for a long name (DejaVu Bold ~0.66em per character) *}
+{var $nameFs = max(2.8, min(3.9, 103.5 / (max(1, mb_strlen($labelName)) * 0.66)))}
 
-{var $slozeni = (float)$template->width_mm >= 160}
-{* Složení text: 2.3mm, shrinking to 1.5mm, then cut to what fits; Dompdf does not clip
-   overflow. Capacity ~0.6em per character, ~85% of each line used after wrapping. *}
-{var $ingrFs = 2.3}
-{var $ingrCap = (int)(floor(29.6 / ($ingrFs * 0.6)) * floor(44.85 / ($ingrFs * 1.25)) * 0.85)}
-{while $ingrFs > 1.55 && $ingrCap < mb_strlen($ingredients)}
-    {var $ingrFs = $ingrFs - 0.1}
-    {var $ingrCap = (int)(floor(29.6 / ($ingrFs * 0.6)) * floor(44.85 / ($ingrFs * 1.25)) * 0.85)}
-{/while}
-
-<div class="fikko-vel2b-akce" n:attr="style: $slozeni ? 'width:166.2mm' : null">
+<div class="fikko-vel2b-akce">
     <div class="logo-col">
         <img class="logo" src="{$logoDataUri|nocheck}" alt="Fikko market">
         <div class="logo-divider"></div>
@@ -115,18 +101,18 @@
         <div n:foreach="$headerWords as $i => $word" class="abs lh0 nu center brand" style="font-size:{=round($bFs, 3)|noescape}mm;top:{=round(30.67 + $i * 6.09 * $bFs / 6, 3)|noescape}mm">{$word}</div>
     </div>
 
-    <div class="abs lh0 center name">{$labelName|truncate:60}</div>
+    <div class="abs lh0 center name" style="font-size:{=round($nameFs, 3)|noescape}mm">{$labelName|truncate:(int)floor(103.5 / ($nameFs * 0.66))}</div>
 
-    <div n:if="$note1" class="abs lh0 nu center note1">{$note1}</div>
-    <div n:if="$moreSpecies" class="abs lh0 nu species">Více druhů</div>
+    <div n:if="$note1" class="abs lh0 sri center note1">{$note1}</div>
+    <div n:if="$moreSpecies" class="abs lh0 sri species">Více druhů</div>
     {if $country}
-        <div class="abs lh0 nu origin" style="left:25.9mm;top:{=round(13.21 + $oy, 3)|noescape}mm">Země původu:</div>
-        <img n:if="$flagIconDataUri" class="flag" style="top:{=round(8.9 + $oy, 3)|noescape}mm" src="{$flagIconDataUri|nocheck}" alt="">
-        <div class="abs lh0 nu origin" style="left:50.7mm;top:{=round(13.21 + $oy, 3)|noescape}mm">{$country->name}</div>
+        <div class="abs lh0 nu origin" style="left:25.9mm;top:{=round(15.47 + $oy, 3)|noescape}mm">Země původu:</div>
+        <img n:if="$flagIconDataUri" class="flag" style="top:{=round(11.16 + $oy, 3)|noescape}mm" src="{$flagIconDataUri|nocheck}" alt="">
+        <div class="abs lh0 nu origin" style="left:50.7mm;top:{=round(15.47 + $oy, 3)|noescape}mm">{$country->name}</div>
     {/if}
 
     {if $compare}
-        <div class="abs" style="left:{=round($colC - 50, 3)|noescape}mm;width:100mm;top:20.62mm">
+        <div class="abs" style="left:{=round($colC - 50, 3)|noescape}mm;width:100mm;top:21mm">
             <table style="margin:0 auto;border-collapse:collapse" cellpadding="0" cellspacing="0">
                 <tr>
                     <td style="padding:0 1.5mm 0 0;vertical-align:top;text-align:right;white-space:nowrap">
@@ -151,7 +137,7 @@
         </div>
     {/if}
 
-    <table class="abs" style="left:0;width:127.3mm;top:13.74mm;border-collapse:collapse" cellpadding="0" cellspacing="0">
+    <table class="abs" style="left:0;width:127.3mm;top:14.12mm;border-collapse:collapse" cellpadding="0" cellspacing="0">
         <tr>
             <td></td>
             <td style="width:1%;padding:0;vertical-align:top;white-space:nowrap">
@@ -171,12 +157,5 @@
         <div n:foreach="$bars as $bar" n:if="$bar['dark']" style="position:absolute;top:0;left:{$bar['left']|noescape};background:{$bar['color']|noescape};width:{$bar['width']|noescape}"></div>
     </div>
     <div class="abs lh0 ean">EAN: {$eanText}</div>
-    <div n:if="$note3 || $note2" class="abs lh0 nu right note3">{$note3 ?: $note2}</div>
-    <div n:if="$slozeni" class="slozeni-col">
-        {* empty or hidden ingredients leave the column blank, title included (CACH-LAM-CODE.md) *}
-        {if !$hideIngredients && $ingredients !== ''}
-            <div class="abs lh0 slozeni-label">Složení</div>
-            <div class="slozeni-text" style="font-size:{=round($ingrFs, 3)|noescape}mm;height:44.85mm">{$ingredients|truncate:$ingrCap}</div>
-        {/if}
-    </div>
+    <div n:if="$note3 || $note2" class="abs lh0 sri right note3">{$note3 ?: $note2}</div>
 </div>

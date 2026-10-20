@@ -1033,12 +1033,13 @@ trait ProductLabelsTrait
 		$branchesId = (int)($this->session->filters[$this->getName()]['custom__branches'] ?? 0);
 		$today = date('Y-m-d');
 		$db = $this->repository->getDatabase();
-		$action = 'price_action > 0 AND price > price_action AND action_from IS NOT NULL';
+		$action = 'price_action > 0 AND price > price_action';
 
 		return [
 			'all' => $this->repository->findAll()->count('DISTINCT products.id'),
+			// the dates are optional (ProductPricesEntity::actionState())
 			'running' => (int)$db->table('product_prices')->where('branches_id', $branchesId)
-				->where("$action AND action_from <= ? AND (action_to IS NULL OR action_to >= ?)", $today, $today)
+				->where(\ProductPricesEntity::actionRunningSql(), $today, $today)
 				->count('DISTINCT products_id'),
 			'planned' => (int)$db->table('product_prices')->where('branches_id', $branchesId)
 				->where("$action AND action_from > ?", $today)

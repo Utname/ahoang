@@ -176,9 +176,6 @@
         font-size: 1.4mm;
         line-height: 1.1;
         opacity: 0.85;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
     }
 </style>
 
@@ -189,8 +186,10 @@
 {var $unitPriceVal = $unitText ?: ($unit ? ($unit->price|number:2,',','') . ' ' . $currencySymbol : '129,90 Kč')}
 {var $storageVal = $note2 ?: '2–6 °C'}
 {var $storageText = str_starts_with($storageVal, 'Skladujte') ? $storageVal : ('Skladujte při ' . $storageVal)}
-{var $packerVal = $note3 ?: 'Fikko Market · adresa provozovny'}
-{var $packerText = str_starts_with($packerVal, 'Balí') ? $packerVal : ('Balí: ' . $packerVal)}
+{* last line (handoff 19.10.2026): company · branch, address of the branch printing it (Nastavení → Pobočky),
+   no "Balí"; Poznámka 3 replaces it. Two lines at most, smaller when longer. *}
+{var $packerText = $note3 ?: $branchLine}
+{var $packerFs = max(1.1, min(1.4, 2 * 46 / (max(1, mb_strlen($packerText)) * 0.55)))}
 {var $finalPriceMinorFormatted = str_starts_with($finalPriceMinor, ',') ? $finalPriceMinor : (',' . $finalPriceMinor)}
 
 <section class="fikko-fruit">
@@ -233,5 +232,5 @@
         <div class="barcode-ean">{$eanText ?: '2810001063137'}</div>
     </div>
 
-    <div class="footer-text">{$packerText}</div>
+    <div class="footer-text" style="font-size:{=round($packerFs, 3)|noescape}mm">{$packerText}</div>
 </section>

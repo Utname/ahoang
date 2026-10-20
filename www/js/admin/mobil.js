@@ -393,7 +393,10 @@
         ({ overview: renderOverview, products: renderProducts, scan: renderScan, queue: renderQueue, jobs: renderJobs })[state.screen]();
     };
 
-    // ---------- the template sheet ----------
+    // ---------- the template sheet ("Možnosti tisku" as on Produkty / the design's Štítky ▾ panel) ----------
+    // draft: counts and headers per template, the label texts of this print (shared by the product's
+    // templates, as on Produkty: they change only this print, never the product card), edit = the
+    // template open in the label editor ('all' = Hromadná úprava)
     var sheetDraft = null;
     var openSheet = function (pid) {
         var p = state.products[pid];
@@ -401,41 +404,142 @@
             return;
         }
         touchRecent(pid);
-        sheetDraft = { pid: pid, counts: {} };
-        types.forEach(function (ty) { var e = entry(pid, ty.id); sheetDraft.counts[ty.id] = e ? e.qty : 0; });
-        if (!state.queue.some(function (e) { return e.pid === pid; })) {
+        sheetDraft = { pid: pid, counts: {}, hdr: {}, ov: {}, edit: null };
+        var mine = state.queue.filter(function (e) { return e.pid === pid; });
+        types.forEach(function (ty) {
+            var e = entry(pid, ty.id);
+            sheetDraft.counts[ty.id] = e ? e.qty : 0;
+            sheetDraft.hdr[ty.id] = e && e.header ? e.header : ty.header;
+        });
+        if (mine.length) {
+            sheetDraft.ov = JSON.parse(JSON.stringify(mine[0].ov || {}));
+        } else {
             sheetDraft.counts[state.lastType] = 1;
         }
         renderSheet();
     };
+    var sheetEntries = function (onlyType, qtyOne) {
+        var d = sheetDraft;
+        return types.filter(function (ty) { return onlyType ? ty.id === onlyType : d.counts[ty.id] > 0; }).map(function (ty) {
+            return { pid: d.pid, type: ty.id, qty: qtyOne ? 1 : Math.max(1, d.counts[ty.id] || 1), header: d.hdr[ty.id], ov: d.ov };
+        });
+    };
+    var thawedOn = function (p) { return sheetDraft.ov.thawed != null ? !!sheetDraft.ov.thawed : !!p.thawed; };
     var renderSheet = function () {
         var el = $('#m-sheet');
         if (!sheetDraft) {
             el.hidden = true;
             return;
         }
+        if (sheetDraft.edit) {
+            renderLabelEditor();
+            return;
+        }
         var p = state.products[sheetDraft.pid];
         var total = 0;
-        var groups = [['std', t.groupStd], ['spec', t.groupSpec], ['akce', t.groupAkce]];
-        var html = '<div class="m-sheet-panel"><div class="m-sheet-head"><div><b>' + esc(p.name) + '</b><small>' + esc(t.sheetHint) + '</small></div>'
-            + '<button type="button" class="m-x" data-sheetclose>×</button></div><div class="m-sheet-body">';
+        var groups = [['std', t.groupStd, t.shStdNote], ['spec', t.groupSpec, t.shSpecNote], ['akce', t.groupAkce, t.shAkceNote]];
+        var html = '<div class="m-sheet-panel m-sheet-tall"><div class="m-sheet-head"><div><b>' + esc(p.name) + '</b><small>' + esc(t.sheetHint) + '</small></div>'
+            + '<button type="button" class="m-x" data-sheetclose>×</button></div><div class="m-sheet-body">'
+            + '<div class="m-sh-tools"><button type="button" class="m-btn m-btn-dark" data-shedit="all">' + esc(t.shBulk) + '</button>'
+            + '<button type="button" class="m-btn m-btn-outline" data-shall>◉ ' + esc(t.previewAll) + '</button></div>'
+            + '<label class="m-check m-sh-thawed"><input type="checkbox" data-shthawed' + (thawedOn(p) ? ' checked' : '') + '><span>' + esc(t.shThawedAll) + '</span></label>';
         groups.forEach(function (g) {
             var list = types.filter(function (ty) { return ty.group === g[0]; });
             if (!list.length) {
                 return;
             }
-            html += '<div class="m-label">' + esc(g[1]) + '</div>';
+            var warn = g[0] === 'akce' && p.action == null;
+            html += '<div class="m-sh-group"><b>' + esc(g[1]) + '</b><small' + (warn ? ' class="m-sh-warn"' : '') + '>' + esc(warn ? t.shAkceMissing : g[2]) + '</small></div>';
             list.forEach(function (ty) {
                 var c = sheetDraft.counts[ty.id] || 0;
                 total += c;
-                html += '<div class="m-size' + (c ? ' m-on' : '') + (ty.akce ? ' m-size-akce' : '') + '"><div><b>' + esc(ty.name) + '</b><small>' + esc(ty.dims) + ' mm'
-                    + (ty.akce && p.action == null ? ' · ' + esc(t.akceNoPrice) : '') + '</small></div>'
-                    + '<span class="m-stepper"><button type="button" data-sz="' + ty.id + '|-1">−</button><b>' + c + '</b><button type="button" data-sz="' + ty.id + '|1">+</button></span></div>';
+                html += '<div class="m-size' + (c ? ' m-on' : '') + (ty.akce ? ' m-size-akce' : '') + '">'
+                    + '<div class="m-size-top"><div><b>' + esc(ty.name) + '</b><small>' + esc(ty.dims) + ' mm</small></div>'
+                    + '<span class="m-stepper"><button type="button" data-sz="' + ty.id + '|-1">−</button><b>' + c + '</b><button type="button" data-sz="' + ty.id + '|1">+</button></span></div>'
+                    + '<select class="m-sh-hdr" data-shhdr="' + ty.id + '">' + cfg.headers.map(function (h) { return '<option value="' + h.id + '"' + (h.id === sheetDraft.hdr[ty.id] ? ' selected' : '') + '>' + esc(h.name) + '</option>'; }).join('') + '</select>'
+                    + (ty.akce && p.action == null ? '<div class="m-sh-warn-line">' + esc(t.shAkceMissing) + '</div>' : '')
+                    + '<div class="m-sh-actions"><button type="button" data-shedit="' + ty.id + '">✎ ' + esc(t.edit) + '</button>'
+                    + '<button type="button" data-shprev="' + ty.id + '">◉ ' + esc(t.preview) + '</button>'
+                    + '<button type="button" data-shpdf="' + ty.id + '"' + (c ? '' : ' disabled') + '>' + esc(t.shPdf) + '</button></div></div>';
             });
         });
         html += '</div><button type="button" class="m-big m-big-teal" data-sheetsave>' + esc(t.addToQueue) + ' · ' + total + '</button></div>';
+        var keep = el.querySelector('.m-sheet-body');
+        var top = keep ? keep.scrollTop : 0;
         el.innerHTML = html;
+        el.querySelector('.m-sheet-body').scrollTop = top;
         el.hidden = false;
+    };
+    // the label editor of one template (or of all: Hromadná úprava), as the design's "Štítek · A4"
+    var renderLabelEditor = function () {
+        var d = sheetDraft;
+        var p = state.products[d.pid];
+        var all = d.edit === 'all';
+        var ty = all ? null : typeById[d.edit];
+        var ov = d.ov;
+        var val = function (k) { return ov[k] == null ? '' : ov[k]; };
+        var opt = function (v, label, sel) { return '<option value="' + esc(v) + '"' + (sel ? ' selected' : '') + '>' + esc(label) + '</option>'; };
+        var field = function (label, input, cls) { return '<label class="m-field' + (cls ? ' ' + cls : '') + '"><span>' + label + '</span>' + input + '</label>'; };
+        var check = function (k, label, on) { return '<label class="m-check"><input type="checkbox" name="' + k + '" value="1"' + (on ? ' checked' : '') + '><span>' + esc(label) + '</span></label>'; };
+        var html = '<div class="m-sheet-panel m-sheet-tall"><div class="m-sheet-head"><div><b>' + esc(all ? t.lbBulkTitle : fmt(t.lbTitle, ty.name)) + '</b>'
+            + '<small>' + esc(p.name) + (ty ? ' · ' + esc(ty.dims) + ' mm' : '') + '</small></div><button type="button" class="m-x" data-lbclose>×</button></div>'
+            + '<form class="m-sheet-body m-newform m-lb" id="m-lb-form" autocomplete="off">'
+            + '<p class="m-info">' + esc(all ? t.lbBulkNote : t.lbNote) + '</p>';
+        if (!all) {
+            html += '<div class="m-field-row m-field-row-even">'
+                + field(esc(t.lbHeader) + ' <i>' + esc(t.lbThis) + '</i>', '<select name="header">' + cfg.headers.map(function (h) { return opt(h.id, h.name, h.id === d.hdr[ty.id]); }).join('') + '</select>')
+                + field(esc(t.lbQty), '<input name="qty" inputmode="numeric" value="' + (d.counts[ty.id] || 0) + '">') + '</div>';
+        }
+        html += field(esc(t.newName), '<input name="name" value="' + esc(val('name')) + '" placeholder="' + esc(p.name) + '" maxlength="250">')
+            + '<div class="m-field-row m-field-row-even">'
+            + field(esc(t.lbPct), '<input name="sale_percent" inputmode="decimal" value="' + esc(val('sale_percent')) + '" placeholder="' + (p.pct || 0) + '"' + (ty && !ty.akce ? ' disabled' : '') + '>')
+            + field(esc(t.unit), '<select name="price_unit">' + opt('', t.lbLikeProduct) + cfg.units.map(function (u) { return opt(u, u, u === ov.price_unit); }).join('') + '</select>')
+            + field(esc(t.moreSpecies), '<select name="is_more_species">' + opt('0', t.no, !ov.is_more_species) + opt('1', t.yes, !!ov.is_more_species) + '</select>')
+            + field(esc(t.origin), '<select name="origin_countries_id">' + opt('', '— (' + (p.origin || '') + ')') + cfg.countries.map(function (c) { return opt(c.id, c.name, c.id === ov.origin_countries_id); }).join('') + '</select>')
+            + '</div><small class="m-muted">' + esc(t.lbPctNote) + '</small>'
+            + '<div class="m-lb-checks">' + check('hide_validity', t.lbHideValidity, !!ov.hide_validity) + check('hide_ingredients', t.lbHideIngredients, !!ov.hide_ingredients)
+            + check('thawed', '❄ ' + t.newThawed, ov.thawed != null ? !!ov.thawed : !!p.thawed) + '</div>'
+            + '<div class="m-field-row m-field-row-even">'
+            + field(esc(t.lbValidity), '<select data-lbvalidity>' + opt('', t.lbChoose) + (p.validity || []).map(function (v) { return opt(v, v); }).join('') + '</select>')
+            + field(esc(t.lbValidityText), '<input name="sale_text" value="' + esc(val('sale_text')) + '" maxlength="255">') + '</div>'
+            + field(esc(t.newIngredients), '<textarea name="ingredients" rows="3" placeholder="' + esc((p.ingredientsText || '').slice(0, 120)) + '">' + esc(val('ingredients')) + '</textarea><small class="m-muted">' + esc(t.lbIngredientsNote) + '</small>')
+            + [1, 2, 3].map(function (n) { return field(esc(fmt(t.newNote, n)), '<input name="note_' + n + '" value="' + esc(val('note_' + n)) + '" placeholder="' + esc((p.labelNotes || [])[n - 1] || '') + '" maxlength="255">'); }).join('')
+            + '<div class="m-field-row">' + field(esc(t.lbUnitPrice), '<input name="default_units_weight" inputmode="decimal" value="' + esc(val('default_units_weight')) + '" placeholder="100">')
+            + field('&nbsp;', '<select name="default_units_id">' + opt('', '—') + cfg.sizeUnits.map(function (u) { return opt(u.id, u.short, u.id === ov.default_units_id); }).join('') + '</select>') + '</div>'
+            + '</form><div class="m-lb-foot">'
+            + (ty ? '<button type="button" class="m-btn m-btn-outline" data-lbprev>◉ ' + esc(t.preview) + '</button>' : '')
+            + '<button type="button" class="m-btn m-btn-outline" data-lbprevall>◉ ' + esc(t.previewAll) + '</button>'
+            + '<button type="button" class="m-btn" data-lbreset>' + esc(t.lbReset) + '</button>'
+            + '<button type="button" class="m-btn" data-lbclose>' + esc(t.lbClose) + '</button>'
+            + '<button type="button" class="m-btn m-btn-teal" data-lbsave>' + esc(t.lbSave) + '</button></div></div>';
+        $('#m-sheet').innerHTML = html;
+        $('#m-sheet').hidden = false;
+    };
+    // the editor's values → the draft (texts of this print; header and copies of the template)
+    var readLabelEditor = function () {
+        var f = $('#m-lb-form');
+        var d = sheetDraft;
+        var ov = {};
+        ['name', 'sale_text', 'ingredients', 'note_1', 'note_2', 'note_3', 'price_unit'].forEach(function (k) { if (f[k].value.trim() !== '') { ov[k] = f[k].value.trim(); } });
+        if (!f.sale_percent.disabled && f.sale_percent.value.trim() !== '') { ov.sale_percent = parseFloat(f.sale_percent.value.replace(',', '.')) || 0; }
+        if (f.is_more_species.value === '1') { ov.is_more_species = 1; }
+        if (f.origin_countries_id.value) { ov.origin_countries_id = parseInt(f.origin_countries_id.value, 10); }
+        ['hide_validity', 'hide_ingredients'].forEach(function (k) { if (f[k].checked) { ov[k] = 1; } });
+        var p = state.products[d.pid];
+        if (f.thawed.checked !== !!p.thawed) { ov.thawed = f.thawed.checked ? 1 : 0; }
+        if (f.default_units_weight.value.trim() !== '' && f.default_units_id.value) {
+            ov.default_units_weight = parseFloat(f.default_units_weight.value.replace(',', '.')) || null;
+            ov.default_units_id = parseInt(f.default_units_id.value, 10);
+        }
+        // overrides the editor does not show stay as they were
+        ['price', 'price_action'].forEach(function (k) { if (d.ov[k] != null) { ov[k] = d.ov[k]; } });
+        var hdr = null;
+        var qty = null;
+        if (d.edit !== 'all') {
+            hdr = parseInt(f.header.value, 10);
+            qty = Math.max(0, Math.min(999, parseInt(f.qty.value, 10) || 0));
+        }
+        return { ov: ov, hdr: hdr, qty: qty };
     };
     var saveSheet = function () {
         var pid = sheetDraft.pid;
@@ -447,6 +551,14 @@
             }
             setCount(pid, type, c);
         });
+        // headers per template, the texts of this print for every template of the product
+        state.queue.forEach(function (e) {
+            if (e.pid === pid) {
+                e.header = sheetDraft.hdr[e.type] || e.header;
+                e.ov = JSON.parse(JSON.stringify(sheetDraft.ov));
+            }
+        });
+        store.save();
         sheetDraft = null;
         renderSheet();
         render();
@@ -1093,6 +1205,60 @@
             saveSheet();
             return;
         }
+        if (d.shedit && sheetDraft) {
+            sheetDraft.edit = d.shedit === 'all' ? 'all' : parseInt(d.shedit, 10);
+            renderSheet();
+            return;
+        }
+        if ((d.shprev || d.shpdf) && sheetDraft) {
+            preview(sheetEntries(parseInt(d.shprev || d.shpdf, 10), !!d.shprev));
+            return;
+        }
+        if (d.shall !== undefined && sheetDraft) {
+            var allEntries = sheetEntries(null, false);
+            if (allEntries.length) {
+                preview(allEntries);
+            } else {
+                toast(t.queueEmpty);
+            }
+            return;
+        }
+        if (d.lbclose !== undefined && sheetDraft) {
+            sheetDraft.edit = null;
+            renderSheet();
+            return;
+        }
+        if ((d.lbsave !== undefined || d.lbprev !== undefined || d.lbprevall !== undefined) && sheetDraft) {
+            var lb = readLabelEditor();
+            var edType = sheetDraft.edit === 'all' ? null : sheetDraft.edit;
+            if (d.lbsave !== undefined) {
+                sheetDraft.ov = lb.ov;
+                if (edType) {
+                    sheetDraft.hdr[edType] = lb.hdr;
+                    sheetDraft.counts[edType] = lb.qty;
+                }
+                sheetDraft.edit = null;
+                renderSheet();
+                toast(t.lbSaved);
+            } else if (d.lbprev !== undefined) {
+                preview([{ pid: sheetDraft.pid, type: edType, qty: 1, header: lb.hdr, ov: lb.ov }]);
+            } else {
+                var withEdits = types.filter(function (ty) { return (ty.id === edType ? lb.qty : sheetDraft.counts[ty.id]) > 0; }).map(function (ty) {
+                    return { pid: sheetDraft.pid, type: ty.id, qty: ty.id === edType ? lb.qty : sheetDraft.counts[ty.id], header: ty.id === edType ? lb.hdr : sheetDraft.hdr[ty.id], ov: lb.ov };
+                });
+                if (withEdits.length) {
+                    preview(withEdits);
+                } else {
+                    toast(t.queueEmpty);
+                }
+            }
+            return;
+        }
+        if (d.lbreset !== undefined && sheetDraft) {
+            sheetDraft.ov = {};
+            renderLabelEditor();
+            return;
+        }
         if (d.priceopen) {
             state.priceOpen = state.priceOpen === parseInt(d.priceopen, 10) ? null : parseInt(d.priceopen, 10);
             render();
@@ -1194,6 +1360,23 @@
 
     document.addEventListener('change', function (ev) {
         var d = ev.target.dataset || {};
+        if (sheetDraft && d.shhdr) {
+            sheetDraft.hdr[parseInt(d.shhdr, 10)] = parseInt(ev.target.value, 10);
+            return;
+        }
+        if (sheetDraft && d.shthawed !== undefined) {
+            var tp = state.products[sheetDraft.pid] || {};
+            if (ev.target.checked === !!tp.thawed) {
+                delete sheetDraft.ov.thawed;
+            } else {
+                sheetDraft.ov.thawed = ev.target.checked ? 1 : 0;
+            }
+            return;
+        }
+        if (d.lbvalidity !== undefined && ev.target.value) {
+            ev.target.form.sale_text.value = ev.target.value;
+            return;
+        }
         var key = d.hdr || d.origin;
         if (ev.target.id === 'm-quick') {
             state.quick = ev.target.checked;

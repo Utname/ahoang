@@ -46,9 +46,9 @@
         overflow: hidden;
         text-align: center;
     }
-    .sub-text { font-family: Nunito, sans-serif; font-style: italic; font-weight: 400; font-size: 6mm; }
-    .platnost-label { font-size: 3.6mm; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 700; opacity: 0.65; }
-    .platnost-val { font-size: 5mm; font-weight: 800; margin-left: 3mm; }
+    /* Více druhů / Poznámka 1 / 3: Sriracha bold (handoff 19.10.2026) */
+    .sub-text { font-family: Sriracha, cursive; font-style: normal; font-weight: bold; font-size: 6mm; }
+    .sri { font-family: Sriracha, cursive; font-weight: bold; font-style: normal; }
     .note1 { font-size: 6mm; }
 
     .flag-img { position: absolute; left: 14mm; width: 15mm; height: 15mm; border: 0.4mm solid #111; border-radius: 50%; }
@@ -101,6 +101,8 @@
 
     .validity { left: 0; top: 281.96mm; width: 210mm; font-size: 3.6mm; font-weight: 600; letter-spacing: 0.02em; }
     .validity b { font-weight: 800; }
+    /* the rules either side of it on a comparison label (design A4: flex 1 | text | flex 1, gap 3mm; A4 Akce has none) */
+    .validity-rule { position: absolute; top: 280.7mm; height: 0; border-top: 0.3mm solid #111; }
 </style>
 
 {* Everything between the product name and Poznámka 3 lives in .middle, which
@@ -148,9 +150,8 @@
     <div class="middle">
 
     <div n:if="$label && $label->is_more_species" class="abs lh0 center sub-text" style="left:14mm;width:182mm;top:{=round(104.16 + $dl, 3)|noescape}mm">Více druhů</div>
-    <div n:if="!$isAkce30 && $validityRange" class="abs lh0 right" style="left:14mm;width:182mm;top:{=round(104.16 + $dl, 3)|noescape}mm"><span class="platnost-label">Platnost</span><span class="platnost-val">{$validityRange}</span></div>
 
-    <div n:if="$note1" class="abs lh0 nu center note1" style="left:14mm;width:182mm;top:{=round(113.16 + $dl, 3)|noescape}mm">{$note1}</div>
+    <div n:if="$note1" class="abs lh0 sri center note1" style="left:14mm;width:182mm;top:{=round(113.16 + $dl, 3)|noescape}mm">{$note1}</div>
 
     {if $country}
         <img n:if="$flagIconDataUri" class="flag-img" src="{$flagIconDataUri|nocheck}" style="top:{=round(119.05 + $dl, 3)|noescape}mm" alt="">
@@ -199,15 +200,23 @@
     </div>
     </div>
 
-    <div n:if="$note3 || $note2" class="note3 nu" style="top:251.83mm">{$note3 ?: $note2}</div>
+    <div n:if="$note3 || $note2" class="note3 sri" style="top:251.83mm">{$note3 ?: $note2}</div>
 
     <div n:if="$bars" class="barcode-bars">
         <div n:foreach="$bars as $bar" n:if="$bar['dark']" style="position:absolute;top:0;left:{$bar['left']|noescape};background:{$bar['color']|noescape};width:{$bar['width']|noescape}"></div>
     </div>
     <div n:if="$eanText" class="abs lh0 barcode-ean">EAN {$eanText}</div>
 
-    {* "Akce platí do" only on AKCE_30 (CACH-LAM-CODE §3). *}
-    {* the chosen text replaces "Akce platí do …" on an Akce label; a comparison label already has Platnost *}
-    <div n:if="!$hideValidity && ($isAkce30 || ($validityCustom && !$validityRange))" class="abs lh0 center validity">{if $validityCustom}{$validityText}{elseif $validityUntil}Akce platí do <b>{$validityUntil}</b> nebo do vyprodání zásob{else}Akce platí do vyprodání zásob{/if}</div>
+    {* the last line between two rules (design A4): "Akce platí do …" only on AKCE_30 (CACH-LAM-CODE §3);
+       a comparison label says "Platnost do …" (no "Akce" on it – the user chose the design's line with this word);
+       the chosen text (Text na štítku) replaces it *}
+    {if !$hideValidity && ($isAkce30 || $isCompare || $validityCustom)}
+        {var $vText = $validityCustom ? (string)$validityText : (($isAkce30 ? 'Akce platí do ' : 'Platnost do ') . ($validityUntil ? $validityUntil . ' nebo do vyprodání zásob' : 'vyprodání zásob'))}
+        {* text width from the Dompdf font (DejaVu Bold ~0.62em per character at 3.6mm), centred on 105mm *}
+        {var $vHalf = min(85, mb_strlen($vText) * 3.6 * 0.62 / 2)}
+        <div n:if="!$isAkce30" class="validity-rule" style="left:14mm;width:{=round(max(0, 105 - $vHalf - 3 - 14), 3)|noescape}mm"></div>
+        <div class="abs lh0 center validity">{if $validityCustom}{$validityText}{elseif $isAkce30}Akce platí do {if $validityUntil}<b>{$validityUntil}</b> nebo do {/if}vyprodání zásob{else}Platnost do {if $validityUntil}<b>{$validityUntil}</b> nebo do {/if}vyprodání zásob{/if}</div>
+        <div n:if="!$isAkce30" class="validity-rule" style="left:{=round(105 + $vHalf + 3, 3)|noescape}mm;width:{=round(max(0, 196 - 105 - $vHalf - 3), 3)|noescape}mm"></div>
+    {/if}
 
 </div>

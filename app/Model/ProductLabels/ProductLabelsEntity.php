@@ -35,7 +35,7 @@ class ProductLabelsEntity extends BaseEntity
 		self::TYPE_A5 => ['term' => 'admin.globals.productLabelTypes.'.self::TYPE_A5, 'img' => '', 'group' => self::GROUP_STD, 'dims' => '210 × 148', 'perPage' => 2],
 		self::TYPE_SIZE_1 => ['term' => 'admin.globals.productLabelTypes.'.self::TYPE_SIZE_1, 'img' => '', 'group' => self::GROUP_STD, 'dims' => '164 × 41', 'perPage' => 6],
 		self::TYPE_SIZE_2 => ['term' => 'admin.globals.productLabelTypes.'.self::TYPE_SIZE_2, 'img' => '', 'group' => self::GROUP_STD, 'dims' => '133 × 41', 'perPage' => 6],
-		self::TYPE_SIZE_3 => ['term' => 'admin.globals.productLabelTypes.'.self::TYPE_SIZE_3, 'img' => '', 'group' => self::GROUP_STD, 'dims' => '182 × 56', 'perPage' => 4],
+		self::TYPE_SIZE_3 => ['term' => 'admin.globals.productLabelTypes.'.self::TYPE_SIZE_3, 'img' => '', 'group' => self::GROUP_STD, 'dims' => '210 × 56', 'perPage' => 5],
 		self::TYPE_SIZE_1B => ['term' => 'admin.globals.productLabelTypes.'.self::TYPE_SIZE_1B, 'img' => '', 'group' => self::GROUP_SPEC, 'dims' => '164 × 52', 'perPage' => 5, 'locked' => TRUE],
 		self::TYPE_SIZE_2B_STD => ['term' => 'admin.globals.productLabelTypes.'.self::TYPE_SIZE_2B_STD, 'img' => '', 'group' => self::GROUP_SPEC, 'dims' => '133 × 52', 'perPage' => 5],
 		self::TYPE_SIZE_2_SLOZENI => ['term' => 'admin.globals.productLabelTypes.'.self::TYPE_SIZE_2_SLOZENI, 'img' => '', 'group' => self::GROUP_SPEC, 'dims' => '167 × 38', 'perPage' => 7],
@@ -45,7 +45,7 @@ class ProductLabelsEntity extends BaseEntity
 		self::TYPE_A5_AKCE => ['term' => 'admin.globals.productLabelTypes.'.self::TYPE_A5_AKCE, 'img' => '', 'group' => self::GROUP_AKCE, 'dims' => '210 × 148', 'perPage' => 2],
 		self::TYPE_SIZE_2_AKCE => ['term' => 'admin.globals.productLabelTypes.'.self::TYPE_SIZE_2_AKCE, 'img' => '', 'group' => self::GROUP_AKCE, 'dims' => '133 × 38', 'perPage' => 7],
 		self::TYPE_SIZE_2B => ['term' => 'admin.globals.productLabelTypes.'.self::TYPE_SIZE_2B, 'img' => '', 'group' => self::GROUP_AKCE, 'dims' => '133 × 52', 'perPage' => 5],
-		self::TYPE_SIZE_3_AKCE => ['term' => 'admin.globals.productLabelTypes.'.self::TYPE_SIZE_3_AKCE, 'img' => '', 'group' => self::GROUP_AKCE, 'dims' => '182 × 56', 'perPage' => 4],
+		self::TYPE_SIZE_3_AKCE => ['term' => 'admin.globals.productLabelTypes.'.self::TYPE_SIZE_3_AKCE, 'img' => '', 'group' => self::GROUP_AKCE, 'dims' => '210 × 56', 'perPage' => 5],
 	];
 
 

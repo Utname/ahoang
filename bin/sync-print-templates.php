@@ -21,11 +21,11 @@ const TEMPLATES = [
 	'a4-discount' => [[1, 'Fikko Cena A4', 210, 297], [10, 'Fikko Cena A4 Akce', 210, 297]],
 	'a5-discount' => [[2, 'Fikko Cena A5', 210, 148.5], [11, 'Fikko Cena A5 Akce', 210, 148.5]],
 	'vel1' => [[3, 'Fikko Cena Vel.1', 164, 41]],
-	'vel2' => [[4, 'Fikko Cena Vel.2', 133, 41]],
-	'vel3' => [[5, 'Fikko Cena Vel.3', 182, 56], [12, 'Fikko Cena Vel.3 Akce', 182, 56]],
-	// 167mm wide rows render the same file with the Složení column
-	'vel2b-akce' => [[6, 'Fikko Cena Vel.2B Akce', 133, 52], [14, 'Fikko Cena Vel.2 B', 133, 52], [16, 'Fikko Cena Vel.2B Složení', 167, 52]],
-	'vel2-akce' => [[7, 'Fikko Cena Vel. 2 Akce', 133, 38], [15, 'Fikko Cena Vel.2 Složení', 167, 38]],
+	// one layout for the vel. 2 family (handoff 19.10.2026): the height comes from the row,
+	// 167mm wide rows add the Složení column
+	'vel2' => [[4, 'Fikko Cena Vel.2', 133, 41], [7, 'Fikko Cena Vel. 2 Akce', 133, 38], [15, 'Fikko Cena Vel.2 Složení', 167, 38], [16, 'Fikko Cena Vel.2B Složení', 167, 52]],
+	'vel3' => [[5, 'Fikko Cena Vel.3', 210, 56], [12, 'Fikko Cena Vel.3 Akce', 210, 56]],
+	'vel2b-akce' => [[6, 'Fikko Cena Vel.2B Akce', 133, 52], [14, 'Fikko Cena Vel.2 B', 133, 52]],
 	'pecivo' => [[8, 'Fikko Cena – tem dải', 150, 41]],
 	'fruit' => [[9, 'Fikko Cena Ovoce', 50, 35]],
 ];
@@ -46,7 +46,8 @@ $pdo = new PDO(
 );
 $where = "product_label_type_id = ? AND variant = 'always' AND is_default = 1";
 $find = $pdo->prepare("SELECT COUNT(*) FROM print_templates WHERE $where");
-$update = $pdo->prepare("UPDATE print_templates SET html_source = ? WHERE $where");
+// the size follows the design too (Vel. 3 went from 182 to 210 mm wide)
+$update = $pdo->prepare("UPDATE print_templates SET html_source = ?, width_mm = ?, height_mm = ? WHERE $where");
 $insert = $pdo->prepare("INSERT INTO print_templates (name, product_label_type_id, width_mm, height_mm, variant, html_source, is_active, is_default) VALUES (?, ?, ?, ?, 'always', ?, 1, 1)");
 
 foreach (TEMPLATES as $file => $types) {
@@ -66,7 +67,7 @@ foreach (TEMPLATES as $file => $types) {
 			printf("%-14s -> type %2d: row created, %d bytes\n", $file, $typeId, strlen($source));
 			continue;
 		}
-		$update->execute([$source, $typeId]);
+		$update->execute([$source, $width, $height, $typeId]);
 		printf("%-14s -> type %2d: %d row(s) updated, %d bytes\n", $file, $typeId, $update->rowCount(), strlen($source));
 	}
 }
